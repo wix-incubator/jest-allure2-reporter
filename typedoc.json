@@ -1,0 +1,6 @@
+{
+  "entryPoints": ["src/index.ts"],
+  "hideGenerator": true,
+  "name": "@wix-incubator/jest-allure2-reporter",
+  "out": "website"
+}

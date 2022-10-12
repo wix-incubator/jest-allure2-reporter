@@ -1,0 +1,70 @@
+{
+    "env": {
+        "browser": true,
+        "node": true,
+        "jest": true
+    },
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:import/recommended",
+        "plugin:import/typescript",
+        "plugin:unicorn/all",
+        "plugin:jsdoc/recommended",
+        "plugin:node/recommended",
+        "plugin:prettier/recommended"
+    ],
+    "ignorePatterns": [
+      "coverage",
+      "dist",
+      "website",
+      "jest.config.js"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "project": "__tests__/tsconfig.json"
+    },
+    "plugins": [
+        "no-only-tests"
+    ],
+    "rules": {
+        "import/extensions": [
+            2,
+            "ignorePackages",
+            {
+                "js": "never",
+                "jsx": "never",
+                "ts": "never",
+                "tsx": "never"
+            }
+        ],
+        "import/no-duplicates": "off",
+        "import/no-unresolved": 2,
+        "node/no-missing-import": "off",
+        "node/no-unsupported-features/es-syntax": "off",
+        "@typescript-eslint/member-ordering": "error",
+        "unicorn/filename-case": "off",
+        "unicorn/import-style": "off",
+        "unicorn/prefer-node-protocol": "off",
+        "unicorn/prefer-string-replace-all": "off",
+        "unicorn/no-unused-properties": "off",
+        "unicorn/prefer-module": "off"
+    },
+    "settings": {
+        "import/resolver": {
+            "typescript": {
+                "project": "__tests__"
+            }
+        }
+    },
+    "overrides": [
+        {
+            "files": ["**/__tests__/*.ts", "*.test.ts"],
+            "rules": {
+                "@typescript-eslint/no-explicit-any": "off",
+                "no-only-tests/no-only-tests": "error"
+            }
+        }
+    ]
+}
