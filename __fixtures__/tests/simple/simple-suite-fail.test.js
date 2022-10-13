@@ -1,5 +1,5 @@
 describe('Suite', () => {
   test('launch app', async () => {
-    // await device.launchApp();
+    throw new Error('Simulated error');
   });
 });

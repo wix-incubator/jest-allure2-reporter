@@ -16,14 +16,16 @@
         "plugin:prettier/recommended"
     ],
     "ignorePatterns": [
+      "__fixtures__",
       "coverage",
       "dist",
       "website",
-      "jest.config.js"
+      "jest.config.js",
+      "*.jest.config.js"
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "project": "__tests__/tsconfig.json"
+        "project": "tsconfig.json"
     },
     "plugins": [
         "no-only-tests"
@@ -51,19 +53,13 @@
         "unicorn/no-unused-properties": "off",
         "unicorn/prefer-module": "off"
     },
-    "settings": {
-        "import/resolver": {
-            "typescript": {
-                "project": "__tests__"
-            }
-        }
-    },
     "overrides": [
         {
             "files": ["**/__tests__/*.ts", "*.test.ts"],
             "rules": {
-                "@typescript-eslint/no-explicit-any": "off",
-                "no-only-tests/no-only-tests": "error"
+              "@typescript-eslint/no-explicit-any": "off",
+              "node/no-unpublished-import": "off",
+              "no-only-tests/no-only-tests": "error"
             }
         }
     ]

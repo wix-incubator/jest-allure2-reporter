@@ -30,9 +30,12 @@
     "build": "tsc",
     "docs": "typedoc && cp -r media website",
     "website": "http-server -p 3000 website",
+    "fixture:results": "npx jest --config=fixture-results.jest.config.js",
+    "fixture:allure": "npx jest --config=fixture-allure.jest.config.js",
     "lint": "eslint . --fix",
     "lint:ci": "eslint .",
     "lint:staged": "lint-staged",
+    "start": "cd __fixtures__ && allure serve",
     "test": "jest",
     "test:ci": "jest --coverage"
   },
@@ -40,8 +43,11 @@
     "@commitlint/cli": "^17.0.3",
     "@commitlint/config-conventional": "^17.0.3",
     "@jest/environment": "^28.1.2",
+    "@jest/reporters": "^28.1.1",
     "@jest/types": "^28.1.1",
+    "@types/glob": "^8.0.0",
     "@types/jest": "^28.1.3",
+    "@types/lodash": "^4.14.186",
     "@types/node": "^12.20.55",
     "@typescript-eslint/eslint-plugin": "^5.29.0",
     "@typescript-eslint/parser": "^5.29.0",
@@ -56,6 +62,7 @@
     "eslint-plugin-prettier": "^4.1.0",
     "eslint-plugin-unicorn": "^42.0.0",
     "fs-extra": "^10.1.0",
+    "glob": "^8.0.3",
     "husky": "^8.0.1",
     "jest": "^28.1.1",
     "jest-environment-node": "^28.1.2",
@@ -68,5 +75,12 @@
     "typescript": "~4.3.5",
     "zx": "^7.0.3"
   },
-  "dependencies": {}
+  "dependencies": {
+    "allure-js-commons": "^2.0.0-beta.19",
+    "lodash": "^4.17.21",
+    "strip-ansi": "^6.0.0"
+  },
+  "peerDependencies": {
+    "jest": "*"
+  }
 }

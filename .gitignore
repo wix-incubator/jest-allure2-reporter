@@ -16,3 +16,6 @@ yarn.lock
 /website
 /dist
 /jest-allure2-reporter-*.tgz
+
+/__fixtures__/allure-results
+/__fixtures__/results
