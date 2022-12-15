@@ -41,13 +41,13 @@ Run tests:
 npm test
 ```
 
-To view the test results, generate the Allure report:
+To view the test results, regenerate the full version of the fixtures:
 
 ```bash
-npm run fixtures:allure
+npm run fixtures
 ```
 
-Start the Allure server:
+Then start the Allure server:
 
 ```bash
 npm start

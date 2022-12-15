@@ -2,42 +2,62 @@
 import fs from 'fs-extra';
 import path from 'path';
 
-// eslint-disable-next-line node/no-unpublished-import
-import type { AggregatedResult, Config, ReporterOnStartOptions, TestResult } from '@jest/reporters';
+import type {
+  AggregatedResult,
+  Config,
+  Reporter,
+  ReporterOnStartOptions,
+  Test,
+  TestCaseResult,
+  TestResult,
+  TestContext,
+  // eslint-disable-next-line node/no-unpublished-import
+} from '@jest/reporters';
 
-class DumpReporter {
+class DumpReporter implements Reporter {
   private readonly _rootDir: string;
+  private readonly _outFile: string;
 
   constructor(globalConfig: Config.GlobalConfig) {
     this._rootDir = globalConfig.rootDir;
+    this._outFile = path.join(this._rootDir, '__fixtures__/test-reporter-calls.json');
   }
 
   onRunStart(
     aggregatedResult: AggregatedResult,
-    _options: ReporterOnStartOptions,
+    options: ReporterOnStartOptions,
   ): Promise<void> | void {
-    const outFile = path.join(this._rootDir, '__fixtures__/results/_run-start.json');
+    console.log('Starting dump: %s', this._outFile);
+    fs.ensureFileSync(this._outFile);
+    fs.writeFileSync(this._outFile, '');
 
-    console.log('Dumping run start into: %s', outFile);
-    fs.ensureFileSync(outFile);
-    fs.writeFileSync(outFile, JSON.stringify(aggregatedResult, undefined, 2));
+    this._append({ method: 'onRunStart', params: [aggregatedResult, options] });
   }
 
-  public onTestResult(_: unknown, testResult: TestResult) {
-    const testsDirectory = path.join(this._rootDir, '__fixtures__/tests');
-    const relativePath = path.relative(testsDirectory, testResult.testFilePath);
-    const outFile = path.join(
-      this._rootDir,
-      '__fixtures__',
-      'results',
-      path.dirname(relativePath),
-      path.basename(testResult.testFilePath, '.test.js') + '.json',
-    );
-
-    console.log('Dumping test result into: %s', outFile);
-    fs.ensureFileSync(outFile);
-    fs.writeFileSync(outFile, JSON.stringify(testResult, undefined, 2));
+  onTestFileStart(test: Test): void {
+    this._append({ method: 'onTestFileStart', params: [test] });
   }
+
+  onTestCaseResult(test: Test, testCaseResult: TestCaseResult): void {
+    this._append({ method: 'onTestCaseResult', params: [test, testCaseResult] });
+  }
+
+  onTestFileResult(test: Test, testResult: TestResult, aggregatedResult: AggregatedResult): void {
+    this._append({ method: 'onTestFileResult', params: [test, testResult, aggregatedResult] });
+  }
+
+  onRunComplete(_testContexts: Set<TestContext>, results: AggregatedResult): void {
+    this._append({ method: 'onRunComplete', params: [{}, results] });
+  }
+
+  _append(payload: any): void {
+    console.log('Append: %s', payload.method);
+    fs.appendFileSync(this._outFile, JSON.stringify(payload) + '\n');
+  }
+
+  getLastError = () => {
+    return void 0;
+  };
 }
 
 module.exports = DumpReporter;
