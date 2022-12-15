@@ -77,6 +77,10 @@ allure generate
 
 For more information, see the [Allure CLI documentation](https://docs.qameta.io/allure/#_get_started).
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## License
 
 [MIT License](LICENSE)
