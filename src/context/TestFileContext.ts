@@ -1,0 +1,108 @@
+import {
+  TestCaseResult,
+  TestResult,
+  // eslint-disable-next-line node/no-unpublished-import
+} from '@jest/reporters';
+import { AllureGroup, LabelName, Stage, Status } from 'allure-js-commons';
+import isEqual from 'lodash/isEqual';
+
+import { TestFileContextConfig } from './TestFileContextConfig';
+
+export default class TestFileContext {
+  private _testFileGroup!: AllureGroup;
+  private _rootSuiteGroup!: AllureGroup;
+  private _subsuiteGroup!: AllureGroup;
+  private _ancestorTitles: string[] = [];
+
+  constructor(private readonly _config: TestFileContextConfig) {
+    this._testFileGroup = this._config.testFileGroup;
+    this._rootSuiteGroup = this._testFileGroup.startGroup('ROOT_DESCRIBE_BLOCK');
+    this._subsuiteGroup = this._rootSuiteGroup;
+    this._ancestorTitles = [];
+  }
+
+  handleTestCaseResult(testCaseResult: TestCaseResult) {
+    if (!isEqual(this._ancestorTitles, testCaseResult.ancestorTitles)) {
+      this._changeSubsuiteGroup(testCaseResult);
+    }
+
+    const { select } = this._config;
+    const allureTest = this._subsuiteGroup.startTest(
+      select.testCase.name(testCaseResult),
+      select.testCase.start(testCaseResult),
+    );
+    allureTest.fullName = select.testCase.fullName(testCaseResult);
+    allureTest.stage = Stage.FINISHED;
+    allureTest.status = select.testCase.status(testCaseResult);
+
+    const statusDetails = select.testCase.statusDetails(testCaseResult);
+    if (statusDetails) {
+      allureTest.statusDetails = statusDetails;
+    }
+
+    allureTest.historyId = select.testCase.historyId(testCaseResult);
+
+    const labelsToAdd = [
+      [LabelName.PACKAGE, select.testCase.labels.package(testCaseResult)],
+      [LabelName.SUITE, select.testCase.labels.suite(testCaseResult)],
+      [LabelName.SUB_SUITE, select.testCase.labels.subsuite(testCaseResult)],
+      [LabelName.THREAD, select.testCase.labels.thread(testCaseResult)],
+    ];
+
+    for (const [labelName, labelValue] of labelsToAdd) {
+      if (labelValue) {
+        allureTest.addLabel(labelName, labelValue);
+      }
+    }
+
+    allureTest.endTest(select.testCase.end(testCaseResult));
+  }
+
+  handleTestFileResult(result: TestResult) {
+    if (result.testResults.length === 0 && result.testExecError) {
+      this._handleEarlyError(result);
+    }
+
+    if (this._subsuiteGroup !== this._rootSuiteGroup) {
+      this._subsuiteGroup.endGroup();
+    }
+
+    this._rootSuiteGroup.endGroup();
+    this._testFileGroup.endGroup();
+  }
+
+  _changeSubsuiteGroup(testCaseResult: TestCaseResult) {
+    const rootSuiteGroup = this._rootSuiteGroup;
+    if (this._subsuiteGroup !== rootSuiteGroup) {
+      this._subsuiteGroup.endGroup();
+    }
+
+    this._ancestorTitles = testCaseResult.ancestorTitles;
+    this._subsuiteGroup =
+      testCaseResult.ancestorTitles.length > 0
+        ? rootSuiteGroup.startGroup(testCaseResult.ancestorTitles.join(' > '))
+        : rootSuiteGroup;
+  }
+
+  _handleEarlyError(result: TestResult) {
+    const { select } = this._config;
+    const allureTest = this._subsuiteGroup.startTest(
+      '(generic failure)',
+      select.testFile.start(result),
+    );
+    allureTest.fullName = select.testFile.fullName(result);
+    allureTest.stage = Stage.FINISHED;
+    allureTest.status = Status.BROKEN;
+    const statusDetails = select.testFile.statusDetails(result);
+    if (statusDetails) {
+      allureTest.statusDetails = statusDetails;
+    }
+    allureTest.description = select.testFile.description(result);
+    allureTest.historyId = select.testFile.historyId(result);
+    allureTest.addLabel(LabelName.TAG, 'unhandled-error');
+    allureTest.addLabel(LabelName.PACKAGE, select.testFile.labels.package(result));
+    allureTest.addLabel(LabelName.SUITE, select.testFile.labels.suite(result));
+    allureTest.addLabel(LabelName.THREAD, '1');
+    allureTest.endTest(select.testFile.end(result));
+  }
+}

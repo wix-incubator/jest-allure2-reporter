@@ -2,7 +2,7 @@ import path from 'path';
 
 import fs from 'fs-extra';
 
-import JestAllure2Reporter from '.';
+import JestAllure2Reporter from './JestAllure2Reporter';
 
 const rootDirectory = path.join(__dirname, '..');
 const testReporterCallsPath = path.join(rootDirectory, '__fixtures__/test-reporter-calls.json');
