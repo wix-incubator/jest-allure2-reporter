@@ -19,6 +19,7 @@
       "__fixtures__",
       "coverage",
       "dist",
+      "scripts",
       "website",
       "jest.config.js",
       "*.jest.config.js"
@@ -51,7 +52,8 @@
         "unicorn/prefer-node-protocol": "off",
         "unicorn/prefer-string-replace-all": "off",
         "unicorn/no-unused-properties": "off",
-        "unicorn/prefer-module": "off"
+        "unicorn/prefer-module": "off",
+        "jsdoc/require-jsdoc": "off"
     },
     "overrides": [
         {
@@ -59,7 +61,7 @@
             "rules": {
               "@typescript-eslint/no-explicit-any": "off",
               "node/no-unpublished-import": "off",
-              "no-only-tests/no-only-tests": "error"
+              "no-only-tests/no-only-tests": "error",
             }
         }
     ]

@@ -1,12 +1,20 @@
-import type { EventEmitter } from 'events';
+import type { JestAllure2ReporterOptions } from '../JestAllure2ReporterOptions';
+import type { ReporterEmitter } from '../ReporterEmitter';
 
-import { MetadataService, QueryService, ThreadService, TimeService } from './fallbacks';
+import {
+  MetadataService,
+  ProjectService,
+  QueryService,
+  ThreadService,
+  TimeService,
+} from './fallbacks';
 import { TestCaseSelectors } from './testCase';
 import { TestFileSelectors } from './testFile';
 
 type SelectorsConfig = {
+  emitter: ReporterEmitter;
+  reporterOptions: Partial<JestAllure2ReporterOptions>;
   rootDir: string;
-  emitter: EventEmitter;
 };
 
 export class Selectors {
@@ -19,20 +27,22 @@ export class Selectors {
     const queryService = new QueryService(emitter);
     const timeService = new TimeService(emitter);
     const threadService = new ThreadService(emitter);
-    const config = {
+    const projectService = new ProjectService({
       rootDir: selectorsConfig.rootDir,
-    };
+      packageName: selectorsConfig.reporterOptions.packageName,
+    });
 
     this.testCase = new TestCaseSelectors({
-      config,
+      reporterOptions: selectorsConfig.reporterOptions,
       meta: metadataService,
       query: queryService,
+      project: projectService,
       thread: threadService,
       time: timeService,
     });
 
     this.testFile = new TestFileSelectors({
-      config,
+      project: projectService,
       time: timeService,
     });
   }

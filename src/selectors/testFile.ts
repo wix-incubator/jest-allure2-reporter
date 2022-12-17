@@ -1,3 +1,4 @@
+import fs from 'fs';
 import path from 'path';
 
 import stripAnsi from 'strip-ansi';
@@ -6,23 +7,21 @@ import type { TestResult } from '@jest/reporters';
 
 import md5 from '../utils/md5';
 
-import type { TimeService } from './fallbacks';
+import type { ProjectService, TimeService } from './fallbacks';
 
 type Services = {
-  config: {
-    rootDir: string;
-  };
+  project: ProjectService;
   time: TimeService;
 };
 
 export class TestFileSelectors {
   public readonly labels = {
     suite: (testResult: TestResult): string => {
-      return this.relativePath(testResult);
+      return this._services.project.relative(testResult.testFilePath);
     },
 
-    package: (_testCaseResult: TestResult): string => {
-      return 'TODO';
+    package: (): string | undefined => {
+      return this._services.project.packageName;
     },
   };
 
@@ -36,20 +35,18 @@ export class TestFileSelectors {
     return testResult.perfStats.end ?? this._services.time.getFileEndTime(testResult);
   }
 
-  public description(_testResult: TestResult) {
-    return `### Test\n\n\`\`\`typescript\n// TODO: insert test file contents\n\`\`\`\n`;
-  }
-
-  public relativePath(testResult: TestResult) {
-    return path.relative(this._services.config.rootDir, testResult.testFilePath);
+  public description(testResult: TestResult) {
+    const fileContents = fs.readFileSync(testResult.testFilePath, 'utf8');
+    return '```typescript\n' + fileContents + '\n```';
   }
 
   public fullName(testResult: TestResult) {
-    return this.relativePath(testResult);
+    return this._services.project.relative(testResult.testFilePath);
   }
 
   public historyId(testResult: TestResult) {
-    return md5([...this.relativePath(testResult).split(path.sep), '']);
+    const relativePath = this._services.project.relative(testResult.testFilePath);
+    return md5([...relativePath.split(path.sep), '']);
   }
 
   public statusDetails(testResult: TestResult) {

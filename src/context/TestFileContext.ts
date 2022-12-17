@@ -32,6 +32,7 @@ export default class TestFileContext {
       select.testCase.start(testCaseResult),
     );
     allureTest.fullName = select.testCase.fullName(testCaseResult);
+    allureTest.description = select.testCase.description();
     allureTest.stage = Stage.FINISHED;
     allureTest.status = select.testCase.status(testCaseResult);
 
@@ -42,8 +43,8 @@ export default class TestFileContext {
 
     allureTest.historyId = select.testCase.historyId(testCaseResult);
 
-    const labelsToAdd = [
-      [LabelName.PACKAGE, select.testCase.labels.package(testCaseResult)],
+    const labelsToAdd: [string, string | undefined][] = [
+      [LabelName.PACKAGE, select.testCase.labels.package()],
       [LabelName.SUITE, select.testCase.labels.suite(testCaseResult)],
       [LabelName.SUB_SUITE, select.testCase.labels.subsuite(testCaseResult)],
       [LabelName.THREAD, select.testCase.labels.thread(testCaseResult)],
@@ -61,6 +62,8 @@ export default class TestFileContext {
   handleTestFileResult(result: TestResult) {
     if (result.testResults.length === 0 && result.testExecError) {
       this._handleEarlyError(result);
+    } else {
+      this._handleSkippedTests(result);
     }
 
     if (this._subsuiteGroup !== this._rootSuiteGroup) {
@@ -100,9 +103,20 @@ export default class TestFileContext {
     allureTest.description = select.testFile.description(result);
     allureTest.historyId = select.testFile.historyId(result);
     allureTest.addLabel(LabelName.TAG, 'unhandled-error');
-    allureTest.addLabel(LabelName.PACKAGE, select.testFile.labels.package(result));
+    const packageName = select.testFile.labels.package();
+    if (packageName) {
+      allureTest.addLabel(LabelName.PACKAGE, packageName);
+    }
     allureTest.addLabel(LabelName.SUITE, select.testFile.labels.suite(result));
     allureTest.addLabel(LabelName.THREAD, '1');
     allureTest.endTest(select.testFile.end(result));
+  }
+
+  _handleSkippedTests(result: TestResult) {
+    for (const testResult of result.testResults) {
+      if (testResult.status !== 'passed' && testResult.status !== 'failed') {
+        this.handleTestCaseResult(testResult);
+      }
+    }
   }
 }

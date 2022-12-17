@@ -29,7 +29,8 @@ class DumpReporter {
   getLastError() { }
   _append(payload) {
     console.log('Append: %s', payload.method);
-    fs.appendFileSync(this._outFile, JSON.stringify(payload) + '\n');
+    const timedPayload = { ...payload, time: Date.now() };
+    fs.appendFileSync(this._outFile, JSON.stringify(timedPayload) + '\n');
   }
 }
 

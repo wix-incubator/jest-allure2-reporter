@@ -32,7 +32,7 @@ describe('Grand parent suite', () => {
 
     afterAll(async () => {
       console.log('Parent suite: afterAll');
-      throw new Error('Parent suite error');
+      throw new Error('Parent suite: afterAll error');
     });
   });
 });

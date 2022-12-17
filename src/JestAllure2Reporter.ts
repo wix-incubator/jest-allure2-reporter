@@ -15,11 +15,12 @@ import {
 import { AllureRuntime } from 'allure-js-commons';
 
 import type { JestAllure2ReporterOptions } from './JestAllure2ReporterOptions';
+import type { ReporterEmitter } from './ReporterEmitter';
 import { TestRunContext } from './context';
 import { Selectors } from './selectors';
 
 export default class JestAllure2Reporter implements Reporter {
-  private readonly _emitter = new EventEmitter();
+  private readonly _emitter = new EventEmitter() as ReporterEmitter;
   private readonly _testRunContext: TestRunContext;
 
   constructor(globalConfig: Config.GlobalConfig, options: Partial<JestAllure2ReporterOptions>) {
@@ -29,6 +30,7 @@ export default class JestAllure2Reporter implements Reporter {
       }),
       select: new Selectors({
         emitter: this._emitter,
+        reporterOptions: options,
         rootDir: globalConfig.rootDir,
       }),
       rootDir: globalConfig.rootDir,
@@ -49,7 +51,6 @@ export default class JestAllure2Reporter implements Reporter {
   }
 
   onTestCaseResult(test: Test, testCaseResult: TestCaseResult) {
-    debugger;
     this._emitter.emit('testCaseResult', { test, testCaseResult });
 
     const fileContext = this._testRunContext.getFileContext(test)!;

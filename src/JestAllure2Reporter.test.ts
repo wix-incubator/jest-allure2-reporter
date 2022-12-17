@@ -1,6 +1,9 @@
+jest.useFakeTimers();
+
 import path from 'path';
 
 import fs from 'fs-extra';
+import _ from 'lodash';
 
 import JestAllure2Reporter from './JestAllure2Reporter';
 
@@ -10,6 +13,7 @@ const allureDirectory = path.join(rootDirectory, '__fixtures__/allure-results');
 
 describe('JestAllure2Reporter', () => {
   let reporter!: JestAllure2Reporter;
+  let allureResults!: Record<string, unknown>[];
 
   beforeAll(async () => {
     await fs.remove(allureDirectory);
@@ -18,7 +22,7 @@ describe('JestAllure2Reporter', () => {
     });
   });
 
-  test('should process test reporter calls', async () => {
+  beforeAll(async () => {
     const testReporterCalls = fs
       .readFileSync(testReporterCallsPath, 'utf8')
       .split('\n')
@@ -26,9 +30,46 @@ describe('JestAllure2Reporter', () => {
       .map((x) => JSON.parse(x));
 
     for (const call of testReporterCalls) {
+      jest.setSystemTime(call.time);
       if (call.method in reporter) {
         await (reporter as any)[call.method](...call.params);
       }
     }
   });
+
+  beforeAll(async () => {
+    const files = await fs.readdir(allureDirectory);
+    allureResults = await Promise.all(
+      files
+        .filter((f) => f.endsWith('.json'))
+        .map(async (file) => {
+          const content = await fs.readFile(path.join(allureDirectory, file));
+          return JSON.parse(content as any);
+        }),
+    );
+  });
+
+  test.each([
+    [
+      'root-test-fail',
+      [
+        expect.objectContaining({
+          status: 'failed',
+          statusDetails: expect.objectContaining({
+            message: 'Error: Simulated error',
+          }),
+        }),
+      ],
+    ],
+  ])('should generate correct results for: %s.test.js', (testName, expected) => {
+    expect(filterBySuite(testName)).toEqual(expected);
+  });
+
+  function filterBySuite(name: string) {
+    return allureResults.filter((result) => {
+      const labels = _.get(result, 'labels', []) as object[];
+      const suiteLabel = _.find(labels, { name: 'suite' }) as any;
+      return suiteLabel?.value === `__fixtures__/tests/${name}.test.js`;
+    });
+  }
 });

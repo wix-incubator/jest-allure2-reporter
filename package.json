@@ -33,7 +33,7 @@
     "website": "http-server -p 3000 website",
     "fixture:results": "npx jest --config=fixture-results.jest.config.js || exit 0",
     "fixture:allure": "npx jest --config=fixture-allure.jest.config.js || exit 0",
-    "fixture": "npm run clean && npm run fixture:results && npm run fixture:allure",
+    "fixture": "npm run clean && npm run build && npm run fixture:results && npm run fixture:allure",
     "lint": "eslint . --fix",
     "lint:ci": "eslint .",
     "lint:staged": "lint-staged",
@@ -80,6 +80,7 @@
   "dependencies": {
     "allure-js-commons": "^2.0.0-beta.19",
     "lodash": "^4.17.21",
+    "pkg-up": "^3.1.0",
     "strip-ansi": "^6.0.0"
   },
   "peerDependencies": {

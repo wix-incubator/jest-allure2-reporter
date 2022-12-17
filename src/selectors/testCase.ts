@@ -1,17 +1,26 @@
 import path from 'path';
 
 import { Status } from 'allure-js-commons';
+import { isEmpty } from 'lodash';
+import stripAnsi from 'strip-ansi';
 // eslint-disable-next-line node/no-unpublished-import
 import type { TestCaseResult } from '@jest/reporters';
 
-import type { MetadataService, QueryService, ThreadService, TimeService } from './fallbacks';
+import type { JestAllure2ReporterOptions } from '../JestAllure2ReporterOptions';
 import md5 from '../utils/md5';
 
+import type {
+  MetadataService,
+  QueryService,
+  ProjectService,
+  ThreadService,
+  TimeService,
+} from './fallbacks';
+
 type Services = {
-  config: {
-    rootDir: string;
-  };
+  reporterOptions: Partial<JestAllure2ReporterOptions>;
   meta: MetadataService;
+  project: ProjectService;
   query: QueryService;
   thread: ThreadService;
   time: TimeService;
@@ -21,15 +30,15 @@ export class TestCaseSelectors {
   public readonly labels = {
     suite: (testCaseResult: TestCaseResult): string => {
       const test = this._services.query.getTest(testCaseResult);
-      return path.relative(this._services.config.rootDir, test.path);
+      return this._services.project.relative(test.path);
     },
 
     subsuite: (testCaseResult: TestCaseResult): string => {
       return testCaseResult.ancestorTitles.join(' » ');
     },
 
-    package: (_testCaseResult: TestCaseResult): string => {
-      return 'TODO';
+    package: (): string | undefined => {
+      return this._services.project.packageName;
     },
 
     thread: (testCaseResult: TestCaseResult): string => {
@@ -66,9 +75,13 @@ export class TestCaseSelectors {
     return testCaseResult.fullName;
   }
 
+  public description() {
+    return 'Code is not available';
+  }
+
   public relativePath(testCaseResult: TestCaseResult) {
     const testFilePath = this._services.query.getTest(testCaseResult).path;
-    return path.relative(this._services.config.rootDir, testFilePath);
+    return this._services.project.relative(testFilePath);
   }
 
   public historyId(testCaseResult: TestCaseResult) {
@@ -80,24 +93,35 @@ export class TestCaseSelectors {
   }
 
   public status(testCaseResult: TestCaseResult) {
-    debugger; // investigate what is the difference between FAILED and BROKEN
-    return testCaseResult.status === 'failed'
-      ? Status.FAILED
-      : false /* TODO */
-      ? Status.BROKEN
-      : testCaseResult.status === 'passed'
-      ? Status.PASSED
-      : Status.SKIPPED;
+    switch (testCaseResult.status) {
+      case 'passed':
+        return Status.PASSED;
+      case 'failed':
+        if (this._services.reporterOptions.errorsAsFailedAssertions) {
+          return Status.FAILED;
+        } else {
+          const hasUnhandledErrors = testCaseResult.failureDetails.some((item) => isEmpty(item));
+          return hasUnhandledErrors ? Status.BROKEN : Status.FAILED;
+        }
+      case 'pending':
+      case 'todo':
+      case 'skipped':
+      case 'disabled':
+        return Status.SKIPPED;
+    }
   }
 
   public statusDetails(testCaseResult: TestCaseResult) {
-    if (this.status(testCaseResult) !== Status.FAILED) {
+    if (testCaseResult.status !== 'failed') {
       return;
     }
 
+    const [message] = testCaseResult.failureMessages[0].split('\n', 1);
+    const trace = testCaseResult.failureMessages.join('\n\n');
+
     return {
-      message: testCaseResult.failureMessages[0].split('\n', 1)[0],
-      trace: testCaseResult.failureMessages.join('\n\n'),
+      message: stripAnsi(message),
+      trace: stripAnsi(trace),
     };
   }
 }

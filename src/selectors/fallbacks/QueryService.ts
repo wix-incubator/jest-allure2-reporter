@@ -1,14 +1,20 @@
-import type { EventEmitter } from 'events';
 // eslint-disable-next-line node/no-unpublished-import
 import type { Test, TestCaseResult } from '@jest/reporters';
+
+import type { ReporterEmitter } from '../../ReporterEmitter';
 
 export class QueryService {
   private _testMap = new Map<TestCaseResult, Test>();
 
-  constructor(emitter: EventEmitter) {
-    emitter.on('testCaseResult', (event: any) =>
+  constructor(emitter: ReporterEmitter) {
+    emitter.on('testCaseResult', (event) =>
       this._saveTestFilePath(event.test, event.testCaseResult),
     );
+    emitter.on('testFileResult', (event) => {
+      for (const testCaseResult of event.testResult.testResults) {
+        this._saveTestFilePath(event.test, testCaseResult);
+      }
+    });
   }
 
   public getTest(testCaseResult: TestCaseResult): Test {

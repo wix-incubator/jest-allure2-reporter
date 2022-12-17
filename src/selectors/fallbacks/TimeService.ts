@@ -1,10 +1,10 @@
-import type { EventEmitter } from 'events';
 import type {
   Test,
   TestCaseResult,
   TestResult,
   // eslint-disable-next-line node/no-unpublished-import
 } from '@jest/reporters';
+import type { ReporterEmitter } from '../../ReporterEmitter';
 
 export class TimeService {
   private _testFileStarts = new Map<string, number>();
@@ -12,14 +12,12 @@ export class TimeService {
   private _testCaseTimes = new Map<TestCaseResult, [number, number]>();
 
   constructor(
-    private readonly _emitter: EventEmitter,
+    private readonly _emitter: ReporterEmitter,
     private readonly _nowProvider = () => Date.now(),
   ) {
-    this._emitter.on('testFileStart', (event: any) => this._onTestFileStart(event.test));
-    this._emitter.on('testFileResult', (event: any) => this._onTestFileResult(event.test));
-    this._emitter.on('testCaseResult', (event: any) =>
-      this._onTestCaseResult(event.testCaseResult),
-    );
+    this._emitter.on('testFileStart', (event) => this._onTestFileStart(event.test));
+    this._emitter.on('testFileResult', (event) => this._onTestFileResult(event.test));
+    this._emitter.on('testCaseResult', (event) => this._onTestCaseResult(event.testCaseResult));
   }
 
   getCaseStartTime(testCaseResult: TestCaseResult): number {
