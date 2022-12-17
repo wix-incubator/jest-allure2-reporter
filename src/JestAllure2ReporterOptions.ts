@@ -31,6 +31,14 @@ export type JestAllure2ReporterOptions = {
    */
   packageName: string;
   /**
+   * Getter function to extract environment information from the test environment.
+   * By default, the environment information is extracted from the `process.env` object.
+   * Use boolean `false` to disable environment information.
+   *
+   * @default true
+   */
+  getEnvironmentInfo: boolean | (() => Promise<Record<string, string>>);
+  /**
    * Treat thrown errors as failed assertions.
    * By default, the reporter distinguishes between failed assertions and thrown errors.
    * The former are reported as FAILED tests, the latter as BROKEN tests.

@@ -1,5 +1,6 @@
 import path from 'path';
 
+import { mapValues } from 'lodash';
 // eslint-disable-next-line node/no-unpublished-import
 import type { Test, TestResult } from '@jest/reporters';
 
@@ -19,11 +20,21 @@ export default class TestRunContext {
       : this._fileContexts.get(test.path);
   }
 
-  writeMetadata() {
+  async writeMetadata() {
     const runtime = this._config.allureRuntime;
 
-    runtime.writeEnvironmentInfo({});
+    runtime.writeEnvironmentInfo(await this._getEnvironmentInfo());
     runtime.writeCategoriesDefinitions([]);
+  }
+
+  async _getEnvironmentInfo() {
+    const { getEnvironmentInfo } = this._config;
+
+    if (typeof getEnvironmentInfo === 'boolean') {
+      return getEnvironmentInfo ? mapValues(process.env, String) : {};
+    }
+
+    return getEnvironmentInfo();
   }
 
   registerFileContext(test: Test) {

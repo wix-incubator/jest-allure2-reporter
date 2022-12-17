@@ -76,7 +76,7 @@ export class TestCaseSelectors {
   }
 
   public description() {
-    return 'Code is not available';
+    return 'Code preview is not available';
   }
 
   public relativePath(testCaseResult: TestCaseResult) {

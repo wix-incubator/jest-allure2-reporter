@@ -5,6 +5,9 @@ module.exports = {
   testMatch: ['<rootDir>/__fixtures__/tests/**/*.test.{js,ts}'],
   reporters: [
     'default',
-    ['.', { packageName: 'jest-allure2-reporter', resultsDir: '__fixtures__/allure-results' }]
+    ['.', {
+      getEnvironmentInfo: () => require('lodash').pick(process.env, ['SHELL', 'NODE']),
+      resultsDir: '__fixtures__/allure-results'
+    }]
   ],
 };

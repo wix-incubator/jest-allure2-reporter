@@ -51,15 +51,31 @@ describe('JestAllure2Reporter', () => {
 
   test.each([
     [
-      'root-test-fail',
-      [
+      'statuses',
+      expect.arrayContaining([
         expect.objectContaining({
-          status: 'failed',
+          name: 'root broken test',
+          status: 'broken',
           statusDetails: expect.objectContaining({
             message: 'Error: Simulated error',
           }),
         }),
-      ],
+        expect.objectContaining({
+          name: 'root failed test',
+          status: 'failed',
+          statusDetails: expect.objectContaining({
+            message: expect.any(String),
+          }),
+        }),
+        expect.objectContaining({
+          name: 'root skipped test',
+          status: 'skipped',
+        }),
+        expect.objectContaining({
+          name: 'root passed test (600ms)',
+          status: 'passed',
+        }),
+      ]),
     ],
   ])('should generate correct results for: %s.test.js', (testName, expected) => {
     expect(filterBySuite(testName)).toEqual(expected);

@@ -28,6 +28,7 @@ export default class JestAllure2Reporter implements Reporter {
       allureRuntime: new AllureRuntime({
         resultsDir: path.resolve(options.resultsDir ?? 'allure-results'),
       }),
+      getEnvironmentInfo: options.getEnvironmentInfo ?? true,
       select: new Selectors({
         emitter: this._emitter,
         reporterOptions: options,
@@ -37,12 +38,12 @@ export default class JestAllure2Reporter implements Reporter {
     });
   }
 
-  onRunStart(
+  async onRunStart(
     aggregatedResult: AggregatedResult,
     options: ReporterOnStartOptions,
-  ): Promise<void> | void {
+  ): Promise<void> {
     this._emitter.emit('runStart', { aggregatedResult, options });
-    this._testRunContext.writeMetadata();
+    await this._testRunContext.writeMetadata();
   }
 
   onTestFileStart(test: Test) {
