@@ -12,8 +12,23 @@ on:
 
 jobs:
 
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+      - uses: bahmutov/npm-install@v1
+        with:
+          useLockFile: false
+      - name: Lint
+        run: npm run lint:ci
+
   unit:
     name: Unit Tests
+    needs: lint
     strategy:
       matrix:
         os: [ubuntu-latest]
@@ -34,8 +49,6 @@ jobs:
       - uses: bahmutov/npm-install@v1
         with:
           useLockFile: false
-      - name: Lint
-        run: npm run lint:ci
       - name: Record fixtures
         run: npm run record
         env:
@@ -57,10 +70,19 @@ jobs:
           useLockFile: false
       - name: Build docs
         run: npm run docs
+      - name: Deploy to GH pages
+        uses: peaceiris/actions-gh-pages@v3
+        if: github.ref == 'refs/heads/master'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./website
+          force_orphan: true
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
 
   publish:
     name: Publish
-    needs: unit
+    needs: docs
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
