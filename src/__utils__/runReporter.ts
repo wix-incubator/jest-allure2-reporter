@@ -1,6 +1,7 @@
 import path from 'path';
 
 import fs from 'fs-extra';
+import glob from 'glob';
 import _ from 'lodash';
 import tempfile from 'tempfile';
 
@@ -21,11 +22,7 @@ export async function runReporter(overrides: Partial<JestAllure2ReporterOptions>
     const globalConfig = { rootDir: rootDirectory } as any;
     const reporter = new JestAllure2Reporter(globalConfig, options);
 
-    const jestVersion =
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      process.env.JEST_VERSION || require('jest/package.json').version;
-
-    const testReporterCalls = await readTestReporterCalls(jestVersion);
+    const testReporterCalls = await readTestReporterCalls();
     for (const call of testReporterCalls) {
       jest.setSystemTime(call.time);
       if (call.method in reporter) {
@@ -41,12 +38,11 @@ export async function runReporter(overrides: Partial<JestAllure2ReporterOptions>
   }
 }
 
-async function readTestReporterCalls(jestVersion: string) {
-  const testReporterCallsPath = path.join(
-    rootDirectory,
-    '__fixtures__/recordings',
-    `${jestVersion}.jsonl`,
-  );
+async function readTestReporterCalls() {
+  const jestVersion = process.env.JEST_VERSION;
+  const testReporterCallsPath = jestVersion
+    ? path.join(rootDirectory, '__fixtures__/recordings', `${jestVersion}.jsonl`)
+    : glob.sync(path.join(rootDirectory, '__fixtures__/recordings/*.jsonl')).reverse()[0];
 
   return fs
     .readFileSync(testReporterCallsPath, 'utf8')
