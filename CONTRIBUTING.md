@@ -32,7 +32,13 @@ npm install
 Generate fixtures:
 
 ```bash
-npm run fixtures:results
+npm run record
+```
+
+> If you want to check compatiblity with a specific Jest version, you can use the `JEST_VERSION` environment variable:
+
+```bash
+JEST_VERSION=27 npm run record
 ```
 
 Run tests:
@@ -44,13 +50,19 @@ npm test
 To view the test results, regenerate the full version of the fixtures:
 
 ```bash
-npm run fixtures
+npm run start
 ```
 
-Then start the Allure server:
+> If you want to check compatiblity with a specific Jest version, you can use the `JEST_VERSION` environment variable:
 
 ```bash
-npm start
+JEST_VERSION=27 npm run start
+```
+
+To re-run the Allure CLI server, run:
+
+```bash
+npm run serve
 ```
 
 ### Checking your code
