@@ -57,11 +57,11 @@
     },
     "overrides": [
         {
-            "files": ["**/__tests__/*.ts", "*.test.ts"],
+            "files": ["**/__tests__/*.ts", "**/__utils__/*.ts", "*.test.ts"],
             "rules": {
               "@typescript-eslint/no-explicit-any": "off",
               "node/no-unpublished-import": "off",
-              "no-only-tests/no-only-tests": "error",
+              "no-only-tests/no-only-tests": "error"
             }
         }
     ]
