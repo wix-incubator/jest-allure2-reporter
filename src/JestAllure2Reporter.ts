@@ -13,6 +13,7 @@ import {
   // eslint-disable-next-line node/no-unpublished-import
 } from '@jest/reporters';
 import { AllureRuntime } from 'allure-js-commons';
+import rimraf from 'rimraf';
 
 import type { JestAllure2ReporterOptions } from './JestAllure2ReporterOptions';
 import type { ReporterEmitter } from './ReporterEmitter';
@@ -21,12 +22,19 @@ import { Selectors } from './selectors';
 
 export default class JestAllure2Reporter implements Reporter {
   private readonly _emitter = new EventEmitter() as ReporterEmitter;
+  private readonly _options: Partial<JestAllure2ReporterOptions>;
   private readonly _testRunContext: TestRunContext;
 
   constructor(globalConfig: Config.GlobalConfig, options: Partial<JestAllure2ReporterOptions>) {
+    this._options = options;
+    this._options.resultsDir ??= path.resolve(options.resultsDir ?? 'allure-results');
+    if (this._options.overwriteResultsDir !== false) {
+      rimraf.sync(this._options.resultsDir);
+    }
+
     this._testRunContext = new TestRunContext({
       allureRuntime: new AllureRuntime({
-        resultsDir: path.resolve(options.resultsDir ?? 'allure-results'),
+        resultsDir: this._options.resultsDir,
       }),
       getEnvironmentInfo: options.getEnvironmentInfo ?? true,
       select: new Selectors({

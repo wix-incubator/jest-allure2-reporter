@@ -23,6 +23,14 @@ export type JestAllure2ReporterOptions = {
    * @default <rootDir>/allure-results
    */
   resultsDir: string;
+
+  /**
+   * Whether the reporter should delete the results directory before running tests.
+   *
+   * @default true
+   */
+  overwriteResultsDir: boolean;
+
   /**
    * Add an extra label to each test case with the package name.
    * Helpful when running tests from multiple packages in a monorepo.
