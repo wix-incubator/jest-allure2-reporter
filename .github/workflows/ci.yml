@@ -1,4 +1,4 @@
-name: Test
+name: CI
 
 on:
   push:
@@ -42,3 +42,9 @@ jobs:
           JEST_VERSION: ${{ matrix.jest }}
       - name: Unit tests
         run: npm test -- --coverage
+      - name: Semantic release
+        if: github.ref == 'refs/heads/master'
+        run: npx --no-install semantic-release --debug
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
