@@ -27,8 +27,8 @@ jobs:
             jest: '29.x.x'
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
       - uses: bahmutov/npm-install@v1
@@ -43,12 +43,27 @@ jobs:
       - name: Unit tests
         run: npm test -- --coverage
 
+  docs:
+    name: Docs
+    needs: unit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+      - uses: bahmutov/npm-install@v1
+        with:
+          useLockFile: false
+      - name: Build docs
+        run: npm run docs
+
   publish:
     name: Publish
     needs: unit
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version-file: '.nvmrc'

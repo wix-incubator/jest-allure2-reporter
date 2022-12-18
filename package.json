@@ -31,7 +31,7 @@
     "prepare": "husky install && npm run clean && npm run build",
     "clean": "git clean -xdf __fixtures__ dist",
     "build": "tsc",
-    "docs": "typedoc && cp -r media website",
+    "docs": "typedoc",
     "website": "http-server -p 3000 website",
     "allure": "zx scripts/allure.mjs",
     "record": "zx scripts/record.mjs",
