@@ -38,7 +38,7 @@
     "lint": "eslint . --fix",
     "lint:ci": "eslint .",
     "lint:staged": "lint-staged",
-    "start": "npm run clean && npm run build && npm run fixture:allure && npm start",
+    "start": "npm run clean && npm run build && npm run allure && npm run serve",
     "serve": "cd __fixtures__ && allure serve",
     "test": "jest",
     "test:ci": "npm run clean && npm run lint:ci && npm run build && npm run record && jest --coverage"
