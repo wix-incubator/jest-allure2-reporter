@@ -39,6 +39,6 @@ jobs:
       - name: Record fixtures
         run: npm run record
         env:
-          - JEST_VERSION: ${{ matrix.jest }}
+          JEST_VERSION: ${{ matrix.jest }}
       - name: Unit tests
         run: npm test -- --coverage
