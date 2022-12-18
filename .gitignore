@@ -1,5 +1,6 @@
 /tmp
-/node_modules
+
+node_modules
 package-lock.json
 yarn.lock
 /npm-debug.log
@@ -17,5 +18,6 @@ yarn.lock
 /dist
 /jest-allure2-reporter-*.tgz
 
-/__fixtures__/allure-results
-/__fixtures__/results
+allure-results
+/__fixtures__
+!/__fixtures__/tests

@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+    paths-ignore:
+      - '**/*.md'
+  pull_request:
+    branches: [master]
+    paths-ignore:
+      - '**/*.md'
+
+jobs:
+
+  unit:
+    name: Unit Tests
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        jest: ['27.x.x', '28.x.x', '29.x.x']
+        include:
+          - node: 14
+            jest: '27.x.x'
+          - node: 16
+            jest: '28.x.x'
+          - node: 18
+            jest: '29.x.x'
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: bahmutov/npm-install@v1
+        with:
+          useLockFile: false
+      - name: Lint
+        run: npm run lint:ci
+      - name: Record fixtures
+        run: npm run record
+        env:
+          JEST_VERSION: ${{ matrix.jest }}
+      - name: Unit tests
+        run: npm test -- --coverage
+      - name: Semantic release
+        if: github.ref == 'refs/heads/master'
+        run: npx --no-install semantic-release --debug
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -50,10 +50,12 @@ module.exports = {
 
 Below is a list of all the available options:
 
-| Property      | Type | Default | Description |
-| ------------- | ---- | ------- | ----------- |
-| `resultsDir`  | `string` | `<rootDir>/allure-results` | The directory where the results will be written to. |
-| `packageName` | `string` | `require('./package.json').name` | The name of your package. |
+| Property                   | Type                     | Default                          | Description                                                                                                                                                                                                                                |
+|----------------------------|--------------------------|----------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `errorsAsFailedAssertions` | `boolean`                | `false`                          | Treat thrown errors as failed assertions. By default, the reporter distinguishes between failed assertions and thrown errors. The former are reported as FAILED tests, the latter as BROKEN tests.                                         |
+| `getEnvironmentInfo`       | `function` or `boolean`  | `true`                           | Can be customized with an async function to extract environment information from the test environment. By default, the environment information is extracted from the `process.env` object. Use `false` to disable environment information. |
+| `packageName`              | `string`                 | `require('./package.json').name` | Add an extra label to each test case with the package name. Helpful when running tests from multiple packages in a monorepo.                                                                                                               |
+| `resultsDir`               | `string`                 | `<rootDir>/allure-results`       | Path to the directory where the report will be generated.                                                                                                                                                                                  |
 
 ## Usage
 

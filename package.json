@@ -23,21 +23,25 @@
   "typings": "./dist/index.d.ts",
   "files": [
     "src",
-    "dist"
+    "dist",
+    "!**/__tests__",
+    "!**/*.test.*"
   ],
   "scripts": {
-    "prepare": "husky install && npm run build",
+    "prepare": "husky install && npm run clean && npm run build",
+    "clean": "git clean -xdf __fixtures__ dist",
     "build": "tsc",
     "docs": "typedoc && cp -r media website",
     "website": "http-server -p 3000 website",
-    "fixture:results": "npx jest --config=fixture-results.jest.config.js",
-    "fixture:allure": "npx jest --config=fixture-allure.jest.config.js",
+    "allure": "zx scripts/allure.mjs",
+    "record": "zx scripts/record.mjs",
     "lint": "eslint . --fix",
     "lint:ci": "eslint .",
     "lint:staged": "lint-staged",
-    "start": "cd __fixtures__ && allure serve",
+    "start": "npm run clean && npm run build && npm run allure && npm run serve",
+    "serve": "cd __fixtures__ && allure serve",
     "test": "jest",
-    "test:ci": "jest --coverage"
+    "test:ci": "npm run clean && npm run lint:ci && npm run build && npm run record && jest --coverage"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.0.3",
@@ -68,7 +72,9 @@
     "jest-environment-node": "^28.1.2",
     "lint-staged": "^13.0.3",
     "prettier": "^2.7.1",
+    "rimraf": "^3.0.2",
     "semantic-release": "^19.0.3",
+    "tempfile": "^3.0.0",
     "ts-jest": "^28.0.5",
     "ts-node": "^10.8.1",
     "typedoc": "^0.22.18",
@@ -78,9 +84,10 @@
   "dependencies": {
     "allure-js-commons": "^2.0.0-beta.19",
     "lodash": "^4.17.21",
+    "pkg-up": "^3.1.0",
     "strip-ansi": "^6.0.0"
   },
   "peerDependencies": {
-    "jest": ">=27"
+    "jest": ">=27.2.5"
   }
 }
