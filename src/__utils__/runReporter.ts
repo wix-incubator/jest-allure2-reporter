@@ -21,7 +21,11 @@ export async function runReporter(overrides: Partial<JestAllure2ReporterOptions>
     const globalConfig = { rootDir: rootDirectory } as any;
     const reporter = new JestAllure2Reporter(globalConfig, options);
 
-    const testReporterCalls = await readTestReporterCalls();
+    const jestVersion =
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      process.env.JEST_VERSION || require('jest/package.json').version;
+
+    const testReporterCalls = await readTestReporterCalls(jestVersion);
     for (const call of testReporterCalls) {
       jest.setSystemTime(call.time);
       if (call.method in reporter) {
@@ -37,8 +41,12 @@ export async function runReporter(overrides: Partial<JestAllure2ReporterOptions>
   }
 }
 
-async function readTestReporterCalls() {
-  const testReporterCallsPath = path.join(rootDirectory, '__fixtures__/test-reporter-calls.json');
+async function readTestReporterCalls(jestVersion: string) {
+  const testReporterCallsPath = path.join(
+    rootDirectory,
+    '__fixtures__/recordings',
+    `${jestVersion}.jsonl`,
+  );
 
   return fs
     .readFileSync(testReporterCallsPath, 'utf8')

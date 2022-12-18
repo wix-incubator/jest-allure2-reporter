@@ -28,21 +28,20 @@
     "!**/*.test.*"
   ],
   "scripts": {
-    "prepare": "husky install && npm run build",
-    "clean:dist": "rimraf dist",
-    "clean:fixtures": "git clean -xdf __fixtures__",
-    "clean": "npm run clean:dist && npm run clean:fixtures",
-    "build": "npm run clean:dist && tsc",
+    "prepare": "husky install && npm run clean && npm run build",
+    "clean": "git clean -xdf __fixtures__ dist",
+    "build": "tsc",
     "docs": "typedoc && cp -r media website",
     "website": "http-server -p 3000 website",
-    "record": "npm run clean && jest --config=fixture-results.jest.config.js || exit 0",
+    "allure": "zx scripts/allure.mjs",
+    "record": "zx scripts/record.mjs",
     "lint": "eslint . --fix",
     "lint:ci": "eslint .",
     "lint:staged": "lint-staged",
     "start": "npm run clean && npm run build && npm run fixture:allure && npm start",
     "serve": "cd __fixtures__ && allure serve",
     "test": "jest",
-    "test:ci": "jest --coverage"
+    "test:ci": "npm run clean && npm run lint:ci && npm run build && npm run record && jest --coverage"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.0.3",
@@ -89,6 +88,6 @@
     "strip-ansi": "^6.0.0"
   },
   "peerDependencies": {
-    "jest": ">=27"
+    "jest": ">=27.2.5"
   }
 }

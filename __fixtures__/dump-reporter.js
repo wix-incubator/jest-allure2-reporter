@@ -6,7 +6,7 @@ const fs = require('fs-extra');
 class DumpReporter {
   constructor(globalConfig) {
     this._rootDir = globalConfig.rootDir;
-    this._outFile = path.join(this._rootDir, '__fixtures__/test-reporter-calls.json');
+    this._outFile = path.join(this._rootDir, 'recordings', require('jest/package.json').version + '.jsonl');
   }
   onRunStart(aggregatedResult, options) {
     console.log('Starting dump: %s', this._outFile);
