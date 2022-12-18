@@ -42,6 +42,19 @@ jobs:
           JEST_VERSION: ${{ matrix.jest }}
       - name: Unit tests
         run: npm test -- --coverage
+
+  publish:
+    name: Publish
+    needs: unit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+      - uses: bahmutov/npm-install@v1
+        with:
+          useLockFile: false
       - name: Semantic release
         if: github.ref == 'refs/heads/master'
         run: npx --no-install semantic-release --debug
