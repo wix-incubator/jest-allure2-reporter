@@ -1,6 +1,5 @@
 import path from 'path';
 
-import { mapValues } from 'lodash';
 // eslint-disable-next-line node/no-unpublished-import
 import type { Test, TestResult } from '@jest/reporters';
 
@@ -27,11 +26,11 @@ export default class TestRunContext {
     runtime.writeCategoriesDefinitions([]);
   }
 
-  async _getEnvironmentInfo() {
+  async _getEnvironmentInfo(): Promise<any> {
     const { getEnvironmentInfo } = this._config;
 
     if (typeof getEnvironmentInfo === 'boolean') {
-      return getEnvironmentInfo ? mapValues(process.env, String) : {};
+      return getEnvironmentInfo ? process.env : {};
     }
 
     return getEnvironmentInfo();
