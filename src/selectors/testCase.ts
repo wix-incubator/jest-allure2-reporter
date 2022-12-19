@@ -6,6 +6,7 @@ import stripAnsi from 'strip-ansi';
 import type { TestCaseResult } from '@jest/reporters';
 
 import type { JestAllure2ReporterOptions } from '../JestAllure2ReporterOptions';
+import isEmptyObject from '../utils/isEmptyObject';
 import md5 from '../utils/md5';
 
 import type {
@@ -15,9 +16,6 @@ import type {
   ThreadService,
   TimeService,
 } from './fallbacks';
-
-const isEmptyObject = (value: unknown) =>
-  value && typeof value === 'object' && Object.keys(value).length === 0;
 
 type Services = {
   reporterOptions: Partial<JestAllure2ReporterOptions>;

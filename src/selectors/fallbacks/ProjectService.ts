@@ -1,8 +1,9 @@
 import path from 'path';
 
-import attempt from 'lodash/attempt';
-import isError from 'lodash/isError';
 import pkgUp from 'pkg-up';
+
+import attempt from '../../utils/attempt';
+import isError from '../../utils/isError';
 
 type Config = {
   rootDir: string;

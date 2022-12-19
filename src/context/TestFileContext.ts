@@ -4,7 +4,8 @@ import {
   // eslint-disable-next-line node/no-unpublished-import
 } from '@jest/reporters';
 import { AllureGroup, LabelName, Stage, Status } from 'allure-js-commons';
-import isEqual from 'lodash/isEqual';
+
+import shallowEqualArrays from '../utils/shallowEqualArrays';
 
 import { TestFileContextConfig } from './TestFileContextConfig';
 
@@ -22,7 +23,7 @@ export default class TestFileContext {
   }
 
   handleTestCaseResult(testCaseResult: TestCaseResult) {
-    if (!isEqual(this._ancestorTitles, testCaseResult.ancestorTitles)) {
+    if (!shallowEqualArrays(this._ancestorTitles, testCaseResult.ancestorTitles)) {
       this._changeSubsuiteGroup(testCaseResult);
     }
 
