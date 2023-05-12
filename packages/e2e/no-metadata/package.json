@@ -1,0 +1,21 @@
+{
+  "name": "@wix/jest-allure2-reporter-e2e-no-metadata",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@wix/eslint-config-jest-allure2-reporter": "^1.0.0",
+    "@wix/jest-config-jest-allure2-reporter": "^1.0.0",
+    "@wix/prettier-config-jest-allure2-reporter": "^1.0.0",
+    "@wix/typescript-config-jest-allure2-reporter": "^1.0.0",
+    "jest-allure2-reporter": "^1.0.0"
+  },
+  "prettier": "@wix/prettier-config-jest-allure2-reporter",
+  "eslintConfig": {
+    "extends": "@wix/jest-allure2-reporter"
+  },
+  "jest": {
+    "reporters": [
+      "jest-allure2-reporter"
+    ]
+  }
+}

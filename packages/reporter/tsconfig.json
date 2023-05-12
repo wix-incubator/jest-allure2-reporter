@@ -1,0 +1,7 @@
+{
+  "extends": "@wix/typescript-config-jest-allure2-reporter",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist"
+  }
+}

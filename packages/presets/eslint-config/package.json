@@ -1,0 +1,28 @@
+{
+  "name": "@wix/eslint-config-jest-allure2-reporter",
+  "version": "1.0.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wix-incubator/jest-allure2-reporter.git",
+    "directory": "packages/presets/eslint-config"
+  },
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.28.0",
+    "@typescript-eslint/parser": "^5.28.0",
+    "eslint": "^8.17.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-jsdoc": "^39.3.2",
+    "eslint-plugin-prefer-arrow": "^1.2.3",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-unicorn": "^46.0.0",
+    "prettier": "^2.7.0"
+  },
+  "peerDependencies": {
+    "typescript": "4.x.x"
+  }
+}

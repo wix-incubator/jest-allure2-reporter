@@ -1,0 +1,12 @@
+{
+  "name": "@wix/prettier-config-jest-allure2-reporter",
+  "version": "1.0.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wix-incubator/jest-allure2-reporter.git",
+    "directory": "packages/presets/prettier-config"
+  },
+  "main": "index.js",
+  "license": "MIT"
+}
