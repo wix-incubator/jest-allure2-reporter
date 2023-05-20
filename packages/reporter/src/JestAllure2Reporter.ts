@@ -19,7 +19,7 @@ import type { ReporterEmitter } from './ReporterEmitter';
 import { TestRunContext } from './context';
 import { Selectors } from './selectors';
 
-export default class JestAllure2Reporter implements Reporter {
+export class JestAllure2Reporter implements Reporter {
   private readonly _emitter = new EventEmitter() as ReporterEmitter;
   private readonly _options: Partial<JestAllure2ReporterOptions>;
   private readonly _testRunContext: TestRunContext;

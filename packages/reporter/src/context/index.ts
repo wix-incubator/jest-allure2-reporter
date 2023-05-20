@@ -1,2 +1,2 @@
-export { default as TestFileContext } from './TestFileContext';
-export { default as TestRunContext } from './TestRunContext';
+export { TestFileContext } from './TestFileContext';
+export { TestRunContext } from './TestRunContext';

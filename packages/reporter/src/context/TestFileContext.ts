@@ -6,7 +6,7 @@ import shallowEqualArrays from '../utils/shallowEqualArrays';
 
 import type { TestFileContextConfig } from './TestFileContextConfig';
 
-export default class TestFileContext {
+export class TestFileContext {
   private _testFileGroup!: AllureGroup;
   private _rootSuiteGroup!: AllureGroup;
   private _subsuiteGroup!: AllureGroup;

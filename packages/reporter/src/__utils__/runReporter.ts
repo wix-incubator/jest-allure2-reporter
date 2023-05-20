@@ -5,7 +5,7 @@ import glob from 'glob';
 import _ from 'lodash';
 import tempfile from 'tempfile';
 
-import JestAllure2Reporter from '../JestAllure2Reporter';
+import { JestAllure2Reporter } from '../JestAllure2Reporter';
 import type { JestAllure2ReporterOptions } from '../JestAllure2ReporterOptions';
 
 const rootDirectory = path.join(__dirname, '../..');

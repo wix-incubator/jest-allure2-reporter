@@ -5,9 +5,9 @@ import type { Test, TestResult } from '@jest/reporters';
 import { isTestResult } from '../utils/predicates';
 
 import type { TestRunContextConfig } from './TestRunContextConfig';
-import TestFileContext from './TestFileContext';
+import { TestFileContext } from './TestFileContext';
 
-export default class TestRunContext {
+export class TestRunContext {
   private readonly _fileContexts = new Map<string, TestFileContext>();
 
   constructor(private readonly _config: TestRunContextConfig) {}
@@ -25,16 +25,6 @@ export default class TestRunContext {
     runtime.writeCategoriesDefinitions([]);
   }
 
-  async _getEnvironmentInfo(): Promise<any> {
-    const { getEnvironmentInfo } = this._config;
-
-    if (typeof getEnvironmentInfo === 'boolean') {
-      return getEnvironmentInfo ? process.env : {};
-    }
-
-    return getEnvironmentInfo();
-  }
-
   registerFileContext(test: Test) {
     const testFilePath = path.relative(this._config.rootDir, test.path);
 
@@ -46,5 +36,15 @@ export default class TestRunContext {
         testFileGroup: this._config.allureRuntime.startGroup(testFilePath),
       }),
     );
+  }
+
+  private async _getEnvironmentInfo(): Promise<any> {
+    const { getEnvironmentInfo } = this._config;
+
+    if (typeof getEnvironmentInfo === 'boolean') {
+      return getEnvironmentInfo ? process.env : {};
+    }
+
+    return getEnvironmentInfo();
   }
 }
