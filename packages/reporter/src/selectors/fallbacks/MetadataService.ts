@@ -1,91 +1,63 @@
-import type {
-  Test,
-  TestResult,
-  TestCaseResult,
-  AggregatedResult,
-} from '@jest/reporters';
+import type { TestCaseResult } from '@jest/reporters';
+import { query } from 'jest-metadata/reporter';
 
-import {
-  isAggregatedResult,
-  isTestCaseResult,
-  isTestResult,
-  isTest,
-} from '../../utils/predicates';
-
-interface GetMetadata {
-  (item: Test): AllureTestFileMetadata | void;
-  (item: TestCaseResult): AllureTestMetadata | void;
-  (item: TestResult): AllureTestFileMetadata | void;
-  (item: AggregatedResult): AllureRunMetadata | void;
-}
+const NS = 'allure2';
 
 export class MetadataService {
-  public readonly get: GetMetadata = (item) => {
-    if (isAggregatedResult(item)) {
-      return;
-    }
+  getWorkerId(testCaseResult: TestCaseResult): string | undefined {
+    const testMetadata = query.testCaseResult(testCaseResult);
+    const runMetadata = testMetadata?.describeBlock.run;
+    const $run = runMetadata?.get(NS) as AllureRunMetadata | undefined;
+    return $run?.workerId;
+  }
 
-    if (isTestResult(item)) {
-      return;
-    }
+  getCode(testCaseResult: TestCaseResult): MetadataService$GetCode {
+    const testMetadata = query.testCaseResult(testCaseResult);
+    const $entry = testMetadata?.get(NS) as AllureTestEntryMetadata | undefined;
+    const $before =
+      testMetadata?.lastInvocation?.before
+        .map((hook) => hook.definition.get(NS) as AllureHookDefinitionMetadata)
+        .map((data) => data?.code ?? 'Code is not available for preview') ?? [];
 
-    if (isTestCaseResult(item)) {
-      return;
-    }
+    const $after =
+      testMetadata?.lastInvocation?.after
+        .map((hook) => hook.definition.get(NS) as AllureHookDefinitionMetadata)
+        .map((data) => data?.code ?? 'Code is not available for preview') ?? [];
 
-    if (isTest(item)) {
-      return;
-    }
-
-    return;
-  };
+    return {
+      beforeHooks: ($before ?? []).map((code) => ({ code })),
+      testFn: { code: $entry?.code ?? 'Code is not available for preview' },
+      afterHooks: ($after ?? []).map((code) => ({ code })),
+    };
+  }
 }
 
-export type AllureAnyMetadata =
+export type MetadataService$GetCode = {
+  beforeHooks: AllureCodeMetadata[];
+  testFn: AllureCodeMetadata;
+  afterHooks: AllureCodeMetadata[];
+};
+
+export type AllureMetadata =
   | AllureRunMetadata
-  | AllureTestFileMetadata
-  | AllureTestMetadata
-  | AllureSuiteMetadata
+  | AllureTestEntryMetadata
+  | AllureHookDefinitionMetadata
   | AllureCodeMetadata
   | AllureAttachmentMetadata;
 
 export type AllureRunMetadata = {
-  startedAt: number;
-};
-
-export type AllureTestFileMetadata = {
-  startedAt: number;
-  endedAt: number;
   workerId: string;
 };
 
-export type AllureTestMetadata = {
-  beforeHooks: AllureCodeMetadata[];
-  testFn: AllureCodeMetadata;
-  afterHooks: AllureCodeMetadata[];
-
-  startedAt: number;
-  duration: number;
-  errors: unknown[];
-  attachments: AllureAttachmentMetadata[];
-
-  parentSuites: AllureSuiteMetadata[];
-  testFile: AllureTestFileMetadata;
-};
-
-export type AllureSuiteMetadata = {
-  beforeHooks: AllureCodeMetadata[];
-  afterHooks: AllureCodeMetadata[];
-
-  startedAt: number;
-  duration: number;
-  errors: unknown[];
-  attachments: AllureAttachmentMetadata[];
-
-  testFile: AllureTestFileMetadata;
-};
-
 export type AllureCodeMetadata = {
+  code: string;
+};
+
+export type AllureTestEntryMetadata = {
+  code: string;
+};
+
+export type AllureHookDefinitionMetadata = {
   code: string;
 };
 

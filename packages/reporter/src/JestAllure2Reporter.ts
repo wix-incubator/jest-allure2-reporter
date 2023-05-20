@@ -4,7 +4,6 @@ import path from 'node:path';
 import type {
   AggregatedResult,
   Config,
-  Reporter,
   ReporterOnStartOptions,
   Test,
   TestCaseResult,
@@ -12,6 +11,7 @@ import type {
   TestResult,
 } from '@jest/reporters';
 import { AllureRuntime } from 'allure-js-commons';
+import { JestMetadataReporter } from 'jest-metadata/reporter';
 import rimraf from 'rimraf';
 
 import type { JestAllure2ReporterOptions } from './JestAllure2ReporterOptions';
@@ -19,7 +19,7 @@ import type { ReporterEmitter } from './ReporterEmitter';
 import { TestRunContext } from './context';
 import { Selectors } from './selectors';
 
-export class JestAllure2Reporter implements Reporter {
+export class JestAllure2Reporter extends JestMetadataReporter {
   private readonly _emitter = new EventEmitter() as ReporterEmitter;
   private readonly _options: Partial<JestAllure2ReporterOptions>;
   private readonly _testRunContext: TestRunContext;
@@ -28,6 +28,8 @@ export class JestAllure2Reporter implements Reporter {
     globalConfig: Config.GlobalConfig,
     options: Partial<JestAllure2ReporterOptions>,
   ) {
+    super(globalConfig, options);
+
     this._options = options;
     this._options.resultsDir ??= path.resolve(
       options.resultsDir ?? 'allure-results',
@@ -54,19 +56,24 @@ export class JestAllure2Reporter implements Reporter {
     aggregatedResult: AggregatedResult,
     options: ReporterOnStartOptions,
   ): Promise<void> {
+    await super.onRunStart(aggregatedResult, options);
+
     this._emitter.emit('runStart', { aggregatedResult, options });
     await this._testRunContext.writeMetadata();
   }
 
   onTestFileStart(test: Test) {
+    super.onTestFileStart(test);
+
     this._emitter.emit('testFileStart', { test });
     this._testRunContext.registerFileContext(test);
   }
 
   onTestCaseResult(test: Test, testCaseResult: TestCaseResult) {
+    super.onTestCaseResult(test, testCaseResult);
     this._emitter.emit('testCaseResult', { test, testCaseResult });
 
-    const fileContext = this._testRunContext.getFileContext(test)!;
+    const fileContext = this._testRunContext.getFileContext(test.path)!;
     fileContext.handleTestCaseResult(testCaseResult);
   }
 
@@ -75,20 +82,22 @@ export class JestAllure2Reporter implements Reporter {
     testResult: TestResult,
     aggregatedResult: AggregatedResult,
   ): Promise<void> | void {
+    super.onTestFileResult(test, testResult, aggregatedResult);
     this._emitter.emit('testFileResult', {
       test,
       testResult,
       aggregatedResult,
     });
 
-    const fileContext = this._testRunContext.getFileContext(test)!;
+    const fileContext = this._testRunContext.getFileContext(test.path)!;
     fileContext.handleTestFileResult(testResult);
   }
 
-  onRunComplete(
+  async onRunComplete(
     testContexts: Set<TestContext>,
     aggregatedResult: AggregatedResult,
-  ): Promise<void> | void {
+  ): Promise<void> {
+    await super.onRunComplete(testContexts, aggregatedResult);
     this._emitter.emit('runComplete', { testContexts, aggregatedResult });
   }
 

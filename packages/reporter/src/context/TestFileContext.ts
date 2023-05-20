@@ -34,7 +34,7 @@ export class TestFileContext {
       select.testCase.start(testCaseResult),
     );
     allureTest.fullName = select.testCase.fullName(testCaseResult);
-    allureTest.description = select.testCase.description();
+    allureTest.description = select.testCase.description(testCaseResult);
     allureTest.stage = Stage.FINISHED;
     allureTest.status = select.testCase.status(testCaseResult);
 

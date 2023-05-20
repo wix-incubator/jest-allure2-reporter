@@ -1,8 +1,6 @@
 import path from 'node:path';
 
-import type { Test, TestResult } from '@jest/reporters';
-
-import { isTestResult } from '../utils/predicates';
+import type { Test } from '@jest/reporters';
 
 import type { TestRunContextConfig } from './TestRunContextConfig';
 import { TestFileContext } from './TestFileContext';
@@ -12,10 +10,8 @@ export class TestRunContext {
 
   constructor(private readonly _config: TestRunContextConfig) {}
 
-  getFileContext(test: Test | TestResult) {
-    return isTestResult(test)
-      ? this._fileContexts.get(test.testFilePath)
-      : this._fileContexts.get(test.path);
+  getFileContext(testFilePath: string) {
+    return this._fileContexts.get(testFilePath);
   }
 
   async writeMetadata() {

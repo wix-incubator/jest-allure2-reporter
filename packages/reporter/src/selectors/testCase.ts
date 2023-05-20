@@ -41,13 +41,13 @@ export class TestCaseSelectors {
     },
 
     thread: (testCaseResult: TestCaseResult): string => {
-      const metadata = this._services.meta.get(testCaseResult);
-      if (!metadata) {
+      const workerId = this._services.meta.getWorkerId(testCaseResult);
+      if (workerId == null) {
         const test = this._services.query.getTest(testCaseResult);
         return `${1 + this._services.thread.getThreadId(test)}`;
+      } else {
+        return workerId;
       }
-
-      return metadata.testFile.workerId;
     },
   };
 
@@ -58,26 +58,33 @@ export class TestCaseSelectors {
   }
 
   public start(testCaseResult: TestCaseResult) {
-    const metadata = this._services.meta.get(testCaseResult);
-    return metadata
-      ? metadata.startedAt
-      : this._services.time.getCaseStartTime(testCaseResult);
+    return this._services.time.getCaseStartTime(testCaseResult);
   }
 
   public end(testCaseResult: TestCaseResult) {
-    const metadata = this._services.meta.get(testCaseResult);
-
-    return metadata && testCaseResult.duration != undefined
-      ? metadata.startedAt + testCaseResult.duration
-      : this._services.time.getCaseEndTime(testCaseResult);
+    return this._services.time.getCaseEndTime(testCaseResult);
   }
 
   public fullName(testCaseResult: TestCaseResult) {
     return testCaseResult.fullName;
   }
 
-  public description() {
-    return 'Code preview is not available';
+  public description(testCaseResult: TestCaseResult) {
+    const metadata = this._services.meta.getCode(testCaseResult);
+
+    const toCodeBlock = (code: string) => '```javascript\n' + code + '\n```';
+    const h2 = (text: string) => `## ${text}\n`;
+    const codeBlocks = [
+      ...metadata.beforeHooks.map((hook) =>
+        [h2('beforeEach'), toCodeBlock(hook.code)].join('\n'),
+      ),
+      [h2('test'), toCodeBlock(metadata.testFn.code)].join('\n'),
+      ...metadata.afterHooks.map((hook) =>
+        [h2('afterEach'), toCodeBlock(hook.code)].join('\n'),
+      ),
+    ];
+
+    return codeBlocks.join('\n\n');
   }
 
   public relativePath(testCaseResult: TestCaseResult) {
