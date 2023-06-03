@@ -20,6 +20,7 @@ import { TestRunContext } from './context';
 import { Selectors } from './selectors';
 
 export class JestAllure2Reporter extends JestMetadataReporter {
+  // eslint-disable-next-line unicorn/prefer-event-target
   private readonly _emitter = new EventEmitter() as ReporterEmitter;
   private readonly _options: Partial<JestAllure2ReporterOptions>;
   private readonly _testRunContext: TestRunContext;
@@ -31,9 +32,9 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     super(globalConfig, options);
 
     this._options = options;
-    this._options.resultsDir ??= path.resolve(
-      options.resultsDir ?? 'allure-results',
-    );
+    this._options.resultsDir =
+      this._options.resultsDir ??
+      path.resolve(options.resultsDir ?? 'allure-results');
     if (this._options.overwriteResultsDir !== false) {
       rimraf.sync(this._options.resultsDir);
     }

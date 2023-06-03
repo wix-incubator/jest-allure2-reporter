@@ -7,7 +7,9 @@ module.exports = {
     "plugin:import/typescript",
     "plugin:prettier/recommended",
     "plugin:unicorn/recommended",
-    "plugin:@typescript-eslint/recommended"
+    "plugin:node/recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:ecmascript-compat/recommended"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -18,7 +20,6 @@ module.exports = {
   "plugins": [
     "eslint-plugin-import",
     "eslint-plugin-jsdoc",
-    "eslint-plugin-node",
     "eslint-plugin-prefer-arrow",
     "eslint-plugin-unicorn",
     "@typescript-eslint"
@@ -28,9 +29,13 @@ module.exports = {
     "import/order": ["error", {
       "newlines-between": "always"
     }],
+    "node/no-unsupported-features/es-syntax": "off",
+    "node/no-missing-import": "off",
+    "node/no-extraneous-import": "off",
     "unicorn/consistent-function-scoping": "off",
     "unicorn/filename-case": "off",
     "unicorn/no-null": "off",
+    "unicorn/prefer-event-target": "off",
     "unicorn/prefer-module": "off",
     "import/no-extraneous-dependencies": ["error", {
       devDependencies: false,
