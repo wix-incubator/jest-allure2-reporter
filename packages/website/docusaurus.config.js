@@ -91,15 +91,15 @@ const config = {
             items: [
               {
                 label: 'Getting Started',
-                to: '/docs/intro',
+                to: '/docs/getting-started',
               },
               {
                 label: 'Features',
-                to: '/docs/intro',
+                to: '/docs/features/overview',
               },
               {
-                label: 'API',
-                to: '/docs/intro',
+                label: 'Demo',
+                href: 'https://allure-framework.github.io/allure-demo/5/',
               },
             ],
           },
