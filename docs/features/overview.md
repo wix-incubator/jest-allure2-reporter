@@ -1,4 +1,8 @@
-# Features
+---
+sidebar_position: 1
+---
+
+# Overview
 
 `jest-allure2-reporter` is a comprehensive tool for generating Allure test reports from your Jest tests. It offers broad support for an array of features that allow you to group and classify test cases, analyze your test environment, evaluate test history trends, and much more.
 

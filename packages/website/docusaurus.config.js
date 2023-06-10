@@ -61,13 +61,13 @@ const config = {
         items: [
           {
             type: 'docSidebar',
-            sidebarId: 'tutorialSidebar',
+            sidebarId: 'docsSidebar',
             position: 'left',
             label: 'Docs',
           },
           {
             type: 'docSidebar',
-            sidebarId: 'tutorialSidebar',
+            sidebarId: 'apiSidebar',
             position: 'left',
             label: 'API',
           },
@@ -75,12 +75,6 @@ const config = {
             href: 'https://allure-framework.github.io/allure-demo/5/',
             label: 'Demo',
             position: 'left',
-          },
-          {
-            type: 'docSidebar',
-            sidebarId: 'tutorialSidebar',
-            position: 'right',
-            label: 'About',
           },
           {
             href: 'https://github.com/wix-incubator/jest-allure2-reporter',
