@@ -13,7 +13,6 @@ Idiomatic Jest reporter for Allure Framework
 [![semantic-release: angular](https://img.shields.io/badge/semantic--release-angular-e10079?logo=semantic-release)](https://github.com/semantic-release/semantic-release)
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 
-![Example screenshot](docs/img/example.png)
 </div>
 
 ## Installation
@@ -55,7 +54,9 @@ and then view the results:
 allure serve
 ```
 
-or generate a static report, e.g., for CI, run:
+![Example screenshot](docs/img/example.png)
+
+If you need to generate a static report, e.g., on CI, run instead:
 
 ```bash
 allure generate
