@@ -1,0 +1,99 @@
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Test Status
+
+Jest Allure 2 Reporter provides a clear indication of your test cases' statuses, allowing you to immediately see if they have _passed_, _failed_, _broken_, been _skipped_, or are of _unknown_ status.
+
+## Examples
+
+Below you can find examples of code that produces each of the statuses.
+
+<Tabs>
+  <TabItem value="Passed" default>
+
+Status `passed` is reported when the test case has passed successfully:
+
+```js
+test('passed test', () => {
+  expect(2 + 2).toBe(4);
+});
+```
+
+  </TabItem>
+  <TabItem value="Failed">
+
+Status `failed` is reported when the test case has revealed a product defect, or it has invalid assertions:
+
+```js
+test('failed test', () => {
+  expect(2 + 2).not.toBe(4);
+});
+```
+
+  </TabItem>
+  <TabItem value="Broken">
+
+Status `broken` is reported when the test case has failed due to an error in the test code:
+
+```js
+test('broken test', () => {
+  const user = null;
+  // TypeError: Cannot read property 'name' of null
+  expect(user.name).toBe('John');
+});
+```
+
+  </TabItem>
+  <TabItem value="Skipped">
+
+Status `skipped` is reported when the test case has been skipped due to a `test.skip` or `test.todo` call:
+
+```js
+test.skip('skipped test', () => {
+  expect(2 + 2).toBe(4);
+});
+
+test.todo('todo test');
+```
+
+  </TabItem>
+  <TabItem value="Unknown">
+
+Status `unknown` is reported when information about the test case result has been lost or not created:
+
+```js
+test('unknown test', () => {
+  process.exit(0); // the test information will be unrecoverable
+});
+```
+
+  </TabItem>
+</Tabs>
+
+## Handling broken tests
+
+If you are using assertions (matchers, expectations) that throw errors directly
+instead of using Jest's `expect` API, and you want to treat these errors as broken tests,
+there is a way to do it.
+
+In your Jest config file, add an options object to the `jest-allure` reporter config with
+`errorsAsFailedAssertions` set to `true`:
+
+```diff
+module.exports = {
+  // ...
+  reporters: [
+    // ...
+-   'jest-allure',
++   ['jest-allure', {
++     errorsAsFailedAssertions: true,
++   }],
+  ],
+};
+```
+
+## Categorizing errors
+
+Allure 2 Framework provides a way to categorize errors by defining category names and regular expressions to match against error messages.
+Read more about it on the [Defect Categories](categories.mdx) feature page.

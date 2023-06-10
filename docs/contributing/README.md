@@ -1,4 +1,4 @@
-# CONTRIBUTING
+# Contributing
 
 We welcome issues and pull requests from the community. :purple_heart:
 

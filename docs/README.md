@@ -1,3 +1,8 @@
+---
+sidebar_position: 1
+title: Getting Started
+---
+
 # jest-allure2-reporter
 
 [![npm version](https://badge.fury.io/js/jest-allure2-reporter.svg)](https://badge.fury.io/js/jest-allure2-reporter)
@@ -5,7 +10,7 @@
 [![semantic-release: angular](https://img.shields.io/badge/semantic--release-angular-e10079?logo=semantic-release)](https://github.com/semantic-release/semantic-release)
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 
-![Example screenshot](docs/example.png)
+![Example screenshot](img/example.png)
 
 ## Installation
 
@@ -82,8 +87,8 @@ For more information, see the [Allure CLI documentation](https://docs.qameta.io/
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+See [the Contributing Guide](contributing/README.md).
 
 ## License
 
-[MIT License](LICENSE)
+[MIT License](../LICENSE)

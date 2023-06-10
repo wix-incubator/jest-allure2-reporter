@@ -14,8 +14,8 @@
   },
   "workspaces": [
     "packages/e2e/*",
-    "packages/fixtures/*",
     "packages/presets/*",
+    "packages/website",
     "packages/reporter"
   ],
   "scripts": {
