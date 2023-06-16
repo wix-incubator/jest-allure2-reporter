@@ -3,4 +3,178 @@ sidebar_position: 2
 description: Fine-grained control over the test flow
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # Steps
+
+Steps are the building blocks of your tests.
+
+Each test is composed of one or more steps, and each step can have its own [status](../features/statuses.mdx),
+description, [attachments](attachments.mdx) and even nested steps.
+
+## Built-in hooks
+
+The simplest steps to start with are the built-in hooks in Jest: `beforeAll`, `beforeEach`, `afterEach` and `afterAll`.
+
+<Tabs groupId="approach">
+  <TabItem value="jsdoc" label="JSDoc">
+
+```js
+beforeAll(async () => {
+  /**
+    * Launch the browser for all tests
+    */
+});
+
+beforeEach(async () => {
+  /**
+    * Visit the page before the test starts
+    */
+});
+
+afterEach(async () => {
+  /**
+    * Take a screenshot after each test
+    */
+});
+
+afterAll(async () => {
+  /**
+    * Close the browser after all tests
+    */
+});
+```
+
+  </TabItem>
+  <TabItem value="dsl" label="Function">
+
+```js
+import { $Description } from 'jest-allure2-reporter/annotations';
+
+$Description('Launch the browser for all tests')
+beforeAll(async () => {
+  // ...
+});
+
+$Description('Visit the page before the test starts')
+beforeEach(async () => {
+  // ...
+});
+
+$Description('Take a screenshot after each test')
+afterEach(async () => {
+  // ...
+});
+
+$Description('Close the browser after all tests')
+afterAll(async () => {
+  // ...
+});
+```
+
+  </TabItem>
+</Tabs>
+
+This way, you will see the name and status of each hook in the report.
+
+`TODO: add screenshot`
+
+## Custom steps
+
+Custom steps add more structure to your tests and make them easier to read and understand.
+You can add additional information to the report such as step description, parameters, attachments, etc.
+
+There are several ways to create custom steps:
+
+* `allure.step` function
+* `allure.createStep` function
+* `@Step` decorator
+
+<Tabs>
+  <TabItem value="step">
+
+Using `allure.step` function is the simplest way to define a step:
+
+```js
+import { allure } from 'jest-allure2-reporter';
+
+test('Login test', async () => {
+  await allure.step('Open login page', async () => {
+    // ...
+  });
+
+  await allure.step('Enter credentials', async () => {
+    allure.parameter('login', 'admin');
+    // ...
+  });
+
+  await allure.step('Submit the form', async () => {
+    // ...
+  });
+});
+```
+
+The drawback of this approach is that you can't reuse steps in other tests.
+Besides, adding parameters is going to be a bit verbose.
+
+  </TabItem>
+  <TabItem value="createStep">
+
+A more advanced technique is to wrap your functions with `allure.createStep`,
+which allows you to reuse steps in other tests and add parameters:
+
+```js
+import { allure } from 'jest-allure2-reporter';
+
+export const open = allure.createStep('Open login page', async () => {
+  // ...
+});
+
+export const enterCredentials = allure.createStep(
+  'Enter credentials',
+  ['Login'],
+  async (login, password) => {
+    // ...
+  }
+);
+
+export const submit = allure.createStep('Submit the form', async () => {
+  // ...
+});
+```
+
+  </TabItem>
+  <TabItem value="@Step">
+
+For aspect-oriented programmers, there is a decorator-based approach. It works only with class methods,
+but otherwise it's similar to `allure.createStep`:
+
+```js
+import { Step } from 'jest-allure2-reporter/annotations';
+
+class LoginPageObject {
+  @Step('Open login page')
+  async open() {
+    // ...
+  }
+
+  @Step('Enter credentials', ['Login'])
+  async enterCredentials(login, password) {
+    // ...
+  }
+
+  @Step('Submit the form')
+  async submit() {
+    // ...
+  }
+}
+```
+
+  </TabItem>
+</Tabs>
+
+Custom steps can be nested, which allows you to create a tree-like structure of your tests.
+See an example report to get an idea how tremendously it improves readability of any test.
+
+`TODO: add screenshot`

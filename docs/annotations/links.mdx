@@ -16,7 +16,7 @@ In Allure reports, you can add different types of links to your test cases for b
 
 There are two ways to add links to your test cases:
 
-* declaratively, using JSDoc annotations such as `@link`, `@issue`, and `@tmsLink`;
+* declaratively, using JSDoc annotations such as `@link`, `@issue`, and `@tms`;
 * programmatically, using annotation functions from the 'jest-allure2-reporter/annotations' package such as `$Link`, `$Issue`, and `$TmsLink`.
 
 ## Issue Links
@@ -65,7 +65,7 @@ You can link a test case in your Test Management System (TMS) to a test case as 
 ```js
 it('should be connected to TMS', () => {
   /**
-   * @tmsLink TMS-123
+   * @tms TMS-123
    */
 
   /* ... test code ... */

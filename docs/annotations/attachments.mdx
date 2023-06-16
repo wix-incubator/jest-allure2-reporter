@@ -1,11 +1,107 @@
 ---
 sidebar_position: 3
-description: Enrich your reports with attachments and screenshots.
+description: Enhance your test reports with screenshots, videos, logs, and more.
 ---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 # Attachments
 
-TODO: Mention both by test and by step.
-TODO: mention image diffing
+Attachments are a powerful feature of Allure reports that can help make your tests much more informative. You can attach text logs, screenshots, configuration details, CSV files, and much more to your tests. These attachments can help you diagnose and debug failing tests.
 
-**Environment and Execution**: Capture the details of your test environment and track every stage of test execution, including setup, test body, tear down, and inner steps. This feature also supports attachments (image, image diff, video, log) and displays test results with their corresponding errors.
+There are several ways to add attachments to a test:
+
+* Using the `allure.attachment` function
+* Using the `allure.createAttachment` function
+* Using the `@Attachment` decorator
+
+## Built-in attachment types
+
+The simplest way to start with attachments is to use the built-in ones:
+
+<Tabs groupId="approach">
+  <TabItem value="function" label="Function">
+
+```js
+import { allure } from 'jest-allure2-reporter';
+
+test('Sample test', async () => {
+  await allure.attachment('My attachment', 'This is a simple text attachment', 'text/plain');
+});
+```
+
+  </TabItem>
+</Tabs>
+
+The `allure.attachment` function takes three arguments: name of the attachment, content, and the content type. The content type must be a valid MIME type.
+
+`TODO: add screenshot`
+
+## Custom attachments
+
+For advanced use cases, you may want to create your own custom attachments:
+
+<Tabs>
+  <TabItem value="attachment">
+
+Using `allure.attachment` function is the most straightforward way to add a custom attachment:
+
+```js
+import { allure } from 'jest-allure2-reporter';
+
+test('Sample test', async () => {
+  const myData = JSON.stringify({a: 1, b: 2});
+  await allure.attachment('My JSON attachment', myData, 'application/json');
+});
+```
+
+The disadvantage of this approach is that it is less flexible and more verbose for complex data.
+
+  </TabItem>
+  <TabItem value="createAttachment">
+
+The `allure.createAttachment` function provides a more advanced way to define a custom attachment:
+
+```js
+import { allure } from 'jest-allure2-reporter';
+
+const attachJson = allure.createAttachment('JSON attachment', (data) => {
+  return JSON.stringify(data);
+}, 'application/json');
+
+test('Sample test', async () => {
+  const myData = {a: 1, b: 2};
+  attachJson(myData);
+});
+```
+
+The `allure.createAttachment` function is particularly useful for reusable attachments.
+
+  </TabItem>
+  <TabItem value="@Attachment">
+
+For aspect-oriented programmers, there is a decorator-based approach:
+
+```js
+import { Attachment } from 'jest-allure2-reporter/annotations';
+
+class DeviceHelper {
+  @Attachment('device-status-%s.json', 'application/json')
+  getStatus(deviceId) {
+    return { status: 'OK' };
+  }
+}
+```
+
+The `@Attachment` decorator is similar to `allure.createAttachment` but works only with class methods.
+
+  </TabItem>
+</Tabs>
+
+Attachments allow you to enrich your test reports with additional context, which can be very useful when diagnosing and debugging failing tests.
+
+`TODO: add screenshot`
+```
+
+This is just a basic outline, feel free to modify or add to it as necessary to fit your needs.

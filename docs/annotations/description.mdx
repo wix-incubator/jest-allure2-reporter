@@ -4,4 +4,33 @@ sidebar_position: 1
 
 # Description
 
-Add rich context to your tests by providing descriptive texts and links, thereby making your test reports more informative and user-friendly.
+Any test benefits from a good description.
+It helps to understand the purpose of the test and the expected outcome.
+It also helps to understand the test when it fails.
+
+Allure Framework allows rich text descriptions in Markdown format.
+However, if you don't have any description, the reporter will still
+make it look good by pasting the source code of the test.
+
+`TODO: add screenshot`
+
+## Configuration
+
+There are two options regarding including the source code of the test: `includeSourceCode`,
+`omitJSDoc`.
+
+Both are `true` by default, so, for example, this test will be reported without the source code:
+
+```js
+it('should add two numbers', () => {
+  /**
+    * This test adds two numbers.
+    */
+  const a = 1;
+  const b = 2;
+  const sum = a + b;
+  expect(sum).toBe(3);
+});
+```
+
+TODO: See the configuration section for more details.

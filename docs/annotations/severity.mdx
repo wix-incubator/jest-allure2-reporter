@@ -166,3 +166,14 @@ it('should login with valid credentials', () => {
 In the generated report, the severity is displayed in the test case description:
 
 `TODO: add screenshot`
+
+## About severity levels
+
+Keep in mind that the meaning of each severity level is subjective and varies from project to project.
+It is merely a convention that you can use to communicate the importance of a test case or an issue.
+
+- **Blocker**: This is the highest severity level. A blocker issue or a test case failure is something that completely prevents further testing or use of the product or system. It must be addressed immediately.
+- **Critical**: A critical issue is a major problem that significantly impacts the functionality of the product or system, but does not entirely prevent its use or testing. It should be addressed as soon as possible after any blocker issues.
+- **Normal**: A normal severity issue is a moderate problem. It impacts the product or system in a noticeable way, but it's not as crucial as blocker or critical issues. It should be addressed in the course of normal workflow.
+- **Minor**: A minor issue has a small impact on the product or system. It might cause some inconvenience or confusion, but it doesn't significantly affect the overall functionality. These are usually lower priority issues.
+- **Trivial**: A trivial issue is a very minor problem, often related to aesthetics, user experience, deprecated features, or aspects of the product still in alpha or beta stages rather than core functionality. Trivial issues are the lowest priority and are typically addressed last, if at all.
