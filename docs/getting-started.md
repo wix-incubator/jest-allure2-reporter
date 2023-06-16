@@ -1,8 +1,34 @@
+---
+slug: /
+hide_table_of_contents: true
+---
+
 # Getting Started
 
-Before you start, make sure you have [Allure CLI](https://docs.qameta.io/allure/#_get_started) installed.
+:::danger
 
-Your project should have [`jest`](https://jestjs.io) installed. The minimum supported version is `27.x`.
+This website version refers to the unreleased version of `jest-allure2-reporter` and is not yet available
+anywhere. Please use GitHub docs for the latest stable version.
+
+:::
+
+Before you start, make sure you have [Allure CLI](https://docs.qameta.io/allure/#_get_started) installed globally:
+
+```bash
+$ allure --version
+2.22.1
+```
+
+To use `jest-allure2-reporter` in your project, you have to be using
+[`jest`](https://jestjs.io) as your test runner. The minimum supported version is `27.x`.
+
+:::tip
+
+Use Jest's default `jest-circus` runner for the full reporting functionality. Reports generated with any other runners like `jest-jasmine` will be incomplete and contain only the most essential information.
+
+:::
+
+## Installation
 
 Run in your project:
 
@@ -12,15 +38,18 @@ npm install --save-dev jest-allure2-reporter
 
 Edit your Jest configuration file, e.g.:
 
-```diff title="jest.config.js"
+```js title="jest.config.js"
  /** @type {import('@jest/types').Config.InitialOptions} */
  module.exports = {
- // ...
-+   testEnvironment: 'jest-allure2-reporter/environment-node',
-+   reporters: [
-+     'default',
-+     'jest-allure2-reporter',
-+   ],
+    // …
+// highlight-start
+    testEnvironment: 'jest-allure2-reporter/environment-node',
+    reporters: [
+      'default',
+      'jest-allure2-reporter',
+    ],
+// highlight-end
+   // …
  };
 ```
 
@@ -30,18 +59,14 @@ Run your tests with `jest` as usual, e.g.:
 
 ```bash
 npm test
+# jest ...
+# PASS  ./my.test.js
 ```
 
-and then view the results:
+and then browse the results stored in the `allure-results` directory via:
 
 ```bash
 allure serve
-```
-
-If you use a custom `resultsDir`, you should specify it in the `allure serve` command, e.g.:
-
-```bash
-allure serve your-results-dir # if you use a custom `resultsDir`
 ```
 
 If you want to generate a static report, e.g., for CI, run:
@@ -50,4 +75,8 @@ If you want to generate a static report, e.g., for CI, run:
 allure generate
 ```
 
-For more information on `allure` CLI, see the documentation on the [official website](https://docs.qameta.io/allure/#_get_started) of Qameta.
+:::tip
+
+For more information on `allure` CLI itself, see the documentation on its [official website](https://docs.qameta.io/allure/#_get_started).
+
+:::

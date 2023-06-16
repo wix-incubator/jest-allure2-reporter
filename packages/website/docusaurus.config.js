@@ -91,11 +91,11 @@ const config = {
             items: [
               {
                 label: 'Getting Started',
-                to: '/docs/getting-started',
+                to: '/docs',
               },
               {
                 label: 'Features',
-                to: '/docs/features/overview',
+                to: '/docs/features',
               },
               {
                 label: 'Demo',

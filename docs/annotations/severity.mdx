@@ -1,0 +1,168 @@
+---
+sidebar_position: 6
+description: Prioritize your test cases and their impact on the product.
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Severity
+
+In Allure reports, you can determine the **severity** of each test case.
+This helps you to prioritize the test cases and to determine the impact of a failed test case.
+The severity can be one of the following values: _blocker_, _critical_, _normal_, _minor_, _trivial_.
+The default severity is **_normal_**.
+
+There are two ways to define the severity of a test case:
+
+* declaratively, via `@severity` JSDoc annotation;
+* programmatically, via `$Severity` annotation function.
+
+The **severity** can be defined in the following places:
+
+* on a _test file_ level;
+* on a _test suite_ level;
+* on a _test case_ level.
+
+## Test file
+
+In a test file, you can define the severity for all test cases in the file.
+This is especially useful for test files that contain multiple top-level `describe` blocks.
+
+<Tabs groupId="approach">
+  <TabItem value="jsdoc" label="JSDoc">
+
+```js
+/**
+ * @severity critical
+ */
+
+describe('Sanity: Login flow', () => {
+  it('should login with valid credentials', () => {
+    /* ... test code ... */
+  });
+});
+
+describe('Sanity: Dashboard', () => {
+  it('should show the dashboard', () => {
+    /* ... test code ... */
+  });
+});
+```
+
+  </TabItem>
+  <TabItem value="dsl" label="Function">
+
+```js
+import { allure } from 'jest-allure2-reporter';
+
+allure.severity('critical');
+
+describe('Sanity: Login flow', () => {
+  it('should login with valid credentials', () => {
+    /* ... test code ... */
+  });
+});
+
+describe('Sanity: Dashboard', () => {
+  it('should show the dashboard', () => {
+    /* ... test code ... */
+  });
+});
+```
+
+  </TabItem>
+</Tabs>
+
+## Test suite
+
+You can define the severity for each test suite individually.
+
+<Tabs groupId="approach">
+  <TabItem value="jsdoc" label="JSDoc">
+
+```js
+describe('Sanity: Login flow', () => {
+  /**
+   * @severity critical
+   */
+
+  it('should login with valid credentials', () => {
+    /* ... test code ... */
+  });
+});
+
+describe('Dashboard', () => {
+  /**
+   * @severity minor
+   */
+
+  it('should show the dashboard', () => {
+    /* ... test code ... */
+  });
+});
+```
+
+Please note that you have to put the JSDoc comment inside the test suite function body.
+
+  </TabItem>
+  <TabItem value="dsl" label="Function">
+
+```js
+import { $Severity } from 'jest-allure2-reporter/annotations';
+
+$Severity('blocker')
+describe('Sanity: Login flow', () => {
+  it('should login with valid credentials', () => {
+    /* ... test code ... */
+  });
+});
+
+$Severity('minor')
+describe('Sanity: Dashboard', () => {
+    it('should show the dashboard', () => {
+    /* ... test code ... */
+  });
+});
+```
+
+  </TabItem>
+</Tabs>
+
+## Test case
+
+You can define the severity for each test case individually.
+
+<Tabs groupId="approach">
+  <TabItem value="jsdoc" label="JSDoc">
+
+```js
+it('should login with valid credentials', () => {
+  /**
+   * @severity critical
+   */
+
+  /* ... test code ... */
+});
+```
+
+Please note that you have to put the JSDoc comment inside the test function body.
+
+  </TabItem>
+  <TabItem value="dsl" label="Function">
+
+```js
+$Severity('critical')
+it('should login with valid credentials', () => {
+  /* ... */
+});
+```
+
+  </TabItem>
+</Tabs>
+
+## Examples
+
+In the generated report, the severity is displayed in the test case description:
+
+`TODO: add screenshot`

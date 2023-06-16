@@ -1,11 +1,12 @@
 ---
 sidebar_position: 2
+description: Have an informative overview of your test results.
 ---
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# Test Status
+# Statuses
 
 Jest Allure 2 Reporter provides a clear indication of your test cases' statuses, allowing you to immediately see if they have _passed_, _failed_, _broken_, been _skipped_, or are of _unknown_ status.
 
@@ -14,7 +15,7 @@ Jest Allure 2 Reporter provides a clear indication of your test cases' statuses,
 Below you can find examples of code that produces each of the statuses.
 
 <Tabs>
-  <TabItem value="Passed" default>
+  <TabItem value="🟢 Passed" default>
 
 Status `passed` is reported when the test case has passed successfully:
 
@@ -25,7 +26,7 @@ test('passed test', () => {
 ```
 
   </TabItem>
-  <TabItem value="Failed">
+  <TabItem value="🔴 Failed">
 
 Status `failed` is reported when the test case has revealed a product defect, or it has invalid assertions:
 
@@ -36,7 +37,7 @@ test('failed test', () => {
 ```
 
   </TabItem>
-  <TabItem value="Broken">
+  <TabItem value="🟡 Broken">
 
 Status `broken` is reported when the test case has failed due to an error in the test code:
 
@@ -49,7 +50,7 @@ test('broken test', () => {
 ```
 
   </TabItem>
-  <TabItem value="Skipped">
+  <TabItem value="⚪ Skipped">
 
 Status `skipped` is reported when the test case has been skipped due to a `test.skip` or `test.todo` call:
 
@@ -62,7 +63,7 @@ test.todo('todo test');
 ```
 
   </TabItem>
-  <TabItem value="Unknown">
+  <TabItem value="🟣 Unknown">
 
 Status `unknown` is reported when information about the test case result has been lost or not created:
 
@@ -100,4 +101,6 @@ module.exports = {
 ## Categorizing errors
 
 Allure 2 Framework provides a way to categorize errors by defining category names and regular expressions to match against error messages.
-Read more about it on the [Defect Categories](categories.mdx) feature page.
+Read more about it in the [Defect category] section.
+
+[Defect category]: grouping.mdx#defect-category
