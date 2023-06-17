@@ -14,9 +14,9 @@
   },
   "workspaces": [
     "packages/e2e/*",
+    "packages/library",
     "packages/presets/*",
-    "packages/website",
-    "packages/reporter"
+    "packages/website"
   ],
   "scripts": {
     "prepare": "husky install",

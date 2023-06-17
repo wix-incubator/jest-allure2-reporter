@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "jest && rm -rf allure-report && allure generate"
+    "build": "jest && rm -rf allure-report && allure generate",
+    "allure": "allure generate --clean"
   },
   "devDependencies": {
     "@wix/eslint-config-jest-allure2-reporter": "^1.0.0",
