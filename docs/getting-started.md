@@ -5,7 +5,7 @@ hide_table_of_contents: true
 
 # Getting Started
 
-:::danger
+:::caution
 
 This website version refers to the unreleased version of `jest-allure2-reporter` and is not yet available
 anywhere. Please use GitHub docs for the latest stable version.

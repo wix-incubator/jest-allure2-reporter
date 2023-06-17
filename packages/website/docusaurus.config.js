@@ -11,6 +11,7 @@ const config = {
   favicon: 'img/favicon.ico',
   url: 'https://wix-incubator.github.io',
   baseUrl: '/jest-allure2-reporter/',
+  trailingSlash: true,
 
   // GitHub pages deployment config.
   organizationName: 'wix-incubator',

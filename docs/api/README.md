@@ -1,5 +1,13 @@
 # API Reference
 
+:::caution
+
+This website version refers to the unreleased version of `jest-allure2-reporter` and is not yet available
+anywhere. Please use GitHub docs for the latest stable version.
+
+:::
+
+
 By default, the reporter will write the results to `allure-results` directory. You can change this by setting the `resultsDir` option:
 
 ```diff

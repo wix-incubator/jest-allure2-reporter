@@ -1,25 +1,207 @@
 ---
 sidebar_position: 1
+description: Make your tests more understandable with rich descriptions
 ---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 # Description
 
-Any test benefits from a good description.
-It helps to understand the purpose of the test and the expected outcome.
-It also helps to understand the test when it fails.
+:::caution
 
-Allure Framework allows rich text descriptions in Markdown format.
-However, if you don't have any description, the reporter will still
-make it look good by pasting the source code of the test.
+This website version refers to the unreleased version of `jest-allure2-reporter` and is not yet available
+anywhere. Please use GitHub docs for the latest stable version.
 
-`TODO: add screenshot`
+:::
+
+A well-written description can enhance the usefulness of a test by providing clear context and expected outcomes. It can also assist in deciphering test failures.
+
+There are two ways to define a description for an executable block:
+
+* declaratively, via `@desc`, `@description`, `@descriptionHtml` JSDoc annotations (or even without them);
+* programmatically, via `$Description('')` or `$DescriptionHtml('')` annotation functions.
+
+The **description** can be defined for the built-in `it`, `test`, `beforeAll`, `beforeEach`, `afterAll`, `afterEach` blocks and [custom steps](steps.mdx).
+
+This article will focus on the built-in blocks.
+
+## Test cases
+
+Allure Framework supports rich text descriptions for tests. But don't worry if you don't provide a description. The reporter will still present the test neatly by displaying the source code of the test.
+
+<Tabs groupId="approach">
+  <TabItem value="jsdoc" label="JSDoc">
+
+```js
+it('should add two numbers', () => {
+  /**
+    * _Implicit_ annotation without `@desc` or `@description`.
+    */
+  const a = 1;
+  const b = 2;
+  const sum = a + b;
+  expect(sum).toBe(3);
+});
+
+it('should subtract two numbers', () => {
+  /**
+    * @descriptionHtml
+    * <i>Explicit</i> annotation with <code>@descriptionHtml</code>.
+    */
+  const a = 1;
+  const b = 2;
+  const diff = b - a;
+  expect(diff).toBe(1);
+});
+```
+
+  </TabItem>
+  <TabItem value="dsl" label="Function">
+
+```js
+$Description('_Implicit_ annotation without `@desc` or `@description`.')
+it('should add two numbers', () => {
+  /**
+    *
+    */
+  const a = 1;
+  const b = 2;
+  const sum = a + b;
+  expect(sum).toBe(3);
+});
+
+$DescriptionHtml('<i>Explicit</i> annotation with <code>@descriptionHtml</code>.')
+it('should subtract two numbers', () => {
+  /**
+    * @descriptionHtml
+    * <i>Explicit</i> annotation with <code>@descriptionHtml</code>.
+    */
+  const a = 1;
+  const b = 2;
+  const diff = b - a;
+  expect(diff).toBe(1);
+});
+```
+
+  </TabItem>
+  <TabItem value="demo" label="Demo">
+
+    TODO: add screenshot
+
+  </TabItem>
+</Tabs>
+
+## Test hooks
+
+Test hooks such as `beforeAll`, `beforeEach`, `afterAll`, `afterEach` can also have descriptions since technically they are considered [steps](steps.mdx) in the Allure report.
+
+However, they are limited to plain text descriptions only due to Allure Framework limitations.
+
+<Tabs groupId="approach">
+  <TabItem value="jsdoc" label="JSDoc">
+
+```js
+beforeAll(() => {
+  /** This hook runs before all tests. */
+});
+
+beforeEach(() => {
+  /** @desc This hook runs before each test. */
+});
+
+afterEach(() => {
+  /**
+    * @description
+    * This hook runs after each test.
+    */
+});
+```
+
+  </TabItem>
+  <TabItem value="dsl" label="Function">
+
+```js
+@Description('This hook runs before all tests.')
+beforeAll(() => {
+  // ...
+});
+
+@Description('This hook runs before each test.')
+beforeEach(() => {
+  // ...
+});
+
+@Description('This hook runs after each test.')
+afterEach(() => {
+  // ...
+});
+```
+
+  </TabItem>
+  <TabItem value="demo" label="Demo">
+
+    TODO: add screenshot
+
+  </TabItem>
+</Tabs>
+
+
+## Test suites
+
+Unfortunately, it is not possible to define a description for the entire test suite or an individual test suite (`describe` block) due to Allure Framework limitations.
+
+However, if you add a description on top of the test suite, it will be prepended to every test description within the suite, e.g.:
+
+<Tabs groupId="approach">
+  <TabItem value="jsdoc" label="JSDoc">
+
+```js
+describe('Sanity: Login flow', () => {
+  /** This description will be prepended to every test description. */
+
+  it('should login with valid credentials', () => {
+    /** This test logs in with valid credentials. */
+  });
+
+  it('should login with invalid credentials', () => {
+    /** This test logs in with invalid credentials. */
+  });
+});
+```
+
+  </TabItem>
+  <TabItem value="dsl" label="Function">
+
+```js
+$Description('This description will be prepended to every test description.')
+describe('Sanity: Login flow', () => {
+  $Description('This test logs in with valid credentials.')
+  it('should login with valid credentials', () => {
+  });
+
+  $Description('This test logs in with invalid credentials.')
+  it('should login with invalid credentials', () => {
+  });
+});
+```
+
+  </TabItem>
+  <TabItem value="demo" label="Demo">
+
+    TODO: add screenshot
+
+  </TabItem>
+</Tabs>
 
 ## Configuration
 
-There are two options regarding including the source code of the test: `includeSourceCode`,
-`omitJSDoc`.
+:::caution Work in progress
+:::
 
-Both are `true` by default, so, for example, this test will be reported without the source code:
+You can configure whether the source code of the test is included or not, using the `includeSourceCode` and `omitJSDoc` options. By default, both are set to `true`.
+
+As a result, the following test will be reported without JSDoc annotations:
 
 ```js
 it('should add two numbers', () => {

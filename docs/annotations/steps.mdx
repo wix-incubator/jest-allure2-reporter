@@ -8,6 +8,13 @@ import TabItem from '@theme/TabItem';
 
 # Steps
 
+:::caution
+
+This website version refers to the unreleased version of `jest-allure2-reporter` and is not yet available
+anywhere. Please use GitHub docs for the latest stable version.
+
+:::
+
 Steps are the building blocks of your tests.
 
 Each test is composed of one or more steps, and each step can have its own [status](../features/statuses.mdx),
@@ -16,6 +23,8 @@ description, [attachments](attachments.mdx) and even nested steps.
 ## Built-in hooks
 
 The simplest steps to start with are the built-in hooks in Jest: `beforeAll`, `beforeEach`, `afterEach` and `afterAll`.
+
+This way, you will see the name and status of each hook in the report.
 
 <Tabs groupId="approach">
   <TabItem value="jsdoc" label="JSDoc">
@@ -74,22 +83,27 @@ afterAll(async () => {
 ```
 
   </TabItem>
+  <TabItem value="demo" label="Demo">
+
+    TODO: add screenshot
+
+  </TabItem>
 </Tabs>
-
-This way, you will see the name and status of each hook in the report.
-
-`TODO: add screenshot`
 
 ## Custom steps
 
 Custom steps add more structure to your tests and make them easier to read and understand.
 You can add additional information to the report such as step description, parameters, attachments, etc.
 
-There are several ways to create custom steps:
+Moreover, custom steps can be nested, which allows you to create a tree-like structure of your tests.
 
-* `allure.step` function
-* `allure.createStep` function
-* `@Step` decorator
+### Wrapping functions
+
+There are several ways to turn your functions into steps:
+
+* `allure.step` function – best for anonymous, one-time steps.
+* `allure.createStep` function – best for reusable functions.
+* `@Step` decorator – best for reusable class methods.
 
 <Tabs>
   <TabItem value="step">
@@ -172,9 +186,46 @@ class LoginPageObject {
 ```
 
   </TabItem>
+  <TabItem value="demo" label="Demo">
+
+    TODO: add screenshot
+
+  </TabItem>
 </Tabs>
 
-Custom steps can be nested, which allows you to create a tree-like structure of your tests.
-See an example report to get an idea how tremendously it improves readability of any test.
+### Instant steps
 
-`TODO: add screenshot`
+Sometimes you need to log a step in the middle of the test, for example, to add a screenshot when an exception is thrown. Use `allure.logStep` function for this:
+
+<Tabs>
+  <TabItem value="logStep">
+
+```js
+import { allure, Status } from 'jest-allure2-reporter';
+
+test('Login test', async () => {
+  try {
+    // ...
+  } catch (error) {
+    allure.logStep('Unexpected error', Status.FAILED, [
+      {
+        name: 'screenshot',
+        content: await page.screenshot({ fullPage: true }),
+        type: 'image/png',
+      },
+    ]);
+
+    throw error;
+  }
+});
+```
+
+  </TabItem>
+  <TabItem value="demo" label="Demo">
+
+    TODO: add screenshot
+
+  </TabItem>
+</Tabs>
+
+As you can see, `allure.logStep` has an optional third parameter (TODO) for attachments. This is just one of possible ways to add attachments to the report. See [Attachments](attachments.mdx) for more details.

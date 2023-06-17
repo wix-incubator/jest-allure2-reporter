@@ -8,6 +8,13 @@ import TabItem from '@theme/TabItem';
 
 # Links
 
+:::caution
+
+This website version refers to the unreleased version of `jest-allure2-reporter` and is not yet available
+anywhere. Please use GitHub docs for the latest stable version.
+
+:::
+
 In Allure reports, you can add different types of links to your test cases for better context and traceability, e.g.:
 
 * links to **issues** in your issue tracker (e.g. JIRA, GitHub, etc.);
@@ -49,11 +56,12 @@ it('should validate non-ASCII passwords', () => {
 });
 ```
   </TabItem>
+  <TabItem value="demo" label="Demo">
+
+    TODO: add screenshot
+
+  </TabItem>
 </Tabs>
-
-This will add a link to the issue in the Allure report:
-
-`TODO: add screenshot`
 
 ## TMS Links
 
@@ -83,11 +91,12 @@ it('should be connected to TMS', () => {
 });
 ```
   </TabItem>
+  <TabItem value="demo" label="Demo">
+
+    TODO: add screenshot
+
+  </TabItem>
 </Tabs>
-
-This will add a link to the issue in the Allure report:
-
-`TODO: add screenshot`
 
 ## Custom Links
 
@@ -117,9 +126,14 @@ it('should demonstrate how the links work', () => {
 });
 ```
   </TabItem>
+  <TabItem value="demo" label="Demo">
+
+    TODO: add screenshot
+
+  </TabItem>
 </Tabs>
 
-Advanced users can also specify a custom link type:
+Advanced users can also specify a custom link type and [configure the URL pattern](#configuration) for it.
 
 <Tabs groupId="approach">
   <TabItem value="jsdoc" label="JSDoc">
@@ -145,15 +159,17 @@ it('should demonstrate how the links work', () => {
 });
 ```
   </TabItem>
+  <TabItem value="demo" label="Demo">
+
+    TODO: add screenshot
+
+  </TabItem>
 </Tabs>
 
-
-
-This will add the custom link to the Allure report:
-
-`TODO: add screenshot`
-
 ## Configuration
+
+:::caution Work in progress
+:::
 
 To handle link generation for custom link types, TMS, and issue ids, you need to configure the 'jest-allure2-reporter' in your `jest.config.js` file.
 
@@ -175,4 +191,5 @@ module.exports = {
   ]
 }
 ```
+
 In this example, `{}` will be replaced with the issue id, tms id, or custom id you've specified
