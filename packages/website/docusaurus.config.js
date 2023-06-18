@@ -6,7 +6,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'jest-allure2-reporter',
+  title: 'Jest Allure2 Reporter',
   tagline: 'Idiomatic Jest reporter for Allure Framework',
   favicon: 'img/favicon.ico',
   url: 'https://wix-incubator.github.io',
