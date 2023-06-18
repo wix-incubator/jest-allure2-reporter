@@ -40,6 +40,15 @@ export class TestCaseSelectors {
       return this._services.project.packageName;
     },
 
+    testClass: (testCaseResult: TestCaseResult): string => {
+      const test = this._services.query.getTest(testCaseResult);
+      return this._services.project.relative(test.path);
+    },
+
+    testMethod: (testCaseResult: TestCaseResult): string => {
+      return testCaseResult.fullName;
+    },
+
     thread: (testCaseResult: TestCaseResult): string => {
       const workerId = this._services.meta.getWorkerId(testCaseResult);
       if (workerId == null) {

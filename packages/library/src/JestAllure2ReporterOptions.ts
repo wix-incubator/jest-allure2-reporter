@@ -31,13 +31,8 @@ export type JestAllure2ReporterOptions = {
    */
   overwriteResultsDir: boolean;
 
-  /**
-   * Add an extra label to each test case with the package name.
-   * Helpful when running tests from multiple packages in a monorepo.
-   *
-   * @default import('package.json').name
-   */
-  packageName: string;
+  testInfo: Partial<JestAllure2Reporter$TestInfoCustomizer>;
+
   /**
    * Getter function to extract environment information from the test environment.
    * By default, the environment information is extracted from the `process.env` object.
@@ -45,7 +40,14 @@ export type JestAllure2ReporterOptions = {
    *
    * @default true
    */
-  getEnvironmentInfo: boolean | (() => Promise<Record<string, string>>);
+  environmentInfo: boolean | JestAllure2Reporter$LabelCustomizer<Allure$EnvironmentInfo>;
+
+  /**
+   * Getter function to extract executor information from the test environment.
+   * The executor is the build agent or any other system that initiates the test run.
+   */
+  executorInfo: JestAllure2Reporter$ValueExtractor<Allure$ExecutorInfo>;
+
   /**
    * Treat thrown errors as failed assertions.
    * By default, the reporter distinguishes between failed assertions and thrown errors.
@@ -55,3 +57,66 @@ export type JestAllure2ReporterOptions = {
    */
   errorsAsFailedAssertions: boolean;
 };
+
+type JestAllure2Reporter$TestInfoCustomizer = {
+  name: JestAllure2Reporter$StringCustomizer;
+  fullName: JestAllure2Reporter$StringCustomizer;
+  description: JestAllure2Reporter$StringCustomizer;
+  descriptionHtml: JestAllure2Reporter$StringCustomizer;
+  labels: Partial<JestAllure2Reporter$LabelsConfig>;
+};
+
+type JestAllure2Reporter$LabelCustomizer<T = string> = JestAllure2Reporter$ValueExtractor<T> | T | undefined;
+type JestAllure2Reporter$StringCustomizer = JestAllure2Reporter$ValueExtractor<string> | undefined;
+type JestAllure2Reporter$ValueExtractor<T> = (testCaseContext: Readonly<JestAllure2Reporter$TestCaseContext>) => T | undefined;
+
+type JestAllure2Reporter$LabelsConfig = {
+  allureId: JestAllure2Reporter$LabelCustomizer;
+  package: JestAllure2Reporter$LabelCustomizer;
+  testClass: JestAllure2Reporter$LabelCustomizer;
+  testMethod: JestAllure2Reporter$LabelCustomizer;
+  parentSuite: JestAllure2Reporter$LabelCustomizer;
+  suite: JestAllure2Reporter$LabelCustomizer;
+  subSuite: JestAllure2Reporter$LabelCustomizer;
+  epic: JestAllure2Reporter$LabelCustomizer;
+  feature: JestAllure2Reporter$LabelCustomizer;
+  story: JestAllure2Reporter$LabelCustomizer;
+  framework: JestAllure2Reporter$LabelCustomizer;
+  language: JestAllure2Reporter$LabelCustomizer;
+  layer: JestAllure2Reporter$LabelCustomizer;
+  thread: JestAllure2Reporter$LabelCustomizer;
+  host: JestAllure2Reporter$LabelCustomizer;
+  severity: JestAllure2Reporter$LabelCustomizer;
+  tag: JestAllure2Reporter$LabelCustomizer<string | string[]>;
+  owner: JestAllure2Reporter$LabelCustomizer;
+  lead: JestAllure2Reporter$LabelCustomizer;
+};
+
+type JestAllure2Reporter$TestCaseContext = {
+  packageName?: string;
+  testIdentifier: string;
+  testPath: string;
+  fullName: string;
+  title: string;
+  ancestorTitles: string[];
+  code?: {
+    beforeAll?: string[];
+    beforeEach?: string[];
+    testFn?: string[];
+    afterAll?: string[];
+    afterEach?: string[];
+  };
+};
+
+type Allure$EnvironmentInfo = Record<string, string>;
+
+type Allure$ExecutorInfo = Partial<{
+  name: string;
+  type: string;
+  url: string;
+  buildOrder: number;
+  buildName: string;
+  buildUrl: string;
+  reportUrl: string;
+  reportName: string;
+}>;
