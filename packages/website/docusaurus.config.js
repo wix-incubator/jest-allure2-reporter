@@ -28,6 +28,18 @@ const config = {
   plugins: [
     'docusaurus-plugin-sass',
     require.resolve('@cmfcmf/docusaurus-search-local'),
+    [
+      'docusaurus-plugin-typedoc',
+      {
+        docsRoot: '../../docs',
+        entryPoints: [
+          '../library/src/index.ts',
+          '../library/src/environment-node.ts',
+          '../library/src/annotations.ts',
+        ],
+        tsconfig: '../library/tsconfig.json',
+      },
+    ],
   ],
 
   presets: [
@@ -66,8 +78,7 @@ const config = {
             label: 'Docs',
           },
           {
-            type: 'docSidebar',
-            sidebarId: 'apiSidebar',
+            href: '/docs/api',
             position: 'left',
             label: 'API',
           },

@@ -40,13 +40,13 @@ export type JestAllure2ReporterOptions = {
    *
    * @default true
    */
-  environmentInfo: boolean | JestAllure2Reporter$LabelCustomizer<Allure$EnvironmentInfo>;
+  environmentInfo: boolean | JestAllure2Reporter$EnvironmentInfoCustomizer;
 
   /**
    * Getter function to extract executor information from the test environment.
    * The executor is the build agent or any other system that initiates the test run.
    */
-  executorInfo: JestAllure2Reporter$ValueExtractor<Allure$ExecutorInfo>;
+  executorInfo: JestAllure2Reporter$TestCaseExtractor<Allure$ExecutorInfo>;
 
   /**
    * Treat thrown errors as failed assertions.
@@ -66,9 +66,28 @@ type JestAllure2Reporter$TestInfoCustomizer = {
   labels: Partial<JestAllure2Reporter$LabelsConfig>;
 };
 
-type JestAllure2Reporter$LabelCustomizer<T = string> = JestAllure2Reporter$ValueExtractor<T> | T | undefined;
-type JestAllure2Reporter$StringCustomizer = JestAllure2Reporter$ValueExtractor<string> | undefined;
-type JestAllure2Reporter$ValueExtractor<T> = (testCaseContext: Readonly<JestAllure2Reporter$TestCaseContext>) => T | undefined;
+type JestAllure2Reporter$LabelCustomizer<T = string> =
+  | JestAllure2Reporter$TestCaseExtractor<T>
+  | T
+  | undefined;
+
+type JestAllure2Reporter$EnvironmentInfoCustomizer = (
+  globalContext: Readonly<JestAllure2Reporter$GlobalContext>,
+) => Allure$EnvironmentInfo | undefined;
+
+type JestAllure2Reporter$GlobalContext = {
+  cwd: string;
+  env: NodeJS.ProcessEnv;
+  packageName?: string;
+};
+
+type JestAllure2Reporter$StringCustomizer =
+  | JestAllure2Reporter$TestCaseExtractor<string>
+  | undefined;
+
+type JestAllure2Reporter$TestCaseExtractor<T> = (
+  testCaseContext: Readonly<JestAllure2Reporter$TestCaseContext>,
+) => T | undefined;
 
 type JestAllure2Reporter$LabelsConfig = {
   allureId: JestAllure2Reporter$LabelCustomizer;
@@ -93,6 +112,8 @@ type JestAllure2Reporter$LabelsConfig = {
 };
 
 type JestAllure2Reporter$TestCaseContext = {
+  cwd: string;
+  env: NodeJS.ProcessEnv;
   packageName?: string;
   testIdentifier: string;
   testPath: string;

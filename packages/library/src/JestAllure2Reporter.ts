@@ -43,7 +43,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
       allureRuntime: new AllureRuntime({
         resultsDir: this._options.resultsDir,
       }),
-      getEnvironmentInfo: options.getEnvironmentInfo ?? true,
+      environmentInfo: options.environmentInfo ?? true,
       select: new Selectors({
         emitter: this._emitter,
         reporterOptions: options,

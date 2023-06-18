@@ -113,7 +113,11 @@ describe('statuses.test.js', () => {
   describe('with options.packageName = "custom"', () => {
     beforeAll(async () => {
       query = await runReporter({
-        packageName: 'custom',
+        testInfo: {
+          labels: {
+            package: 'custom',
+          },
+        },
       });
       query = query.bySuite(/statuses/);
     });

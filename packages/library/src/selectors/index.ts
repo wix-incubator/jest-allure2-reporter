@@ -29,7 +29,8 @@ export class Selectors {
     const threadService = new ThreadService(emitter);
     const projectService = new ProjectService({
       rootDir: selectorsConfig.rootDir,
-      packageName: selectorsConfig.reporterOptions.packageName,
+      packageName: selectorsConfig.reporterOptions.testInfo?.labels
+        ?.package as string, // TODO: rewrite label system
     });
 
     this.testCase = new TestCaseSelectors({

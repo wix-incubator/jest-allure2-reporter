@@ -48,7 +48,10 @@ export class TestFileContext {
     const labelsToAdd: [string, string | undefined][] = [
       [LabelName.PACKAGE, select.testCase.labels.package()],
       [LabelName.TEST_CLASS, select.testCase.labels.testClass(testCaseResult)],
-      [LabelName.TEST_METHOD, select.testCase.labels.testMethod(testCaseResult)],
+      [
+        LabelName.TEST_METHOD,
+        select.testCase.labels.testMethod(testCaseResult),
+      ],
       [LabelName.SUITE, select.testCase.labels.suite(testCaseResult)],
       [LabelName.SUB_SUITE, select.testCase.labels.subsuite(testCaseResult)],
       [LabelName.THREAD, select.testCase.labels.thread(testCaseResult)],

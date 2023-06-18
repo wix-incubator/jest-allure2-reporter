@@ -35,12 +35,18 @@ export class TestRunContext {
   }
 
   private async _getEnvironmentInfo(): Promise<any> {
-    const { getEnvironmentInfo } = this._config;
+    const { environmentInfo } = this._config;
 
-    if (typeof getEnvironmentInfo === 'boolean') {
-      return getEnvironmentInfo ? process.env : {};
+    if (typeof environmentInfo === 'boolean') {
+      return environmentInfo ? process.env : {};
+    } else if (typeof environmentInfo === 'function') {
+      return environmentInfo({
+        cwd: process.cwd(),
+        env: process.env,
+        // TODO: packageName: requireCwd('./package.json').name,
+      });
+    } else {
+      return process.env;
     }
-
-    return getEnvironmentInfo();
   }
 }

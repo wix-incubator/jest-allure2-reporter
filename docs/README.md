@@ -2,7 +2,7 @@
 
 <div align="center">
 
-<img src="docs/img/logo-full.svg" height=300 />
+<img src="img/logo-full.svg" height="300" />
 
 # jest-allure2-reporter
 
@@ -54,7 +54,7 @@ and then view the results:
 allure serve
 ```
 
-![Example screenshot](docs/img/example.png)
+![Example screenshot](img/example.png)
 
 If you need to generate a static report, e.g., on CI, run instead:
 

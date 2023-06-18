@@ -19,10 +19,10 @@ describe('environment.properties', () => {
     });
   });
 
-  describe('with options.getEnvironmentInfo = (...)', () => {
+  describe('with options.environmentInfo = (...)', () => {
     beforeAll(async () => {
       query = await runReporter({
-        getEnvironmentInfo: async () => ({
+        environmentInfo: () => ({
           CUSTOM_INFO: 'CUSTOM_VALUE',
         }),
       });
