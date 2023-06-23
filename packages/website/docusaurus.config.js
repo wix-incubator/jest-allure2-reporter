@@ -17,7 +17,7 @@ const config = {
   organizationName: 'wix-incubator',
   projectName: 'jest-allure2-reporter',
 
-  onBrokenLinks: 'throw',
+  onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
 
   i18n: {
@@ -31,6 +31,7 @@ const config = {
     [
       'docusaurus-plugin-typedoc',
       {
+        out: 'reference',
         docsRoot: '../../docs',
         entryPoints: [
           '../library/src/index.ts',
@@ -78,9 +79,10 @@ const config = {
             label: 'Docs',
           },
           {
-            href: '/docs/api',
+            type: 'docSidebar',
+            sidebarId: 'referenceSidebar',
             position: 'left',
-            label: 'API',
+            label: 'Reference',
           },
           {
             href: 'https://allure-framework.github.io/allure-demo/5/',
@@ -105,12 +107,16 @@ const config = {
                 to: '/docs',
               },
               {
-                label: 'Features',
-                to: '/docs/features',
+                label: 'Config',
+                to: '/docs/config',
               },
               {
-                label: 'Demo',
-                href: 'https://allure-framework.github.io/allure-demo/5/',
+                label: 'API',
+                to: '/docs/api',
+              },
+              {
+                label: 'Reference',
+                to: '/docs/reference',
               },
             ],
           },
@@ -118,8 +124,20 @@ const config = {
             title: 'More',
             items: [
               {
+                label: 'Demo',
+                href: 'https://allure-framework.github.io/allure-demo/5/',
+              },
+              {
+                label: 'Acknowledgements',
+                to: '/docs/acknowledgements',
+              },
+              {
+                label: 'Contributing',
+                to: '/docs/contributing',
+              },
+              {
                 label: 'GitHub',
-                href: 'https://github.com/wix-incubator/docusaurus',
+                href: 'https://github.com/wix-incubator/jest-allure2-reporter',
               },
             ],
           },

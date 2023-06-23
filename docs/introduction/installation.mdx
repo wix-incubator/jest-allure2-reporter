@@ -1,9 +1,9 @@
 ---
-slug: /
-hide_table_of_contents: true
+sidebar_position: 1
+slug: /installation
 ---
 
-# Getting Started
+# Installation
 
 :::caution
 
@@ -11,6 +11,8 @@ This website version refers to the unreleased version of `jest-allure2-reporter`
 anywhere. Please use GitHub docs for the latest stable version.
 
 :::
+
+## Prerequisites
 
 Before you start, make sure you have [Allure CLI](https://docs.qameta.io/allure/#_get_started) installed globally:
 
@@ -28,7 +30,7 @@ Use Jest's default `jest-circus` runner for the full reporting functionality. Re
 
 :::
 
-## Installation
+## Setup
 
 Run in your project:
 
@@ -52,31 +54,3 @@ Edit your Jest configuration file, e.g.:
    // …
  };
 ```
-
-## Usage
-
-Run your tests with `jest` as usual, e.g.:
-
-```bash
-npm test
-# jest ...
-# PASS  ./my.test.js
-```
-
-and then browse the results stored in the `allure-results` directory via:
-
-```bash
-allure serve
-```
-
-If you want to generate a static report, e.g., for CI, run:
-
-```bash
-allure generate
-```
-
-:::tip
-
-For more information on `allure` CLI itself, see the documentation on its [official website](https://docs.qameta.io/allure/#_get_started).
-
-:::

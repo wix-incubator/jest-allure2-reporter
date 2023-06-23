@@ -1,23 +1,23 @@
 ---
-id: "environment_node.default"
-title: "Class: default"
-sidebar_label: "default"
+id: "environment_node.AllureNodeJestEnvironment"
+title: "Class: AllureNodeJestEnvironment"
+sidebar_label: "AllureNodeJestEnvironment"
 custom_edit_url: null
 ---
 
-[environment-node](../modules/environment_node.md).default
+[environment-node](../modules/environment_node.md).AllureNodeJestEnvironment
 
 ## Hierarchy
 
 - `TestEnvironment`
 
-  ↳ **`default`**
+  ↳ **`AllureNodeJestEnvironment`**
 
 ## Constructors
 
 ### constructor
 
-• **new default**(`config`, `context`)
+• **new AllureNodeJestEnvironment**(`config`, `context`)
 
 #### Parameters
 
@@ -32,7 +32,7 @@ TestEnvironment.constructor
 
 #### Defined in
 
-[packages/library/src/environment-node.ts:6](https://github.com/wix-incubator/jest-allure2-reporter/blob/969b5b6/packages/library/src/environment-node.ts#L6)
+[packages/library/src/environment-node.ts:6](https://github.com/wix-incubator/jest-allure2-reporter/blob/2712229/packages/library/src/environment-node.ts#L6)
 
 ## Properties
 
@@ -66,7 +66,7 @@ node_modules/jest-metadata/dist/environment-decorator.d.ts:8
 
 #### Defined in
 
-[packages/library/src/environment-node.ts:19](https://github.com/wix-incubator/jest-allure2-reporter/blob/969b5b6/packages/library/src/environment-node.ts#L19)
+[packages/library/src/environment-node.ts:19](https://github.com/wix-incubator/jest-allure2-reporter/blob/2712229/packages/library/src/environment-node.ts#L19)
 
 ___
 

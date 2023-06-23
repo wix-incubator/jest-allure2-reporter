@@ -2,7 +2,7 @@ import { state } from 'jest-metadata';
 import { TestEnvironment } from 'jest-metadata/environment-node';
 import type { ForwardedCircusEvent } from 'jest-metadata/environment-decorator';
 
-export default class Allure2NodeJestEnvironment extends TestEnvironment {
+export class AllureNodeJestEnvironment extends TestEnvironment {
   constructor(config: any, context: any) {
     super(config, context);
 
@@ -20,3 +20,5 @@ export default class Allure2NodeJestEnvironment extends TestEnvironment {
     state.currentMetadata.set(['allure2', 'code'], event.fn.toString());
   };
 }
+
+export default AllureNodeJestEnvironment;

@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "test": "jest || true",
-    "build": "allure generate",
-    "allure": "allure serve"
+    "build": "allure generate --clean",
+    "start": "allure serve"
   },
   "devDependencies": {
     "@wix/eslint-config-jest-allure2-reporter": "^1.0.0",

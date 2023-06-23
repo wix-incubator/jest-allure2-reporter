@@ -18,6 +18,19 @@
 
 .tagline {}
 
+.heroTop {
+  padding-top: 2em;
+}
+
+.heroRight {
+  text-align: left;
+  padding-top: 3em;
+}
+
+.heroText {
+  font-size: 125%;
+}
+
 .buttons {
   display: flex;
   align-items: center;

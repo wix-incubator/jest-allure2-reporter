@@ -5,7 +5,13 @@
   width: 100%;
 }
 
+.feature {
+  padding-bottom: 3rem;
+}
+
 .featureSvg {
-  height: 200px;
-  width: 200px;
+  color: var(--ifm-color-primary);
+  max-height: 200px;
+  max-width: 200px;
+  margin-bottom: 2rem;
 }

@@ -32,7 +32,7 @@ JestMetadataReporter.constructor
 
 #### Defined in
 
-[packages/library/src/JestAllure2Reporter.ts:28](https://github.com/wix-incubator/jest-allure2-reporter/blob/969b5b6/packages/library/src/JestAllure2Reporter.ts#L28)
+[packages/library/src/JestAllure2Reporter.ts:28](https://github.com/wix-incubator/jest-allure2-reporter/blob/2712229/packages/library/src/JestAllure2Reporter.ts#L28)
 
 ## Properties
 
@@ -56,7 +56,7 @@ ___
 
 #### Defined in
 
-[packages/library/src/JestAllure2Reporter.ts:24](https://github.com/wix-incubator/jest-allure2-reporter/blob/969b5b6/packages/library/src/JestAllure2Reporter.ts#L24)
+[packages/library/src/JestAllure2Reporter.ts:24](https://github.com/wix-incubator/jest-allure2-reporter/blob/2712229/packages/library/src/JestAllure2Reporter.ts#L24)
 
 ___
 
@@ -66,7 +66,7 @@ ___
 
 #### Defined in
 
-[packages/library/src/JestAllure2Reporter.ts:25](https://github.com/wix-incubator/jest-allure2-reporter/blob/969b5b6/packages/library/src/JestAllure2Reporter.ts#L25)
+[packages/library/src/JestAllure2Reporter.ts:25](https://github.com/wix-incubator/jest-allure2-reporter/blob/2712229/packages/library/src/JestAllure2Reporter.ts#L25)
 
 ___
 
@@ -76,7 +76,7 @@ ___
 
 #### Defined in
 
-[packages/library/src/JestAllure2Reporter.ts:26](https://github.com/wix-incubator/jest-allure2-reporter/blob/969b5b6/packages/library/src/JestAllure2Reporter.ts#L26)
+[packages/library/src/JestAllure2Reporter.ts:26](https://github.com/wix-incubator/jest-allure2-reporter/blob/2712229/packages/library/src/JestAllure2Reporter.ts#L26)
 
 ## Methods
 
@@ -94,7 +94,7 @@ JestMetadataReporter.getLastError
 
 #### Defined in
 
-[packages/library/src/JestAllure2Reporter.ts:105](https://github.com/wix-incubator/jest-allure2-reporter/blob/969b5b6/packages/library/src/JestAllure2Reporter.ts#L105)
+[packages/library/src/JestAllure2Reporter.ts:105](https://github.com/wix-incubator/jest-allure2-reporter/blob/2712229/packages/library/src/JestAllure2Reporter.ts#L105)
 
 ___
 
@@ -119,7 +119,7 @@ JestMetadataReporter.onRunComplete
 
 #### Defined in
 
-[packages/library/src/JestAllure2Reporter.ts:97](https://github.com/wix-incubator/jest-allure2-reporter/blob/969b5b6/packages/library/src/JestAllure2Reporter.ts#L97)
+[packages/library/src/JestAllure2Reporter.ts:97](https://github.com/wix-incubator/jest-allure2-reporter/blob/2712229/packages/library/src/JestAllure2Reporter.ts#L97)
 
 ___
 
@@ -144,7 +144,7 @@ JestMetadataReporter.onRunStart
 
 #### Defined in
 
-[packages/library/src/JestAllure2Reporter.ts:56](https://github.com/wix-incubator/jest-allure2-reporter/blob/969b5b6/packages/library/src/JestAllure2Reporter.ts#L56)
+[packages/library/src/JestAllure2Reporter.ts:56](https://github.com/wix-incubator/jest-allure2-reporter/blob/2712229/packages/library/src/JestAllure2Reporter.ts#L56)
 
 ___
 
@@ -169,7 +169,7 @@ JestMetadataReporter.onTestCaseResult
 
 #### Defined in
 
-[packages/library/src/JestAllure2Reporter.ts:73](https://github.com/wix-incubator/jest-allure2-reporter/blob/969b5b6/packages/library/src/JestAllure2Reporter.ts#L73)
+[packages/library/src/JestAllure2Reporter.ts:73](https://github.com/wix-incubator/jest-allure2-reporter/blob/2712229/packages/library/src/JestAllure2Reporter.ts#L73)
 
 ___
 
@@ -195,7 +195,7 @@ JestMetadataReporter.onTestFileResult
 
 #### Defined in
 
-[packages/library/src/JestAllure2Reporter.ts:81](https://github.com/wix-incubator/jest-allure2-reporter/blob/969b5b6/packages/library/src/JestAllure2Reporter.ts#L81)
+[packages/library/src/JestAllure2Reporter.ts:81](https://github.com/wix-incubator/jest-allure2-reporter/blob/2712229/packages/library/src/JestAllure2Reporter.ts#L81)
 
 ___
 
@@ -219,7 +219,7 @@ JestMetadataReporter.onTestFileStart
 
 #### Defined in
 
-[packages/library/src/JestAllure2Reporter.ts:66](https://github.com/wix-incubator/jest-allure2-reporter/blob/969b5b6/packages/library/src/JestAllure2Reporter.ts#L66)
+[packages/library/src/JestAllure2Reporter.ts:66](https://github.com/wix-incubator/jest-allure2-reporter/blob/2712229/packages/library/src/JestAllure2Reporter.ts#L66)
 
 ___
 
