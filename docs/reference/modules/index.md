@@ -54,4 +54,4 @@ Options to use with jest-allure2-reporter package in Jest config
 
 #### Defined in
 
-[packages/library/src/JestAllure2ReporterOptions.ts:19](https://github.com/wix-incubator/jest-allure2-reporter/blob/1921ba4/packages/library/src/JestAllure2ReporterOptions.ts#L19)
+[packages/library/src/JestAllure2ReporterOptions.ts:19](https://github.com/wix-incubator/jest-allure2-reporter/blob/14ca9ce/packages/library/src/JestAllure2ReporterOptions.ts#L19)

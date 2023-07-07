@@ -22,6 +22,10 @@ There are four main ways to group test results in Allure reports:
 
 ## By Suite :star:
 
+```
+TODO: Add screenshot
+```
+
 This is the default grouping option, and it makes the most sense for projects using Jest.
 
 The suite hierarchy consists of up to four levels: **parent suite**, **suite**, **subsuite**, and **test case**.
@@ -94,6 +98,13 @@ module.exports = {
 ```
 
   </TabItem>
+  <TabItem value="report" label="Report">
+
+```
+TODO: Add screenshot
+```
+
+  </TabItem>
 </Tabs>
 
 ### File-oriented example
@@ -144,6 +155,13 @@ module.exports = {
     ],
   ],
 };
+```
+
+  </TabItem>
+  <TabItem value="report" label="Report">
+
+```
+TODO: Add screenshot
 ```
 
   </TabItem>
@@ -198,9 +216,20 @@ module.exports = {
 ```
 
   </TabItem>
+  <TabItem value="report" label="Report">
+
+```
+TODO: Add screenshot
+```
+
+  </TabItem>
 </Tabs>
 
 ## By Story 📖
+
+```
+TODO: Add screenshot
+```
 
 This grouping option stems from the [Behavior-Driven Development](https://en.wikipedia.org/wiki/Behavior-driven_development) (BDD) methodology and
 allows users to group test results based on the **epic**, **feature** and **story** to which each test case belongs, where:
@@ -216,6 +245,56 @@ This grouping is not enabled by default. Moreover, you need to decide how exactl
 The [annotation-based approach](../api/08-labels.mdx) gives you a fine-grained control over the names of your Epic, Feature and Story labels, but it requires you to add annotations to your test cases.
 
 In the previous example, it would make sense to group both client and server tests under the same features like **Login screen** and **Forgot password screen**, whereas the epic would be **Authentication**.
+
+<Tabs groupId="grouping-default">
+  <TabItem value="structure" label="Structure">
+
+```plain
+└─ Authentication
+   ├─ Login screen
+   │  ├─ should validate e-mail on client
+   │  ├─ should validate e-mail on server
+   │  ├─ should display login form on client
+   │  ├─ should return 401 if user is not found
+   │  └─ should return 401 if password is incorrect
+   └─ Forgot password screen
+      ├─ should validate e-mail on client
+      ├─ should validate e-mail on server
+      ├─ should return 401 if user is not found
+      └─ should return 401 if password is incorrect
+```
+
+  </TabItem>
+  <TabItem value="config" label="Code">
+
+```js title="login.test.js"
+import { $Epic, $Feature, $Story } from 'jest-allure2-reporter/annotations';
+
+$Epic('Authentication');
+$Feature('Login screen');
+describe('Login controller', () => {
+  $Story('should validate e-mail on server');
+  it('should validate e-mail', () => {
+    // ...
+  });
+
+  $Story('should return 401 if user is not found');
+  it('should return 401 if user is not found', () => {
+    // ...
+  });
+});
+```
+
+  </TabItem>
+  <TabItem value="report" label="Report">
+
+```
+TODO: Add screenshot
+```
+
+  </TabItem>
+</Tabs>
+
 
 ### Configuration API
 
@@ -264,8 +343,8 @@ module.exports = {
     ['jest-allure2-reporter', /** @type {import('jest-allure2-reporter').Options}*/ {
       labels: {
         epic: ({ test }) => test.ancestorTitles[0],
-        feature: ({ test }) => test.ancestorTitles[1],
-        story: ({ test }) => [...test.ancestorTitles.slice(2), test.title].join(' '),
+        feature: ({ test }) => test.ancestorTitles.slice(1).join(' ') || undefined,
+        story: ({ test }) => test.title,
       },
     }],
   ],
@@ -273,19 +352,30 @@ module.exports = {
 ```
 
   </TabItem>
+  <TabItem value="report" label="Report">
+
+```
+TODO: Add screenshot
+```
+
+  </TabItem>
 </Tabs>
 
 ## By Package 📦
 
+```
+TODO: Add screenshot
+```
+
 This grouping feature is the least helpful outside of Java world, where packages are used to organize the codebase.
 
-It strictly follows `com.example.package.ClassName` naming convention, where `com.example.package` is a **package**, `com.example.package.ClassName` is a **test class**, and `shouldAssertAndDoSomething` is a **test method**.
+It strictly follows `com.example.package.ClassName` naming convention, where:
 
-:::caution
+* `com.example.package` is a **package**,
+* `com.example.package.ClassName` is a **test class**,
+* `shouldAssertAndDoSomething` is a **test method**.
 
 It doesn't work well with JavaScript, and, that's why you can use only two grouping levels: **package** and **test method**.
-
-:::
 
 A couple of feasible options are:
 
@@ -328,6 +418,13 @@ module.exports = {
     }],
   ],
 };
+```
+
+  </TabItem>
+  <TabItem value="report" label="Report">
+
+```
+TODO: Add screenshot
 ```
 
   </TabItem>
