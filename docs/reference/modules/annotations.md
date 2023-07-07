@@ -24,7 +24,7 @@ custom_edit_url: null
 
 #### Defined in
 
-[packages/library/src/annotations.ts:14](https://github.com/wix-incubator/jest-allure2-reporter/blob/2712229/packages/library/src/annotations.ts#L14)
+[packages/library/src/annotations.ts:14](https://github.com/wix-incubator/jest-allure2-reporter/blob/1921ba4/packages/library/src/annotations.ts#L14)
 
 ___
 
@@ -44,7 +44,7 @@ ___
 
 #### Defined in
 
-[packages/library/src/annotations.ts:16](https://github.com/wix-incubator/jest-allure2-reporter/blob/2712229/packages/library/src/annotations.ts#L16)
+[packages/library/src/annotations.ts:16](https://github.com/wix-incubator/jest-allure2-reporter/blob/1921ba4/packages/library/src/annotations.ts#L16)
 
 ___
 
@@ -64,7 +64,7 @@ ___
 
 #### Defined in
 
-[packages/library/src/annotations.ts:18](https://github.com/wix-incubator/jest-allure2-reporter/blob/2712229/packages/library/src/annotations.ts#L18)
+[packages/library/src/annotations.ts:18](https://github.com/wix-incubator/jest-allure2-reporter/blob/1921ba4/packages/library/src/annotations.ts#L18)
 
 ___
 
@@ -84,7 +84,7 @@ ___
 
 #### Defined in
 
-[packages/library/src/annotations.ts:19](https://github.com/wix-incubator/jest-allure2-reporter/blob/2712229/packages/library/src/annotations.ts#L19)
+[packages/library/src/annotations.ts:19](https://github.com/wix-incubator/jest-allure2-reporter/blob/1921ba4/packages/library/src/annotations.ts#L19)
 
 ___
 
@@ -105,7 +105,7 @@ ___
 
 #### Defined in
 
-[packages/library/src/annotations.ts:21](https://github.com/wix-incubator/jest-allure2-reporter/blob/2712229/packages/library/src/annotations.ts#L21)
+[packages/library/src/annotations.ts:21](https://github.com/wix-incubator/jest-allure2-reporter/blob/1921ba4/packages/library/src/annotations.ts#L21)
 
 ___
 
@@ -125,7 +125,7 @@ ___
 
 #### Defined in
 
-[packages/library/src/annotations.ts:20](https://github.com/wix-incubator/jest-allure2-reporter/blob/2712229/packages/library/src/annotations.ts#L20)
+[packages/library/src/annotations.ts:20](https://github.com/wix-incubator/jest-allure2-reporter/blob/1921ba4/packages/library/src/annotations.ts#L20)
 
 ___
 
@@ -145,7 +145,7 @@ ___
 
 #### Defined in
 
-[packages/library/src/annotations.ts:22](https://github.com/wix-incubator/jest-allure2-reporter/blob/2712229/packages/library/src/annotations.ts#L22)
+[packages/library/src/annotations.ts:22](https://github.com/wix-incubator/jest-allure2-reporter/blob/1921ba4/packages/library/src/annotations.ts#L22)
 
 ___
 
@@ -165,7 +165,7 @@ ___
 
 #### Defined in
 
-[packages/library/src/annotations.ts:25](https://github.com/wix-incubator/jest-allure2-reporter/blob/2712229/packages/library/src/annotations.ts#L25)
+[packages/library/src/annotations.ts:25](https://github.com/wix-incubator/jest-allure2-reporter/blob/1921ba4/packages/library/src/annotations.ts#L25)
 
 ___
 
@@ -186,4 +186,4 @@ ___
 
 #### Defined in
 
-[packages/library/src/annotations.ts:23](https://github.com/wix-incubator/jest-allure2-reporter/blob/2712229/packages/library/src/annotations.ts#L23)
+[packages/library/src/annotations.ts:23](https://github.com/wix-incubator/jest-allure2-reporter/blob/1921ba4/packages/library/src/annotations.ts#L23)

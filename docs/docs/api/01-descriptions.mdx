@@ -1,5 +1,4 @@
 ---
-sidebar_position: 1
 description: Make your tests more understandable with rich descriptions
 ---
 
@@ -22,7 +21,7 @@ There are two ways to define a description for an executable block:
 * declaratively, via `@desc`, `@description`, `@descriptionHtml` JSDoc annotations (or even without them);
 * programmatically, via `$Description('')` or `$DescriptionHtml('')` annotation functions.
 
-The **description** can be defined for the built-in `it`, `test`, `beforeAll`, `beforeEach`, `afterAll`, `afterEach` blocks and [custom steps](steps.mdx).
+The **description** can be defined for the built-in `it`, `test`, `beforeAll`, `beforeEach`, `afterAll`, `afterEach` blocks and [custom steps](02-steps.mdx).
 
 This article will focus on the built-in blocks.
 
@@ -94,7 +93,7 @@ it('should subtract two numbers', () => {
 
 ## Test hooks
 
-Test hooks such as `beforeAll`, `beforeEach`, `afterAll`, `afterEach` can also have descriptions since technically they are considered [steps](steps.mdx) in the Allure report.
+Test hooks such as `beforeAll`, `beforeEach`, `afterAll`, `afterEach` can also have descriptions since technically they are considered [steps](02-steps.mdx) in the Allure report.
 
 However, they are limited to plain text descriptions only due to Allure Framework limitations.
 

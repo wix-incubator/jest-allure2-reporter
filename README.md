@@ -2,7 +2,7 @@
 
 <div align="center">
 
-<img src="img/logo-full.svg" height="300" />
+<img src="docs/img/logo-full.svg" height="300" />
 
 # jest-allure2-reporter
 
@@ -54,7 +54,7 @@ and then view the results:
 allure serve
 ```
 
-![Example screenshot](img/example.png)
+![Example screenshot](docs/img/example.png)
 
 If you need to generate a static report, e.g., on CI, run instead:
 
@@ -75,5 +75,5 @@ Licensed under [MIT License].
 [`jest`]: https://jestjs.io
 [our documentation website]: https://wix-incubator.github.io/jest-allure2-reporter/
 [Allure docs]: https://docs.qameta.io/allure/#_get_started
-[Contributing]: https://wix-incubator.github.io/jest-allure2-reporter/docs/contributing
-[MIT License]: ../LICENSE
+[Contributing]: https://wix-incubator.github.io/jest-allure2-reporter/about/contributing
+[MIT License]: LICENSE

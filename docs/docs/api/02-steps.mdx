@@ -1,5 +1,4 @@
 ---
-sidebar_position: 2
 description: Fine-grained control over the test flow
 ---
 
@@ -17,8 +16,8 @@ anywhere. Please use GitHub docs for the latest stable version.
 
 Steps are the building blocks of your tests.
 
-Each test is composed of one or more steps, and each step can have its own [status](../config/statuses.mdx),
-description, [attachments](attachments.mdx) and even nested steps.
+Each test is composed of one or more steps, and each step can have its own [status](../config/02-statuses.mdx),
+[description](01-descriptions.mdx), [attachments](03-attachments.mdx) and even nested steps.
 
 ## Built-in hooks
 
@@ -228,4 +227,4 @@ test('Login test', async () => {
   </TabItem>
 </Tabs>
 
-As you can see, `allure.logStep` has an optional third parameter (TODO) for attachments. This is just one of possible ways to add attachments to the report. See [Attachments](attachments.mdx) for more details.
+As you can see, `allure.logStep` has an optional third parameter (TODO) for attachments. This is just one of possible ways to add attachments to the report. See [Attachments](03-attachments.mdx) for more details.

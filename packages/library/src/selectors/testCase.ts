@@ -27,6 +27,10 @@ type Services = {
 
 export class TestCaseSelectors {
   public readonly labels = {
+    parentSuite: (_testCaseResult: TestCaseResult): string => {
+      return undefined as unknown as string;
+    },
+
     suite: (testCaseResult: TestCaseResult): string => {
       const test = this._services.query.getTest(testCaseResult);
       return this._services.project.relative(test.path);

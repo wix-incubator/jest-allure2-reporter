@@ -50,6 +50,7 @@ const config = {
       ({
         docs: {
           path: '../../docs',
+          routeBasePath: '/',
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl:
             'https://github.com/wix-incubator/jest-allure2-reporter/tree/master/docs/',
@@ -129,11 +130,11 @@ const config = {
               },
               {
                 label: 'Acknowledgements',
-                to: '/docs/acknowledgements',
+                to: '/about/acknowledgements',
               },
               {
                 label: 'Contributing',
-                to: '/docs/contributing',
+                to: '/about/contributing',
               },
               {
                 label: 'GitHub',

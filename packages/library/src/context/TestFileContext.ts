@@ -52,6 +52,10 @@ export class TestFileContext {
         LabelName.TEST_METHOD,
         select.testCase.labels.testMethod(testCaseResult),
       ],
+      [
+        LabelName.PARENT_SUITE,
+        select.testCase.labels.parentSuite(testCaseResult),
+      ],
       [LabelName.SUITE, select.testCase.labels.suite(testCaseResult)],
       [LabelName.SUB_SUITE, select.testCase.labels.subsuite(testCaseResult)],
       [LabelName.THREAD, select.testCase.labels.thread(testCaseResult)],
