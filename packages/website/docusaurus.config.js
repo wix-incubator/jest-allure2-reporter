@@ -28,19 +28,19 @@ const config = {
   plugins: [
     'docusaurus-plugin-sass',
     require.resolve('@cmfcmf/docusaurus-search-local'),
-    [
-      'docusaurus-plugin-typedoc',
-      {
-        out: 'reference',
-        docsRoot: '../../docs',
-        entryPoints: [
-          '../library/src/index.ts',
-          '../library/src/environment-node.ts',
-          '../library/src/annotations.ts',
-        ],
-        tsconfig: '../library/tsconfig.json',
-      },
-    ],
+    // [
+    //   'docusaurus-plugin-typedoc',
+    //   {
+    //     out: 'reference',
+    //     docsRoot: '../../docs',
+    //     entryPoints: [
+    //       '../library/src/index.ts',
+    //       '../library/src/environment-node.ts',
+    //       '../library/src/annotations.ts',
+    //     ],
+    //     tsconfig: '../library/tsconfig.json',
+    //   },
+    // ],
   ],
 
   presets: [

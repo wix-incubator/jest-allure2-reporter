@@ -59,11 +59,10 @@ it('should subtract two numbers', () => {
   <TabItem value="dsl" label="Function">
 
 ```js
+import { $Description } from 'jest-allure2-reporter/annotations';
+
 $Description('_Implicit_ annotation without `@desc` or `@description`.')
 it('should add two numbers', () => {
-  /**
-    *
-    */
   const a = 1;
   const b = 2;
   const sum = a + b;
@@ -72,10 +71,6 @@ it('should add two numbers', () => {
 
 $DescriptionHtml('<i>Explicit</i> annotation with <code>@descriptionHtml</code>.')
 it('should subtract two numbers', () => {
-  /**
-    * @descriptionHtml
-    * <i>Explicit</i> annotation with <code>@descriptionHtml</code>.
-    */
   const a = 1;
   const b = 2;
   const diff = b - a;
@@ -121,17 +116,19 @@ afterEach(() => {
   <TabItem value="dsl" label="Function">
 
 ```js
-@Description('This hook runs before all tests.')
+import { $Description } from 'jest-allure2-reporter/annotations';
+
+$Description('This hook runs before all tests.')
 beforeAll(() => {
   // ...
 });
 
-@Description('This hook runs before each test.')
+$Description('This hook runs before each test.')
 beforeEach(() => {
   // ...
 });
 
-@Description('This hook runs after each test.')
+$Description('This hook runs after each test.')
 afterEach(() => {
   // ...
 });
@@ -173,6 +170,8 @@ describe('Sanity: Login flow', () => {
   <TabItem value="dsl" label="Function">
 
 ```js
+import { $Description } from 'jest-allure2-reporter/annotations';
+
 $Description('This description will be prepended to every test description.')
 describe('Sanity: Login flow', () => {
   $Description('This test logs in with valid credentials.')

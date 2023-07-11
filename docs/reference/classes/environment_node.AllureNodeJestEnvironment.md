@@ -32,7 +32,7 @@ TestEnvironment.constructor
 
 #### Defined in
 
-[packages/library/src/environment-node.ts:6](https://github.com/wix-incubator/jest-allure2-reporter/blob/14ca9ce/packages/library/src/environment-node.ts#L6)
+[packages/library/src/environment-node.ts:6](https://github.com/wix-incubator/jest-allure2-reporter/blob/039baf3/packages/library/src/environment-node.ts#L6)
 
 ## Properties
 
@@ -66,7 +66,7 @@ node_modules/jest-metadata/dist/environment-decorator.d.ts:8
 
 #### Defined in
 
-[packages/library/src/environment-node.ts:19](https://github.com/wix-incubator/jest-allure2-reporter/blob/14ca9ce/packages/library/src/environment-node.ts#L19)
+[packages/library/src/environment-node.ts:19](https://github.com/wix-incubator/jest-allure2-reporter/blob/039baf3/packages/library/src/environment-node.ts#L19)
 
 ___
 

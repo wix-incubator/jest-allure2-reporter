@@ -17,14 +17,27 @@ Whether you're a developer, QA professional, or someone involved in unit, integr
 
 [`jest-allure2-reporter`](https://www.npmjs.com/package/jest-allure2-reporter) is a reporting toolkit for [Jest](https://jestjs.io/), a widely popular testing framework in the JavaScript ecosystem.
 
-It consists of several packages:
+**It has a few entry points:**
 
-* `jest-allure2-reporter` - the reporter itself, which is responsible for collecting test results and generating a report;
-* `jest-allure2-reporter/annotations` - a set of functions and decorators to add additional metadata to your tests;
-* Environment packages, to enable the annotations and provide additional test data:
-  * `jest-allure2-reporter/environment-node` - for Node.js tests;
-  * `jest-allure2-reporter/environment-jsdom` - for browser tests;
-  * `jest-allure2-reporter/environment-extend` - for advanced use cases where you need to extend your already customized test environment.
+<dl>
+  <dt><code>jest-allure2-reporter</code></dt>
+  <dd>The reporter itself, which is responsible for collecting test results and generating a report.</dd>
+  <dt><code>jest-allure2-reporter/annotations</code></dt>
+  <dd>A set of functions and decorators to add additional metadata to your tests.</dd>
+  <dt>
+    Environment packages, to enable the annotations and provide additional test data:
+  </dt>
+  <dd>
+    <dl>
+      <dt><code>jest-allure2-reporter/environment-node</code></dt>
+      <dd>For Node.js tests.</dd>
+      <dt><code>jest-allure2-reporter/environment-jsdom</code></dt>
+      <dd>For browser tests.</dd>
+      <dt><code>jest-allure2-reporter/environment-extend</code></dt>
+      <dd>For advanced use cases where you need to extend your already customized test environment.</dd>
+    </dl>
+  </dd>
+</dl>
 
 The produced reports look like directories with multiple JSON files.
 They can be viewed using the [`allure` command-line tool][allure-cli], a flexible, feature-rich reporting tool that provides clear and concise test result representation.
