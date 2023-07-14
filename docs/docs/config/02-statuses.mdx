@@ -84,29 +84,22 @@ test('unknown test', () => {
 
 ## Handling broken tests
 
-If you are using assertions (matchers, expectations) that throw errors directly
-instead of using Jest's `expect` API, and you want to treat these errors as broken tests,
-there is a way to do it.
+If your test assertions _throw errors directly_ instead of using or extending
+Jest's [`expect` API][expect], they will be reported as &#8288;🟡&nbsp;Broken tests by default.
 
-In your Jest config file, add an options object to the `jest-allure` reporter config with
-`errorsAsFailedAssertions` set to `true`:
+To report them as 🔴&nbsp;Failed tests, you should enable `errorsAsFailedAssertions`:
 
-```diff
+```js title="jest.config.js"
 module.exports = {
   // ...
   reporters: [
     // ...
--   'jest-allure',
-+   ['jest-allure', {
-+     errorsAsFailedAssertions: true,
-+   }],
+    ['jest-allure2-reporter', {
+// highlight-next-line
+      errorsAsFailedAssertions: true,
+    }],
   ],
 };
 ```
 
-## Categorizing errors
-
-Allure 2 Framework provides a way to categorize errors by defining category names and regular expressions to match against error messages.
-Read more about it in the [Defect category] section.
-
-[Defect category]: 01-grouping.mdx#defect-category
+[expect]: https://jestjs.io/docs/expect

@@ -25,7 +25,7 @@ Whether you're a developer, QA professional, or someone involved in unit, integr
   <dt><code>jest-allure2-reporter/annotations</code></dt>
   <dd>A set of functions and decorators to add additional metadata to your tests.</dd>
   <dt>
-    Environment packages, to enable the annotations and provide additional test data:
+    <b>Environment packages</b>, to enable the annotations and provide additional test data:
   </dt>
   <dd>
     <dl>
@@ -44,17 +44,16 @@ They can be viewed using the [`allure` command-line tool][allure-cli], a flexibl
 
 ## Why one more Allure reporter for Jest?
 
-With Jest's evolution from Jasmine to its own [Circus test runner](https://github.com/jestjs/jest/pull/3668) in [version 27.0.0](https://jestjs.io/blog/2021/05/25/jest-27#flipping-defaults), the testing landscape shifted dramatically. While this change brought new opportunities for enhanced testing, it also created a void: existing Allure reporters[^1], designed for Jasmine, fell short of leveraging Jest's new capabilities.
+Jest's evolution from Jasmine to its own [Circus test runner](https://github.com/jestjs/jest/pull/3668) in [version 27.0.0](https://jestjs.io/blog/2021/05/25/jest-27#flipping-defaults) brought new opportunities for enhanced testing, but it also created a void: existing Allure reporters[^1], designed for Jasmine, fell short of leveraging Jest's new features and refined test lifecycle.
 
-While community-made reporters sought to bridge this gap[^2][^3][^4], they were not without limitations. Issues with irregular maintenance, limited reach, and significant feature gaps were prevalent. Most critically, they took a non-idiomatic approach by acting as extensions to Jest's `testEnvironment`, which led to a critical shortcomings: e.g., inability to report early test issues like `SyntaxError` or test environment setup failures.
+While community-made reporters sought to bridge this gap[^2][^3][^4], they had their own shortcomings &mdash; issues with irregular maintenance, limited reach, and significant feature gaps were prevalent. Most critically, they took a non-idiomatic approach by acting as extensions to Jest's `testEnvironment`, which led to a critical shortcomings: e.g., inability to report early test issues like `SyntaxError` or test environment setup failures.
 
 ## Conclusion
 
-Jest Allure 2 Reporter is not just another Allure reporter; it's a powerful tool tailor-made for the modern Jest ecosystem. By effectively capturing data from Jest's test environment, it provides comprehensive insights into your tests.
+Jest Allure 2 Reporter is not just another Allure reporter; it's a powerful tool tailor-made for the **modern** Jest ecosystem. By effectively capturing data from Jest's test environment, it provides comprehensive insights into your tests.
 
 Flexible by design, it works seamlessly regardless of you've extended your test environment or not.
 
-Jest Allure 2 Reporter gives you the necessary insights for your testing tasks in an easy-to-understand format.
 Easy to understand, straightforward to adopt, and flexible to work with – it's the Jest Allure reporter you've been waiting for.
 
 Ready to explore what this reporter can do for you? [Begin your journey here.][config]

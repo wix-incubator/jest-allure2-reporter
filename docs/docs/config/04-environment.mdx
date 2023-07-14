@@ -1,5 +1,5 @@
 ---
-description: Get hold of the executor and environment information for your test runs.
+description: Get hold of the environment information for your test runs.
 ---
 
 # Environment
@@ -11,6 +11,18 @@ anywhere. Please use GitHub docs for the latest stable version.
 
 :::
 
-**Environment**: Jest Allure 2 Reporter can capture a complete or a filtered view of your test environment (`process.env`). The filtered view can be adjusted based on `include`, `exclude` lists or callback functions.
+The Allure "Environment" feature in Allure reporting is a way to provide additional context and information about the test execution environment. It allows you to capture and display specific details related to the test environment, such as the operating system, browser version, device information, or any other relevant configuration.
 
-**Executor (Build Agent)**: The tool captures and displays what build agent executed the test run, providing additional context for the report.
+By utilizing the Allure "Environment" feature, you can gain insights into the test environment conditions and better understand how they may impact the test results. This information can be valuable for troubleshooting and debugging purposes, as well as for ensuring reproducibility of test outcomes across different environments.
+
+To use the Allure "Environment" feature, you typically need to integrate the appropriate Allure environment package that corresponds to your testing framework or runtime environment. This package provides the necessary tools and hooks to collect the environment information during test execution and include it in the generated Allure reports.
+
+By including environment information in your Allure reports, you can have a comprehensive overview of the test execution context, making it easier to analyze and interpret the test results. This feature is particularly useful when working with distributed or parallel test execution environments, as it helps identify environment-specific issues or variations in test outcomes.
+
+In summary, the Allure "Environment" feature enhances your test reporting by providing detailed information about the test execution environment. It allows you to capture and display relevant environment details alongside your test results, facilitating better analysis, troubleshooting, and reproducibility of test outcomes.
+
+## Configuration
+
+To enable the Allure "Environment" feature, you need to integrate the appropriate Allure environment package that corresponds to your testing framework or runtime environment. This package provides the necessary tools and hooks to collect the environment information during test execution and include it in the generated Allure reports.
+
+The following table lists the available Allure environment packages and their corresponding testing frameworks or runtime environments:
