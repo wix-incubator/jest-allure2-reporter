@@ -5,6 +5,13 @@ slug: /docs
 
 # Introduction
 
+:::caution
+
+This website version refers to the unreleased version of `jest-allure2-reporter` and is not yet available
+anywhere. Please use GitHub docs for the latest stable version.
+
+:::
+
 Thanks for choosing Jest Allure 2 Reporter!
 
 Whether you're a developer, QA professional, or someone involved in unit, integration, or end-to-end testing, this tool will make your testing process more efficient, organized, and insightful.
@@ -17,7 +24,10 @@ Whether you're a developer, QA professional, or someone involved in unit, integr
 
 [`jest-allure2-reporter`](https://www.npmjs.com/package/jest-allure2-reporter) is a reporting toolkit for [Jest](https://jestjs.io/), a widely popular testing framework in the JavaScript ecosystem.
 
-**It has a few entry points:**
+The produced reports look like directories with multiple JSON files.
+They can be viewed using the [`allure` command-line tool][allure-cli], a flexible, feature-rich reporting tool that provides clear and concise test result representation.
+
+It provides several **entry points**:
 
 <dl>
   <dt><code>jest-allure2-reporter</code></dt>
@@ -25,7 +35,7 @@ Whether you're a developer, QA professional, or someone involved in unit, integr
   <dt><code>jest-allure2-reporter/annotations</code></dt>
   <dd>A set of functions and decorators to add additional metadata to your tests.</dd>
   <dt>
-    <b>Environment packages</b>, to enable the annotations and provide additional test data:
+    <b>Environment packages</b>, to enable the annotations, media attachments and provide additional test data:
   </dt>
   <dd>
     <dl>
@@ -39,22 +49,17 @@ Whether you're a developer, QA professional, or someone involved in unit, integr
   </dd>
 </dl>
 
-The produced reports look like directories with multiple JSON files.
-They can be viewed using the [`allure` command-line tool][allure-cli], a flexible, feature-rich reporting tool that provides clear and concise test result representation.
-
 ## Why one more Allure reporter for Jest?
 
 Jest's evolution from Jasmine to its own [Circus test runner](https://github.com/jestjs/jest/pull/3668) in [version 27.0.0](https://jestjs.io/blog/2021/05/25/jest-27#flipping-defaults) brought new opportunities for enhanced testing, but it also created a void: existing Allure reporters[^1], designed for Jasmine, fell short of leveraging Jest's new features and refined test lifecycle.
 
 While community-made reporters sought to bridge this gap[^2][^3][^4], they had their own shortcomings &mdash; issues with irregular maintenance, limited reach, and significant feature gaps were prevalent. Most critically, they took a non-idiomatic approach by acting as extensions to Jest's `testEnvironment`, which led to a critical shortcomings: e.g., inability to report early test issues like `SyntaxError` or test environment setup failures.
 
-## Conclusion
+## Takeaways
 
-Jest Allure 2 Reporter is not just another Allure reporter; it's a powerful tool tailor-made for the **modern** Jest ecosystem. By effectively capturing data from Jest's test environment, it provides comprehensive insights into your tests.
-
-Flexible by design, it works seamlessly regardless of you've extended your test environment or not.
-
-Easy to understand, straightforward to adopt, and flexible to work with – it's the Jest Allure reporter you've been waiting for.
+* This reporter is a powerful tool tailor-made for the **modern** Jest ecosystem, not "yet another Allure reporter".
+* Easy to understand, straightforward to adopt, and flexible to work with – it's the Jest Allure reporter you've been waiting for.
+* It is progressive by design &mdash; you can start using it like a [standard reporter][jest-reporters], but the more you invest in it, the more you get out of it.
 
 Ready to explore what this reporter can do for you? [Begin your journey here.][config]
 
@@ -65,5 +70,6 @@ Ready to explore what this reporter can do for you? [Begin your journey here.][c
 
 [allure-cli]: https://docs.qameta.io/allure/#_commandline
 [config]: ../config/index.mdx
+[jest-reporters]: https://jestjs.io/docs/configuration#reporters-arraymodulename--modulename-options
 
 

@@ -1,0 +1,79 @@
+---
+description: Developer-oriented way to group test results.
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# By Package
+
+:::caution
+
+This website version refers to the unreleased version of `jest-allure2-reporter` and is not yet available
+anywhere. Please use GitHub docs for the latest stable version.
+
+:::
+
+![Grouping by package](../../../img/screenshots/config-01-grouping-08.jpg)
+
+This grouping feature is the least helpful outside of Java world, where packages are used to organize the codebase.
+
+It strictly follows `com.example.package.ClassName` naming convention, where:
+
+* `com.example.package` is a **package**,
+* `com.example.package.ClassName` is a **test class**,
+* `shouldAssertAndDoSomething` is a **test method**.
+
+It doesn't work well with JavaScript, and, that's why you can use only two grouping levels: **package** and **test method**.
+
+A couple of feasible options are:
+
+* use `package` to group tests by `package.json` name;
+* use `package` to group tests by the file path;
+* use `testMethod` to group tests by the full test name
+
+<Tabs groupId="grouping-default">
+  <TabItem value="report" label="Report">
+
+![Grouping by Story: configuration-based](../../../img/screenshots/config-01-grouping-07.jpg)
+
+  </TabItem>
+  <TabItem value="structure" label="Structure">
+
+```plain
+└─ @my-company/my-package
+   ├─ Forgot password controller should return 401 if password is incorrect
+   ├─ Forgot password controller should return 401 if user is not found
+   ├─ Forgot password screen when loaded and typed should validate e-mail
+   ├─ Forgot password screen when loaded should display forgot password form
+   ├─ Login controller should return 401 if password is incorrect
+   ├─ Login controller should return 401 if user is not found
+   ├─ Login screen when loaded and typed should validate password
+   ├─ Login screen when loaded and typed should validate password
+   └─ Login screen when loaded should display login form
+```
+
+  </TabItem>
+  <TabItem value="config" label="Config">
+
+```js title="jest.config.js"
+/** @type {import('@jest/types').Config.InitialOptions} */
+module.exports = {
+  testEnvironment: 'jest-allure2-reporter/environment-node',
+  reporters: [
+    'default',
+    ['jest-allure2-reporter', /** @type {import('jest-allure2-reporter').Options}*/ {
+      labels: {
+        package: ({ package }) => package.name,
+        // NOTE: `testClass` won't work due to the aforementioned issue
+        testClass: ({ file }) => file.path,
+        testMethod: ({ test }) => test.fullName,
+      },
+    }],
+  ],
+};
+```
+
+  </TabItem>
+</Tabs>
+

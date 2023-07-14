@@ -1,0 +1,213 @@
+---
+description: The most common way to group test results.
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# By Suite
+
+:::caution
+
+This website version refers to the unreleased version of `jest-allure2-reporter` and is not yet available
+anywhere. Please use GitHub docs for the latest stable version.
+
+:::
+
+This is perhaps the most common way to group test results, and it makes the most sense for projects using Jest.
+
+![Grouping by suite](../../../img/screenshots/config-01-grouping-01.jpg)
+
+The suite hierarchy consists of up to four levels: **parent suite**, **suite**, **subsuite**, and **test case**.
+
+:::info
+
+<dl>
+  <dt><strong>Parent Suite</strong></dt>
+  <dd>The highest level of the hierarchy used to group test results by package (e.g., <code>client</code>, <code>server</code>), test directory (e.g., <code>e2e</code>, <code>unit</code>, <code>integration</code>), or any other relevant criteria. <em>It is not configured by default</em>, but you can easily add it to your reports.</dd>
+
+  <dt><strong>Suite</strong></dt>
+  <dd>Serves as the primary grouping level, typically based on test file paths. However, you can choose alternative criteria such as feature or component directories (<code>LoginScreen</code>, <code>ProfileScreen</code>, <code>core</code>, <code>utils</code>), or top-level describe block names, if preferred.</dd>
+
+  <dt><strong>Subsuite</strong></dt>
+  <dd>Helpful when dealing with a large number of test cases within a single suite. By default, it groups test cases based on the top-level describe block. However, alternative configurations can be explored if there are numerous nested describe blocks or a file system-based splitting is preferred.</dd>
+
+  <dt><strong>Test Case</strong></dt>
+  <dd>Represents the actual test. By default, it displays the test name, including the inner describe block names. You have the flexibility to choose a test name format that best suits your needs – see a few examples below of how to configure the grouping levels.</dd>
+</dl>
+
+:::
+
+Below we'll explore a few examples of how to configure the grouping by suite.
+
+## Default preset
+
+By default, `jest-allure2-reporter` provides 3 levels of grouping: **suite**, **subsuite**, and **test case**:
+
+1. The **suite** level is based on the _test file path_.
+1. The **subsuite** level is based on the _top-level describe block_.
+1. The **test case** level is based on the _test name_ (including the inner describe block names).
+
+<Tabs groupId="grouping-default">
+  <TabItem value="report" label="Report">
+
+![Default grouping](../../../img/screenshots/config-01-grouping-02.jpg)
+
+  </TabItem>
+  <TabItem value="structure" label="Structure">
+
+```plain
+├─ client/auth/LoginScreen.test.js
+│  └─ Login screen
+│     ├─ when loaded should display login form
+│     └─ when loaded and typed should validate e-mail
+│     └─ when loaded and typed should validate password
+├─ client/auth/ForgotPasswordScreen.test.js
+│  └─ Forgot password screen
+│     ├─ when loaded should display forgot password form
+│     └─ when loaded and typed should validate e-mail
+├─ server/controllers/login.test.js
+|  └─ Login controller
+|     ├─ should return 401 if user is not found
+|     └─ should return 401 if password is incorrect
+└─ server/controllers/forgotPassword.test.js
+   └─ Forgot password controller
+      ├─ should return 401 if user is not found
+      └─ should return 401 if password is incorrect
+```
+
+  </TabItem>
+  <TabItem value="config" label="Config">
+
+```js title="jest.config.js"
+/** @type {import('@jest/types').Config.InitialOptions} */
+module.exports = {
+  testEnvironment: 'jest-allure2-reporter/environment-node',
+  reporters: [
+    'default',
+    'jest-allure2-reporter',
+    // You don't need to configure anything special
+    // to get this structure.
+  ],
+};
+```
+
+  </TabItem>
+</Tabs>
+
+## File-oriented example
+
+This example might be useful for projects with many test files and relatively few test cases per file.
+
+<Tabs groupId="grouping-default">
+  <TabItem value="report" label="Report">
+
+![File-oriented grouping](../../../img/screenshots/config-01-grouping-03.jpg)
+
+  </TabItem>
+  <TabItem value="structure" label="Structure">
+
+```plain
+├─ client
+│  └─ auth
+│     ├─ LoginScreen.test.js
+│     │  ├─ Login screen when loaded should display login form
+│     │  ├─ Login screen when loaded and typed should validate e-mail
+│     │  └─ Login screen when loaded and typed should validate password
+│     └─ ForgotPasswordScreen.test.js
+│        ├─ Forgot password screen when loaded should display forgot password form
+│        └─ Forgot password screen when loaded and typed should validate e-mail
+└─ server
+   └─ controllers
+      ├─ login.test.js
+      │  ├─ Login controller should return 401 if user is not found
+      │  └─ Login controller should return 401 if password is incorrect
+      └─ ForgotPasswordScreen.test.js
+         ├─ Forgot password controller should return 401 if user is not found
+         └─ Forgot password controller should return 401 if password is incorrect
+```
+
+  </TabItem>
+  <TabItem value="config" label="Config">
+
+```js title="jest.config.js"
+/** @type {import('@jest/types').Config.InitialOptions} */
+module.exports = {
+  testEnvironment: 'jest-allure2-reporter/environment-node',
+  reporters: [
+    'default',
+    ['jest-allure2-reporter', /** @type {import('jest-allure2-reporter').Options}*/
+      {
+        labels: {
+          parentSuite: ({ file }) => file.pathSegments[0],
+          suite: ({ file }) => file.pathSegments.slice(1, -1).join(' '),
+          subsuite: ({ file }) => file.pathSegments.slice(-1)[0],
+          test: ({ test }) => test.fullName,
+        },
+      },
+    ],
+  ],
+};
+```
+
+  </TabItem>
+</Tabs>
+
+## Test-oriented example
+
+This example should fit projects with a small number of test files and numerous test cases per file.
+
+<Tabs groupId="grouping-default">
+  <TabItem value="report" label="Report">
+
+![Test-oriented grouping](../../../img/screenshots/config-01-grouping-04.jpg)
+
+  </TabItem>
+  <TabItem value="structure" label="Structure">
+
+```plain
+├─ client/auth/LoginScreen.test.js
+│  ├─ Login screen
+│  │  ├─ when loaded
+│  │  │  └─ should display login form
+│  │  └─ when loaded and typed
+│  │     ├─ should validate e-mail
+│  │     └─ should validate password
+│  └─ Forgot password screen
+│     ├─ when loaded
+│     │  └─ should display forgot password form
+│     └─ when loaded and typed
+│        └─ should validate e-mail
+└─ server/controllers/login.test.js
+   ├─ Login controller
+   │  ├─ should return 401 if user is not found
+   │  └─ should return 401 if password is incorrect
+   └─ Forgot password controller
+      ├─ should return 401 if user is not found
+      └─ should return 401 if password is incorrect
+```
+
+  </TabItem>
+  <TabItem value="config" label="Config">
+
+```js title="jest.config.js"
+/** @type {import('@jest/types').Config.InitialOptions} */
+module.exports = {
+  testEnvironment: 'jest-allure2-reporter/environment-node',
+  reporters: [
+    'default',
+    ['jest-allure2-reporter', /** @type {import('jest-allure2-reporter').Options}*/ {
+      labels: {
+        parentSuite: ({ file }) => file.path,
+        suite: ({ test }) => test.ancestorTitles[0],
+        subsuite: ({ test }) => test.ancestorTitles.slice(1).join(' ') || undefined,
+        test: ({ test }) => test.title,
+      },
+    }],
+  ],
+};
+```
+
+  </TabItem>
+</Tabs>
+

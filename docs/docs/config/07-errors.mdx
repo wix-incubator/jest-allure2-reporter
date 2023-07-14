@@ -2,7 +2,7 @@
 description: Distinguish between types of test failures.
 ---
 
-# Errors
+# Error handling 🚧
 
 :::caution
 
@@ -11,46 +11,15 @@ anywhere. Please use GitHub docs for the latest stable version.
 
 :::
 
+:::danger
+
+This article is just a draft. It is not yet complete, and you should not read it meanwhile :)
+
+:::
+
 There are a few things to know about Jest failures and how they are reported to Allure.
 
-## Categories
-
-```
-TODO: add a screenshot
-```
-
-One of the most important things when your builds start failing is to understand what exactly is broken.
-
-By default, the reporter can distinguish only between **Product defects** and **Test defects**. In the context of this reporter:
-
-* A **product defect** is a failed Jest assertion, e.g. `expect(countOfPosts).toBe(1)`.
-* A **test defect** is a failed test, e.g. `throw new Error('Something went wrong')`.
-
-It is advisable to invest some time into configuring the reporter to distinguish between different types of product defects, especially if you have end-to-end tests that are prone to flakiness, e.g.:
-
-```js title="jest.config.js"
-/**
- * @type {import('@jest/types').Config.InitialOptions}
- */
-module.exports = {
-  // ... your jest config
-  reporters: [
-    'default',
-    ['jest-allure2-reporter',
-      /** @type {import('jest-allure2-reporter').JestAllure2ReporterOptions} */
-      {
-        categories: [
-          {
-            name: "Visual Regression",
-            matchedStatuses: ["failed"],
-            messageRegex: "Expected .*to match a screenshot.*"
-          }
-        ]
-      }
-    ],
-  ],
-};
-```
+## Defect categories
 
 ## `beforeAll` and `afterAll` hooks
 

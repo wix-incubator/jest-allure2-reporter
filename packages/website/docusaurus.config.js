@@ -1,8 +1,7 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
-const lightCodeTheme = require('prism-react-renderer/themes/github');
-const darkCodeTheme = require('prism-react-renderer/themes/dracula');
+const { themes: prismThemes } = require('prism-react-renderer');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -26,8 +25,8 @@ const config = {
   },
 
   plugins: [
-    'docusaurus-plugin-sass',
-    require.resolve('@cmfcmf/docusaurus-search-local'),
+    '@noomorph/docusaurus-plugin-sass',
+    require.resolve('@noomorph/docusaurus-search-local'),
     // [
     //   'docusaurus-plugin-typedoc',
     //   {
@@ -146,8 +145,8 @@ const config = {
         copyright: `Copyright © ${new Date().getFullYear()} Wix Incubator. Built with Docusaurus.`,
       },
       prism: {
-        theme: lightCodeTheme,
-        darkTheme: darkCodeTheme,
+        theme: prismThemes.github,
+        darkTheme: prismThemes.darcula,
       },
     }),
 };
