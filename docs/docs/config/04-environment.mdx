@@ -2,6 +2,9 @@
 description: Get hold of the environment information for your test runs.
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # Environment
 
 :::caution
@@ -11,20 +14,51 @@ anywhere. Please use GitHub docs for the latest stable version.
 
 :::
 
-<img src={require('../../img/screenshots/config-environment-01.jpg').default} width={398} alt="Environment" />
+**Environment** is a feature that allows you to capture and display specific details related to the test execution environment, such as the operating system, browser version, device information, or any other global information that is relevant to the entire test run.
 
-The Allure "Environment" feature in Allure reporting is a way to provide additional context and information about the test execution environment. It allows you to capture and display specific details related to the test environment, such as the operating system, browser version, device information, or any other relevant configuration.
+Such information can be especially insightful when you're troubleshooting test failures in a heterogeneous environment, e.g. when tests fail on CI but pass locally, or when you're trying to pinpoint the cause of a test failure on a specific platform or a version of some software.
 
-By utilizing the Allure "Environment" feature, you can gain insights into the test environment conditions and better understand how they may impact the test results. This information can be valuable for troubleshooting and debugging purposes, as well as for ensuring reproducibility of test outcomes across different environments.
-
-To use the Allure "Environment" feature, you typically need to integrate the appropriate Allure environment package that corresponds to your testing framework or runtime environment. This package provides the necessary tools and hooks to collect the environment information during test execution and include it in the generated Allure reports.
-
-By including environment information in your Allure reports, you can have a comprehensive overview of the test execution context, making it easier to analyze and interpret the test results. This feature is particularly useful when working with distributed or parallel test execution environments, as it helps identify environment-specific issues or variations in test outcomes.
-
-In summary, the Allure "Environment" feature enhances your test reporting by providing detailed information about the test execution environment. It allows you to capture and display relevant environment details alongside your test results, facilitating better analysis, troubleshooting, and reproducibility of test outcomes.
+It is always a good idea to include environment information in your test reports, as soon as you start running tests anywhere further than your local machine. When you will be setting it up, try to configure saving [Executor] information as well.
 
 ## Configuration
 
-To enable the Allure "Environment" feature, you need to integrate the appropriate Allure environment package that corresponds to your testing framework or runtime environment. This package provides the necessary tools and hooks to collect the environment information during test execution and include it in the generated Allure reports.
+By default, the environment information is not included in the report. To enable it, you need to add the following configuration to your `jest.config.js` file. In the example below, we're using the [lodash] library to filter out any sensitive information from the environment variables, and we also include the name and version of the package under test, as well as the type of the operating system:
 
-The following table lists the available Allure environment packages and their corresponding testing frameworks or runtime environments:
+<Tabs groupId="configTab">
+  <TabItem value="config" label="Config">
+
+```js title="jest.config.js"
+const _ = require('lodash');
+const os = require('os');
+
+/** @type {import('@jest/types').Config.InitialOptions} */
+module.exports = {
+  // ...
+  reporters: [
+    // ...
+    ['jest-allure2-reporter', {
+      environment: ({ _, package }) => ({
+        'package.name': package.name,
+        'package.version': package.version,
+        'os.type': os.type(),
+
+        ..._
+          .chain(process.env)
+          .omitBy((value, key) => /secret|password|token/i.test(key))
+          .mapKeys((value, key) => 'env.' + key)
+          .value(),
+      }),
+    }],
+  ],
+};
+```
+
+  </TabItem>
+  <TabItem value="demo" label="Report">
+    <img src={require('../../img/screenshots/config-environment-01.jpg').default} width={398} alt="Environment" />
+  </TabItem>
+</Tabs>
+
+[Executor]: 05-executor.mdx
+
+[lodash]: https://lodash.com

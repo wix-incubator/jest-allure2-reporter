@@ -30,10 +30,10 @@ The suite hierarchy consists of up to four levels: **parent suite**, **suite**, 
   <dd>Serves as the primary grouping level, typically based on test file paths. However, you can choose alternative criteria such as feature or component directories (<code>LoginScreen</code>, <code>ProfileScreen</code>, <code>core</code>, <code>utils</code>), or top-level describe block names, if preferred.</dd>
 
   <dt><strong>Subsuite</strong></dt>
-  <dd>Helpful when dealing with a large number of test cases within a single suite. By default, it groups test cases based on the top-level describe block. However, alternative configurations can be explored if there are numerous nested describe blocks or a file system-based splitting is preferred.</dd>
+  <dd>Helpful when dealing with a large number of test cases within a single suite. By default, test cases are grouped per top-level describe block. However, if there are numerous nested describe blocks (or, vice versa &mdash; lots of files and directories), you can look for alternative configurations.</dd>
 
   <dt><strong>Test Case</strong></dt>
-  <dd>Represents the actual test. By default, it displays the test name, including the inner describe block names. You have the flexibility to choose a test name format that best suits your needs – see a few examples below of how to configure the grouping levels.</dd>
+  <dd>Represents the actual test. By default, it displays the test name, including the inner describe block names. You have the flexibility to choose a test name format that best suits your needs – see a few examples below in this article.</dd>
 </dl>
 
 :::
@@ -48,8 +48,8 @@ By default, `jest-allure2-reporter` provides 3 levels of grouping: **suite**, **
 1. The **subsuite** level is based on the _top-level describe block_.
 1. The **test case** level is based on the _test name_ (including the inner describe block names).
 
-<Tabs groupId="grouping-default">
-  <TabItem value="report" label="Report">
+<Tabs groupId="configTab">
+  <TabItem value="demo" label="Report">
 
 ![Default grouping](../../../img/screenshots/config-01-grouping-02.jpg)
 
@@ -99,8 +99,8 @@ module.exports = {
 
 This example might be useful for projects with many test files and relatively few test cases per file.
 
-<Tabs groupId="grouping-default">
-  <TabItem value="report" label="Report">
+<Tabs groupId="configTab">
+  <TabItem value="demo" label="Report">
 
 ![File-oriented grouping](../../../img/screenshots/config-01-grouping-03.jpg)
 
@@ -155,10 +155,10 @@ module.exports = {
 
 ## Test-oriented example
 
-This example should fit projects with a small number of test files and numerous test cases per file.
+This example should fit projects with a smaller number of test files and numerous test cases per file.
 
-<Tabs groupId="grouping-default">
-  <TabItem value="report" label="Report">
+<Tabs groupId="configTab">
+  <TabItem value="demo" label="Report">
 
 ![Test-oriented grouping](../../../img/screenshots/config-01-grouping-04.jpg)
 

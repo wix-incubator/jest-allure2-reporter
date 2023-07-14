@@ -1,6 +1,9 @@
 ---
-description: Know the exact machine behind your test runs.
+description: Get to know the exact machine behind your test runs.
 ---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 # Executor
 
@@ -11,16 +14,69 @@ anywhere. Please use GitHub docs for the latest stable version.
 
 :::
 
-<img src={require('../../img/screenshots/config-executor-01.jpg').default} width={398} alt="Executor" />
+**Executor** information is crucial as it allows you to identify the entity or system that executed the tests.
+Typically, this would be a build agent on your CI/CD server, but, in a way, a developer's host machine is also an executor.
 
-The "Executor" feature in Allure reports is designed to provide information about the entity or system responsible for executing the tests. It helps track and identify the source or entity that triggered the test execution, allowing you to gain insights into who or what initiated the tests.
+While this feature might not be significant for a single test run on your local machine, it becomes invaluable:
 
-In the context of Allure reports, the "Executor" represents the entity or component that runs the tests, such as a testing framework, a CI/CD pipeline, or a specific user account. It acts as a metadata attribute associated with the test results, providing a valuable reference point for understanding the context and origin of the test executions.
+* **When you want to navigate the history of your test runs.**
+  Executor info provides the necessary URLs and identifiers to form a comprehensive record of your test runs. When viewed over time, this history can reveal trends and patterns that may not be evident from a single test run. Are your tests taking longer to execute? Are they failing more frequently? When did they last pass successfully? These are all questions that the executor info can help answer.
+* **When you want to analyze the test results based on the executor.**
+  This is a great idea when your tests are flaky, but you suspect that the flakiness is caused by a specific build agent on your CI/CD server.
+  Such errors can crop up when the agents are manually provisioned, or when they lack uniformity: variations in network configurations, different software versions, or a shift in the alignment of stars in the night sky above the data center[^1]!
 
-The "Executor" feature in Allure reports serves multiple purposes. Firstly, it helps establish a clear connection between the test results and the system or entity responsible for their execution. This can be useful in identifying the source of test failures or issues, especially in scenarios where multiple testing environments or systems are involved.
+## Configuration
 
-Additionally, the "Executor" feature enables you to differentiate and analyze test results based on the executing entity. For example, if you have different teams or users running tests, the "Executor" attribute can help categorize and filter the results accordingly, allowing you to gain insights into team-specific or user-specific test outcomes.
+By default, the executor information is included in the report if a CI/CD environment is detected.
+However, if you want to report local test runs as well, you'll need to tweak the configuration at your taste, e.g.:
 
-To include the "Executor" information in Allure reports, you typically need to configure the appropriate attribute or field in your test execution framework or pipeline. This may involve setting environment variables, specifying configuration files, or utilizing specific plugins or integrations depending on your testing ecosystem.
+<Tabs groupId="configTab">
+  <TabItem value="demo" label="Report">
+    <img src={require('../../img/screenshots/config-executor-01.jpg').default} width={398} alt="Executor" />
+  </TabItem>
+  <TabItem value="config" label="Config">
 
-In summary, the "Executor" feature in Allure reports provides information about the entity or system responsible for running the tests. It helps track and identify the source of test executions, enabling better analysis, troubleshooting, and categorization of test results based on the executing entity.
+```js title="jest.config.js"
+const os = require('os');
+
+/** @type {import('@jest/types').Config.InitialOptions} */
+module.exports = {
+  // ...
+  reporters: [
+    // ...
+    ['jest-allure2-reporter', {
+      executor: ({ defaultValue }) => ({
+        name: os.hostname(),
+        type: os.platform(),
+
+        ...defaultValue,
+      }),
+    }]
+  ],
+};
+```
+
+  </TabItem>
+</Tabs>
+
+The `defaultValue` is based on [`ci-info`] npm package, but it can be overriden just like
+shown above in the example.
+
+## Overrides
+
+In the table below you can see the exhaustive list of executor info properties:
+
+| Property       | Description                                                            |
+|----------------|------------------------------------------------------------------------|
+| `name`         | A human-readable name of the executor, e.g. Jenkins, Teamcity, etc.    |
+| `type`         | The type of the executor: `jenkins`, `teamcity`, `bamboo`, etc.        |
+| `url`          | The URL of the executor. TODO                                          |
+| `buildOrder`   | The order of the build, used for building trend charts over [History]. |
+| `buildName`    | The name of the build.  TODO                                           |
+| `buildUrl`     | The URL of the build on the CI/CD server.                              |
+| `reportUrl`    | The URL of the Allure report itself, to be used when linking to it.    |
+| `reportName`   | The name of the report. TODO                                           |
+
+[^1]: On a more serious note, it is not entirely unheard of for a build agent to have a faulty hardware component, such as a faulty RAM module. Such issues can be hard to detect, as they may only manifest themselves under heavy load, or when the agent is running a specific type of tests.
+
+[History]: 06-history.mdx
