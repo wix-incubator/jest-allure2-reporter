@@ -54,19 +54,58 @@ const scenarios = [
   //   await page.goto('https://allure-framework.github.io/allure-demo/5/#packages');
   //   await page.waitForSelector('.tree__content');
   // }],
-  ['config-03-errors-01', async (page) => {
-    await page.goto('https://allure-framework.github.io/allure-demo/5/#categories');
-    await page.waitForSelector('.tree__content');
-  }],
-  ['config-environment-01', async (page) => {
-    await page.goto('https://allure-framework.github.io/allure-demo/5/');
-    await page.waitForSelector('.widget[data-id="environment"]');
-    return page.$('.widget[data-id="environment"]');
-  }],
-  ['config-executor-01', async (page) => {
-    await page.goto('https://allure-framework.github.io/allure-demo/5/');
-    await page.waitForSelector('.widget[data-id="executors"]');
-    return page.$('.widget[data-id="executors"]');
+  // ['config-03-errors-01', async (page) => {
+  //   await page.goto('https://allure-framework.github.io/allure-demo/5/#categories');
+  //   await page.waitForSelector('.tree__content');
+  // }],
+  // ['config-environment-01', async (page) => {
+  //   await page.goto('https://allure-framework.github.io/allure-demo/5/');
+  //   await page.waitForSelector('.widget[data-id="environment"]');
+  //   return page.$('.widget[data-id="environment"]');
+  // }],
+  // ['config-executor-01', async (page) => {
+  //   await page.goto('https://allure-framework.github.io/allure-demo/5/');
+  //   await page.waitForSelector('.widget[data-id="executors"]');
+  //   return page.$('.widget[data-id="executors"]');
+  // }],
+  // ['config-history-01', async (page) => {
+  //   await page.goto('https://allure-framework.github.io/allure-demo/5/#graph');
+  //   await page.waitForNetworkIdle();
+  //   await page.waitForSelector('.chart__svg');
+  // }],
+  // ['config-history-02', async (page) => {
+  //   await page.goto('https://allure-framework.github.io/allure-demo/5/#categories/5f7424d2d4d8c2e0b74fb91fb685e1b4/3a46dbf2ef318473/retries');
+  //   await page.waitForNetworkIdle();
+  // }],
+  // ['graphs-duration-trend', async (page) => {
+  //   await page.goto('https://allure-framework.github.io/allure-demo/5/#graph');
+  //   await page.waitForNetworkIdle();
+  //
+  //   return page.$('.widget[data-id="duration-trend"]');
+  // }],
+  // ['graphs-retry-trend', async (page) => {
+  //   await page.goto('https://allure-framework.github.io/allure-demo/5/#graph');
+  //   await page.waitForNetworkIdle();
+  //
+  //   return page.$('.widget[data-id="retry-trend"]');
+  // }],
+  // ['graphs-category-trend', async (page) => {
+  //   await page.goto('https://allure-framework.github.io/allure-demo/5/#graph');
+  //   await page.waitForNetworkIdle();
+  //
+  //   return page.$('.widget[data-id="categories-trend"]');
+  // }],
+  // ['graphs-history-trend', async (page) => {
+  //   await page.goto('https://allure-framework.github.io/allure-demo/5/#graph');
+  //   await page.waitForNetworkIdle();
+  //
+  //   return page.$('.widget[data-id="history-trend"]');
+  // }],
+  ['icon-retries', async (page) => {
+    await page.goto('https://allure-framework.github.io/allure-demo/5/#suites');
+    await page.waitForNetworkIdle();
+
+    return page.$('span[data-mark="retriesStatusChange"]');
   }],
 ];
 

@@ -45,11 +45,11 @@ module.exports = {
   reporters: [
     // ...
     ['jest-allure2-reporter', {
-      executor: ({ defaultValue }) => ({
+      executor: ({ value }) => ({
         name: os.hostname(),
         type: os.platform(),
 
-        ...defaultValue,
+        ...value,
       }),
     }]
   ],
@@ -59,23 +59,23 @@ module.exports = {
   </TabItem>
 </Tabs>
 
-The `defaultValue` is based on [`ci-info`] npm package, but it can be overriden just like
-shown above in the example.
+The `defaultValue` is based on [`ci-info`] npm package, but you can override any of its properties,
+as shown above in the example.
 
 ## Overrides
 
-In the table below you can see the exhaustive list of executor info properties:
+In the table below you can see all available `ExecutorInfo` properties:
 
-| Property       | Description                                                            |
-|----------------|------------------------------------------------------------------------|
-| `name`         | A human-readable name of the executor, e.g. Jenkins, Teamcity, etc.    |
-| `type`         | The type of the executor: `jenkins`, `teamcity`, `bamboo`, etc.        |
-| `url`          | The URL of the executor. TODO                                          |
-| `buildOrder`   | The order of the build, used for building trend charts over [History]. |
-| `buildName`    | The name of the build.  TODO                                           |
-| `buildUrl`     | The URL of the build on the CI/CD server.                              |
-| `reportUrl`    | The URL of the Allure report itself, to be used when linking to it.    |
-| `reportName`   | The name of the report. TODO                                           |
+| Property       | Description                                                                                 |
+|----------------|---------------------------------------------------------------------------------------------|
+| `name`         | A human-readable name of the executor, e.g. Jenkins, Teamcity, etc.                         |
+| `type`         | Executor type (`jenkins`, `teamcity`, `bamboo`, etc.), determines the icon in the report.   |
+| `buildName`    | Display name of the build in the Executor widget.                                           |
+| `buildUrl`     | Makes `buildName` link clickable in the Executor widget to take you to the build page.      |
+| `buildOrder`   | Index of the build, used to sort builds chronologically in the [Trend] widget.              |
+| `reportUrl`    | URL of the current Allure report, used to navigate between reports in the [Trend] widget.   |
+| `reportName`   | Name of the current Allure report. Purpose is unclear.                                      |
+| `url`          | Base URL of the server where Allure reports are hosted. Purpose is unclear.                 |
 
 [^1]: On a more serious note, it is not entirely unheard of for a build agent to have a faulty hardware component, such as a faulty RAM module. Such issues can be hard to detect, as they may only manifest themselves under heavy load, or when the agent is running a specific type of tests.
 
