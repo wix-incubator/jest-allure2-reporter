@@ -1,4 +1,4 @@
-import type { JestAllure2ReporterOptions } from '../JestAllure2ReporterOptions';
+import type { ReporterOptions } from '../ReporterOptions';
 import type { ReporterEmitter } from '../ReporterEmitter';
 
 import {
@@ -13,7 +13,7 @@ import { TestFileSelectors } from './testFile';
 
 type SelectorsConfig = {
   emitter: ReporterEmitter;
-  reporterOptions: Partial<JestAllure2ReporterOptions>;
+  reporterOptions: Partial<ReporterOptions>;
   rootDir: string;
 };
 
@@ -29,7 +29,7 @@ export class Selectors {
     const threadService = new ThreadService(emitter);
     const projectService = new ProjectService({
       rootDir: selectorsConfig.rootDir,
-      packageName: selectorsConfig.reporterOptions.testInfo?.labels
+      packageName: selectorsConfig.reporterOptions.testCase?.labels
         ?.package as string, // TODO: rewrite label system
     });
 

@@ -113,7 +113,7 @@ describe('statuses.test.js', () => {
   describe('with options.packageName = "custom"', () => {
     beforeAll(async () => {
       query = await runReporter({
-        testInfo: {
+        testCase: {
           labels: {
             package: 'custom',
           },

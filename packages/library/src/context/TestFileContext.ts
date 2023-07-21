@@ -1,6 +1,6 @@
 import type { TestCaseResult, TestResult } from '@jest/reporters';
-import type { AllureGroup } from 'allure-js-commons';
-import { LabelName, Stage, Status } from 'allure-js-commons';
+import type { AllureGroup } from '@noomorph/allure-js-commons';
+import { LabelName, Stage, Status } from '@noomorph/allure-js-commons';
 
 import shallowEqualArrays from '../utils/shallowEqualArrays';
 

@@ -10,11 +10,11 @@ import type {
   TestContext,
   TestResult,
 } from '@jest/reporters';
-import { AllureRuntime } from 'allure-js-commons';
+import { AllureRuntime } from '@noomorph/allure-js-commons';
 import { JestMetadataReporter } from 'jest-metadata/reporter';
 import rimraf from 'rimraf';
 
-import type { JestAllure2ReporterOptions } from './JestAllure2ReporterOptions';
+import type { ReporterOptions } from './ReporterOptions';
 import type { ReporterEmitter } from './ReporterEmitter';
 import { TestRunContext } from './context';
 import { Selectors } from './selectors';
@@ -22,12 +22,12 @@ import { Selectors } from './selectors';
 export class JestAllure2Reporter extends JestMetadataReporter {
   // eslint-disable-next-line unicorn/prefer-event-target
   private readonly _emitter = new EventEmitter() as ReporterEmitter;
-  private readonly _options: Partial<JestAllure2ReporterOptions>;
+  private readonly _options: Partial<ReporterOptions>;
   private readonly _testRunContext: TestRunContext;
 
   constructor(
     globalConfig: Config.GlobalConfig,
-    options: Partial<JestAllure2ReporterOptions>,
+    options: Partial<ReporterOptions>,
   ) {
     super(globalConfig, options);
 
@@ -43,7 +43,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
       allureRuntime: new AllureRuntime({
         resultsDir: this._options.resultsDir,
       }),
-      environmentInfo: options.environmentInfo ?? true,
+      environmentInfo: options.environment ?? true,
       select: new Selectors({
         emitter: this._emitter,
         reporterOptions: options,

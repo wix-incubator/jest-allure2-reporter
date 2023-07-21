@@ -22,7 +22,7 @@ describe('environment.properties', () => {
   describe('with options.environmentInfo = (...)', () => {
     beforeAll(async () => {
       query = await runReporter({
-        environmentInfo: () => ({
+        environment: () => ({
           CUSTOM_INFO: 'CUSTOM_VALUE',
         }),
       });

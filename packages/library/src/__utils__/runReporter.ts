@@ -6,12 +6,12 @@ import _ from 'lodash';
 import tempfile from 'tempfile';
 
 import { JestAllure2Reporter } from '../JestAllure2Reporter';
-import type { JestAllure2ReporterOptions } from '../JestAllure2ReporterOptions';
+import type { ReporterOptions } from '../ReporterOptions';
 
 const rootDirectory = path.join(__dirname, '../..');
 
 export async function runReporter(
-  overrides: Partial<JestAllure2ReporterOptions>,
+  overrides: Partial<ReporterOptions>,
 ) {
   const options = {
     ...overrides,

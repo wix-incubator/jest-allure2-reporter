@@ -1,10 +1,10 @@
 import path from 'node:path';
 
-import { Status } from 'allure-js-commons';
+import { Status } from '@noomorph/allure-js-commons';
 import stripAnsi from 'strip-ansi';
 import type { TestCaseResult } from '@jest/reporters';
 
-import type { JestAllure2ReporterOptions } from '../JestAllure2ReporterOptions';
+import type { ReporterOptions } from '../ReporterOptions';
 import isEmptyObject from '../utils/isEmptyObject';
 import md5 from '../utils/md5';
 
@@ -17,7 +17,7 @@ import type {
 } from './fallbacks';
 
 type Services = {
-  reporterOptions: Partial<JestAllure2ReporterOptions>;
+  reporterOptions: Partial<ReporterOptions>;
   meta: MetadataService;
   project: ProjectService;
   query: QueryService;
