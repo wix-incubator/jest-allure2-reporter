@@ -42,13 +42,18 @@ import type {
  */
 export type ReporterOptions = {
   /**
+   * Overwrite the results directory if it already exists.
+   * @default true
+   */
+  overwrite?: boolean;
+  /**
    * Specifies where to output test result files.
    * Please note that the results directory is not a ready-to-use Allure report.
    * You'll need to generate the report using the `allure` CLI.
    *
    * @default 'allure-results'
    */
-  resultsDir: string | ResultsDirectoryConfig;
+  resultsDir: string;
   /**
    * Configures globally how test cases are reported: names, descriptions, labels, status, etc.
    */
@@ -71,22 +76,6 @@ export type ReporterOptions = {
    * `failed` and `broken` respectively.
    */
   categories: CategoriesCustomizer;
-};
-
-/**
- * Extended configuration options for the results directory.
- */
-type ResultsDirectoryConfig = {
-  /**
-   * The path to the output directory with Allure results.
-   * @default 'allure-results'
-   */
-  path: string;
-  /**
-   * Overwrite the results directory if it already exists.
-   * @default true
-   */
-  overwrite?: boolean;
 };
 
 /**
@@ -136,7 +125,7 @@ interface TestCaseCustomizer extends TestStepCustomizer {
 
 interface TestStepCustomizer {
   /**
-   * Extractor for the short test case name.
+   * Extractor for the default test or step name.
    * @default ({ test }) => test.title
    */
   name: TestStepExtractor<string>;
@@ -248,7 +237,7 @@ interface TestStepExtractorContext<T> extends TestCaseExtractorContext<T> {
 interface FileContext {
   readonly contents: string;
   readonly path: PathHelper;
-  readonly posixPath: PathHelper;
+  readonly pathPosix: PathHelper;
 }
 
 interface PathHelper {
@@ -301,17 +290,15 @@ type Jest$Status =
   | 'focused';
 
 interface TestCaseMetadata extends TestStepMetadata {
+  readonly name?: never;
   readonly identifier: string;
   readonly labels?: readonly Label[];
   readonly links?: readonly Link[];
 }
 
 interface TestStepMetadata {
-  readonly code?: string;
   readonly name?: string;
-  readonly status?: Status;
-  readonly statusDetails?: StatusDetails;
-  readonly stage: Stage;
+  readonly code?: string;
   readonly description?: readonly string[];
   readonly descriptionHtml?: readonly string[];
   readonly steps?: readonly TestStepMetadata[];
