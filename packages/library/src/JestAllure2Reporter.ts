@@ -1,4 +1,3 @@
-import { EventEmitter } from 'node:events';
 import path from 'node:path';
 
 import type {
@@ -10,20 +9,24 @@ import type {
   TestContext,
   TestResult,
 } from '@jest/reporters';
-import { AllureRuntime } from '@noomorph/allure-js-commons';
-import { JestMetadataReporter } from 'jest-metadata/reporter';
+import { query, JestMetadataReporter } from 'jest-metadata/reporter';
 import rimraf from 'rimraf';
+import { AllureRuntime } from '@noomorph/allure-js-commons';
 
-import type { ReporterOptions } from './ReporterOptions';
-import type { ReporterEmitter } from './ReporterEmitter';
-import { TestRunContext } from './context';
-import { Selectors } from './selectors';
+import type {
+  GlobalExtractorContext,
+  ReporterOptions,
+  AllureRunMetadata,
+  AllureTestCaseMetadata,
+} from './ReporterOptions';
+import { resolveOptions } from './options';
+
+const NAMESPACE = 'allure2' as const;
 
 export class JestAllure2Reporter extends JestMetadataReporter {
-  // eslint-disable-next-line unicorn/prefer-event-target
-  private readonly _emitter = new EventEmitter() as ReporterEmitter;
-  private readonly _options: Partial<ReporterOptions>;
-  private readonly _testRunContext: TestRunContext;
+  private readonly _allure: AllureRuntime;
+  private readonly _options: ReporterOptions;
+  private readonly _globalContext: GlobalExtractorContext<any>;
 
   constructor(
     globalConfig: Config.GlobalConfig,
@@ -31,26 +34,16 @@ export class JestAllure2Reporter extends JestMetadataReporter {
   ) {
     super(globalConfig, options);
 
-    this._options = options;
-    this._options.resultsDir =
-      this._options.resultsDir ??
-      path.resolve(options.resultsDir ?? 'allure-results');
-    if (this._options.overwriteResultsDir !== false) {
-      rimraf.sync(this._options.resultsDir);
-    }
-
-    this._testRunContext = new TestRunContext({
-      allureRuntime: new AllureRuntime({
-        resultsDir: this._options.resultsDir,
-      }),
-      environmentInfo: options.environment ?? true,
-      select: new Selectors({
-        emitter: this._emitter,
-        reporterOptions: options,
-        rootDir: globalConfig.rootDir,
-      }),
-      rootDir: globalConfig.rootDir,
+    this._options = resolveOptions(options);
+    this._allure = new AllureRuntime({
+      resultsDir: this._options.resultsDir,
     });
+
+    this._globalContext = {
+      cwd: process.cwd(),
+      package: require(path.join(process.cwd(), 'package.json')),
+      value: undefined,
+    };
   }
 
   async onRunStart(
@@ -59,23 +52,48 @@ export class JestAllure2Reporter extends JestMetadataReporter {
   ): Promise<void> {
     await super.onRunStart(aggregatedResult, options);
 
-    this._emitter.emit('runStart', { aggregatedResult, options });
-    await this._testRunContext.writeMetadata();
+    if (this._options.overwrite) {
+      rimraf.sync(this._options.resultsDir);
+    }
+
+    const environment = this._options.environment(this._globalContext);
+    if (environment) {
+      this._allure.writeEnvironmentInfo(environment);
+    }
+
+    const executor = this._options.executor(this._globalContext);
+    if (executor) {
+      this._allure.writeExecutorInfo(executor);
+    }
   }
 
   onTestFileStart(test: Test) {
     super.onTestFileStart(test);
 
-    this._emitter.emit('testFileStart', { test });
-    this._testRunContext.registerFileContext(test);
+    const run = query.test(test)!.get(NAMESPACE, {}) as AllureRunMetadata;
+    run.startedAt = Date.now();
+    run.threadId = '1';
+  }
+
+  onTestCaseStart(_test: unknown, _testCaseStartInfo: unknown) {
+    super.onTestCaseStart(_test, _testCaseStartInfo);
+
+    const testEntry = query.testCaseResult(testCaseResult)!;
+    const metadata = testEntry.get(NAMESPACE, {}) as AllureTestCaseMetadata;
+
+    metadata.start = Date.now();
   }
 
   onTestCaseResult(test: Test, testCaseResult: TestCaseResult) {
     super.onTestCaseResult(test, testCaseResult);
-    this._emitter.emit('testCaseResult', { test, testCaseResult });
 
-    const fileContext = this._testRunContext.getFileContext(test.path)!;
-    fileContext.handleTestCaseResult(testCaseResult);
+    const testEntry = query.testCaseResult(testCaseResult)!;
+    const metadata = testEntry.get(NAMESPACE, {}) as AllureTestCaseMetadata;
+
+    metadata.identifier = testEntry.id;
+    metadata.start =
+      metadata.start ?? Date.now() - (testCaseResult.duration ?? 0);
+    metadata.stop = Date.now();
   }
 
   onTestFileResult(
@@ -84,12 +102,8 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     aggregatedResult: AggregatedResult,
   ): Promise<void> | void {
     super.onTestFileResult(test, testResult, aggregatedResult);
-    this._emitter.emit('testFileResult', {
-      test,
-      testResult,
-      aggregatedResult,
-    });
 
+    const run = query.test(test)!.get(NAMESPACE, {}) as AllureRunMetadata;
     const fileContext = this._testRunContext.getFileContext(test.path)!;
     fileContext.handleTestFileResult(testResult);
   }
@@ -99,7 +113,6 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     aggregatedResult: AggregatedResult,
   ): Promise<void> {
     await super.onRunComplete(testContexts, aggregatedResult);
-    this._emitter.emit('runComplete', { testContexts, aggregatedResult });
   }
 
   getLastError(): Error | void {

@@ -35,7 +35,7 @@ export class TimeService {
   }
 
   getFileEndTime(testResult: TestResult): number {
-    return this._testFileStarts.get(testResult.testFilePath) ?? Number.NaN;
+    return this._testFileEnds.get(testResult.testFilePath) ?? Number.NaN;
   }
 
   private _onTestFileStart(test: Test): void {

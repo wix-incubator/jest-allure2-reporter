@@ -45,7 +45,7 @@ export type ReporterOptions = {
    * Overwrite the results directory if it already exists.
    * @default true
    */
-  overwrite?: boolean;
+  overwrite: boolean;
   /**
    * Specifies where to output test result files.
    * Please note that the results directory is not a ready-to-use Allure report.
@@ -212,13 +212,13 @@ type TestStepExtractor<T> = (
   testStepContext: Readonly<TestStepExtractorContext<T>>,
 ) => T | undefined;
 
-interface GlobalExtractorContext<T> {
+export interface GlobalExtractorContext<T> {
   cwd: string;
   package: PackageHelper | undefined;
   value: T | undefined;
 }
 
-interface TestCaseExtractorContext<T> extends GlobalExtractorContext<T> {
+export interface TestCaseExtractorContext<T> extends GlobalExtractorContext<T> {
   readonly file: FileContext;
   /**
    * When absent, it means an error was thrown before the test was defined.
@@ -230,7 +230,7 @@ interface TestCaseExtractorContext<T> extends GlobalExtractorContext<T> {
   readonly errors: readonly Error[];
 }
 
-interface TestStepExtractorContext<T> extends TestCaseExtractorContext<T> {
+export interface TestStepExtractorContext<T> extends TestCaseExtractorContext<T> {
   readonly step?: TestStepContext;
 }
 
@@ -272,12 +272,12 @@ interface TestCaseContext {
    * Custom test case metadata.
    * Available only when `jest-circus` is used with `testEnvironment` using `jest-allure2-reporter/environment-*` packages.
    */
-  readonly metadata?: TestCaseMetadata;
+  readonly metadata?: AllureTestCaseMetadata;
 }
 
 interface TestStepContext {
   readonly path: readonly string[];
-  readonly metadata: TestStepMetadata;
+  readonly metadata: AllureTestStepMetadata;
 }
 
 type Jest$Status =
@@ -289,21 +289,27 @@ type Jest$Status =
   | 'disabled'
   | 'focused';
 
-interface TestCaseMetadata extends TestStepMetadata {
-  readonly name?: never;
-  readonly identifier: string;
-  readonly labels?: readonly Label[];
-  readonly links?: readonly Link[];
+export interface AllureRunMetadata {
+  endedAt: number;
+  startedAt: number;
+  threadId: string;
 }
 
-interface TestStepMetadata {
-  readonly name?: string;
-  readonly code?: string;
-  readonly description?: readonly string[];
-  readonly descriptionHtml?: readonly string[];
-  readonly steps?: readonly TestStepMetadata[];
-  readonly attachments?: readonly Attachment[];
-  readonly parameters?: readonly Parameter[];
-  readonly start?: number;
-  readonly stop?: number;
+export interface AllureTestCaseMetadata extends AllureTestStepMetadata {
+  name?: never;
+  identifier: string;
+  labels?: readonly Label[];
+  links?: readonly Link[];
+}
+
+export interface AllureTestStepMetadata {
+  name?: string;
+  code?: string;
+  description?: readonly string[];
+  descriptionHtml?: readonly string[];
+  steps?: readonly AllureTestStepMetadata[];
+  attachments?: readonly Attachment[];
+  parameters?: readonly Parameter[];
+  start?: number;
+  stop?: number;
 }
