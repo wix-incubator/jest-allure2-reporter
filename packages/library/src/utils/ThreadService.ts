@@ -1,19 +1,10 @@
 import type { Test } from '@jest/reporters';
 
-import type { ReporterEmitter } from '../../ReporterEmitter';
-
 const FREE_SLOT = undefined;
 
 export class ThreadService {
   private readonly _activeThreads: (string | undefined)[] = [];
   private readonly _threadMap = new Map<string, number>();
-
-  constructor(private readonly _emitter: ReporterEmitter) {
-    this._emitter.on('testFileStart', (event) =>
-      this.allocateThread(event.test),
-    );
-    this._emitter.on('testFileResult', (event) => this.freeThread(event.test));
-  }
 
   allocateThread(test: Test): void {
     const freeIndex = this._activeThreads.indexOf(FREE_SLOT);

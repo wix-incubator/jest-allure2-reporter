@@ -1,4 +1,4 @@
-import { $Set } from 'jest-metadata/annotations';
+import { $Set } from 'jest-metadata';
 
 import { ALLURE_ID } from '../constants';
 

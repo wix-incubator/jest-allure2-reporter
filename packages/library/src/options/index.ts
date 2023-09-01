@@ -1,4 +1,6 @@
-import type { ReporterOptions } from '../ReporterOptions';
+import type { ReporterOptions } from './ReporterOptions';
+
+export * from './ReporterOptions';
 
 export function resolveOptions(
   options: Partial<ReporterOptions> | undefined,

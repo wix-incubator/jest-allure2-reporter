@@ -6,22 +6,24 @@ import type {
   ReporterOnStartOptions,
   Test,
   TestCaseResult,
-  TestContext,
-  TestResult,
 } from '@jest/reporters';
-import { query, JestMetadataReporter } from 'jest-metadata/reporter';
+import {JestMetadataReporter, query} from 'jest-metadata/reporter';
 import rimraf from 'rimraf';
-import { AllureRuntime } from '@noomorph/allure-js-commons';
+import {
+  AllureRuntime,
+  Stage,
+  Status,
+} from '@noomorph/allure-js-commons';
 
 import type {
+  AllureTestCaseMetadata,
+  AllureTestStepMetadata,
   GlobalExtractorContext,
   ReporterOptions,
-  AllureRunMetadata,
-  AllureTestCaseMetadata,
-} from './ReporterOptions';
-import { resolveOptions } from './options';
+} from './options/ReporterOptions';
+import {resolveOptions} from './options';
 
-const NAMESPACE = 'allure2' as const;
+const ns = (key?: string) => (key ? ['allure2', key] : ['allure2']);
 
 export class JestAllure2Reporter extends JestMetadataReporter {
   private readonly _allure: AllureRuntime;
@@ -35,6 +37,10 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     super(globalConfig, options);
 
     this._options = resolveOptions(options);
+    if (this._options.overwrite) {
+      rimraf.sync(this._options.resultsDir);
+    }
+
     this._allure = new AllureRuntime({
       resultsDir: this._options.resultsDir,
     });
@@ -52,9 +58,6 @@ export class JestAllure2Reporter extends JestMetadataReporter {
   ): Promise<void> {
     await super.onRunStart(aggregatedResult, options);
 
-    if (this._options.overwrite) {
-      rimraf.sync(this._options.resultsDir);
-    }
 
     const environment = this._options.environment(this._globalContext);
     if (environment) {
@@ -70,49 +73,96 @@ export class JestAllure2Reporter extends JestMetadataReporter {
   onTestFileStart(test: Test) {
     super.onTestFileStart(test);
 
-    const run = query.test(test)!.get(NAMESPACE, {}) as AllureRunMetadata;
-    run.startedAt = Date.now();
-    run.threadId = '1';
-  }
-
-  onTestCaseStart(_test: unknown, _testCaseStartInfo: unknown) {
-    super.onTestCaseStart(_test, _testCaseStartInfo);
-
-    const testEntry = query.testCaseResult(testCaseResult)!;
-    const metadata = testEntry.get(NAMESPACE, {}) as AllureTestCaseMetadata;
-
-    metadata.start = Date.now();
+    query.test(test)!.assign(ns(), {
+      start: Date.now(),
+      threadId: '1',
+    });
   }
 
   onTestCaseResult(test: Test, testCaseResult: TestCaseResult) {
     super.onTestCaseResult(test, testCaseResult);
 
     const testEntry = query.testCaseResult(testCaseResult)!;
-    const metadata = testEntry.get(NAMESPACE, {}) as AllureTestCaseMetadata;
+    const lastInvocation = testEntry.lastInvocation;
+    if (lastInvocation) {
+      const userTestMetadata = {
+        ...(testEntry.get(ns()) as AllureTestCaseMetadata),
+        ...(lastInvocation.get(ns()) as AllureTestCaseMetadata),
+      } as AllureTestStepMetadata;
 
-    metadata.identifier = testEntry.id;
-    metadata.start =
-      metadata.start ?? Date.now() - (testCaseResult.duration ?? 0);
-    metadata.stop = Date.now();
-  }
+      const group = this._allure.startGroup(testCaseResult.fullName);
 
-  onTestFileResult(
-    test: Test,
-    testResult: TestResult,
-    aggregatedResult: AggregatedResult,
-  ): Promise<void> | void {
-    super.onTestFileResult(test, testResult, aggregatedResult);
+      const test = group.startTest(testCaseResult.title, userTestMetadata.start);
+      test.fullName = testCaseResult.fullName;
 
-    const run = query.test(test)!.get(NAMESPACE, {}) as AllureRunMetadata;
-    const fileContext = this._testRunContext.getFileContext(test.path)!;
-    fileContext.handleTestFileResult(testResult);
-  }
+      const allInvocations = [
+        [() => group.addBefore(), lastInvocation.beforeAll],
+        [() => group.addBefore(), lastInvocation.before],
+        [() => test.startStep('test'), lastInvocation.fn ? [lastInvocation.fn] : []],
+        [() => group.addAfter(), lastInvocation.after],
+        [() => group.addAfter(), lastInvocation.afterAll],
+      ] as const;
 
-  async onRunComplete(
-    testContexts: Set<TestContext>,
-    aggregatedResult: AggregatedResult,
-  ): Promise<void> {
-    await super.onRunComplete(testContexts, aggregatedResult);
+      for (const [createGroup, invocations] of allInvocations) {
+        for (const invocation of invocations) {
+          const definition = invocation.definition.get(
+            ns(),
+          )! as AllureTestStepMetadata;
+          const executable = invocation.get(ns())! as AllureTestStepMetadata;
+          const userMetadata: AllureTestStepMetadata = {
+            ...userTestMetadata,
+            ...definition,
+            ...executable,
+          };
+
+          const step = createGroup();
+          step.stage = userMetadata.stage ?? Stage.SCHEDULED;
+          step.status = userMetadata.status ?? step.status;
+          if (userMetadata.start != null) {
+            step.wrappedItem.start = userMetadata.start;
+          }
+          if (userMetadata.stop != null) {
+            step.wrappedItem.stop = userMetadata.stop;
+          }
+          if (userMetadata.statusDetails != null) {
+            step.statusDetails = userMetadata.statusDetails;
+          }
+          if (userMetadata.name != null) {
+            step.name = userMetadata.name;
+          }
+        }
+      }
+
+      let code = '';
+      const attachCodeAs = (type: string, content: unknown) => {
+        if (content) {
+          code += `${type}(${content})\n`;
+        }
+      };
+      for (const block of lastInvocation.beforeAll) {
+        attachCodeAs('beforeAll', block.definition.get(ns('code')));
+      }
+      for (const block of lastInvocation.before) {
+        attachCodeAs('beforeEach', block.definition.get(ns('code')));
+      }
+      attachCodeAs('test', lastInvocation.entry.get(ns('code')));
+      debugger;
+      for (const block of lastInvocation.after) {
+        attachCodeAs('afterEach', block.definition.get(ns('code')));
+      }
+      for (const block of lastInvocation.afterAll) {
+        attachCodeAs('afterAll', block.definition.get(ns('code')));
+      }
+
+      test.descriptionHtml = '<details><summary>Test code</summary><pre><code>\n' + code + '\n</code></pre></details>';
+      test.status = testCaseResult.status === 'passed' ? Status.PASSED : Status.FAILED;
+      test.stage = Stage.FINISHED;
+      test.statusDetails = {
+        message: testCaseResult.failureMessages.join('\n'),
+      };
+      test.endTest(userTestMetadata.stop);
+      group.endGroup();
+    }
   }
 
   getLastError(): Error | void {

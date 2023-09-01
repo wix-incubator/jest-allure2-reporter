@@ -177,21 +177,21 @@ type LinkCustomizer = TestCaseExtractor<Link>;
 type LabelsCustomizer =
   | TestCaseExtractor<Label[]>
   | Partial<{
-      readonly allureId: TestCaseExtractor<string>;
-      readonly package: TestCaseExtractor<string>;
-      readonly testClass: TestCaseExtractor<string>;
-      readonly testMethod: TestCaseExtractor<string>;
-      readonly parentSuite: TestCaseExtractor<string>;
-      readonly suite: TestCaseExtractor<string>;
-      readonly subSuite: TestCaseExtractor<string>;
-      readonly epic: TestCaseExtractor<string[]>;
-      readonly feature: TestCaseExtractor<string[]>;
-      readonly story: TestCaseExtractor<string[]>;
-      readonly framework: TestCaseExtractor<string>;
-      readonly language: TestCaseExtractor<string>;
-      readonly layer: TestCaseExtractor<string>;
-      readonly thread: TestCaseExtractor<string>;
-      readonly host: TestCaseExtractor<string>;
+      readonly allureId: TestCaseExtractor<string>; // TestEntryMetadata → (invocations)
+      readonly package: TestCaseExtractor<string>; // N/A
+      readonly testClass: TestCaseExtractor<string>; // N/A
+      readonly testMethod: TestCaseExtractor<string>; // N/A
+      readonly parentSuite: TestCaseExtractor<string>; // N/A
+      readonly suite: TestCaseExtractor<string>; // N/A
+      readonly subSuite: TestCaseExtractor<string>; // N/A
+      readonly epic: TestCaseExtractor<string[]>; // uniq | AggregatedResultMetadata → ... → TestEntryMetadata → (invocations)
+      readonly feature: TestCaseExtractor<string[]>; // uniq | AggregatedResultMetadata → ... → TestEntryMetadata → (invocations)
+      readonly story: TestCaseExtractor<string[]>; // uniq | AggregatedResultMetadata → ... → TestEntryMetadata → (invocations)
+      readonly framework: TestCaseExtractor<string>; // last | AggregatedResultMetadata → ... → TestEntryMetadata → (invocations)
+      readonly language: TestCaseExtractor<string>; // last | AggregatedResultMetadata → ... → TestEntryMetadata → (invocations)
+      readonly layer: TestCaseExtractor<string>; // last | AggregatedResultMetadata → ... → TestEntryMetadata → (invocations)
+      readonly thread: TestCaseExtractor<string>; // N/A
+      readonly host: TestCaseExtractor<string>; // N/A
       readonly severity: TestCaseExtractor<string>;
       readonly tag: TestCaseExtractor<string[]>;
       readonly owner: TestCaseExtractor<string>;
@@ -230,7 +230,8 @@ export interface TestCaseExtractorContext<T> extends GlobalExtractorContext<T> {
   readonly errors: readonly Error[];
 }
 
-export interface TestStepExtractorContext<T> extends TestCaseExtractorContext<T> {
+export interface TestStepExtractorContext<T>
+  extends TestCaseExtractorContext<T> {
   readonly step?: TestStepContext;
 }
 
@@ -298,6 +299,8 @@ export interface AllureRunMetadata {
 export interface AllureTestCaseMetadata extends AllureTestStepMetadata {
   name?: never;
   identifier: string;
+  description?: readonly string[];
+  descriptionHtml?: readonly string[];
   labels?: readonly Label[];
   links?: readonly Link[];
 }
@@ -305,8 +308,9 @@ export interface AllureTestCaseMetadata extends AllureTestStepMetadata {
 export interface AllureTestStepMetadata {
   name?: string;
   code?: string;
-  description?: readonly string[];
-  descriptionHtml?: readonly string[];
+  status?: Status;
+  statusDetails?: StatusDetails;
+  stage?: Stage;
   steps?: readonly AllureTestStepMetadata[];
   attachments?: readonly Attachment[];
   parameters?: readonly Parameter[];

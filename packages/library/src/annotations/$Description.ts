@@ -1,4 +1,4 @@
-import {$Push} from "jest-metadata/annotations";
+import { $Push } from 'jest-metadata';
 
 import { DESCRIPTION } from '../constants';
 
