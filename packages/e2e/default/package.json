@@ -5,7 +5,8 @@
   "scripts": {
     "test": "jest || true",
     "build": "allure generate --clean",
-    "start": "allure serve"
+    "start": "allure serve",
+    "test:dev": "npm run build --workspace=jest-allure2-reporter && npm test ; npm run build"
   },
   "devDependencies": {
     "@wix/eslint-config-jest-allure2-reporter": "^1.0.0",

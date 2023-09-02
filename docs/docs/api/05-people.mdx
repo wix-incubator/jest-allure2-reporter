@@ -14,17 +14,17 @@ anywhere. Please use GitHub docs for the latest stable version.
 
 :::
 
-In Allure reports, you can indicate the **owner** and the team **lead** for each test case.
+In Allure reports, you can indicate who is the **owner** of any given test case.
 This allows for better organization, responsibility allocation, and communication within your team.
 Advanced solutions can leverage this information to notify the relevant people about test failures
 or to assign automatic tasks to them.
 
 There are two ways to associate a test case with a person:
 
-* declaratively, via `@owner` and `@lead` JSDoc annotations;
-* programmatically, via `$Owner` and `$Lead` annotation functions.
+* declaratively, via `@owner` JSDoc annotations;
+* programmatically, via `$Owner` annotation functions.
 
-## Owner
+## Basic usage
 
 The owner of a test suite is the person who is responsible for the test suite and all test cases in it.
 
@@ -140,72 +140,15 @@ Please note that you have to put the JSDoc comment inside the test function body
   </TabItem>
 </Tabs>
 
-## Lead
-
-The team lead might be the second person responsible for the test suite or the test case.
-
-<Tabs groupId="approach">
-  <TabItem value="jsdoc" label="JSDoc">
-
-The `@lead` annotation follows the same rules and syntax as the `@owner`, e.g.:
-
-```js
-/**
- * @owner John Doe <john.doe@example.com>
- * @lead Jane Smith <jane.smith@example.com>
- */
-
-describe('Sanity: Login flow', () => {
-  it('should login with valid credentials', () => {
-    /* ... test code ... */
-  });
-
-  it('should open the new Login page version', () => {
-    /**
-     * @owner Mark Doe <mark.doe@example.com>
-     * @lead Mary Smith <mary.smith@example.com>
-     */
-
-    /* ... test code ... */
-  });
-});
-```
-
-</TabItem>
-  <TabItem value="dsl" label="Function">
-
-The `$Lead` annotation follows the same rules and syntax as the `$Owner`, e.g.:
-
-```js
-import { $Lead, $Owner } from 'jest-allure2-reporter/annotations';
-
-$Owner('John Doe <john.doe@example.com>');
-$Lead('Jane Smith <jane.smith@example.com>');
-describe('Sanity: Login flow', () => {
-  it('should login with valid credentials', () => {
-    /* ... test code ... */
-  });
-
-  $Owner('Mark Doe <mark.doe@example.com>');
-  $Lead('Mary Smith <mary.smith@example.com>');
-  it('should open the new Login page version', () => {
-    /* ... test code ... */
-  });
-});
-```
-
-  </TabItem>
-</Tabs>
-
 ## Examples
 
-In the generated report, the owner and lead are displayed in the test case description:
+In the generated report, the owner is displayed in the test case description:
 
 `TODO: add screenshot`
 
 ## Advanced usage
 
-You can use the owner and lead information in your custom reporters and plugins.
+You can use the owner information in your custom reporters and plugins.
 `TODO: read more about query functions to use in your custom reporters and plugins`
 
 ```js
@@ -219,30 +162,25 @@ export default class NotifyJestReporter {
   /**
    */
   async onRunComplete(contexts, results) {
-    const owners = new Map();
-    const leads = new Map();
+    const owners = new Set();
 
     for (const testFileResult of results.testResults) {
       for (const testCaseResult of testFileResult.testResults) {
-        if (testCaseResult.status !== 'failed') {
-          continue;
-        }
-
-        const owner = query.owner(testCaseResult);
-        const lead = query.lead(testCaseResult);
-
-        if (owner) {
-          await this.#notify(owner, testCaseResult);
-        }
-
-        if (lead && lead !== owner) {
-          await this.#notify(lead, testCaseResult);
+        if (testCaseResult.status === 'failed') {
+          const owner = query.owner(testCaseResult);
+          if (owner) {
+            owners.add(owner);
+          }
         }
       }
     }
+
+    for (const owner of owners) {
+      await this.#notify(owner);
+    }
   }
 
-  async #notify(person, testCaseResult) {
+  async #notify(person) {
     // ... some code to send a notification to the person ...
   }
 }

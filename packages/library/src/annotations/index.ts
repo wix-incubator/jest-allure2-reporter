@@ -4,7 +4,6 @@ export * from './$DescriptionHtml';
 export * from './$Epic';
 export * from './$Feature';
 export * from './$Issue';
-export * from './$Lead';
 export * from './$Link';
 export * from './$Owner';
 export * from './$Severity';
