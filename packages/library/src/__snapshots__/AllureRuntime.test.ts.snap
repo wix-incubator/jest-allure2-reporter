@@ -1,0 +1,92 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AllureRuntime should add attachments within the steps 1`] = `
+{
+  "$pointer": [],
+  "attachments": [
+    {
+      "content": {
+        "data": [
+          102,
+          105,
+          114,
+          115,
+          116,
+        ],
+        "type": "Buffer",
+      },
+      "name": "attachment1",
+      "type": "text/plain",
+    },
+    {
+      "content": {
+        "data": [
+          102,
+          105,
+          102,
+          116,
+          104,
+        ],
+        "type": "Buffer",
+      },
+      "name": "attachment5",
+      "type": "text/plain",
+    },
+  ],
+  "steps": [
+    {
+      "attachments": [
+        {
+          "content": "third",
+          "name": "attachment3",
+          "type": "text/plain",
+        },
+      ],
+      "name": "outer step",
+      "stage": "finished",
+      "status": "passed",
+      "statusDetails": undefined,
+      "steps": [
+        {
+          "attachments": [
+            {
+              "content": "second",
+              "name": "attachment2",
+              "type": "text/plain",
+            },
+          ],
+          "name": "inner step 1",
+          "stage": "finished",
+          "status": "failed",
+          "statusDetails": {
+            "message": "Sync error",
+            "trace": "Test stack",
+          },
+        },
+        {
+          "name": "inner step 2",
+          "stage": "finished",
+          "status": "passed",
+          "statusDetails": undefined,
+        },
+        {
+          "attachments": [
+            {
+              "content": "fourth",
+              "name": "attachment4",
+              "type": "text/plain",
+            },
+          ],
+          "name": "inner step 3",
+          "stage": "finished",
+          "status": "failed",
+          "statusDetails": {
+            "message": "Async error",
+            "trace": "Test stack",
+          },
+        },
+      ],
+    },
+  ],
+}
+`;

@@ -316,4 +316,10 @@ export interface AllureTestStepMetadata {
   parameters?: readonly Parameter[];
   start?: number;
   stop?: number;
+
+  /**
+   * Pointer to the child step that is currently being added or executed.
+   * @example ['steps', '0', 'steps', '0']
+   */
+  $pointer?: string[];
 }
