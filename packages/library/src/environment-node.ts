@@ -1,12 +1,16 @@
 import { state } from 'jest-metadata';
 import { TestEnvironment } from 'jest-metadata/environment-node';
 import type { ForwardedCircusEvent } from 'jest-metadata/environment-decorator';
+import { Stage, Status } from '@noomorph/allure-js-commons';
 
 import { PREFIX } from './constants';
 import type { AllureTestCaseMetadata, AllureTestStepMetadata } from './options';
-import {Stage, Status} from "@noomorph/allure-js-commons";
+import { AllureRuntime } from './AllureRuntime';
 
 export class AllureNodeJestEnvironment extends TestEnvironment {
+  // @ts-expect-error TS2564
+  private readonly allure: AllureRuntime;
+
   constructor(config: any, context: any) {
     super(config, context);
 
@@ -14,6 +18,11 @@ export class AllureNodeJestEnvironment extends TestEnvironment {
       ['allure2', 'workerId'],
       process.env.JEST_WORKER_ID,
     );
+
+    this.allure = new AllureRuntime({
+      metadataProvider: () => state.currentMetadata,
+      nowProvider: () => Date.now(),
+    });
 
     this.testEvents
       .on('add_hook', this.#addHook.bind(this))
@@ -26,7 +35,7 @@ export class AllureNodeJestEnvironment extends TestEnvironment {
       .on('test_fn_failure', this.#executableFailure.bind(this));
   }
 
-  #addHook({event}: ForwardedCircusEvent) {
+  #addHook({ event }: ForwardedCircusEvent) {
     const metadata = {
       name: event.hookType,
       start: Date.now(),
@@ -36,7 +45,7 @@ export class AllureNodeJestEnvironment extends TestEnvironment {
     state.currentMetadata.assign(PREFIX, metadata);
   }
 
-  #addTest({event}: ForwardedCircusEvent) {
+  #addTest({ event }: ForwardedCircusEvent) {
     const metadata: AllureTestCaseMetadata = {
       identifier: state.currentMetadata.id,
       stage: Stage.SCHEDULED,
@@ -46,6 +55,7 @@ export class AllureNodeJestEnvironment extends TestEnvironment {
     state.currentMetadata.assign(PREFIX, metadata);
   }
 
+  // eslint-disable-next-line no-empty-pattern
   #executableStart({}: ForwardedCircusEvent) {
     const metadata: AllureTestStepMetadata = {
       start: Date.now(),
@@ -55,20 +65,23 @@ export class AllureNodeJestEnvironment extends TestEnvironment {
     state.currentMetadata.assign(PREFIX, metadata);
   }
 
-  #executableFailure({event}: ForwardedCircusEvent) {
+  #executableFailure({ event }: ForwardedCircusEvent) {
     const metadata: AllureTestStepMetadata = {
       stop: Date.now(),
       stage: Stage.FINISHED,
       status: Status.FAILED,
-      statusDetails: event.error ? {
-        message: event.error.message,
-        trace: event.error.stack,
-      } : {},
+      statusDetails: event.error
+        ? {
+            message: event.error.message,
+            trace: event.error.stack,
+          }
+        : {},
     };
 
     state.currentMetadata.assign(PREFIX, metadata);
   }
 
+  // eslint-disable-next-line no-empty-pattern
   #executableSuccess({}: ForwardedCircusEvent) {
     const metadata: AllureTestStepMetadata = {
       stop: Date.now(),

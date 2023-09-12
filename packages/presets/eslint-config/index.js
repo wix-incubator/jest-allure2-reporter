@@ -66,6 +66,7 @@ module.exports = {
   ],
   "ignorePatterns": [
     "assets",
+    "coverage",
     "dist",
     "jest.config.ts"
   ]

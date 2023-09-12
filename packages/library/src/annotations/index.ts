@@ -1,4 +1,3 @@
-export * from './$AllureId';
 export * from './$Description';
 export * from './$DescriptionHtml';
 export * from './$Epic';

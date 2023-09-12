@@ -1,5 +1,6 @@
-import { $Push } from 'jest-metadata';
+import { LabelName } from '@noomorph/allure-js-commons';
 
-import { TAG } from '../constants';
+import { $Label } from './$Label';
 
-export const $Tag = (...tagNames: string[]) => $Push(TAG, ...tagNames);
+export const $Tag = (...tagNames: string[]) =>
+  $Label(LabelName.TAG, ...tagNames);

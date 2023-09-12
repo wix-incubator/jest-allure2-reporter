@@ -1,5 +1,5 @@
-import { $Push } from 'jest-metadata';
+import { LabelName } from '@noomorph/allure-js-commons';
 
-import { OWNER } from '../constants';
+import { $Label } from './$Label';
 
-export const $Owner = (owner: string) => $Push(OWNER, owner);
+export const $Owner = (value: string) => $Label(LabelName.OWNER, value);

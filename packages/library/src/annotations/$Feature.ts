@@ -1,5 +1,5 @@
-import { $Push } from 'jest-metadata';
+import { LabelName } from '@noomorph/allure-js-commons';
 
-import { FEATURE } from '../constants';
+import { $Label } from './$Label';
 
-export const $FEATURE = (name: string) => $Push(FEATURE, name);
+export const $Feature = (value: string) => $Label(LabelName.FEATURE, value);

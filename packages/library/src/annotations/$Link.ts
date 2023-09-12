@@ -1,15 +1,13 @@
 import { $Push } from 'jest-metadata';
+import type { Link } from '@noomorph/allure-js-commons';
 
-import { LINK } from '../constants';
+import { LINKS } from '../constants';
 
-export const $Link = (options: string | LinkOptions) =>
-  $Push(
-    LINK,
-    typeof options === 'string' ? { name: options, url: options } : options,
-  );
+export const $Link = (maybeUrl: string | Link, maybeName?: string) => {
+  const link =
+    typeof maybeUrl === 'string'
+      ? { name: maybeName ?? maybeUrl, url: maybeUrl }
+      : maybeUrl;
 
-export type LinkOptions = {
-  name: string;
-  url: string;
-  type?: string;
+  $Push(LINKS, link);
 };

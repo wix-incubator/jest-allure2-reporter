@@ -42,8 +42,36 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
           "type": "text/plain",
         },
       ],
+      "code": "async () => {
+            try {
+                runtime.step('inner step 1', () => {
+                    runtime.attachment('attachment2', 'second', 'text/plain');
+                    const error = new Error('Sync error');
+                    error.stack = 'Test stack';
+                    throw error;
+                });
+            }
+            catch {
+                /* empty */
+            }
+            runtime.step('inner step 2', () => {
+                /* empty */
+            });
+            runtime.attachment('attachment3', 'third', 'text/plain');
+            await runtime
+                .step('inner step 3', async () => {
+                runtime.attachment('attachment4', 'fourth', 'text/plain');
+                const error = new Error('Async error');
+                error.stack = 'Test stack';
+                throw error;
+            })
+                .catch(() => {
+                /* empty */
+            });
+        }",
       "name": "outer step",
       "stage": "finished",
+      "start": 0,
       "status": "passed",
       "statusDetails": undefined,
       "steps": [
@@ -55,19 +83,32 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
               "type": "text/plain",
             },
           ],
+          "code": "() => {
+                    runtime.attachment('attachment2', 'second', 'text/plain');
+                    const error = new Error('Sync error');
+                    error.stack = 'Test stack';
+                    throw error;
+                }",
           "name": "inner step 1",
           "stage": "finished",
+          "start": 1,
           "status": "failed",
           "statusDetails": {
             "message": "Sync error",
             "trace": "Test stack",
           },
+          "stop": 2,
         },
         {
+          "code": "() => {
+                /* empty */
+            }",
           "name": "inner step 2",
           "stage": "finished",
+          "start": 3,
           "status": "passed",
           "statusDetails": undefined,
+          "stop": 4,
         },
         {
           "attachments": [
@@ -77,15 +118,24 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
               "type": "text/plain",
             },
           ],
+          "code": "async () => {
+                runtime.attachment('attachment4', 'fourth', 'text/plain');
+                const error = new Error('Async error');
+                error.stack = 'Test stack';
+                throw error;
+            }",
           "name": "inner step 3",
           "stage": "finished",
+          "start": 5,
           "status": "failed",
           "statusDetails": {
             "message": "Async error",
             "trace": "Test stack",
           },
+          "stop": 6,
         },
       ],
+      "stop": 7,
     },
   ],
 }

@@ -19,7 +19,7 @@
     "directory": "packages/reporter"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=16.20.0"
   },
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
@@ -69,6 +69,6 @@
     "jest": ">=27.2.5"
   },
   "browserslist": [
-    "node 14"
+    "node 16"
   ]
 }

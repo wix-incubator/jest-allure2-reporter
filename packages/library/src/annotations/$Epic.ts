@@ -1,5 +1,5 @@
-import { $Push } from 'jest-metadata';
+import { LabelName } from '@noomorph/allure-js-commons';
 
-import { EPIC } from '../constants';
+import { $Label } from './$Label';
 
-export const $Epic = (name: string) => $Push(EPIC, name);
+export const $Epic = (value: string) => $Label(LabelName.EPIC, value);

@@ -7,9 +7,14 @@ import type {
   Test,
   TestCaseResult,
 } from '@jest/reporters';
-import {JestMetadataReporter, query} from 'jest-metadata/reporter';
+import { JestMetadataReporter, query } from 'jest-metadata/reporter';
 import rimraf from 'rimraf';
-import {AllureRuntime, LabelName, Stage, Status,} from '@noomorph/allure-js-commons';
+import {
+  AllureRuntime,
+  LabelName,
+  Stage,
+  Status,
+} from '@noomorph/allure-js-commons';
 
 import type {
   AllureTestCaseMetadata,
@@ -17,7 +22,7 @@ import type {
   GlobalExtractorContext,
   ReporterOptions,
 } from './options/ReporterOptions';
-import {resolveOptions} from './options';
+import { resolveOptions } from './options';
 
 const ns = (key?: string) => (key ? ['allure2', key] : ['allure2']);
 

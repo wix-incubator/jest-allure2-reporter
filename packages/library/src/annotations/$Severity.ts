@@ -1,5 +1,5 @@
-import { $Set } from 'jest-metadata';
+import { LabelName } from '@noomorph/allure-js-commons';
 
-import { SEVERITY } from '../constants';
+import { $Label } from './$Label';
 
-export const $Severity = (severity: string) => $Set(SEVERITY, severity);
+export const $Severity = (value: string) => $Label(LabelName.SEVERITY, value);
