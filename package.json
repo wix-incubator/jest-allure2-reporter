@@ -25,7 +25,7 @@
     "docs": "lerna run docs --scope=jest-allure2-reporter",
     "start": "lerna run start --scope=jest-allure2-reporter",
     "lint": "lerna run lint",
-    "lint:fix": "lerna run lint:fix",
+    "lint:ci": "lerna run lint:ci",
     "lint:staged": "lerna run lint:staged",
     "test": "lerna run test"
   },

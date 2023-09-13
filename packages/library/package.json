@@ -32,8 +32,8 @@
   "scripts": {
     "build": "tsc",
     "docs": "typedoc",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint": "eslint . --fix",
+    "lint:ci": "eslint .",
     "test": "jest"
   },
   "devDependencies": {
