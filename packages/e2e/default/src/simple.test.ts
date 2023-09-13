@@ -14,4 +14,8 @@ describe('Simple suite', () => {
   afterEach(() => {
     console.log('afterEach');
   });
+
+  afterAll(() => {
+    console.log('afterAll');
+  });
 });

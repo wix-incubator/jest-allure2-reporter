@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/ban-types, prefer-rest-params */
 import type { Metadata } from 'jest-metadata';
 import { Status, Stage } from '@noomorph/allure-js-commons';
 import type {
   StatusDetails,
+  Parameter,
   ParameterOptions,
   LabelName,
 } from '@noomorph/allure-js-commons';
@@ -21,6 +23,8 @@ export type AllureRuntimeConfig = {
   metadataProvider: () => Metadata;
   nowProvider: () => number;
 };
+
+export type ParameterOrString = string | Parameter;
 
 export class AllureRuntime {
   readonly #metadataProvider: AllureRuntimeConfig['metadataProvider'];
@@ -61,10 +65,54 @@ export class AllureRuntime {
     ]);
   }
 
+  parameters(parameters: Record<string, unknown>) {
+    for (const [name, value] of Object.entries(parameters)) {
+      this.parameter(name, value);
+    }
+  }
+
   attachment(name: string, content: Buffer | string, type: string) {
     this.#metadata.push(this.#localPath('attachments'), [
       { name, content, type },
     ]);
+  }
+
+  createStep<F extends Function>(
+    name: string,
+    arguments_: ParameterOrString[],
+    function_: F,
+  ): F;
+  createStep<F extends Function>(name: string, function_: F): F;
+  createStep<F extends Function>(
+    name: string,
+    maybeArguments: F | ParameterOrString[],
+    maybeFunction?: F,
+  ): F {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias,unicorn/no-this-assignment
+    const runtime = this;
+    const function_ =
+      typeof maybeArguments === 'function' ? maybeArguments : maybeFunction!;
+    const definitions = Array.isArray(maybeArguments) ? maybeArguments : null;
+
+    function wrapped(this: unknown) {
+      const thisWrapped = () => Reflect.apply(function_, this, arguments);
+      return runtime.step(name, () => {
+        const parameters =
+          definitions ?? Array.from(arguments, (_, index) => `${index}`);
+
+        // eslint-disable-next-line unicorn/no-for-loop
+        for (let index = 0; index < parameters.length; index++) {
+          const parameter = parameters[index];
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { name, value: _value, ...options } = parameter as Parameter;
+          runtime.parameter(name ?? parameter, arguments[index], options);
+        }
+        return thisWrapped();
+      });
+    }
+
+    wrapped.toString = function_.toString.bind(function_);
+    return wrapped as unknown as F;
   }
 
   step(name: string, function_: () => Promise<unknown>): Promise<unknown>;

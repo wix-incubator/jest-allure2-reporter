@@ -1,6 +1,7 @@
 import { state } from 'jest-metadata';
 import { TestEnvironment } from 'jest-metadata/environment-node';
 import type { ForwardedCircusEvent } from 'jest-metadata/environment-decorator';
+import type { StatusDetails } from '@noomorph/allure-js-commons';
 import { Stage, Status } from '@noomorph/allure-js-commons';
 
 import { PREFIX } from './constants';
@@ -30,6 +31,8 @@ export class AllureNodeJestEnvironment extends TestEnvironment {
       .on('hook_start', this.#executableStart.bind(this))
       .on('hook_failure', this.#executableFailure.bind(this))
       .on('hook_success', this.#executableSuccess.bind(this))
+      .on('test_start', this.#executableStart.bind(this))
+      .on('test_done', this.#testDone.bind(this))
       .on('test_fn_start', this.#executableStart.bind(this))
       .on('test_fn_success', this.#executableSuccess.bind(this))
       .on('test_fn_failure', this.#executableFailure.bind(this));
@@ -38,7 +41,6 @@ export class AllureNodeJestEnvironment extends TestEnvironment {
   #addHook({ event }: ForwardedCircusEvent) {
     const metadata = {
       name: event.hookType,
-      start: Date.now(),
       code: event.fn.toString(),
     } as AllureTestStepMetadata;
 
@@ -88,6 +90,27 @@ export class AllureNodeJestEnvironment extends TestEnvironment {
       stage: Stage.FINISHED,
       status: Status.PASSED,
       statusDetails: {},
+    };
+
+    const id = state.currentMetadata.id;
+    console.log(id);
+    state.currentMetadata.assign(PREFIX, metadata);
+  }
+
+  #testDone({ event }: ForwardedCircusEvent) {
+    const metadata: AllureTestStepMetadata = {
+      stop: Date.now(),
+      stage: Stage.FINISHED,
+      status: event.test.failing ? Status.FAILED : Status.PASSED,
+      // eslint-disable-next-line unicorn/no-array-reduce
+      statusDetails: event.test.errors.reduce(
+        (accumulator: StatusDetails, error: Error) => {
+          accumulator.message += error.message + '\n';
+          accumulator.trace += error.stack + '\n';
+          return accumulator;
+        },
+        { message: '', trace: '' },
+      ),
     };
 
     state.currentMetadata.assign(PREFIX, metadata);

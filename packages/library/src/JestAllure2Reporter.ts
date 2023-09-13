@@ -6,6 +6,7 @@ import type {
   ReporterOnStartOptions,
   Test,
   TestCaseResult,
+  TestResult,
 } from '@jest/reporters';
 import { JestMetadataReporter, query } from 'jest-metadata/reporter';
 import rimraf from 'rimraf';
@@ -86,117 +87,138 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     });
   }
 
-  onTestCaseResult(test: Test, testCaseResult: TestCaseResult) {
-    super.onTestCaseResult(test, testCaseResult);
+  onTestCaseResult(_test: unknown, testCaseResult: TestCaseResult) {
+    const now = Date.now();
+    super.onTestCaseResult(_test, testCaseResult);
+    const metadata = query.testCaseResult(testCaseResult).lastInvocation!;
+    const { start, stop } = metadata.get(ns(), {}) as AllureTestCaseMetadata;
 
-    const testEntry = query.testCaseResult(testCaseResult)!;
-    const lastInvocation = testEntry.lastInvocation;
-    if (lastInvocation) {
-      const userTestMetadata = {
-        ...(testEntry.get(ns()) as AllureTestCaseMetadata),
-        ...(lastInvocation.get(ns()) as AllureTestCaseMetadata),
-      } as AllureTestStepMetadata;
+    // Polyfill for non-Circus configurations
+    if (!(start && stop) && testCaseResult.duration) {
+      metadata.assign(ns(), {
+        start: now - testCaseResult.duration,
+        stop: now,
+      });
+    }
+  }
 
-      const group = this._allure.startGroup(testCaseResult.fullName);
+  onTestFileResult(
+    test: Test,
+    testResult: TestResult,
+    _aggregatedResult: AggregatedResult,
+  ) {
+    super.onTestFileResult(test, testResult, _aggregatedResult);
 
-      const aTest = group.startTest(
-        testCaseResult.title,
-        userTestMetadata.start!,
-      );
-      aTest.fullName = testCaseResult.fullName;
+    for (const testCaseResult of testResult.testResults) {
+      const testEntry = query.testCaseResult(testCaseResult);
 
-      const allInvocations = [
-        [() => group.addBefore(), lastInvocation.beforeAll],
-        [() => group.addBefore(), lastInvocation.before],
-        [
-          () => aTest.startStep('test'),
-          lastInvocation.fn ? [lastInvocation.fn] : [],
-        ],
-        [() => group.addAfter(), lastInvocation.after],
-        [() => group.addAfter(), lastInvocation.afterAll],
-      ] as const;
+      for (const nextInvocation of testEntry.invocations) {
+        const userTestMetadata = {
+          ...(testEntry.get(ns()) as AllureTestCaseMetadata),
+          ...(nextInvocation.get(ns()) as AllureTestCaseMetadata),
+        } as AllureTestStepMetadata;
 
-      for (const [createGroup, invocations] of allInvocations) {
-        for (const invocation of invocations) {
-          const definition = invocation.definition.get(
-            ns(),
-          )! as AllureTestStepMetadata;
-          const executable = invocation.get(ns())! as AllureTestStepMetadata;
-          const userMetadata: AllureTestStepMetadata = {
-            ...userTestMetadata,
-            ...definition,
-            ...executable,
-          };
+        const group = this._allure.startGroup(testCaseResult.fullName);
 
-          const step = createGroup();
-          step.stage = userMetadata.stage ?? Stage.SCHEDULED;
-          step.status = userMetadata.status ?? step.status;
-          if (userMetadata.start != null) {
-            step.wrappedItem.start = userMetadata.start;
-          }
-          if (userMetadata.stop != null) {
-            step.wrappedItem.stop = userMetadata.stop;
-          }
-          if (userMetadata.statusDetails != null) {
-            step.statusDetails = userMetadata.statusDetails;
-          }
-          if (userMetadata.name != null) {
-            step.name = userMetadata.name;
+        const aTest = group.startTest(
+          testCaseResult.title,
+          userTestMetadata.start!,
+        );
+        aTest.fullName = testCaseResult.fullName;
+
+        const allInvocations = [
+          [() => group.addBefore(), nextInvocation.beforeAll],
+          [() => group.addBefore(), nextInvocation.before],
+          [
+            () => aTest.startStep('test'),
+            nextInvocation.fn ? [nextInvocation.fn] : [],
+          ],
+          [() => group.addAfter(), nextInvocation.after],
+          [() => group.addAfter(), nextInvocation.afterAll],
+        ] as const;
+
+        for (const [createGroup, invocations] of allInvocations) {
+          for (const invocation of invocations) {
+            const definition = invocation.definition.get(
+              ns(),
+            )! as AllureTestStepMetadata;
+            const executable = invocation.get(ns())! as AllureTestStepMetadata;
+            const userMetadata: AllureTestStepMetadata = {
+              ...userTestMetadata,
+              ...definition,
+              ...executable,
+            };
+
+            const step = createGroup();
+            step.stage = userMetadata.stage ?? Stage.SCHEDULED;
+            step.status = userMetadata.status ?? step.status;
+            if (userMetadata.start != null) {
+              step.wrappedItem.start = userMetadata.start;
+            }
+            if (userMetadata.stop != null) {
+              step.wrappedItem.stop = userMetadata.stop;
+            }
+            if (userMetadata.statusDetails != null) {
+              step.statusDetails = userMetadata.statusDetails;
+            }
+            if (userMetadata.name != null) {
+              step.name = userMetadata.name;
+            }
           }
         }
-      }
 
-      let code = '';
-      const attachCodeAs = (type: string, content: unknown) => {
-        if (content) {
-          code += `${type}(${content})\n`;
+        let code = '';
+        const attachCodeAs = (type: string, content: unknown) => {
+          if (content) {
+            code += `${type}(${content})\n`;
+          }
+        };
+        for (const block of nextInvocation.beforeAll) {
+          attachCodeAs('beforeAll', block.definition.get(ns('code')));
         }
-      };
-      for (const block of lastInvocation.beforeAll) {
-        attachCodeAs('beforeAll', block.definition.get(ns('code')));
-      }
-      for (const block of lastInvocation.before) {
-        attachCodeAs('beforeEach', block.definition.get(ns('code')));
-      }
-      attachCodeAs('test', lastInvocation.entry.get(ns('code')));
-      for (const block of lastInvocation.after) {
-        attachCodeAs('afterEach', block.definition.get(ns('code')));
-      }
-      for (const block of lastInvocation.afterAll) {
-        attachCodeAs('afterAll', block.definition.get(ns('code')));
-      }
+        for (const block of nextInvocation.before) {
+          attachCodeAs('beforeEach', block.definition.get(ns('code')));
+        }
+        attachCodeAs('test', nextInvocation.entry.get(ns('code')));
+        for (const block of nextInvocation.after) {
+          attachCodeAs('afterEach', block.definition.get(ns('code')));
+        }
+        for (const block of nextInvocation.afterAll) {
+          attachCodeAs('afterAll', block.definition.get(ns('code')));
+        }
 
-      aTest.descriptionHtml =
-        '<details><summary>Test code</summary><pre><code language="JavaScript">\n' +
-        code +
-        '\n</code></pre></details>';
-      aTest.status = Status.BROKEN;
-      aTest.statusDetails = {
-        message: testCaseResult.failureMessages.join('\n'),
-      };
-      aTest.addLabel(LabelName.SEVERITY, 'critical');
-      aTest.addLabel(LabelName.TAG, 'e2e');
-      aTest.addLabel(LabelName.TAG, 'detox');
-      aTest.addLabel(LabelName.EPIC, 'Epic 1');
-      aTest.addLabel(LabelName.EPIC, 'Epic 2');
-      aTest.addLabel(LabelName.FEATURE, 'Feature 1');
-      aTest.addLabel(LabelName.FEATURE, 'Feature 2');
-      aTest.addLabel(LabelName.STORY, testCaseResult.fullName);
-      aTest.addLabel(LabelName.OWNER, 'John Doe <john.doe@example.com>');
-      aTest.addLabel(LabelName.PACKAGE, 'jest-metadata');
-      aTest.addLabel(LabelName.TAG, 'flaky');
-      aTest.addLabel(LabelName.SUITE, 'Suite');
-      aTest.addLabel(LabelName.PARENT_SUITE, 'Parent suite');
-      aTest.addLabel(LabelName.SUB_SUITE, 'Sub-suite');
-      aTest.addLabel(
-        LabelName.TEST_METHOD,
-        test.path + ':' + testCaseResult.fullName,
-      );
-      aTest.addTmsLink('https://tms.example.com/E2E-10100', 'E2E-10100');
-      aTest.addIssueLink('https://jira-company.de/FEAT-10001', 'FEAT-10001');
-      aTest.addLink('https://github.com/com/proj', 'FEAT-10001', 'github');
-      aTest.endTest(userTestMetadata.stop!);
-      group.endGroup();
+        aTest.descriptionHtml =
+          '<details><summary>Test code</summary><pre><code language="JavaScript">\n' +
+          code +
+          '\n</code></pre></details>';
+        aTest.status = Status.BROKEN;
+        aTest.statusDetails = {
+          message: testCaseResult.failureMessages.join('\n'),
+        };
+        aTest.addLabel(LabelName.SEVERITY, 'critical');
+        aTest.addLabel(LabelName.TAG, 'e2e');
+        aTest.addLabel(LabelName.TAG, 'detox');
+        aTest.addLabel(LabelName.EPIC, 'Epic 1');
+        aTest.addLabel(LabelName.EPIC, 'Epic 2');
+        aTest.addLabel(LabelName.FEATURE, 'Feature 1');
+        aTest.addLabel(LabelName.FEATURE, 'Feature 2');
+        aTest.addLabel(LabelName.STORY, testCaseResult.fullName);
+        aTest.addLabel(LabelName.OWNER, 'John Doe <john.doe@example.com>');
+        aTest.addLabel(LabelName.PACKAGE, 'jest-metadata');
+        aTest.addLabel(LabelName.TAG, 'flaky');
+        aTest.addLabel(LabelName.SUITE, 'Suite');
+        aTest.addLabel(LabelName.PARENT_SUITE, 'Parent suite');
+        aTest.addLabel(LabelName.SUB_SUITE, 'Sub-suite');
+        aTest.addLabel(
+          LabelName.TEST_METHOD,
+          test.path + ':' + testCaseResult.fullName,
+        );
+        aTest.addTmsLink('https://tms.example.com/E2E-10100', 'E2E-10100');
+        aTest.addIssueLink('https://jira-company.de/FEAT-10001', 'FEAT-10001');
+        aTest.addLink('https://github.com/com/proj', 'FEAT-10001', 'github');
+        aTest.endTest(userTestMetadata.stop!);
+        group.endGroup();
+      }
     }
   }
 

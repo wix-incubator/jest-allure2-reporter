@@ -1,3 +1,5 @@
+# Test Plan
+
 1. Test cases:
   * by **status**:
      * passed
@@ -77,11 +79,10 @@
    * Categories trend
 5. User API:
   * Decorator-like functions:
-    * $AllureId()
     * $Title()
     * $Description()
     * $Severity()
-    * $Category()
+    * $Tag()
     * $Parameters()
   * Real decorators:
     * `@allure.step('Login as %s')` – should format string with the given parameters and attach them to the step.
