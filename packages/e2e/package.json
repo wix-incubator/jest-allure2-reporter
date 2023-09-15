@@ -1,21 +1,24 @@
 {
-  "name": "@wix/jest-allure2-reporter-e2e-no-metadata",
+  "name": "@wix/jest-allure2-reporter-e2e",
   "version": "1.0.0",
   "private": true,
-  "dependencies": {
+  "scripts": {
+    "test": "jest || true",
+    "build": ":",
+    "start": "ALLURE_NO_ANALYTICS=1 allure serve allure-results/default",
+    "start:dev": "npm run build --workspace=jest-allure2-reporter && npm test && npm start"
+  },
+  "devDependencies": {
     "@wix/eslint-config-jest-allure2-reporter": "^1.0.0",
     "@wix/jest-config-jest-allure2-reporter": "^1.0.0",
     "@wix/prettier-config-jest-allure2-reporter": "^1.0.0",
-    "@wix/typescript-config-jest-allure2-reporter": "^1.0.0",
+    "@wix/typescript-config-jest-allure2-reporter": "^1.0.0"
+  },
+  "dependencies": {
     "jest-allure2-reporter": "^1.0.0"
   },
   "prettier": "@wix/prettier-config-jest-allure2-reporter",
   "eslintConfig": {
     "extends": "@wix/jest-allure2-reporter"
-  },
-  "jest": {
-    "reporters": [
-      "jest-allure2-reporter"
-    ]
   }
 }

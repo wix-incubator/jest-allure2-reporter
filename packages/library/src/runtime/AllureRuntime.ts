@@ -15,9 +15,10 @@ import {
   LABELS,
   LINKS,
   PREFIX,
-} from './constants';
-import type { AllureTestStepMetadata } from './options';
-import { isPromiseLike } from './utils/isPromiseLike';
+} from '../constants';
+import { isPromiseLike } from '../utils/isPromiseLike';
+
+import type { AllureTestStepMetadata } from './metadata';
 
 export type AllureRuntimeConfig = {
   metadataProvider: () => Metadata;

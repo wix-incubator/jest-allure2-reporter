@@ -1,7 +1,7 @@
 import { state } from 'jest-metadata';
 
 import { AllureRuntime } from './AllureRuntime';
-import { PREFIX } from './constants';
+import { PREFIX } from '../constants';
 
 describe('AllureRuntime', () => {
   it('should add attachments within the steps', async () => {

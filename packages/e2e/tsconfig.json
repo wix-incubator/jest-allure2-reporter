@@ -1,0 +1,6 @@
+{
+  "extends": "@wix/typescript-config-jest-allure2-reporter/tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  }
+}

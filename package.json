@@ -13,10 +13,8 @@
     "url": "github:wix-incubator/jest-allure2-reporter"
   },
   "workspaces": [
-    "packages/e2e/*",
-    "packages/library",
-    "packages/presets/*",
-    "packages/website"
+    "packages/*",
+    "packages/presets/*"
   ],
   "scripts": {
     "prepare": "husky install",
@@ -35,5 +33,8 @@
     "cz-conventional-changelog": "^3.3.0",
     "husky": "^8.0.1",
     "lerna": "^6.6.2"
+  },
+  "jest": {
+    "testPathIgnorePatterns": [".*"]
   }
 }

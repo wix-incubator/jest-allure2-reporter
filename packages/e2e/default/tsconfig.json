@@ -1,6 +1,0 @@
-{
-  "extends": "@wix/typescript-config-jest-allure2-reporter",
-  "compilerOptions": {
-    "noEmit": true
-  }
-}

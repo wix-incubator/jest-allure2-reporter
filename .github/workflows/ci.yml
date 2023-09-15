@@ -34,11 +34,11 @@ jobs:
         os: [ubuntu-latest]
         jest: ['27.x.x', '28.x.x', '29.x.x']
         include:
-          - node: 14
-            jest: '27.x.x'
           - node: 16
-            jest: '28.x.x'
+            jest: '27.x.x'
           - node: 18
+            jest: '28.x.x'
+          - node: 20
             jest: '29.x.x'
     runs-on: ${{ matrix.os }}
     steps:
