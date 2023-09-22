@@ -9,7 +9,7 @@ import type {
 } from '@noomorph/allure-js-commons';
 
 import {
-  $POINTER,
+  CURRENT_STEP,
   DESCRIPTION,
   DESCRIPTION_HTML,
   LABELS,
@@ -17,8 +17,7 @@ import {
   PREFIX,
 } from '../constants';
 import { isPromiseLike } from '../utils/isPromiseLike';
-
-import type { AllureTestStepMetadata } from './metadata';
+import type { AllureTestStepMetadata } from '../metadata/metadata';
 
 export type AllureRuntimeConfig = {
   metadataProvider: () => Metadata;
@@ -160,7 +159,7 @@ export class AllureRuntime {
       },
     ]);
     // eslint-disable-next-line unicorn/no-array-push-push
-    this.#metadata.push($POINTER, ['steps', `${count}`]);
+    this.#metadata.push(CURRENT_STEP, ['steps', `${count}`]);
   };
 
   #stopStep = (status: Status, statusDetails?: StatusDetails) => {
@@ -170,8 +169,8 @@ export class AllureRuntime {
       statusDetails,
       stop: this.#now(),
     });
-    const $pointer = this.#metadata.get($POINTER, []) as string[];
-    this.#metadata.set($POINTER, $pointer.slice(0, -2));
+    const currentStep = this.#metadata.get(CURRENT_STEP, []) as string[];
+    this.#metadata.set(CURRENT_STEP, currentStep.slice(0, -2));
   };
 
   #updateStep = (stage: Stage) => {
@@ -179,7 +178,7 @@ export class AllureRuntime {
   };
 
   #localPath(key?: keyof AllureTestStepMetadata, ...innerKeys: string[]) {
-    const stepPath = this.#metadata.get($POINTER, []) as string[];
+    const stepPath = this.#metadata.get(CURRENT_STEP, []) as string[];
     const allKeys = key ? [key, ...innerKeys] : innerKeys;
     return [PREFIX, ...stepPath, ...allKeys];
   }

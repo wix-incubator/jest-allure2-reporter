@@ -6,8 +6,11 @@ import type {
 } from '@jest/reporters';
 import { JestMetadataReporter, query } from 'jest-metadata/reporter';
 import rimraf from 'rimraf';
-import type { ExecutableItemWrapper } from '@noomorph/allure-js-commons';
-import { AllureRuntime } from '@noomorph/allure-js-commons';
+import type {
+  ExecutableItemWrapper,
+  Status,
+} from '@noomorph/allure-js-commons';
+import { AllureRuntime, Stage } from '@noomorph/allure-js-commons';
 import type { TestContext } from '@jest/reporters';
 
 import type {
@@ -18,16 +21,11 @@ import type {
   TestStepExtractorContext,
 } from '../options/ReporterOptions';
 import { resolveOptions } from '../options';
-import type { AllureTestCaseMetadata } from '../runtime';
+import type { AllureTestCaseMetadata } from '../metadata';
+import { MetadataSquasher, StepExtractor } from '../metadata';
 
 const ns = (key?: keyof AllureTestCaseMetadata) =>
   key ? ['allure2', key] : ['allure2'];
-
-function flattenTestCaseMetadata(
-  _testCaseResult: TestCaseResult,
-): AllureTestCaseMetadata {
-  return {} as any; // TODO: implement
-}
 
 function doBeforeMagic(
   _testCaseResult: TestCaseResult,
@@ -53,7 +51,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     super.onTestFileStart(test);
 
     // TODO: use Thread service fallback
-    query.test(test).set(ns('$workerId'), '1');
+    query.test(test).set(ns('workerId'), '1');
   }
 
   onTestCaseResult(test: Test, testCaseResult: TestCaseResult) {
@@ -107,16 +105,59 @@ export class JestAllure2Reporter extends JestMetadataReporter {
       allure.writeCategoriesDefinitions(categories);
     }
 
+    const squasher = new MetadataSquasher(true);
+    const stepper = new StepExtractor(true);
+
     for (const testResult of results.testResults) {
       for (const testCaseResult of testResult.testResults) {
-        const testCaseContext: TestCaseExtractorContext<any> = {
-          ...globalContext,
-          testFile: testResult,
-          testCase: testCaseResult,
-          testCaseMetadata: flattenTestCaseMetadata(testCaseResult),
-        };
+        const allInvocations = query.testCaseResult(testCaseResult).invocations;
+        for (const invocationMetadata of allInvocations) {
+          const testCaseContext: TestCaseExtractorContext<any> = {
+            ...globalContext,
+            testFile: testResult,
+            testCase: testCaseResult,
+            testCaseMetadata: squasher.testInvocation(invocationMetadata),
+          };
 
-        const customize: Required<TestStepCustomizer> = config.testCase.steps;
+          const invocationIndex = allInvocations.indexOf(invocationMetadata);
+          const groupName = `${testCaseResult.fullName} (${invocationIndex})`;
+          const allureGroup = allure.startGroup(groupName);
+          const allureTest = allureGroup.startTest(
+            config.testCase.name(testCaseContext),
+            testCaseContext.testCaseMetadata.start,
+          );
+          allureTest.description = config.testCase.description(testCaseContext);
+          allureTest.descriptionHtml =
+            config.testCase.descriptionHtml(testCaseContext);
+
+          allureTest.status = (config.testCase.status(testCaseContext) ??
+            'unknown') as Status;
+          allureTest.stage = (config.testCase.stage(testCaseContext) ??
+            Stage.FINISHED) as Stage;
+
+          for (const link of config.testCase.links(testCaseContext) ?? []) {
+            allureTest.addLink(link.url, link.name, link.type);
+          }
+
+          for (const label of config.testCase.labels(testCaseContext) ?? []) {
+            allureTest.addLabel(label.name, label.value);
+          }
+
+          const parameters = config.testCase.parameters(testCaseContext) ?? [];
+          for (const { name, value, ...options } of parameters) {
+            allureTest.addParameter(name, value, options);
+          }
+
+          const attachments =
+            config.testCase.attachments(testCaseContext) ?? [];
+          for (const { name, source, type } of attachments) {
+            allureTest.addAttachment(name, type, source);
+          }
+
+          allureTest.endTest(testCaseContext.testCaseMetadata.stop);
+        }
+
+        const customize: Required<TestStepCustomizer> = config.testStep;
         const foo = (
           testStepContext: TestStepExtractorContext<any>,
           allureStep: ExecutableItemWrapper,
@@ -131,34 +172,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
           allureStep.statusDetails =
             customize.statusDetails(testStepContext) ??
             allureStep.statusDetails;
-
-          const parameters = customize.parameters(testStepContext) ?? [];
-          for (const { name, value, ...options } of parameters) {
-            allureStep.addParameter(name, value, options);
-          }
-
-          const attachments = customize.attachments(testStepContext) ?? [];
-          for (const { name, source, type } of attachments) {
-            allureStep.addAttachment(name, type, source);
-          }
         };
-
-        const allureGroup = allure.startGroup(testCaseResult.fullName);
-        const allureTest = allureGroup.startTest(
-          config.testCase.name(testCaseContext),
-          testCaseContext.testCaseMetadata.start,
-        );
-        allureTest.description = config.testCase.description(testCaseContext);
-        allureTest.descriptionHtml =
-          config.testCase.descriptionHtml(testCaseContext);
-
-        for (const link of config.testCase.links(testCaseContext) ?? []) {
-          allureTest.addLink(link.url, link.name, link.type);
-        }
-
-        for (const label of config.testCase.labels(testCaseContext) ?? []) {
-          allureTest.addLabel(label.name, label.value);
-        }
 
         for (const testStepContext of doBeforeMagic(testCaseResult)) {
           foo(testStepContext, allureGroup.addBefore());
@@ -169,8 +183,6 @@ export class JestAllure2Reporter extends JestMetadataReporter {
         for (const testStepContext of doAfterMagic(testCaseResult)) {
           foo(testStepContext, allureGroup.addAfter());
         }
-
-        allureTest.endTest(testCaseContext.testCaseMetadata.stop);
       }
     }
   }

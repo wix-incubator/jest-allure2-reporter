@@ -34,6 +34,7 @@ module.exports = {
     "node/no-extraneous-import": "off",
     "unicorn/consistent-function-scoping": "off",
     "unicorn/filename-case": "off",
+    "unicorn/no-array-callback-reference": "off",
     "unicorn/no-null": "off",
     "unicorn/prefer-event-target": "off",
     "unicorn/prefer-module": "off",

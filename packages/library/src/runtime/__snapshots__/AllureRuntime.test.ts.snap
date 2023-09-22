@@ -2,7 +2,7 @@
 
 exports[`AllureRuntime should add attachments within the steps 1`] = `
 {
-  "$pointer": [],
+  "currentStep": [],
   "attachments": [
     {
       "content": {

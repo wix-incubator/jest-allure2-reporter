@@ -23,6 +23,10 @@ export function composeOptions(
     overwrite: custom.overwrite ?? base.overwrite,
     resultsDir: custom.resultsDir ?? base.resultsDir,
     testCase: composeTestCaseCustomizers(base.testCase, custom.testCase),
+    testStep: composeTestStepCustomizers(
+      base.testStep as TestStepCustomizer,
+      custom.testStep,
+    ),
     environment: composeExtractors(custom.environment, base.environment),
     executor: composeExtractors(custom.executor, base.executor),
     categories: composeExtractors(custom.categories, base.categories),
@@ -46,14 +50,11 @@ function composeTestCaseCustomizers(
       custom.descriptionHtml,
       base.descriptionHtml,
     ),
+    stage: composeExtractors(custom.stage, base.stage),
     status: composeExtractors(custom.status, base.status),
     statusDetails: composeExtractors(custom.statusDetails, base.statusDetails),
     attachments: composeExtractors(custom.attachments, base.attachments),
     parameters: composeExtractors(custom.parameters, base.parameters),
-    steps: composeTestStepCustomizers(
-      base.steps as TestStepCustomizer,
-      custom.steps,
-    ),
     labels: composeExtractors(
       aggregateLabelCustomizers(custom.labels),
       base.labels,

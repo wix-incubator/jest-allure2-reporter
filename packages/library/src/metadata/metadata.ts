@@ -12,7 +12,6 @@ export interface AllureTestStepMetadata {
   steps?: AllureTestStepMetadata[];
 
   name?: string;
-  code?: string;
   status?: Status;
   statusDetails?: StatusDetails;
   stage?: Stage;
@@ -28,14 +27,17 @@ export interface AllureTestCaseMetadata extends AllureTestStepMetadata {
    * @example ['steps', '0', 'steps', '0']
    * @internal
    */
-  $pointer?: string[];
+  currentStep?: string[];
   /**
    * Jest worker ID.
    * @internal Used to generate unique thread names.
-   * @see {LabelName.THREAD}
+   * @see {import('@noomorph/allure-js-commons').LabelName.THREAD}
    */
-  $workerId?: string;
-
+  workerId?: string;
+  /**
+   * Source code of the test case, glued from all hooks and test function itself.
+   */
+  code?: string[];
   /**
    * Only steps can have names.
    */

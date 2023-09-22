@@ -103,7 +103,7 @@
           aTest.addLabel(LabelName.SUB_SUITE, 'Sub-suite');
           aTest.addLabel(
             LabelName.THREAD,
-            testEntry.describeBlock.run.get(ns('$workerId')) as string,
+            testEntry.describeBlock.run.get(ns('workerId')) as string,
           );
           aTest.addLabel(
             LabelName.TEST_METHOD,

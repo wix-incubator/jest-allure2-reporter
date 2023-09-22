@@ -1,18 +1,19 @@
 import path from 'node:path';
 
 import type { TestCaseResult } from '@jest/reporters';
-import type { Status, StatusDetails } from '@noomorph/allure-js-commons';
+import type { StatusDetails } from '@noomorph/allure-js-commons';
+import { Stage, Status } from '@noomorph/allure-js-commons';
 
 import type {
   ExtractorContext,
   ReporterConfig,
   ResolvedTestCaseCustomizer,
+  ResolvedTestStepCustomizer,
 } from './ReporterOptions';
 import { aggregateLabelCustomizers } from './aggregateLabelCustomizers';
 
 const identity = <T>(context: ExtractorContext<T>) => context.value;
-const last = <T>(context: ExtractorContext<T[]>) =>
-  context.value?.[context.value.length - 1];
+const last = <T>(context: ExtractorContext<T[]>) => context.value?.at(-1);
 const all = identity;
 
 export function defaultOptions(): ReporterConfig {
@@ -24,18 +25,11 @@ export function defaultOptions(): ReporterConfig {
       return '```javascript\n' + testCaseMetadata.code + '\n```';
     },
     descriptionHtml: () => void 0,
+    stage: ({ testCase }) => getTestCaseStage(testCase),
     status: ({ testCase }) => getTestCaseStatus(testCase),
     statusDetails: ({ testCase }) => getTestCaseStatusDetails(testCase),
     attachments: ({ testCaseMetadata }) => testCaseMetadata.attachments,
     parameters: ({ testCaseMetadata }) => testCaseMetadata.parameters,
-    steps: {
-      name: ({ testStep }) => testStep.name,
-      stage: ({ testStep }) => testStep.stage,
-      status: ({ testStep }) => testStep.status,
-      statusDetails: ({ testStep }) => testStep.statusDetails,
-      attachments: ({ testStep }) => testStep.attachments,
-      parameters: ({ testStep }) => testStep.parameters,
-    },
     labels: aggregateLabelCustomizers({
       package: last,
       testClass: last,
@@ -47,7 +41,7 @@ export function defaultOptions(): ReporterConfig {
       epic: all,
       feature: all,
       story: all,
-      thread: ({ testCaseMetadata }) => testCaseMetadata.$workerId,
+      thread: ({ testCaseMetadata }) => testCaseMetadata.workerId,
       severity: last,
       tag: all,
       owner: last,
@@ -55,35 +49,68 @@ export function defaultOptions(): ReporterConfig {
     links: all,
   };
 
+  const testStep: ResolvedTestStepCustomizer = {
+    name: ({ testStep }) => testStep.name,
+    stage: ({ testStep }) => testStep.stage,
+    status: ({ testStep }) => testStep.status,
+    statusDetails: ({ testStep }) => testStep.statusDetails,
+    attachments: ({ testStep }) => testStep.attachments,
+    parameters: ({ testStep }) => testStep.parameters,
+  };
+
   return {
     overwrite: true,
     resultsDir: 'allure-results',
     testCase,
+    testStep,
     environment: identity,
     executor: identity,
     categories: identity,
   };
 }
 
-function getTestCaseStatus(testCase: TestCaseResult): Status[keyof Status] {
+function getTestCaseStatus(testCase: TestCaseResult): Status {
   const hasErrors = testCase.failureMessages?.length > 0;
   // TODO: Add support for 'broken' status
   switch (testCase.status) {
-    case 'passed':
-    case 'failed':
+    case 'passed': {
+      return Status.PASSED;
+    }
+    case 'failed': {
+      return Status.FAILED;
+    }
     case 'skipped': {
-      return testCase.status;
+      return Status.SKIPPED;
     }
     case 'pending':
     case 'todo':
     case 'disabled': {
-      return 'skipped';
+      return Status.SKIPPED;
     }
     case 'focused': {
-      return hasErrors ? 'failed' : 'passed';
+      return hasErrors ? Status.FAILED : Status.PASSED;
     }
     default: {
-      return 'unknown';
+      return 'unknown' as Status;
+    }
+  }
+}
+
+function getTestCaseStage(testCase: TestCaseResult): Stage {
+  switch (testCase.status) {
+    case 'passed':
+    case 'focused':
+    case 'failed': {
+      return Stage.FINISHED;
+    }
+    case 'todo':
+    case 'disabled':
+    case 'pending':
+    case 'skipped': {
+      return Stage.PENDING;
+    }
+    default: {
+      return Stage.INTERRUPTED;
     }
   }
 }

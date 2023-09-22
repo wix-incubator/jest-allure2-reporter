@@ -15,7 +15,7 @@ import type { Config } from '@jest/reporters';
 import type {
   AllureTestCaseMetadata,
   AllureTestStepMetadata,
-} from '../runtime';
+} from '../metadata';
 
 /**
  * Configuration options for the `jest-allure2-reporter` package.
@@ -61,9 +61,13 @@ export type ReporterOptions = {
    */
   resultsDir?: string;
   /**
-   * Configures globally how test cases are reported: names, descriptions, labels, status, etc.
+   * Customize how test cases are reported: names, descriptions, labels, status, etc.
    */
   testCase?: Partial<TestCaseCustomizer>;
+  /**
+   * Customize how individual test steps are reported.
+   */
+  testStep?: Partial<TestStepCustomizer>;
   /**
    * Configures the environment information that will be reported.
    */
@@ -86,6 +90,7 @@ export type ReporterOptions = {
 
 export type ReporterConfig = Required<ReporterOptions> & {
   testCase: ResolvedTestCaseCustomizer;
+  testStep: ResolvedTestStepCustomizer;
 };
 
 /**
@@ -120,19 +125,19 @@ export interface TestCaseCustomizer {
    */
   descriptionHtml: TestCaseExtractor<string>;
   /**
+   * Extractor for the test case stage.
+   */
+  stage: TestCaseExtractor<Stage>;
+  /**
    * Extractor for the test case status.
    * @see https://wix-incubator.github.io/jest-allure2-reporter/docs/config/statuses/
    * @example ({ value }) => value === 'broken' ? 'failed' : value
    */
-  status: TestCaseExtractor<Status[keyof Status]>;
+  status: TestCaseExtractor<Status>;
   /**
    * Extractor for the test case status details.
    */
   statusDetails: TestCaseExtractor<StatusDetails>;
-  /**
-   * Customize step details for the test case.
-   */
-  steps: Partial<TestStepCustomizer>;
   /**
    * Customize Allure labels for the test case.
    *
@@ -167,21 +172,22 @@ export interface TestCaseCustomizer {
 }
 
 export type ResolvedTestCaseCustomizer = Required<TestCaseCustomizer> & {
-  steps: Required<TestStepCustomizer>;
   labels: TestCaseExtractor<Label[]>;
   links: TestCaseExtractor<Link[]>;
 };
 
+export type ResolvedTestStepCustomizer = Required<TestStepCustomizer>;
+
 export interface TestStepCustomizer {
   /**
    * Extractor for the step name.
-   * @example ({ testStep }) => ['beforeEach', 'afterEach'].includes(testStep.name) ? testStep.name.replace('Each', ' each') : testStep.name
+   * @example ({ value }) => value.replace(/(before|after)(Each|All)/, (_, p1, p2) => p1 + ' ' + p2.toLowerCase())
    */
   name: TestStepExtractor<string>;
   /**
    * Extractor for the test step stage.
    * @see https://wix-incubator.github.io/jest-allure2-reporter/docs/config/statuses/
-   * @example ({ value }) => value === 'broken' ? 'failed' : value
+   * TODO: add example
    */
   stage: TestStepExtractor<Stage>;
   /**
@@ -280,6 +286,6 @@ export interface TestStepExtractorContext<T>
 
 // TODO: improve typings (less never patches, please)
 export type AllureTestStepContext = AllureTestStepMetadata & {
-  $pointer: readonly string[];
+  currentStep: readonly string[];
   steps: never;
 };

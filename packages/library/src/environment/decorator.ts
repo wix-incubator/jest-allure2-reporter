@@ -10,7 +10,7 @@ import { Stage, Status } from '@noomorph/allure-js-commons';
 import type {
   AllureTestCaseMetadata,
   AllureTestStepMetadata,
-} from '../runtime';
+} from '../metadata';
 import { PREFIX } from '../constants';
 import { AllureRuntime } from '../runtime';
 
@@ -67,7 +67,7 @@ export function WithAllure2<E extends WithEmitter>(
       }: ForwardedCircusEvent<Circus.Event & { name: 'add_test' }>) {
         const metadata: AllureTestCaseMetadata = {
           stage: Stage.SCHEDULED,
-          code: event.fn.toString(),
+          code: [event.fn.toString()],
         };
 
         state.currentMetadata.assign(PREFIX, metadata);
