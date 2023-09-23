@@ -21,9 +21,13 @@ export const extractCode: MetadataSquasherMapping<
     ...testInvocation.beforeAll
       .map(getHookDefinition)
       .map(getCode('beforeAll')),
-    ...testInvocation.before.map(getHookDefinition).map(getCode('beforeEach')),
-    getCode('test')(testInvocation.entry),
-    ...testInvocation.after.map(getHookDefinition).map(getCode('afterEach')),
+    ...testInvocation.beforeEach
+      .map(getHookDefinition)
+      .map(getCode('beforeEach')),
+    getCode('test')(testInvocation.definition),
+    ...testInvocation.afterEach
+      .map(getHookDefinition)
+      .map(getCode('afterEach')),
     ...testInvocation.afterAll.map(getHookDefinition).map(getCode('afterAll')),
   ].filter(Boolean);
 };

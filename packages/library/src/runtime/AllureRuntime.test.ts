@@ -1,6 +1,7 @@
 import { state } from 'jest-metadata';
 
 import { PREFIX } from '../constants';
+
 import { AllureRuntime } from './AllureRuntime';
 
 describe('AllureRuntime', () => {
@@ -10,6 +11,7 @@ describe('AllureRuntime', () => {
     const runtime = new AllureRuntime({
       metadataProvider: () => state,
       nowProvider: () => now++,
+      writeAttachment: (content) => content.toString(),
     });
 
     runtime.attachment('attachment1', Buffer.from('first'), 'text/plain');

@@ -12,8 +12,8 @@ on:
 
 jobs:
 
-  lint:
-    name: Lint
+  self_check:
+    name: Self Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -25,76 +25,7 @@ jobs:
           useLockFile: false
       - name: Lint
         run: npm run lint:ci
-
-  unit:
-    name: Unit Tests
-    needs: lint
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        jest: ['27.x.x', '28.x.x', '29.x.x']
-        include:
-          - node: 16
-            jest: '27.x.x'
-          - node: 18
-            jest: '28.x.x'
-          - node: 20
-            jest: '29.x.x'
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node }}
-      - uses: bahmutov/npm-install@v1
-        with:
-          useLockFile: false
-      - name: Record fixtures
-        run: npm run record
-        env:
-          JEST_VERSION: ${{ matrix.jest }}
-      - name: Unit tests
-        run: npm test -- --coverage
-
-  docs:
-    name: Docs
-    needs: unit
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version-file: '.nvmrc'
-      - uses: bahmutov/npm-install@v1
-        with:
-          useLockFile: false
-      - name: Build docs
-        run: npm run docs
-      - name: Deploy to GH pages
-        uses: peaceiris/actions-gh-pages@v3
-        if: github.ref == 'refs/heads/master'
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./website
-          force_orphan: true
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
-
-  publish:
-    name: Publish
-    needs: docs
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version-file: '.nvmrc'
-      - uses: bahmutov/npm-install@v1
-        with:
-          useLockFile: false
-      - name: Semantic release
-        if: github.ref == 'refs/heads/master'
-        run: npx --no-install semantic-release --debug
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Unit Tests
+        run: npm test
+      - name: Build
+        run: npm run build

@@ -5,9 +5,9 @@ import type {
   TestCaseCustomizer,
   TestStepCustomizer,
 } from './ReporterOptions';
-import { composeExtractors } from './composeExtractors';
 import { aggregateLabelCustomizers } from './aggregateLabelCustomizers';
 import { aggregateLinkCustomizers } from './aggregateLinkCustomizers';
+import { composeExtractors } from './composeExtractors';
 
 export function composeOptions(
   base: ReporterConfig,
@@ -50,6 +50,8 @@ function composeTestCaseCustomizers(
       custom.descriptionHtml,
       base.descriptionHtml,
     ),
+    start: composeExtractors(custom.start, base.start),
+    stop: composeExtractors(custom.stop, base.stop),
     stage: composeExtractors(custom.stage, base.stage),
     status: composeExtractors(custom.status, base.status),
     statusDetails: composeExtractors(custom.statusDetails, base.statusDetails),
@@ -69,7 +71,7 @@ function composeTestCaseCustomizers(
 function composeTestStepCustomizers(
   base: TestStepCustomizer,
   custom: Partial<TestStepCustomizer> | undefined,
-) {
+): TestStepCustomizer {
   if (!custom) {
     return base;
   }
@@ -77,6 +79,8 @@ function composeTestStepCustomizers(
   return {
     name: composeExtractors(custom.name, base.name),
     stage: composeExtractors(custom.stage, base.stage),
+    start: composeExtractors(custom.start, base.start),
+    stop: composeExtractors(custom.stop, base.stop),
     status: composeExtractors(custom.status, base.status),
     statusDetails: composeExtractors(custom.statusDetails, base.statusDetails),
     attachments: composeExtractors(custom.attachments, base.attachments),

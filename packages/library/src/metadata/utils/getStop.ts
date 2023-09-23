@@ -1,18 +1,18 @@
 import type { MetadataSquasherMapping } from '../MetadataSquasher';
 import type { AllureTestCaseMetadata } from '../metadata';
-import { PREFIX } from '../../constants';
+import { STOP } from '../../constants';
 
 export const getStop: MetadataSquasherMapping<
   AllureTestCaseMetadata,
   'stop'
 > = ({ testEntry, testInvocation }) => {
-  const last =
-    (testInvocation &&
-      (testInvocation.afterAll.at(-1) ??
-        testInvocation.after.at(-1) ??
-        testInvocation.fn)) ??
-    testEntry;
+  const lastBlock =
+    testInvocation &&
+    (testInvocation.afterAll.at(-1) ??
+      testInvocation.afterEach.at(-1) ??
+      testInvocation.fn);
 
-  const stop: number = (last?.get([PREFIX, 'stop']) as number);
-  return stop;
+  return (lastBlock?.get(STOP) ??
+    testInvocation?.get(STOP) ??
+    testEntry?.get(STOP)) as number;
 };

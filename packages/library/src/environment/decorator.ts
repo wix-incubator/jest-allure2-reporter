@@ -1,10 +1,14 @@
+import { randomUUID } from 'node:crypto';
+import path from 'node:path';
+import fs from 'node:fs';
+import os from 'node:os';
+
 import type { Circus } from '@jest/types';
 import type {
   ForwardedCircusEvent,
   WithEmitter,
 } from 'jest-metadata/environment-decorator';
 import { state } from 'jest-metadata';
-import type { StatusDetails } from '@noomorph/allure-js-commons';
 import { Stage, Status } from '@noomorph/allure-js-commons';
 
 import type {
@@ -33,19 +37,28 @@ export function WithAllure2<E extends WithEmitter>(
           process.env.JEST_WORKER_ID,
         );
 
-        this.allure = new AllureRuntime({
+        const attachmentsFolder = os.tmpdir();
+        this.global.allure = new AllureRuntime({
           metadataProvider: () => state.currentMetadata,
           nowProvider: () => Date.now(),
+          writeAttachment(content) {
+            const filePath = `allure2-${randomUUID()}`;
+            const absolutePath = path.join(attachmentsFolder, filePath);
+            fs.writeFileSync(absolutePath, content);
+            return absolutePath;
+          },
         });
 
         this.testEvents
           .on('add_hook', this.#addHook.bind(this))
           .on('add_test', this.#addTest.bind(this))
+          .on('test_start', this.#executableStart.bind(this))
+          .on('test_todo', this.#testSkip.bind(this))
+          .on('test_skip', this.#testSkip.bind(this))
+          .on('test_done', this.#testDone.bind(this))
           .on('hook_start', this.#executableStart.bind(this))
           .on('hook_failure', this.#executableFailure.bind(this))
           .on('hook_success', this.#executableSuccess.bind(this))
-          .on('test_start', this.#executableStart.bind(this))
-          .on('test_done', this.#testDone.bind(this))
           .on('test_fn_start', this.#executableStart.bind(this))
           .on('test_fn_success', this.#executableSuccess.bind(this))
           .on('test_fn_failure', this.#executableFailure.bind(this));
@@ -54,19 +67,23 @@ export function WithAllure2<E extends WithEmitter>(
       #addHook({
         event,
       }: ForwardedCircusEvent<Circus.Event & { name: 'add_hook' }>) {
-        const metadata = {
-          name: event.hookType,
-          code: event.fn.toString(),
-        } as AllureTestStepMetadata;
-
-        state.currentMetadata.assign(PREFIX, metadata);
+        const sourceCode = event.fn.toString();
+        if (
+          !sourceCode.includes(
+            "during setup, this cannot be null (and it's fine to explode if it is)",
+          )
+        ) {
+          const metadata = {
+            code: [sourceCode],
+          } as AllureTestStepMetadata;
+          state.currentMetadata.assign(PREFIX, metadata);
+        }
       }
 
       #addTest({
         event,
       }: ForwardedCircusEvent<Circus.Event & { name: 'add_test' }>) {
         const metadata: AllureTestCaseMetadata = {
-          stage: Stage.SCHEDULED,
           code: [event.fn.toString()],
         };
 
@@ -90,7 +107,7 @@ export function WithAllure2<E extends WithEmitter>(
       >) {
         const metadata: AllureTestStepMetadata = {
           stop: Date.now(),
-          stage: Stage.FINISHED,
+          stage: Stage.INTERRUPTED,
           status: Status.FAILED,
           statusDetails: event.error
             ? {
@@ -115,22 +132,23 @@ export function WithAllure2<E extends WithEmitter>(
         state.currentMetadata.assign(PREFIX, metadata);
       }
 
+      #testSkip() {
+        const metadata: AllureTestCaseMetadata = {
+          stop: Date.now(),
+          stage: Stage.PENDING,
+          status: Status.SKIPPED,
+        };
+
+        state.currentMetadata.assign(PREFIX, metadata);
+      }
+
       #testDone({
         event,
       }: ForwardedCircusEvent<Circus.Event & { name: 'test_done' }>) {
-        const metadata: AllureTestStepMetadata = {
+        const metadata: AllureTestCaseMetadata = {
           stop: Date.now(),
-          stage: Stage.FINISHED,
+          stage: event.test.failing ? Stage.INTERRUPTED : Stage.FINISHED,
           status: event.test.failing ? Status.FAILED : Status.PASSED,
-          // eslint-disable-next-line unicorn/no-array-reduce
-          statusDetails: event.test.errors.reduce(
-            (accumulator: StatusDetails, error: Error) => {
-              accumulator.message += error.message + '\n';
-              accumulator.trace += error.stack + '\n';
-              return accumulator;
-            },
-            { message: '', trace: '' },
-          ),
         };
 
         state.currentMetadata.assign(PREFIX, metadata);

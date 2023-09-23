@@ -11,6 +11,7 @@ import type {
   ResolvedTestStepCustomizer,
 } from './ReporterOptions';
 import { aggregateLabelCustomizers } from './aggregateLabelCustomizers';
+import { composeExtractors } from './composeExtractors';
 
 const identity = <T>(context: ExtractorContext<T>) => context.value;
 const last = <T>(context: ExtractorContext<T[]>) => context.value?.at(-1);
@@ -22,40 +23,52 @@ export function defaultOptions(): ReporterConfig {
     name: ({ testCase }) => testCase.title,
     fullName: ({ testCase }) => testCase.fullName,
     description: ({ testCaseMetadata }) => {
-      return '```javascript\n' + testCaseMetadata.code + '\n```';
+      const text = testCaseMetadata.description?.join('\n') ?? '';
+      const code =
+        '```javascript\n' + testCaseMetadata.code?.join('\n\n') + '\n```';
+      return [text, code].filter(Boolean).join('\n\n');
     },
     descriptionHtml: () => void 0,
+    start: ({ testCase, testCaseMetadata }) =>
+      testCaseMetadata.start ??
+      (testCaseMetadata.stop ?? Date.now()) - (testCase.duration ?? 0),
+    stop: ({ testCaseMetadata }) => testCaseMetadata.stop ?? Date.now(),
     stage: ({ testCase }) => getTestCaseStage(testCase),
     status: ({ testCase }) => getTestCaseStatus(testCase),
     statusDetails: ({ testCase }) => getTestCaseStatusDetails(testCase),
-    attachments: ({ testCaseMetadata }) => testCaseMetadata.attachments,
-    parameters: ({ testCaseMetadata }) => testCaseMetadata.parameters,
-    labels: aggregateLabelCustomizers({
-      package: last,
-      testClass: last,
-      testMethod: last,
-      parentSuite: last,
-      suite: ({ testCase, testFile }) =>
-        testCase.ancestorTitles[0] ?? path.basename(testFile.testFilePath),
-      subSuite: ({ testCase }) => testCase.ancestorTitles.slice(1).join(' '),
-      epic: all,
-      feature: all,
-      story: all,
-      thread: ({ testCaseMetadata }) => testCaseMetadata.workerId,
-      severity: last,
-      tag: all,
-      owner: last,
-    })!,
-    links: all,
+    attachments: ({ testCaseMetadata }) => testCaseMetadata.attachments ?? [],
+    parameters: ({ testCaseMetadata }) => testCaseMetadata.parameters ?? [],
+    labels: composeExtractors(
+      aggregateLabelCustomizers({
+        package: last,
+        testClass: last,
+        testMethod: last,
+        parentSuite: last,
+        suite: ({ testCase, testFile }) =>
+          testCase.ancestorTitles[0] ?? path.basename(testFile.testFilePath),
+        subSuite: ({ testCase }) => testCase.ancestorTitles.slice(1).join(' '),
+        epic: all,
+        feature: all,
+        story: all,
+        thread: ({ testCaseMetadata }) => testCaseMetadata.workerId,
+        severity: last,
+        tag: all,
+        owner: last,
+      }),
+      ({ testCaseMetadata }) => testCaseMetadata.labels ?? [],
+    ),
+    links: ({ testCaseMetadata }) => testCaseMetadata.links ?? [],
   };
 
   const testStep: ResolvedTestStepCustomizer = {
     name: ({ testStep }) => testStep.name,
+    start: ({ testStep }) => testStep.start,
+    stop: ({ testStep }) => testStep.stop,
     stage: ({ testStep }) => testStep.stage,
     status: ({ testStep }) => testStep.status,
     statusDetails: ({ testStep }) => testStep.statusDetails,
-    attachments: ({ testStep }) => testStep.attachments,
-    parameters: ({ testStep }) => testStep.parameters,
+    attachments: ({ testStep }) => testStep.attachments ?? [],
+    parameters: ({ testStep }) => testStep.parameters ?? [],
   };
 
   return {

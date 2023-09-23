@@ -1,10 +1,11 @@
 import type {
-  AggregatedResultMetadata,
+  GlobalMetadata,
   DescribeBlockMetadata,
-  RunMetadata,
+  TestFileMetadata,
   TestEntryMetadata,
   TestFnInvocationMetadata,
   TestInvocationMetadata,
+  HookInvocationMetadata,
 } from 'jest-metadata';
 
 import { PREFIX } from '../constants';
@@ -25,13 +26,14 @@ export class MetadataSquasher {
     const config = this.testInvocationConfig as any;
     const keys = Object.keys(config) as (keyof AllureTestCaseMetadata)[];
     const result: Partial<AllureTestCaseMetadata> = {};
-    const context = {
-      aggregatedResult: metadata.entry.describeBlock.run.aggregatedResult,
-      run: metadata.entry.describeBlock.run,
-      describeBlock: [...metadata.entry.ancestors()],
-      testEntry: metadata.entry,
+    const context: MetadataSquasherContext = {
+      globalMetadata: metadata.file.globalMetadata,
+      testFile: metadata.file,
+      describeBlock: [...metadata.definition.ancestors()],
+      testEntry: metadata.definition,
       testInvocation: metadata,
-      testFnInvocation: metadata.fn,
+      testFnInvocation: [...metadata.invocations()],
+      anyInvocation: [...metadata.allInvocations()],
     };
 
     for (const key of keys) {
@@ -44,30 +46,32 @@ export class MetadataSquasher {
   private static flatConfig(): MetadataSquasherConfig<AllureTestCaseMetadata> {
     return {
       code: extractCode,
-      workerId: ({ run }) => run?.get([PREFIX, 'workerId']) as string,
+      workerId: ({ testFile }) => {
+        return testFile?.get([PREFIX, 'workerId']) as string;
+      },
       description: chain(['testEntry', 'testInvocation', 'testFnInvocation']),
       descriptionHtml: chain([
         'testEntry',
         'testInvocation',
         'testFnInvocation',
       ]),
-      attachments: chain(['testEntry', 'testInvocation', 'testFnInvocation']),
-      parameters: chain(['testEntry', 'testInvocation', 'testFnInvocation']),
+      attachments: chain(['testEntry', 'testInvocation', 'anyInvocation']),
+      parameters: chain(['testEntry', 'testInvocation', 'anyInvocation']),
       labels: chain([
-        'aggregatedResult',
-        'run',
+        'globalMetadata',
+        'testFile',
         'describeBlock',
         'testEntry',
         'testInvocation',
-        'testFnInvocation',
+        'anyInvocation',
       ]),
       links: chain([
-        'aggregatedResult',
-        'run',
+        'globalMetadata',
+        'testFile',
         'describeBlock',
         'testEntry',
         'testInvocation',
-        'testFnInvocation',
+        'anyInvocation',
       ]),
       start: getStart,
       stop: getStop,
@@ -93,10 +97,11 @@ export type MetadataSquasherMapping<T, K extends keyof T = keyof T> = (
 ) => T[K];
 
 export type MetadataSquasherContext = Partial<{
-  aggregatedResult: AggregatedResultMetadata;
-  run: RunMetadata;
+  globalMetadata: GlobalMetadata;
+  testFile: TestFileMetadata;
   describeBlock: DescribeBlockMetadata[];
   testEntry: TestEntryMetadata;
   testInvocation: TestInvocationMetadata;
-  testFnInvocation: TestFnInvocationMetadata;
+  testFnInvocation: (HookInvocationMetadata<any> | TestFnInvocationMetadata)[];
+  anyInvocation: (HookInvocationMetadata<any> | TestFnInvocationMetadata)[];
 }>;

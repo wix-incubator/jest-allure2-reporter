@@ -6,7 +6,8 @@ import type {
   Label,
   Link,
   LinkType,
-  Parameter, Stage,
+  Parameter,
+  Stage,
   Status,
   StatusDetails,
 } from '@noomorph/allure-js-commons';
@@ -115,6 +116,14 @@ export interface TestCaseCustomizer {
    */
   fullName: TestCaseExtractor<string>;
   /**
+   * Extractor for the test case start timestamp.
+   */
+  start: TestCaseExtractor<number>;
+  /**
+   * Extractor for the test case stop timestamp.
+   */
+  stop: TestCaseExtractor<number>;
+  /**
    * Extractor for the test case description.
    * @example ({ testCaseMetadata }) => '```js\n' + testCaseMetadata.code + '\n```'
    */
@@ -184,6 +193,14 @@ export interface TestStepCustomizer {
    * @example ({ value }) => value.replace(/(before|after)(Each|All)/, (_, p1, p2) => p1 + ' ' + p2.toLowerCase())
    */
   name: TestStepExtractor<string>;
+  /**
+   * Extractor for the test step start timestamp.
+   */
+  start: TestStepExtractor<number>;
+  /**
+   * Extractor for the test step stop timestamp.
+   */
+  stop: TestStepExtractor<number>;
   /**
    * Extractor for the test step stage.
    * @see https://wix-incubator.github.io/jest-allure2-reporter/docs/config/statuses/
@@ -281,11 +298,5 @@ export interface TestCaseExtractorContext<T> extends GlobalExtractorContext<T> {
 
 export interface TestStepExtractorContext<T>
   extends TestCaseExtractorContext<T> {
-  testStep: AllureTestStepContext;
+  testStep: AllureTestStepMetadata;
 }
-
-// TODO: improve typings (less never patches, please)
-export type AllureTestStepContext = AllureTestStepMetadata & {
-  currentStep: readonly string[];
-  steps: never;
-};

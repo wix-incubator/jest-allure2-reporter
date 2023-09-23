@@ -2,43 +2,25 @@
 
 exports[`AllureRuntime should add attachments within the steps 1`] = `
 {
-  "currentStep": [],
   "attachments": [
     {
-      "content": {
-        "data": [
-          102,
-          105,
-          114,
-          115,
-          116,
-        ],
-        "type": "Buffer",
-      },
       "name": "attachment1",
+      "source": "first",
       "type": "text/plain",
     },
     {
-      "content": {
-        "data": [
-          102,
-          105,
-          102,
-          116,
-          104,
-        ],
-        "type": "Buffer",
-      },
       "name": "attachment5",
+      "source": "fifth",
       "type": "text/plain",
     },
   ],
+  "currentStep": [],
   "steps": [
     {
       "attachments": [
         {
-          "content": "third",
           "name": "attachment3",
+          "source": "third",
           "type": "text/plain",
         },
       ],
@@ -78,8 +60,8 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
         {
           "attachments": [
             {
-              "content": "second",
               "name": "attachment2",
+              "source": "second",
               "type": "text/plain",
             },
           ],
@@ -113,8 +95,8 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
         {
           "attachments": [
             {
-              "content": "fourth",
               "name": "attachment4",
+              "source": "fourth",
               "type": "text/plain",
             },
           ],

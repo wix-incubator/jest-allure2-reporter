@@ -56,7 +56,7 @@
   "dependencies": {
     "@noomorph/allure-js-commons": "^2.3.0",
     "ci-info": "^3.8.0",
-    "jest-metadata": "^1.0.0-beta.18",
+    "jest-metadata": "^1.0.0-beta.20",
     "pkg-up": "^3.1.0",
     "rimraf": "^4.3.1",
     "strip-ansi": "^6.0.0"

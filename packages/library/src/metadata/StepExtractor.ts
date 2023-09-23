@@ -1,4 +1,5 @@
 import type {
+  HookDefinitionMetadata,
   HookInvocationMetadata,
   TestFnInvocationMetadata,
 } from 'jest-metadata';
@@ -10,27 +11,11 @@ import type { AllureTestStepMetadata } from './metadata';
 export class StepExtractor {
   constructor(protected readonly flat: boolean) {}
 
-  public extractFromHook(
-    metadata: HookInvocationMetadata,
+  public extractFromInvocation(
+    metadata: HookInvocationMetadata<any> | TestFnInvocationMetadata,
   ): AllureTestStepMetadata {
     const data = {
-      name: metadata.definition.hookType,
-      ...(metadata.get([PREFIX]) as AllureTestStepMetadata),
-    };
-
-    if (this.flat) {
-      delete data.attachments;
-      delete data.parameters;
-    }
-
-    return data;
-  }
-
-  public extractFromTestFn(
-    metadata: TestFnInvocationMetadata,
-  ): AllureTestStepMetadata {
-    const data = {
-      name: 'test',
+      name: (metadata.definition as HookDefinitionMetadata).hookType ?? 'test',
       ...(metadata.get([PREFIX]) as AllureTestStepMetadata),
     };
 

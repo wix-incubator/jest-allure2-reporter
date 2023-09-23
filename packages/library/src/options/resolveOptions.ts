@@ -7,5 +7,5 @@ export * from './ReporterOptions';
 export function resolveOptions(
   options?: ReporterOptions | undefined,
 ): ReporterConfig {
-  return composeOptions(defaultOptions(), options ?? {});
+  return composeOptions(defaultOptions(), options);
 }

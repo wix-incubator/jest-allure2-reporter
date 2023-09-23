@@ -7,6 +7,7 @@ import type {
   ParameterOptions,
   LabelName,
 } from '@noomorph/allure-js-commons';
+import stripAnsi from 'strip-ansi';
 
 import {
   CURRENT_STEP,
@@ -22,6 +23,7 @@ import type { AllureTestStepMetadata } from '../metadata/metadata';
 export type AllureRuntimeConfig = {
   metadataProvider: () => Metadata;
   nowProvider: () => number;
+  writeAttachment: (content: Buffer | string) => string;
 };
 
 export type ParameterOrString = string | Parameter;
@@ -29,6 +31,7 @@ export type ParameterOrString = string | Parameter;
 export class AllureRuntime {
   readonly #metadataProvider: AllureRuntimeConfig['metadataProvider'];
   readonly #now: AllureRuntimeConfig['nowProvider'];
+  readonly #writeAttachment: AllureRuntimeConfig['writeAttachment'];
 
   get #metadata(): Metadata {
     return this.#metadataProvider();
@@ -37,6 +40,7 @@ export class AllureRuntime {
   constructor(config: AllureRuntimeConfig) {
     this.#metadataProvider = config.metadataProvider;
     this.#now = config.nowProvider;
+    this.#writeAttachment = config.writeAttachment;
   }
 
   description(value: string) {
@@ -72,8 +76,13 @@ export class AllureRuntime {
   }
 
   attachment(name: string, content: Buffer | string, type: string) {
+    const source = this.#writeAttachment(content);
+    this.fileAttachment(name, source, type);
+  }
+
+  fileAttachment(name: string, source: string, type: string) {
     this.#metadata.push(this.#localPath('attachments'), [
-      { name, content, type },
+      { name, source, type },
     ]);
   }
 
@@ -162,13 +171,25 @@ export class AllureRuntime {
     this.#metadata.push(CURRENT_STEP, ['steps', `${count}`]);
   };
 
-  #stopStep = (status: Status, statusDetails?: StatusDetails) => {
+  #stopStep = (status: Status, rawStatusDetails?: StatusDetails) => {
+    const statusDetails = rawStatusDetails
+      ? {
+          message: rawStatusDetails.message
+            ? stripAnsi(rawStatusDetails.message)
+            : undefined,
+          trace: rawStatusDetails.trace
+            ? stripAnsi(rawStatusDetails.trace)
+            : undefined,
+        }
+      : undefined;
+
     this.#metadata.assign(this.#localPath(), {
       stage: Stage.FINISHED,
       status,
       statusDetails,
       stop: this.#now(),
     });
+
     const currentStep = this.#metadata.get(CURRENT_STEP, []) as string[];
     this.#metadata.set(CURRENT_STEP, currentStep.slice(0, -2));
   };
