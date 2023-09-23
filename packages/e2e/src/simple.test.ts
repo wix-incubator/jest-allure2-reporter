@@ -42,6 +42,10 @@ describe('Simple suite', () => {
     });
   });
 
+  it('should not fail but it will', () => {
+    expect(true).toBe(false);
+  });
+
   it.skip('should skip', () => {
     expect(true).toBe(true);
   });

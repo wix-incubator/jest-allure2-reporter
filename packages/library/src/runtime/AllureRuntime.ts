@@ -7,7 +7,6 @@ import type {
   ParameterOptions,
   LabelName,
 } from '@noomorph/allure-js-commons';
-import stripAnsi from 'strip-ansi';
 
 import {
   CURRENT_STEP,
@@ -171,18 +170,7 @@ export class AllureRuntime {
     this.#metadata.push(CURRENT_STEP, ['steps', `${count}`]);
   };
 
-  #stopStep = (status: Status, rawStatusDetails?: StatusDetails) => {
-    const statusDetails = rawStatusDetails
-      ? {
-          message: rawStatusDetails.message
-            ? stripAnsi(rawStatusDetails.message)
-            : undefined,
-          trace: rawStatusDetails.trace
-            ? stripAnsi(rawStatusDetails.trace)
-            : undefined,
-        }
-      : undefined;
-
+  #stopStep = (status: Status, statusDetails?: StatusDetails) => {
     this.#metadata.assign(this.#localPath(), {
       stage: Stage.FINISHED,
       status,

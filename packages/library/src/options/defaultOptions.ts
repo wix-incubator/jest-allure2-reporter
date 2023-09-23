@@ -4,6 +4,8 @@ import type { TestCaseResult } from '@jest/reporters';
 import type { StatusDetails } from '@noomorph/allure-js-commons';
 import { Stage, Status } from '@noomorph/allure-js-commons';
 
+import { stripStatusDetails } from '../metadata/utils';
+
 import type {
   ExtractorContext,
   ReporterConfig,
@@ -66,7 +68,7 @@ export function defaultOptions(): ReporterConfig {
     stop: ({ testStep }) => testStep.stop,
     stage: ({ testStep }) => testStep.stage,
     status: ({ testStep }) => testStep.status,
-    statusDetails: ({ testStep }) => testStep.statusDetails,
+    statusDetails: ({ testStep }) => stripStatusDetails(testStep.statusDetails),
     attachments: ({ testStep }) => testStep.attachments ?? [],
     parameters: ({ testStep }) => testStep.parameters ?? [],
   };
@@ -133,9 +135,9 @@ function getTestCaseStatusDetails(
 ): StatusDetails | undefined {
   const message = (testCase.failureMessages ?? []).join('\n');
   return message
-    ? {
+    ? stripStatusDetails({
         message: message.split('\n', 1)[0],
         trace: message,
-      }
+      })
     : undefined;
 }

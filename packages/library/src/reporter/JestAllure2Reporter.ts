@@ -6,11 +6,8 @@ import type {
 } from '@jest/reporters';
 import { JestMetadataReporter, query } from 'jest-metadata/reporter';
 import rimraf from 'rimraf';
-import type {
-  Status,
-  ExecutableItemWrapper,
-} from '@noomorph/allure-js-commons';
-import { AllureRuntime, Stage } from '@noomorph/allure-js-commons';
+import type { ExecutableItemWrapper } from '@noomorph/allure-js-commons';
+import { AllureRuntime } from '@noomorph/allure-js-commons';
 import type { TestContext } from '@jest/reporters';
 
 import type {
@@ -122,10 +119,10 @@ export class JestAllure2Reporter extends JestMetadataReporter {
           allureTest.descriptionHtml =
             config.testCase.descriptionHtml(testCaseContext);
 
-          allureTest.status = (config.testCase.status(testCaseContext) ??
-            'unknown') as Status;
-          allureTest.stage = (config.testCase.stage(testCaseContext) ??
-            Stage.FINISHED) as Stage;
+          allureTest.status = config.testCase.status(testCaseContext)!;
+          allureTest.statusDetails =
+            config.testCase.statusDetails(testCaseContext)!;
+          allureTest.stage = config.testCase.stage(testCaseContext)!;
 
           for (const link of config.testCase.links(testCaseContext) ?? []) {
             allureTest.addLink(link.url, link.name, link.type);
