@@ -14,22 +14,46 @@ anywhere. Please use GitHub docs for the latest stable version.
 
 :::
 
+
+This grouping option is a concept that comes from the [Behavior-Driven Development](https://en.wikipedia.org/wiki/Behavior-driven_development) (BDD) methodology.
+Unlike the [suite-based grouping](01-by-suite.mdx), which is based on the technical structure of your test suite, the story-based grouping
+helps you to focus on the business value of your tests and view them from the end-user perspective.
+
 ![Grouping by story](../../../img/screenshots/config-01-grouping-05.jpg)
 
-This grouping option comes from the [Behavior-Driven Development](https://en.wikipedia.org/wiki/Behavior-driven_development) (BDD) methodology and
-allows users to group test results based on the **epic**, **feature** and **story** to which each test case belongs, where:
+The story-oriented hierarchy has 4 mandatory levels: **epic**, **feature**, **story** and **test case**.
 
-* **epic** is a high-level business goal.
-* **feature** is a functionality that delivers business value.
-* **story** is a user story that describes a feature from the end-user perspective.
+:::info Glossary
 
-This grouping is not enabled by default. Moreover, you need to decide how exactly you want to enable it: via [configuration](#configuration-api) or [annotations](#annotations-api).
+<dl>
+  <dt><strong>Epic</strong></dt>
+  <dd>High-level business goal</dd>
+
+  <dt><strong>Feature</strong></dt>
+  <dd>Functionality that delivers business value</dd>
+
+  <dt><strong>Story</strong></dt>
+  <dd>User story that describes a feature from the end-user perspective</dd>
+
+  <dt><strong>Test Case</strong></dt>
+  <dd>Atomic, lowest-level unit. In Jest, it is a single <code>it</code> or <code>test</code> function.</dd>
+</dl>
+
+:::
+
+Before you start using this grouping option, you need to decide how exactly you want to implement it:
+
+* via [annotations](#annotations-api) – a more granular approach, which allows you to control the grouping on a per-test basis;
+* via [configuration](#configuration-api) – a quick option to enable it all at once, based on general rules;
+* via _mixing these approaches_ – a compromise between the two, where the configuration serves as a fallback for missing annotations.
 
 ## Annotations API
 
-The [annotation-based approach](../../api/08-labels.mdx) gives you a fine-grained control over the names of your Epic, Feature and Story labels, but it requires you to add annotations to your test cases.
+The [annotation-based approach](../../api/08-labels.mdx) gives you a fine-grained control over the names of your epic, feature and story labels, but it requires you to add annotations to _every and each test case_ (sic!) which can be tedious.
 
-In the previous example, it would make sense to group both client and server tests under the same features like **Login screen** and **Forgot password screen**, whereas the epic would be **Authentication**.
+Let's take the same project as in the previous article, where there are two parts: client and server.
+Both them deal with the same functionality – authentication and restoring forgotten passwords.
+Hence, it would make sense to group both client and server tests under the same epic named **Authentication**, and continue grouping them by features and stories regardless of the application layer.
 
 <Tabs groupId="configTab">
   <TabItem value="demo" label="Report">
@@ -78,18 +102,47 @@ describe('Login controller', () => {
   </TabItem>
 </Tabs>
 
+As mentioned before, the annotation-based approach requires you to annotate literally **every test case** with all
+the three labels (epic, feature and story), otherwise the report will be stubbornly displaying a flat structure in **Behaviors** section.
+
+:::tip
+
+To relax the requirement to annotate all your test cases, you can add a fallback via configuration, e.g.:
+
+```js title="jest.config.js"
+/** @type {import('@jest/types').Config.InitialOptions} */
+module.exports = {
+  testEnvironment: 'jest-allure2-reporter/environment-node',
+  reporters: [
+    'default',
+    ['jest-allure2-reporter', /** @type {import('jest-allure2-reporter').Options}*/ {
+      labels: {
+        epic: ({ value }) => value ?? 'Uncategorized',
+        feature: ({ value }) => value ?? 'Untitled feature',
+        story: ({ value }) => value ?? 'Untitled story',
+      },
+    }],
+  ],
+};
+```
+
+:::
 
 ## Configuration API
 
-The **configuration-based approach** allows you to group test cases based on the available attributes like file path, ancestor describe blocks, test name and so on.
+The **configuration-based approach** allows you to group test cases based on the available attributes like the test file path, the ancestor describe blocks and any
+other contextually available information.
 
-It's a good option if you don't want to add annotations to your test cases by hand, but it's less flexible than the annotation-based approach. Still, it might be useful if your grouping by suite focuses mostly [on the file structure](#file-oriented-example), and you want to add "a fresh perspective" by grouping tests by describe blocks and test names, for example.
+It is much faster to implement than if you were to annotate every test case by hand, but it is also less flexible.
+Still, there are many cases where it can be useful, especially if you have a large test suite and you want to add some structure to it.
+For example, if your grouping by suite focuses mostly [on the file structure](01-by-suite.mdx#file-oriented-example),
+the story-based grouping may add "a fresh perspective" by grouping tests by describe blocks and test names, for example.
 
-Here's a simple example where we map:
+Let's explore a simple example, where we'll map:
 
 * **epic** to the top-level describe block
-* **feature** to the second-level describe block
-* **story** to the remaining describe blocks and test name itself
+* **feature** to the middle-level describe blocks
+* **story** to the lowest-level describe block
 
 <Tabs groupId="configTab">
   <TabItem value="demo" label="Report">
@@ -130,15 +183,55 @@ module.exports = {
     'default',
     ['jest-allure2-reporter', /** @type {import('jest-allure2-reporter').Options}*/ {
       labels: {
-        epic: ({ test }) => test.ancestorTitles[0],
-        feature: ({ test }) => test.ancestorTitles.slice(1).join(' ') || undefined,
-        story: ({ test }) => test.title,
+        epic: ({ testCase }) => testCase.ancestorTitles.at(0) ?? '(uncategorized)',
+        feature: ({ testCase }) => testCase.ancestorTitles.slice(1, -1).join(' > ') ?? '(uncategorized)',
+        story: ({ testCase }) => testCase.ancestorTitles.at(-1) ?? '(uncategorized)',
       },
     }],
   ],
 };
 ```
 
+  </TabItem>
+</Tabs>
+
+## Many-to-many mapping
+
+It is worth mentioning that Allure allows you to map a test case to multiple epics, features and stories, but
+you should use this feature with caution, as it may lead to a very complex report structure.
+
+<Tabs groupId="approach">
+  <TabItem value="jsdoc" label="JSDoc">
+
+```js title="login.test.js"
+it('should validate e-mail', () => {
+  /**
+   * @epic Authentication
+   * @feature Login screen
+   * @story Validation
+   *
+   * @epic Security
+   * @feature XSS prevention
+   * @story Login form
+   */
+
+   // ...
+});
+```
+  </TabItem>
+  <TabItem value="dsl" label="Function">
+
+```js title="login.test.js"
+$Epic('Authentication');
+$Feature('Login screen');
+$Story('Validation');
+$Epic('Security');
+$Feature('XSS prevention');
+$Story('Login form');
+it('should validate e-mail', () => {
+   // ...
+});
+```
   </TabItem>
 </Tabs>
 

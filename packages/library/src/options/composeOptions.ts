@@ -8,6 +8,7 @@ import type {
 import { aggregateLabelCustomizers } from './aggregateLabelCustomizers';
 import { aggregateLinkCustomizers } from './aggregateLinkCustomizers';
 import { composeExtractors } from './composeExtractors';
+import { asExtractor } from './asExtractor';
 
 export function composeOptions(
   base: ReporterConfig,
@@ -27,9 +28,15 @@ export function composeOptions(
       base.testStep as TestStepCustomizer,
       custom.testStep,
     ),
-    environment: composeExtractors(custom.environment, base.environment),
-    executor: composeExtractors(custom.executor, base.executor),
-    categories: composeExtractors(custom.categories, base.categories),
+    environment: composeExtractors(
+      asExtractor(custom.environment),
+      base.environment,
+    ),
+    executor: composeExtractors(asExtractor(custom.executor), base.executor),
+    categories: composeExtractors(
+      asExtractor(custom.categories),
+      base.categories,
+    ),
   };
 }
 

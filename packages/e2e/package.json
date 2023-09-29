@@ -19,6 +19,9 @@
   },
   "prettier": "@wix/prettier-config-jest-allure2-reporter",
   "eslintConfig": {
-    "extends": "@wix/jest-allure2-reporter"
+    "extends": "@wix/jest-allure2-reporter",
+    "env": {
+      "jest": true
+    }
   }
 }

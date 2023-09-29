@@ -1,3 +1,5 @@
+import path from 'node:path';
+
 import type {
   AggregatedResult,
   Config,
@@ -5,6 +7,7 @@ import type {
   TestCaseResult,
 } from '@jest/reporters';
 import { JestMetadataReporter, query } from 'jest-metadata/reporter';
+import pkgUp from 'pkg-up';
 import rimraf from 'rimraf';
 import type { ExecutableItemWrapper } from '@noomorph/allure-js-commons';
 import { AllureRuntime } from '@noomorph/allure-js-commons';
@@ -21,6 +24,8 @@ import { resolveOptions } from '../options';
 import type { AllureTestStepMetadata } from '../metadata';
 import { MetadataSquasher, StepExtractor } from '../metadata';
 import { STOP, WORKER_ID } from '../constants';
+import attempt from '../utils/attempt';
+import isError from '../utils/isError';
 
 export class JestAllure2Reporter extends JestMetadataReporter {
   private readonly _globalConfig: Config.GlobalConfig;
@@ -66,9 +71,20 @@ export class JestAllure2Reporter extends JestMetadataReporter {
       resultsDir: config.resultsDir,
     });
 
+    const { rootDir } = this._globalConfig;
+    const packageJsonPath = await pkgUp({ cwd: rootDir });
+    let manifest: any = packageJsonPath
+      ? attempt(() => require(packageJsonPath))
+      : null;
+
+    if (isError(manifest)) {
+      manifest = null;
+    }
+
     const globalContext: GlobalExtractorContext<any> = {
       globalConfig: this._globalConfig,
       config,
+      manifest,
       value: undefined,
     };
 
@@ -100,6 +116,12 @@ export class JestAllure2Reporter extends JestMetadataReporter {
           );
           const testCaseContext: TestCaseExtractorContext<any> = {
             ...globalContext,
+            filePath: path
+              .relative(
+                globalContext.globalConfig.rootDir,
+                testResult.testFilePath,
+              )
+              .split(path.sep),
             testFile: testResult,
             testCase: testCaseResult,
             testCaseMetadata,

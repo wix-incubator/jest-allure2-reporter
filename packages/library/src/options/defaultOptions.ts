@@ -73,7 +73,7 @@ export function defaultOptions(): ReporterConfig {
     parameters: ({ testStep }) => testStep.parameters ?? [],
   };
 
-  return {
+  const config: ReporterConfig = {
     overwrite: true,
     resultsDir: 'allure-results',
     testCase,
@@ -82,6 +82,8 @@ export function defaultOptions(): ReporterConfig {
     executor: identity,
     categories: identity,
   };
+
+  return config;
 }
 
 function getTestCaseStatus(testCase: TestCaseResult): Status {

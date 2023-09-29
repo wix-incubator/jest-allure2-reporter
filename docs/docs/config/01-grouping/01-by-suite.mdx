@@ -18,9 +18,9 @@ This is perhaps the most common way to group test results, and it makes the most
 
 ![Grouping by suite](../../../img/screenshots/config-01-grouping-01.jpg)
 
-The suite hierarchy consists of up to four levels: **parent suite**, **suite**, **subsuite**, and **test case**.
+The suite hierarchy consists of up to four levels: **parent suite**, **suite**, **sub-suite** and **test case**.
 
-:::info
+:::info Glossary
 
 <dl>
   <dt><strong>Parent Suite</strong></dt>
@@ -42,10 +42,10 @@ Below we'll explore a few examples of how to configure the grouping by suite.
 
 ## Default preset
 
-By default, `jest-allure2-reporter` provides 3 levels of grouping: **suite**, **subsuite**, and **test case**:
+By default, `jest-allure2-reporter` provides 3 levels of grouping: **suite**, **sub-suite**, and **test case**:
 
 1. The **suite** level is based on the _test file path_.
-1. The **subsuite** level is based on the _top-level describe block_.
+1. The **sub-suite** level is based on the _top-level describe block_.
 1. The **test case** level is based on the _test name_ (including the inner describe block names).
 
 <Tabs groupId="configTab">
@@ -136,13 +136,19 @@ module.exports = {
   testEnvironment: 'jest-allure2-reporter/environment-node',
   reporters: [
     'default',
-    ['jest-allure2-reporter', /** @type {import('jest-allure2-reporter').Options}*/
+    ['jest-allure2-reporter',
+      /** @type {import('jest-allure2-reporter').ReporterOptions}*/
       {
-        labels: {
-          parentSuite: ({ file }) => file.pathSegments[0],
-          suite: ({ file }) => file.pathSegments.slice(1, -1).join(' '),
-          subsuite: ({ file }) => file.pathSegments.slice(-1)[0],
-          test: ({ test }) => test.fullName,
+        testCase: {
+          name: ({ testCase }) => [
+            ...testCase.ancestorTitles,
+            testCase.title
+          ].join(' » '),
+          labels: {
+            parentSuite: ({ filePath }) => file.pathSegments[0],
+            suite: ({ filePath }) => file.pathSegments[1],
+            subSuite: ({ filePath }) => file.pathSegments.slice(2).join('/'),
+          },
         },
       },
     ],
@@ -200,7 +206,7 @@ module.exports = {
       labels: {
         parentSuite: ({ file }) => file.path,
         suite: ({ test }) => test.ancestorTitles[0],
-        subsuite: ({ test }) => test.ancestorTitles.slice(1).join(' ') || undefined,
+        subSuite: ({ test }) => test.ancestorTitles.slice(1).join(' ') || undefined,
         test: ({ test }) => test.title,
       },
     }],

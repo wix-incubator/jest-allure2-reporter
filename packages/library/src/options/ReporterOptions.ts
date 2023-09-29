@@ -62,6 +62,24 @@ export type ReporterOptions = {
    */
   resultsDir?: string;
   /**
+   * Configures the defect categories for the report.
+   *
+   * By default, the report will have the following categories:
+   * `Product defects`, `Test defects` based on the test case status:
+   * `failed` and `broken` respectively.
+   */
+  categories?: Category[] | CategoriesCustomizer;
+  /**
+   * Configures the environment information that will be reported.
+   */
+  environment?: Record<string, string> | EnvironmentCustomizer;
+  /**
+   * Configures the executor information that will be reported.
+   * By default, the executor information is inferred from `ci-info` package.
+   * Local runs won't have any executor information unless you customize this.
+   */
+  executor?: ExecutorInfo | ExecutorCustomizer;
+  /**
    * Customize how test cases are reported: names, descriptions, labels, status, etc.
    */
   testCase?: Partial<TestCaseCustomizer>;
@@ -69,29 +87,14 @@ export type ReporterOptions = {
    * Customize how individual test steps are reported.
    */
   testStep?: Partial<TestStepCustomizer>;
-  /**
-   * Configures the environment information that will be reported.
-   */
-  environment?: EnvironmentCustomizer;
-  /**
-   * Configures the executor information that will be reported.
-   * By default, the executor information is inferred from `ci-info` package.
-   * Local runs won't have any executor information unless you customize this.
-   */
-  executor?: ExecutorCustomizer;
-  /**
-   * Configures the defect categories for the report.
-   *
-   * By default, the report will have the following categories:
-   * `Product defects`, `Test defects` based on the test case status:
-   * `failed` and `broken` respectively.
-   */
-  categories?: CategoriesCustomizer;
 };
 
 export type ReporterConfig = Required<ReporterOptions> & {
   testCase: ResolvedTestCaseCustomizer;
   testStep: ResolvedTestStepCustomizer;
+  categories: CategoriesCustomizer;
+  environment: EnvironmentCustomizer;
+  executor: ExecutorCustomizer;
 };
 
 /**
@@ -240,24 +243,28 @@ export type LinksCustomizer =
 export type LabelsCustomizer =
   | TestCaseExtractor<Label[]>
   | Partial<{
-      readonly package: LabelExtractor; // N/A
-      readonly testClass: LabelExtractor; // N/A
-      readonly testMethod: LabelExtractor; // N/A
-      readonly parentSuite: LabelExtractor; // N/A
-      readonly suite: LabelExtractor; // N/A
-      readonly subSuite: LabelExtractor; // N/A
-      readonly epic: LabelExtractor; // uniq | AggregatedResultMetadata → ... → TestEntryMetadata → (invocations)
-      readonly feature: LabelExtractor; // uniq | AggregatedResultMetadata → ... → TestEntryMetadata → (invocations)
-      readonly story: LabelExtractor; // uniq | AggregatedResultMetadata → ... → TestEntryMetadata → (invocations)
-      readonly thread: LabelExtractor; // N/A
-      readonly severity: LabelExtractor;
-      readonly tag: LabelExtractor;
-      readonly owner: LabelExtractor;
+      readonly package: LabelConfig;
+      readonly testClass: LabelConfig;
+      readonly testMethod: LabelConfig;
+      readonly parentSuite: LabelConfig;
+      readonly suite: LabelConfig;
+      readonly subSuite: LabelConfig;
+      readonly epic: LabelConfig;
+      readonly feature: LabelConfig;
+      readonly story: LabelConfig;
+      readonly thread: LabelConfig;
+      readonly severity: LabelConfig;
+      readonly tag: LabelConfig;
+      readonly owner: LabelConfig;
 
-      readonly [key: string]: LabelExtractor;
+      readonly [key: string]: LabelConfig;
     }>;
 
-export type LabelExtractor = TestCaseExtractor<string[], string | string[]>;
+export type LabelConfig = LabelValue | LabelExtractor;
+
+export type LabelValue = string | string[];
+
+export type LabelExtractor = TestCaseExtractor<string[], LabelValue>;
 
 export type Extractor<T, C extends ExtractorContext<T>, R = T> = (
   context: Readonly<C>,
@@ -288,9 +295,18 @@ export interface ExtractorContext<T> {
 export interface GlobalExtractorContext<T> extends ExtractorContext<T> {
   globalConfig: Config.GlobalConfig;
   config: ReporterConfig;
+  /**
+   * The contents of the `package.json` file if it exists.
+   */
+  manifest: {
+    name: string;
+    version: string;
+    [key: string]: any;
+  } | null;
 }
 
 export interface TestCaseExtractorContext<T> extends GlobalExtractorContext<T> {
+  filePath: string[];
   testFile: TestResult;
   testCase: TestCaseResult;
   testCaseMetadata: AllureTestCaseMetadata;
