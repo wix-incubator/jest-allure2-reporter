@@ -33,7 +33,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
   private _config?: ReporterConfig;
 
   constructor(globalConfig: Config.GlobalConfig, options: ReporterOptions) {
-    super(globalConfig, options);
+    super(globalConfig);
 
     this._globalConfig = globalConfig;
     this._options = resolveOptions(options);
@@ -108,7 +108,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
 
     for (const testResult of results.testResults) {
       for (const testCaseResult of testResult.testResults) {
-        const allInvocations = query.testCaseResult(testCaseResult).invocations;
+        const allInvocations = query.testCaseResult(testCaseResult).invocations ?? [];
 
         for (const testInvocationMetadata of allInvocations) {
           const testCaseMetadata = squasher.testInvocation(

@@ -26,8 +26,9 @@ export function defaultOptions(): ReporterConfig {
     fullName: ({ testCase }) => testCase.fullName,
     description: ({ testCaseMetadata }) => {
       const text = testCaseMetadata.description?.join('\n') ?? '';
-      const code =
-        '```javascript\n' + testCaseMetadata.code?.join('\n\n') + '\n```';
+      const code = testCaseMetadata.code?.length
+        ? '```javascript\n' + testCaseMetadata.code.join('\n\n') + '\n```'
+        : '';
       return [text, code].filter(Boolean).join('\n\n');
     },
     descriptionHtml: () => void 0,

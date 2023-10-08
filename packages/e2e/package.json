@@ -12,7 +12,8 @@
     "@wix/eslint-config-jest-allure2-reporter": "^1.0.0",
     "@wix/jest-config-jest-allure2-reporter": "^1.0.0",
     "@wix/prettier-config-jest-allure2-reporter": "^1.0.0",
-    "@wix/typescript-config-jest-allure2-reporter": "^1.0.0"
+    "@wix/typescript-config-jest-allure2-reporter": "^1.0.0",
+    "jest-jasmine2": "^29.7.0"
   },
   "dependencies": {
     "jest-allure2-reporter": "^1.0.0"
