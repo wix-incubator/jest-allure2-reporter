@@ -13,7 +13,6 @@ import type {
   ResolvedTestStepCustomizer,
 } from './ReporterOptions';
 import { aggregateLabelCustomizers } from './aggregateLabelCustomizers';
-import { composeExtractors } from './composeExtractors';
 
 const identity = <T>(context: ExtractorContext<T>) => context.value;
 const last = <T>(context: ExtractorContext<T[]>) => context.value?.at(-1);
@@ -41,25 +40,22 @@ export function defaultOptions(): ReporterConfig {
     statusDetails: ({ testCase }) => getTestCaseStatusDetails(testCase),
     attachments: ({ testCaseMetadata }) => testCaseMetadata.attachments ?? [],
     parameters: ({ testCaseMetadata }) => testCaseMetadata.parameters ?? [],
-    labels: composeExtractors(
-      aggregateLabelCustomizers({
-        package: last,
-        testClass: last,
-        testMethod: last,
-        parentSuite: last,
-        suite: ({ testCase, testFile }) =>
-          testCase.ancestorTitles[0] ?? path.basename(testFile.testFilePath),
-        subSuite: ({ testCase }) => testCase.ancestorTitles.slice(1).join(' '),
-        epic: all,
-        feature: all,
-        story: all,
-        thread: ({ testCaseMetadata }) => testCaseMetadata.workerId,
-        severity: last,
-        tag: all,
-        owner: last,
-      }),
-      ({ testCaseMetadata }) => testCaseMetadata.labels ?? [],
-    ),
+    labels: aggregateLabelCustomizers({
+      package: last,
+      testClass: last,
+      testMethod: last,
+      parentSuite: last,
+      suite: ({ testCase, testFile }) =>
+        testCase.ancestorTitles[0] ?? path.basename(testFile.testFilePath),
+      subSuite: ({ testCase }) => testCase.ancestorTitles.slice(1).join(' '),
+      epic: all,
+      feature: all,
+      story: all,
+      thread: ({ testCaseMetadata }) => testCaseMetadata.workerId,
+      severity: last,
+      tag: all,
+      owner: last,
+    })!,
     links: ({ testCaseMetadata }) => testCaseMetadata.links ?? [],
   };
 

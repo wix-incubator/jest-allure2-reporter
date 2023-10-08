@@ -5,6 +5,7 @@ import type {
   Config,
   Test,
   TestCaseResult,
+  TestResult,
 } from '@jest/reporters';
 import { JestMetadataReporter, query } from 'jest-metadata/reporter';
 import pkgUp from 'pkg-up';
@@ -26,10 +27,12 @@ import { MetadataSquasher, StepExtractor } from '../metadata';
 import { STOP, WORKER_ID } from '../constants';
 import attempt from '../utils/attempt';
 import isError from '../utils/isError';
+import { ThreadService } from '../utils/ThreadService';
 
 export class JestAllure2Reporter extends JestMetadataReporter {
   private readonly _globalConfig: Config.GlobalConfig;
   private readonly _options: ReporterOptions;
+  private readonly _threadService = new ThreadService();
   private _config?: ReporterConfig;
 
   constructor(globalConfig: Config.GlobalConfig, options: ReporterOptions) {
@@ -42,8 +45,9 @@ export class JestAllure2Reporter extends JestMetadataReporter {
   onTestFileStart(test: Test) {
     super.onTestFileStart(test);
 
-    // TODO: use Thread service fallback
-    query.test(test).set(WORKER_ID, '1');
+    const testFileMetadata = query.test(test);
+    const threadId = this._threadService.allocateThread(test.path);
+    testFileMetadata.set(WORKER_ID, String(1 + threadId));
   }
 
   onTestCaseResult(test: Test, testCaseResult: TestCaseResult) {
@@ -54,6 +58,15 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     if (Number.isNaN(stop)) {
       metadata.set(STOP, now);
     }
+  }
+
+  onTestFileResult(
+    test: Test,
+    testResult: TestResult,
+    aggregatedResult: AggregatedResult,
+  ) {
+    this._threadService.freeThread(test.path);
+    return super.onTestFileResult(test, testResult, aggregatedResult);
   }
 
   async onRunComplete(
@@ -108,7 +121,8 @@ export class JestAllure2Reporter extends JestMetadataReporter {
 
     for (const testResult of results.testResults) {
       for (const testCaseResult of testResult.testResults) {
-        const allInvocations = query.testCaseResult(testCaseResult).invocations ?? [];
+        const allInvocations =
+          query.testCaseResult(testCaseResult).invocations ?? [];
 
         for (const testInvocationMetadata of allInvocations) {
           const testCaseMetadata = squasher.testInvocation(

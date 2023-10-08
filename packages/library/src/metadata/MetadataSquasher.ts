@@ -8,7 +8,7 @@ import type {
   HookInvocationMetadata,
 } from 'jest-metadata';
 
-import { PREFIX } from '../constants';
+import { WORKER_ID } from '../constants';
 
 import { chain, extractCode, getStart, getStop } from './utils';
 import type { AllureTestCaseMetadata } from './metadata';
@@ -47,7 +47,7 @@ export class MetadataSquasher {
     return {
       code: extractCode,
       workerId: ({ testFile }) => {
-        return testFile?.get([PREFIX, 'workerId']) as string;
+        return testFile?.get(WORKER_ID) as string;
       },
       description: chain(['testEntry', 'testInvocation', 'testFnInvocation']),
       descriptionHtml: chain([

@@ -3,6 +3,7 @@ import type { Metadata } from 'jest-metadata';
 
 import type { MetadataSquasherMapping } from '../MetadataSquasher';
 import type { AllureTestCaseMetadata } from '../metadata';
+import { CODE } from '../../constants';
 
 export const extractCode: MetadataSquasherMapping<
   AllureTestCaseMetadata,
@@ -13,7 +14,7 @@ export const extractCode: MetadataSquasherMapping<
   const getHookDefinition = (metadata: HookInvocationMetadata) =>
     metadata.definition;
   const getCode = (functionName: string) => (metadata: Metadata) => {
-    const code = metadata.get(['allure2', 'code']);
+    const code = metadata.get(CODE);
     return code ? `${functionName}(${code})` : '';
   };
 

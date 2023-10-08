@@ -15,7 +15,7 @@ import type {
   AllureTestCaseMetadata,
   AllureTestStepMetadata,
 } from '../metadata';
-import { PREFIX } from '../constants';
+import { PREFIX, WORKER_ID } from '../constants';
 import { AllureRuntime } from '../runtime';
 
 export function WithAllure2<E extends WithEmitter>(
@@ -32,10 +32,7 @@ export function WithAllure2<E extends WithEmitter>(
       constructor(...arguments_: any[]) {
         super(...arguments_);
 
-        state.currentMetadata.set(
-          ['allure2', 'workerId'],
-          process.env.JEST_WORKER_ID,
-        );
+        state.currentMetadata.set(WORKER_ID, process.env.JEST_WORKER_ID);
 
         const attachmentsFolder = os.tmpdir();
         this.global.allure = new AllureRuntime({

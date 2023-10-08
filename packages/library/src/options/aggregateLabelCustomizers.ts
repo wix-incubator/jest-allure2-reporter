@@ -35,11 +35,15 @@ export function aggregateLabelCustomizers(
 
     if (context.value) {
       for (const label of context.value) {
-        (found[label.name] ?? other).push(label.value);
+        if (found[label.name]) {
+          found[label.name].push(label.value);
+        } else {
+          other.push(label);
+        }
       }
     }
 
-    return [
+    const result = [
       ...other,
       ...names.flatMap((name) => {
         const extractor = extractors[name]!;
@@ -49,6 +53,8 @@ export function aggregateLabelCustomizers(
         return value ? value.map((value) => ({ name, value } as Label)) : [];
       }),
     ];
+
+    return result;
   };
 }
 
