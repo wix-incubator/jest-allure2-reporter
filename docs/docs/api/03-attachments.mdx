@@ -90,7 +90,7 @@ The `allure.createAttachment` function is particularly useful for reusable attac
 For aspect-oriented programmers, there is a decorator-based approach:
 
 ```js
-import { Attachment } from 'jest-allure2-reporter/annotations';
+import { Attachment } from 'jest-allure2-reporter';
 
 class DeviceHelper {
   @Attachment('device-status-%s.json', 'application/json')

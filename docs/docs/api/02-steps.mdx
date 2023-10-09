@@ -58,7 +58,7 @@ afterAll(async () => {
   <TabItem value="dsl" label="Function">
 
 ```js
-import { $Description } from 'jest-allure2-reporter/annotations';
+import { $Description } from 'jest-allure2-reporter';
 
 $Description('Launch the browser for all tests')
 beforeAll(async () => {
@@ -164,7 +164,7 @@ For aspect-oriented programmers, there is a decorator-based approach. It works o
 but otherwise it's similar to `allure.createStep`:
 
 ```js
-import { Step } from 'jest-allure2-reporter/annotations';
+import { Step } from 'jest-allure2-reporter';
 
 class LoginPageObject {
   @Step('Open login page')
