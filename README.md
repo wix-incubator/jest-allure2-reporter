@@ -32,11 +32,13 @@ Edit your Jest config, e.g. `jest.config.js`:
 ```diff
 /** @type {import('@jest/types').Config.InitialOptions} */
 module.exports = {
-  // ...
-  reporters: [
-    'default',
-+   'jest-allure2-reporter',
-  ],
+   // ...
+   reporters: [
+     'default',
++    'jest-allure2-reporter',
+   ],
+   // For the most of the features you'll need the custom environment:
++  testEnvironment: 'jest-allure2-reporter/environment-node',
 };
 ```
 
@@ -51,7 +53,7 @@ npm test
 and then view the results:
 
 ```bash
-allure serve
+ALLURE_NO_ANALYTICS=1 allure serve
 ```
 
 ![Example screenshot](docs/img/example.png)
@@ -59,7 +61,7 @@ allure serve
 If you need to generate a static report, e.g., on CI, run instead:
 
 ```bash
-allure generate
+ALLURE_NO_ANALYTICS=1 allure generate
 ```
 
 Make sure you have `allure` CLI installed beforehand. For more information about it, refer to the official [Allure docs].
