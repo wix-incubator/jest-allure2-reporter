@@ -1,0 +1,65 @@
+---
+description: QA and Product Manager perspective on test results.
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# By Defect Category
+
+:::caution
+
+This website version refers to the unreleased version of `jest-allure2-reporter`, partially available as `2.0.0-alpha.*` release.
+Please use GitHub docs for the latest stable version, `1.x.x`.
+
+:::
+
+![Defect categories](../../../img/screenshots/config-03-errors-01.jpg)
+
+One of the most important things when your builds start failing is to understand _what exactly is broken_.
+
+By defining defect categories, you can easily distinguish between different types of errors and failures.
+
+There are two built-in defect categories:
+
+<dl>
+  <dt><strong>Product defect</strong></dt>
+  <dd>A failed Jest assertion, e.g. <code>expect(countOfPosts).toBe(1)</code>.</dd>
+  <dt><strong>Test defect</strong></dt>
+  <dd>A failed test, e.g. <code>throw new TypeError('Cannot read property 'name' of null')</code>.</dd>
+</dl>
+
+We recommend to invest some time into configuring the reporter to distinguish between different types of product defects, especially if you have end-to-end tests that are prone to flakiness, e.g.:
+
+```js title="jest.config.js"
+/**
+ * @type {import('@jest/types').Config.InitialOptions}
+ */
+module.exports = {
+  // ... your jest config
+  reporters: [
+    'default',
+    ['jest-allure2-reporter',
+      /** @type {import('jest-allure2-reporter').JestAllure2ReporterOptions} */
+      {
+// highlight-start
+        categories: [
+          {
+            name: "Visual Regression",
+            // optional `matchedStatuses`
+            matchedStatuses: ["failed"],
+            // optional `messageRegex`
+            messageRegex: "Expected .*to match a screenshot.*",
+            // optional `traceRegex`
+            traceRegex: ".*visual-regression.*",
+          },
+          //
+          // ... other categories
+          //
+        ],
+// highlight-end
+      }
+    ],
+  ],
+};
+```

@@ -1,0 +1,82 @@
+---
+description: Get to know the exact machine behind your test runs.
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Executor
+
+:::caution
+
+This website version refers to the unreleased version of `jest-allure2-reporter`, partially available as `2.0.0-alpha.*` release.
+Please use GitHub docs for the latest stable version, `1.x.x`.
+
+:::
+
+**Executor** information is crucial as it allows you to identify the entity or system that executed the tests.
+Typically, this would be a build agent on your CI/CD server, but, in a way, a developer's host machine is also an executor.
+
+While this feature might not be significant for a single test run on your local machine, it becomes invaluable:
+
+* **When you want to navigate the history of your test runs.**
+  Executor info provides the necessary URLs and identifiers to form a comprehensive record of your test runs. When viewed over time, this history can reveal trends and patterns that may not be evident from a single test run. Are your tests taking longer to execute? Are they failing more frequently? When did they last pass successfully? These are all questions that the executor info can help answer.
+* **When you want to analyze the test results based on the executor.**
+  This is a great idea when your tests are flaky, but you suspect that the flakiness is caused by a specific build agent on your CI/CD server.
+  Such errors can crop up when the agents are manually provisioned, or when they lack uniformity: variations in network configurations, different software versions, or a shift in the alignment of stars in the night sky above the data center[^1]!
+
+## Configuration
+
+By default, the executor information is included in the report if a CI/CD environment is detected.
+However, if you want to report local test runs as well, you'll need to tweak the configuration at your taste, e.g.:
+
+<Tabs groupId="configTab">
+  <TabItem value="demo" label="Report">
+    <img src={require('../../img/screenshots/config-executor-01.jpg').default} width={398} alt="Executor" />
+  </TabItem>
+  <TabItem value="config" label="Config">
+
+```js title="jest.config.js"
+const os = require('os');
+
+/** @type {import('@jest/types').Config.InitialOptions} */
+module.exports = {
+  // ...
+  reporters: [
+    // ...
+    ['jest-allure2-reporter', {
+      executor: ({ value }) => ({
+        name: os.hostname(),
+        type: os.platform(),
+
+        ...value,
+      }),
+    }]
+  ],
+};
+```
+
+  </TabItem>
+</Tabs>
+
+The `defaultValue` is based on [`ci-info`] npm package, but you can override any of its properties,
+as shown above in the example.
+
+## Overrides
+
+In the table below you can see all available `ExecutorInfo` properties:
+
+| Property       | Description                                                                                 |
+|----------------|---------------------------------------------------------------------------------------------|
+| `name`         | A human-readable name of the executor, e.g. Jenkins, Teamcity, etc.                         |
+| `type`         | Executor type (`jenkins`, `teamcity`, `bamboo`, etc.), determines the icon in the report.   |
+| `buildName`    | Display name of the build in the Executor widget.                                           |
+| `buildUrl`     | Makes `buildName` link clickable in the Executor widget to take you to the build page.      |
+| `buildOrder`   | Index of the build, used to sort builds chronologically in the [Trend] widget.              |
+| `reportUrl`    | URL of the current Allure report, used to navigate between reports in the [Trend] widget.   |
+| `reportName`   | Name of the current Allure report. Purpose is unclear.                                      |
+| `url`          | Base URL of the server where Allure reports are hosted. Purpose is unclear.                 |
+
+[^1]: On a more serious note, it is not entirely unheard of for a build agent to have a faulty hardware component, such as a faulty RAM module. Such issues can be hard to detect, as they may only manifest themselves under heavy load, or when the agent is running a specific type of tests.
+
+[History]: 06-history.mdx

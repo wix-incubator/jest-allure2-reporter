@@ -1,0 +1,17 @@
+.features {
+  display: flex;
+  align-items: center;
+  padding: 2rem 0;
+  width: 100%;
+}
+
+.feature {
+  padding-bottom: 3rem;
+}
+
+.featureSvg {
+  color: var(--ifm-color-primary);
+  max-height: 200px;
+  max-width: 200px;
+  margin-bottom: 2rem;
+}

@@ -1,0 +1,187 @@
+---
+description: Claim the ownership of test cases and suites.
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# People
+
+:::caution
+
+This website version refers to the unreleased version of `jest-allure2-reporter`, partially available as `2.0.0-alpha.*` release.
+Please use GitHub docs for the latest stable version, `1.x.x`.
+
+:::
+
+In Allure reports, you can indicate who is the **owner** of any given test case.
+This allows for better organization, responsibility allocation, and communication within your team.
+Advanced solutions can leverage this information to notify the relevant people about test failures
+or to assign automatic tasks to them.
+
+There are two ways to associate a test case with a person:
+
+* declaratively, via `@owner` JSDoc annotations;
+* programmatically, via `$Owner` annotation functions.
+
+## Basic usage
+
+The owner of a test suite is the person who is responsible for the test suite and all test cases in it.
+
+Here is how you can associate an entire test file with an owner:
+
+<Tabs groupId="approach">
+  <TabItem value="jsdoc" label="JSDoc">
+
+```js
+/**
+ * @owner John Doe <john.doe@example.com>
+ */
+
+describe('Sanity: Login flow', () => {
+  it('should login with valid credentials', () => {
+    /* ... test code ... */
+  });
+});
+
+describe('Sanity: Dashboard', () => {
+  it('should show the dashboard', () => {
+    /* ... test code ... */
+  });
+});
+```
+
+  </TabItem>
+  <TabItem value="dsl" label="Function">
+
+```js
+import { allure } from 'jest-allure2-reporter';
+
+allure.owner('John Doe <john.doe@example.com>');
+
+describe('Sanity: Login flow', () => {
+  it('should login with valid credentials', () => {
+    /* ... test code ... */
+  });
+});
+
+describe('Sanity: Dashboard', () => {
+  it('should show the dashboard', () => {
+    /* ... test code ... */
+  });
+});
+```
+
+  </TabItem>
+</Tabs>
+
+Here is how you can associate a selected test suite with an owner:
+
+<Tabs groupId="approach">
+  <TabItem value="jsdoc" label="JSDoc">
+
+```js
+describe('Sanity: Login flow', () => {
+  /**
+   * @owner John Doe <john.doe@example.com>
+   */
+
+  it('should login with valid credentials', () => {
+    /* ... test code ... */
+  });
+});
+```
+
+Please note that you have to put the JSDoc comment inside the test suite function body.
+
+</TabItem>
+  <TabItem value="dsl" label="Function">
+
+```js
+import { $Owner } from 'jest-allure2-reporter/annotations';
+
+$Owner('John Doe <john.doe@example.com>');
+describe('Sanity: Login flow', () => {
+  it('should login with valid credentials', () => {
+    /* ... test code ... */
+  });
+});
+```
+
+</TabItem>
+</Tabs>
+
+You can also assign an owner for each test case individually.
+
+<Tabs groupId="approach">
+  <TabItem value="jsdoc" label="JSDoc">
+
+```js
+it('should login with valid credentials', () => {
+  /**
+   * @owner John Doe <john.doe@example.com>
+   */
+
+  /* ... test code ... */
+});
+```
+
+Please note that you have to put the JSDoc comment inside the test function body.
+
+  </TabItem>
+  <TabItem value="dsl" label="Function">
+
+    ```js
+    $Owner('John Doe <john.doe@example.com>');
+    it('should login with valid credentials', () => {
+    /* ... */
+  });
+    ```
+  </TabItem>
+</Tabs>
+
+## Examples
+
+In the generated report, the owner is displayed in the test case description:
+
+`TODO: add screenshot`
+
+## Advanced usage
+
+You can use the owner information in your custom reporters and plugins.
+`TODO: read more about query functions to use in your custom reporters and plugins`
+
+```js
+import * as query from 'jest-allure2-reporter/query';
+
+/**
+ * Simplistic implementation of a notification reporter.
+ * @implements {Reporter}
+ */
+export default class NotifyJestReporter {
+  /**
+   */
+  async onRunComplete(contexts, results) {
+    const owners = new Set();
+
+    for (const testFileResult of results.testResults) {
+      for (const testCaseResult of testFileResult.testResults) {
+        if (testCaseResult.status === 'failed') {
+          const owner = query.owner(testCaseResult);
+          if (owner) {
+            owners.add(owner);
+          }
+        }
+      }
+    }
+
+    for (const owner of owners) {
+      await this.#notify(owner);
+    }
+  }
+
+  async #notify(person) {
+    // ... some code to send a notification to the person ...
+  }
+}
+```

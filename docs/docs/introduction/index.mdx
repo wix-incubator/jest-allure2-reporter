@@ -1,0 +1,75 @@
+---
+sidebar_position: 1
+slug: /docs
+---
+
+# Introduction
+
+:::caution
+
+This website version refers to the unreleased version of `jest-allure2-reporter`, partially available as `2.0.0-alpha.*` release.
+Please use GitHub docs for the latest stable version, `1.x.x`.
+
+:::
+
+Thanks for choosing Jest Allure 2 Reporter!
+
+Whether you're a developer, QA professional, or someone involved in unit, integration, or end-to-end testing, this tool will make your testing process more efficient, organized, and insightful.
+
+<div className="text--center">
+  <iframe width="560" height="315" src="https://www.youtube.com/embed/NpEaa2P7qZI" title="YouTube video player" frameBorder={0} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen></iframe>
+</div>
+
+## What is `jest-allure2-reporter`?
+
+[`jest-allure2-reporter`](https://www.npmjs.com/package/jest-allure2-reporter) is a reporting toolkit for [Jest](https://jestjs.io/), a widely popular testing framework in the JavaScript ecosystem.
+
+The produced reports look like directories with multiple JSON files.
+They can be viewed using the [`allure` command-line tool][allure-cli], a flexible, feature-rich reporting tool that provides clear and concise test result representation.
+
+It provides several **entry points**:
+
+<dl>
+  <dt><code>jest-allure2-reporter</code></dt>
+  <dd>The reporter itself, which is responsible for collecting test results and generating a report.</dd>
+  <dt><code>jest-allure2-reporter/annotations</code></dt>
+  <dd>A set of functions and decorators to add additional metadata to your tests.</dd>
+  <dt>
+    <b>Environment packages</b>, to enable the annotations, media attachments and provide additional test data:
+  </dt>
+  <dd>
+    <dl>
+      <dt><code>jest-allure2-reporter/environment-node</code></dt>
+      <dd>For Node.js tests.</dd>
+      <dt><code>jest-allure2-reporter/environment-jsdom</code></dt>
+      <dd>For browser tests.</dd>
+      <dt><code>jest-allure2-reporter/environment-extend</code></dt>
+      <dd>For advanced use cases where you need to extend your already customized test environment.</dd>
+    </dl>
+  </dd>
+</dl>
+
+## Why one more Allure reporter for Jest?
+
+Jest's evolution from Jasmine to its own [Circus test runner](https://github.com/jestjs/jest/pull/3668) in [version 27.0.0](https://jestjs.io/blog/2021/05/25/jest-27#flipping-defaults) brought new opportunities for enhanced testing, but it also created a void: existing Allure reporters[^1], designed for Jasmine, fell short of leveraging Jest's new features and refined test lifecycle.
+
+While community-made reporters sought to bridge this gap[^2][^3][^4], they had their own shortcomings &mdash; issues with irregular maintenance, limited reach, and significant feature gaps were prevalent. Most critically, they took a non-idiomatic approach by acting as extensions to Jest's `testEnvironment`, which led to a critical shortcomings: e.g., inability to report early test issues like `SyntaxError` or test environment setup failures.
+
+## Takeaways
+
+* This reporter is a powerful tool tailor-made for the **modern** Jest ecosystem, not "yet another Allure reporter".
+* Easy to understand, straightforward to adopt, and flexible to work with – it's the Jest Allure reporter you've been waiting for.
+* It is progressive by design &mdash; you can start using it like a [standard reporter][jest-reporters], but the more you invest in it, the more you get out of it.
+
+Ready to explore what this reporter can do for you? [Begin your journey here.][config]
+
+[^1]: https://github.com/allure-framework/allure-js/tree/master/packages/allure-jest
+[^2]: https://github.com/zaqqaz/jest-allure
+[^3]: https://github.com/ryparker/jest-circus-allure-environment
+[^4]: https://github.com/c4lifa/jest-allure-circus
+
+[allure-cli]: https://docs.qameta.io/allure/#_commandline
+[config]: ../config/index.mdx
+[jest-reporters]: https://jestjs.io/docs/configuration#reporters-arraymodulename--modulename-options
+
+

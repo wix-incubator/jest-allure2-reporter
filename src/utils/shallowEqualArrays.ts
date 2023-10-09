@@ -2,7 +2,10 @@
 
 type Maybe<T> = T | null | undefined;
 
-export default function shallowEqualArrays(a: Maybe<unknown[]>, b: Maybe<unknown[]>) {
+export default function shallowEqualArrays(
+  a: Maybe<unknown[]>,
+  b: Maybe<unknown[]>,
+) {
   if (a === b) {
     return true;
   }

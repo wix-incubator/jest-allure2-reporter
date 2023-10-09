@@ -1,0 +1,18 @@
+{
+  "name": "@wix/jest-allure2-reporter-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "jest || true",
+    "build": ":",
+    "start": "ALLURE_NO_ANALYTICS=1 allure serve allure-results/default",
+    "start:dev": "npm run build --workspace=jest-allure2-reporter && npm test && npm start"
+  },
+  "devDependencies": {
+    "jest": "29.x.x",
+    "jest-jasmine2": "29.x.x",
+    "jest-allure2-reporter": "..",
+    "ts-jest": "29.x.x",
+    "typescript": "5.x.x"
+  }
+}

@@ -1,23 +1,19 @@
-/tmp
-
-node_modules
-package-lock.json
-yarn.lock
-/npm-debug.log
-/examples/*.log
-/examples/*.json
-
-*.log
+# Files
 
 .DS_Store
-.idea
-.vscode
+*.log
+*.tgz
+package-lock.json
+yarn.lock
+npm-debug.log
 
-/coverage
-/website
-/dist
-/jest-allure2-reporter-*.tgz
+# Folders
 
-allure-results
-/__fixtures__
-!/__fixtures__/tests
+.idea/
+.vscode/
+allure-report/
+allure-results/
+coverage/
+dist/
+node_modules/
+tmp/

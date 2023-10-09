@@ -1,0 +1,126 @@
+---
+description: Have an informative overview of your test results.
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Statuses
+
+:::caution
+
+This website version refers to the unreleased version of `jest-allure2-reporter`, partially available as `2.0.0-alpha.*` release.
+Please use GitHub docs for the latest stable version, `1.x.x`.
+
+:::
+
+Jest Allure 2 Reporter supports all the standard statuses defined by the Allure Framework.
+
+It provides a clear indication whether your test cases have [`passed`], [`failed`], were [`broken`],
+[`skipped`], or whether their status is [`unknown`].
+
+## 🟢 Passed {#passed}
+
+Status `passed` is reported when the test case has passed successfully:
+
+```js
+test('passed test', () => {
+  expect(2 + 2).toBe(4);
+});
+```
+
+## 🔴 Failed {#failed}
+
+Status `failed` is reported when the test case has revealed a product defect, or it has invalid assertions:
+
+```js
+test('failed test', () => {
+  expect(2 + 2).not.toBe(4);
+});
+```
+
+:::tip
+
+You can build a [custom defects classification][defects] system based on
+test status, error messages, and stack traces.
+
+:::
+
+## 🟡 Broken {#broken}
+
+Status `broken` is reported when the test case has failed due to an error in the test code:
+
+```js
+test('broken test', () => {
+  const user = null;
+  // TypeError: Cannot read property 'name' of null
+  expect(user.name).toBe('John');
+});
+```
+
+:::tip
+
+If your test assertions _throw errors directly_ instead of using or extending
+Jest's [`expect` API][expect], they will be reported as &#8288;🟡&nbsp;Broken tests by default.
+
+To report them as 🔴&nbsp;Failed tests, you should disable `brokenStatus`:
+
+```js title="jest.config.js"
+module.exports = {
+  // ...
+  reporters: [
+    // ...
+    ['jest-allure2-reporter', {
+// highlight-next-line
+      brokenStatus: false,
+    }],
+  ],
+};
+```
+
+:::
+
+## ⚪ Skipped {#skipped}
+
+Status `skipped` is reported when the test case has been skipped due to a `test.skip` or `test.todo` call:
+
+```js
+test.skip('skipped test', () => {
+  expect(2 + 2).toBe(4);
+});
+
+test.todo('todo test');
+```
+
+:::note
+
+There's no way to distinguish between `test.skip` and `test.todo` calls, so both will be reported as skipped.
+
+:::
+
+## 🟣 Unknown {#unknown}
+
+Status `unknown` is reported when information about the test case result has been lost or not created:
+
+```js
+test('unknown test', () => {
+  process.exit(0); // the test information will be unrecoverable
+});
+```
+
+:::info
+
+In the real world scenarios, this might happen if you use `--bail` in Jest with
+multiple test suites running in parallel, and one of them fails. In this case,
+Jest will exit immediately, and the reporter will not be able to wait for the
+test results from the other workers.
+
+:::
+
+[expect]: https://jestjs.io/docs/expect
+[defects]: 07-errors.mdx#defect-categories
+[`passed`]: #passed
+[`failed`]: #failed
+[`broken`]: #broken
+[`skipped`]: #skipped
+[`unknown`]: #unknown
