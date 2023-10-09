@@ -28,6 +28,7 @@ import { STOP, WORKER_ID } from '../constants';
 import attempt from '../utils/attempt';
 import isError from '../utils/isError';
 import { ThreadService } from '../utils/ThreadService';
+import md5 from '../utils/md5';
 
 export class JestAllure2Reporter extends JestMetadataReporter {
   private readonly _globalConfig: Config.GlobalConfig;
@@ -149,6 +150,9 @@ export class JestAllure2Reporter extends JestMetadataReporter {
           const allureTest = allureGroup.startTest(
             config.testCase.name(testCaseContext),
             config.testCase.start(testCaseContext),
+          );
+          allureTest.historyId = md5(
+            config.testCase.historyId(testCaseContext)!,
           );
           allureTest.fullName = config.testCase.fullName(testCaseContext)!;
           allureTest.description = config.testCase.description(testCaseContext);
