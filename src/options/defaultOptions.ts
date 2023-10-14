@@ -1,7 +1,7 @@
 import path from 'node:path';
 
 import type { TestCaseResult } from '@jest/reporters';
-import type { StatusDetails } from '@noomorph/allure-js-commons';
+import type { Attachment, StatusDetails } from '@noomorph/allure-js-commons';
 import { Stage, Status } from '@noomorph/allure-js-commons';
 
 import { stripStatusDetails } from '../metadata/utils';
@@ -38,7 +38,8 @@ export function defaultOptions(): ReporterConfig {
     stage: ({ testCase }) => getTestCaseStage(testCase),
     status: ({ testCase }) => getTestCaseStatus(testCase),
     statusDetails: ({ testCase }) => getTestCaseStatusDetails(testCase),
-    attachments: ({ testCaseMetadata }) => testCaseMetadata.attachments ?? [],
+    attachments: ({ config, testCaseMetadata }) =>
+      (testCaseMetadata.attachments ?? []).map(relativizeAttachment, config),
     parameters: ({ testCaseMetadata }) => testCaseMetadata.parameters ?? [],
     labels: aggregateLabelCustomizers({
       package: last,
@@ -139,4 +140,14 @@ function getTestCaseStatusDetails(
         trace: message,
       })
     : undefined;
+}
+
+function relativizeAttachment(
+  this: ReporterConfig,
+  attachment: Attachment,
+): Attachment {
+  return {
+    ...attachment,
+    source: path.relative(this.resultsDir, attachment.source),
+  };
 }

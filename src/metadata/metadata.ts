@@ -10,6 +10,11 @@ import type {
 
 export interface AllureTestStepMetadata {
   steps?: AllureTestStepMetadata[];
+  hidden?: boolean;
+  /**
+   * Source code of the test case, test step or a hook.
+   */
+  code?: string[];
 
   name?: string;
   status?: Status;
@@ -34,10 +39,6 @@ export interface AllureTestCaseMetadata extends AllureTestStepMetadata {
    * @see {import('@noomorph/allure-js-commons').LabelName.THREAD}
    */
   workerId?: string;
-  /**
-   * Source code of the test case, glued from all hooks and test function itself.
-   */
-  code?: string[];
   /**
    * Only steps can have names.
    */

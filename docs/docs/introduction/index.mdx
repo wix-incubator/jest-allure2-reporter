@@ -32,8 +32,8 @@ It provides several **entry points**:
 <dl>
   <dt><code>jest-allure2-reporter</code></dt>
   <dd>The reporter itself, which is responsible for collecting test results and generating a report.</dd>
-  <dt><code>jest-allure2-reporter</code></dt>
-  <dd>A set of functions and decorators to add additional metadata to your tests.</dd>
+  <dd>DSL to add additional metadata to your test definitions: <code>$Link</code>, <code>$Owner</code>.</dd>
+  <dd>`allure` runtime API to use inside your tests: <code>allure.step</code>, <code>allure.attachment</code>.</dd>
   <dt>
     <b>Environment packages</b>, to enable the annotations, media attachments and provide additional test data:
   </dt>
@@ -43,8 +43,8 @@ It provides several **entry points**:
       <dd>For Node.js tests.</dd>
       <dt><code>jest-allure2-reporter/environment-jsdom</code></dt>
       <dd>For browser tests.</dd>
-      <dt><code>jest-allure2-reporter/environment-extend</code></dt>
-      <dd>For advanced use cases where you need to extend your already customized test environment.</dd>
+      <dt><code>jest-allure2-reporter/environment-decorator</code></dt>
+      <dd>For advanced use cases where you need to extend an already customized test environment.</dd>
     </dl>
   </dd>
 </dl>

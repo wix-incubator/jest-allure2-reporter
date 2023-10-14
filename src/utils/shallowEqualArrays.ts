@@ -1,5 +1,3 @@
-/* eslint-disable unicorn/no-null */
-
 type Maybe<T> = T | null | undefined;
 
 export default function shallowEqualArrays(
@@ -18,7 +16,6 @@ export default function shallowEqualArrays(
     return false;
   }
 
-  // eslint-disable-next-line unicorn/no-array-callback-reference,unicorn/no-array-method-this-argument
   return a.every(isItemEqual, b);
 }
 
