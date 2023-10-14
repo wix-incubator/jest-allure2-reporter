@@ -1,3 +1,4 @@
+import path from 'node:path';
 import {
   allure,
   $Description,
@@ -5,15 +6,16 @@ import {
   $Severity,
   $Link,
 } from 'jest-allure2-reporter';
+import {LoginHelper} from "./utils/LoginHelper";
 
 $Description('Sanity test for Allure reporter');
 $Owner('Yaroslav Serhieiev <yaroslavs@wix.com>');
 describe('Simple suite', () => {
   beforeAll(() => {
     console.log('beforeAll');
-    allure.fileAttachment(
+    allure.createFileAttachment(
       'Project Logo',
-      '/home/x/Projects/wix-incubator/jest-allure2-reporter/docs/img/logo.svg',
+      path.resolve('../docs/img/logo.svg'),
       'image/svg+xml',
     );
   });
@@ -32,12 +34,8 @@ describe('Simple suite', () => {
       });
 
       allure.step('Inner step 2', () => {
-        allure.attachment(
-          'Some code',
-          'console.log("Hello, World!");',
-          'text/plain',
-        );
-        expect(true).toBe(false);
+        const helper = new LoginHelper();
+        expect(helper.typeEmail('allure@wix-incubator.com')).toBe('Entered: allure@wix-incubator.com');
       });
     });
   });

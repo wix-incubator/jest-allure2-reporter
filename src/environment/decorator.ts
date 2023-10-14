@@ -49,16 +49,18 @@ export function WithAllure2<E extends WithEmitter>(
         event,
       }: ForwardedCircusEvent<Circus.Event & { name: 'add_hook' }>) {
         const sourceCode = event.fn.toString();
-        if (
-          !sourceCode.includes(
-            "during setup, this cannot be null (and it's fine to explode if it is)",
-          )
-        ) {
-          const metadata = {
-            code: [sourceCode],
-          } as AllureTestStepMetadata;
-          state.currentMetadata.assign(PREFIX, metadata);
+        const hidden = sourceCode.includes(
+          "during setup, this cannot be null (and it's fine to explode if it is)",
+        );
+
+        const metadata = {
+          code: [sourceCode],
+        } as AllureTestStepMetadata;
+        if (hidden) {
+          delete metadata.code;
+          metadata.hidden = true;
         }
+        state.currentMetadata.assign(PREFIX, metadata);
       }
 
       #addTest({

@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/ban-types, prefer-rest-params */
+import path from 'node:path';
+
 import type { Metadata } from 'jest-metadata';
 import { Status, Stage } from '@noomorph/allure-js-commons';
 import type {
   StatusDetails,
-  Parameter,
   ParameterOptions,
   LabelName,
 } from '@noomorph/allure-js-commons';
@@ -16,21 +17,33 @@ import {
   LINKS,
   PREFIX,
 } from '../constants';
-import { isPromiseLike } from '../utils/isPromiseLike';
 import type { AllureTestStepMetadata } from '../metadata/metadata';
+import { isPromiseLike } from '../utils/isPromiseLike';
+import { inferMimeType } from '../utils/inferMimeType';
+import { hijackValue } from '../utils/hijackValue';
+import type {
+  AttachmentContent,
+  Function_,
+  MaybePromise,
+  ParameterOrString,
+} from '../utils/types';
 
 export type AllureRuntimeConfig = {
   metadataProvider: () => Metadata;
   nowProvider: () => number;
-  writeAttachment: (content: Buffer | string) => string;
+  placeAttachment: (name: string, content: AttachmentContent) => string;
+  writeAttachment: <T extends AttachmentContent>(
+    filePath: string,
+    content: T,
+  ) => Promise<void>;
 };
-
-export type ParameterOrString = string | Parameter;
 
 export class AllureRuntime {
   readonly #metadataProvider: AllureRuntimeConfig['metadataProvider'];
   readonly #now: AllureRuntimeConfig['nowProvider'];
+  readonly #placeAttachment: AllureRuntimeConfig['placeAttachment'];
   readonly #writeAttachment: AllureRuntimeConfig['writeAttachment'];
+  #idle = Promise.resolve();
 
   get #metadata(): Metadata {
     return this.#metadataProvider();
@@ -39,7 +52,12 @@ export class AllureRuntime {
   constructor(config: AllureRuntimeConfig) {
     this.#metadataProvider = config.metadataProvider;
     this.#now = config.nowProvider;
+    this.#placeAttachment = config.placeAttachment;
     this.#writeAttachment = config.writeAttachment;
+  }
+
+  async flush(): Promise<void> {
+    await this.#idle;
   }
 
   description(value: string) {
@@ -74,14 +92,79 @@ export class AllureRuntime {
     }
   }
 
-  attachment(name: string, content: Buffer | string, type: string) {
-    const source = this.#writeAttachment(content);
-    this.fileAttachment(name, source, type);
+  createAttachment<T extends AttachmentContent>(
+    name: string,
+    content: T,
+    mimeType?: string,
+  ): T;
+  createAttachment<T extends AttachmentContent>(
+    name: string,
+    content: MaybePromise<T>,
+    mimeType?: string,
+  ): Promise<T>;
+  createAttachment<F extends Function_<AttachmentContent>>(
+    name: string,
+    function_: F,
+    mimeType?: string,
+  ): F;
+  createAttachment<F extends Function_<Promise<AttachmentContent>>>(
+    name: string,
+    function_: F,
+    mimeType?: string,
+  ): F;
+  createAttachment(
+    name: string,
+    maybeFunction:
+      | AttachmentContent
+      | Promise<AttachmentContent>
+      | Function_<MaybePromise<AttachmentContent>>,
+    mimeType?: string,
+  ): typeof maybeFunction {
+    return hijackValue<AttachmentContent>(maybeFunction, (content) => {
+      const source = this.#placeAttachment(name, content);
+      this.#addFileAttachment(name, source, mimeType);
+      const promise = this.#writeAttachment(source, content);
+      this.#idle = this.#idle.then(() => promise);
+    });
   }
 
-  fileAttachment(name: string, source: string, type: string) {
+  createFileAttachment(
+    name: string,
+    filePath: string,
+    mimeType?: string,
+  ): string;
+  createFileAttachment(
+    name: string,
+    filePathPromise: MaybePromise<string>,
+    mimeType?: string,
+  ): Promise<string>;
+  createFileAttachment(
+    name: string,
+    function_: Function_<string>,
+    mimeType?: string,
+  ): Function_<string>;
+  createFileAttachment(
+    name: string,
+    function_: Function_<Promise<string>>,
+    mimeType?: string,
+  ): Function_<Promise<string>>;
+  createFileAttachment(
+    name: string,
+    maybeFunction: string | Promise<string> | Function_<MaybePromise<string>>,
+    mimeType?: string,
+  ): typeof maybeFunction {
+    return hijackValue<string>(maybeFunction, (filePath) => {
+      this.#addFileAttachment(name, filePath, mimeType);
+    });
+  }
+
+  #addFileAttachment(name: string, filePath: string, mimeType?: string) {
     this.#metadata.push(this.#localPath('attachments'), [
-      { name, source, type },
+      {
+        name,
+        source: path.resolve(filePath),
+        type: mimeType ?? inferMimeType(name),
+      },
     ]);
   }
 
@@ -96,7 +179,6 @@ export class AllureRuntime {
     maybeArguments: F | ParameterOrString[],
     maybeFunction?: F,
   ): F {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias,unicorn/no-this-assignment
     const runtime = this;
     const function_ =
       typeof maybeArguments === 'function' ? maybeArguments : maybeFunction!;
@@ -104,19 +186,27 @@ export class AllureRuntime {
 
     function wrapped(this: unknown) {
       const thisWrapped = () => Reflect.apply(function_, this, arguments);
-      return runtime.step(name, () => {
+      const wrapper = () => {
         const parameters =
           definitions ?? Array.from(arguments, (_, index) => `${index}`);
 
         // eslint-disable-next-line unicorn/no-for-loop
         for (let index = 0; index < parameters.length; index++) {
           const parameter = parameters[index];
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { name, value: _value, ...options } = parameter as Parameter;
+          const {
+            name,
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            value: _value,
+            ...options
+          } = typeof parameter === 'string'
+            ? { name: parameter, value: undefined }
+            : parameter;
           runtime.parameter(name ?? parameter, arguments[index], options);
         }
         return thisWrapped();
-      });
+      };
+      wrapper.toString = function_.toString.bind(function_);
+      return runtime.step(name, wrapper);
     }
 
     wrapped.toString = function_.toString.bind(function_);

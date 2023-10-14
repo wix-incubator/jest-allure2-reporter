@@ -4,22 +4,27 @@ import type {
   TestFnInvocationMetadata,
 } from 'jest-metadata';
 
-import { PREFIX } from '../constants';
+import { HIDDEN, PREFIX } from '../constants';
 
 import type { AllureTestStepMetadata } from './metadata';
 
 export class StepExtractor {
-  constructor(protected readonly flat: boolean) {}
-
   public extractFromInvocation(
     metadata: HookInvocationMetadata<any> | TestFnInvocationMetadata,
-  ): AllureTestStepMetadata {
+  ): AllureTestStepMetadata | null {
+    const definition = metadata.definition as HookDefinitionMetadata;
+    const hidden = metadata.get(HIDDEN, definition.get(HIDDEN, false));
+    if (hidden) {
+      return null;
+    }
+
+    const hookType = definition.hookType;
     const data = {
-      name: (metadata.definition as HookDefinitionMetadata).hookType ?? 'test',
+      name: hookType,
       ...(metadata.get([PREFIX]) as AllureTestStepMetadata),
     };
 
-    if (this.flat) {
+    if (!hookType) {
       delete data.attachments;
       delete data.parameters;
     }

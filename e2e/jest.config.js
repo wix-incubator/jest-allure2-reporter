@@ -1,3 +1,3 @@
-const PRESET = process.env.ALLURE_PRESET ?? 'default';
+const ALLURE_PRESET = process.env.ALLURE_PRESET ?? 'default';
 
-module.exports = require(`./configs/${PRESET}`);
+module.exports = require(`./configs/${ALLURE_PRESET}`);

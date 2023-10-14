@@ -5,12 +5,12 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
   "attachments": [
     {
       "name": "attachment1",
-      "source": "first",
+      "source": "/attachments/first",
       "type": "text/plain",
     },
     {
       "name": "attachment5",
-      "source": "fifth",
+      "source": "/attachments/fifth",
       "type": "text/plain",
     },
   ],
@@ -20,14 +20,14 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
       "attachments": [
         {
           "name": "attachment3",
-          "source": "third",
+          "source": "/attachments/third",
           "type": "text/plain",
         },
       ],
       "code": "async () => {
             try {
                 runtime.step('inner step 1', () => {
-                    runtime.attachment('attachment2', 'second', 'text/plain');
+                    runtime.createAttachment('attachment2', 'second', 'text/plain');
                     const error = new Error('Sync error');
                     error.stack = 'Test stack';
                     throw error;
@@ -39,10 +39,10 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
             runtime.step('inner step 2', () => {
                 /* empty */
             });
-            runtime.attachment('attachment3', 'third', 'text/plain');
+            await runtime.createAttachment('attachment3', 'third', 'text/plain');
             await runtime
                 .step('inner step 3', async () => {
-                runtime.attachment('attachment4', 'fourth', 'text/plain');
+                await runtime.createAttachment('attachment4', 'fourth', 'text/plain');
                 const error = new Error('Async error');
                 error.stack = 'Test stack';
                 throw error;
@@ -61,12 +61,12 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
           "attachments": [
             {
               "name": "attachment2",
-              "source": "second",
+              "source": "/attachments/second",
               "type": "text/plain",
             },
           ],
           "code": "() => {
-                    runtime.attachment('attachment2', 'second', 'text/plain');
+                    runtime.createAttachment('attachment2', 'second', 'text/plain');
                     const error = new Error('Sync error');
                     error.stack = 'Test stack';
                     throw error;
@@ -96,12 +96,12 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
           "attachments": [
             {
               "name": "attachment4",
-              "source": "fourth",
+              "source": "/attachments/fourth",
               "type": "text/plain",
             },
           ],
           "code": "async () => {
-                runtime.attachment('attachment4', 'fourth', 'text/plain');
+                await runtime.createAttachment('attachment4', 'fourth', 'text/plain');
                 const error = new Error('Async error');
                 error.stack = 'Test stack';
                 throw error;

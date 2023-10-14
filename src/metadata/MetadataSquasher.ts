@@ -16,10 +16,8 @@ import type { AllureTestCaseMetadata } from './metadata';
 export class MetadataSquasher {
   protected readonly testInvocationConfig: MetadataSquasherConfig<AllureTestCaseMetadata>;
 
-  constructor(flat: boolean) {
-    this.testInvocationConfig = flat
-      ? MetadataSquasher.flatConfig()
-      : MetadataSquasher.deepConfig();
+  constructor() {
+    this.testInvocationConfig = MetadataSquasher.flatConfig();
   }
 
   testInvocation(metadata: TestInvocationMetadata): AllureTestCaseMetadata {
@@ -78,13 +76,13 @@ export class MetadataSquasher {
     };
   }
 
-  private static deepConfig(): MetadataSquasherConfig<AllureTestCaseMetadata> {
-    return {
-      ...this.flatConfig(),
-      attachments: chain(['testEntry', 'testInvocation']),
-      parameters: chain(['testEntry', 'testInvocation']),
-    };
-  }
+  // private static deepConfig(): MetadataSquasherConfig<AllureTestCaseMetadata> {
+  //   return {
+  //     ...this.flatConfig(),
+  //     attachments: chain(['testEntry', 'testInvocation']),
+  //     parameters: chain(['testEntry', 'testInvocation']),
+  //   };
+  // }
 }
 
 export type MetadataSquasherConfig<T extends object> = {

@@ -1,7 +1,7 @@
-export function isPromiseLike(
-  maybePromise: unknown,
-): maybePromise is PromiseLike<unknown> {
+export function isPromiseLike<T>(
+  maybePromise: T | Promise<T>,
+): maybePromise is Promise<T> {
   return maybePromise
-    ? typeof (maybePromise as PromiseLike<unknown>).then === 'function'
+    ? typeof (maybePromise as PromiseLike<T>).then === 'function'
     : false;
 }

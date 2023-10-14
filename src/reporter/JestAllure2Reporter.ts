@@ -3,10 +3,12 @@ import path from 'node:path';
 import type {
   AggregatedResult,
   Config,
+  ReporterOnStartOptions,
   Test,
   TestCaseResult,
   TestResult,
 } from '@jest/reporters';
+import { state } from 'jest-metadata';
 import { JestMetadataReporter, query } from 'jest-metadata/reporter';
 import pkgUp from 'pkg-up';
 import rimraf from 'rimraf';
@@ -24,7 +26,7 @@ import type {
 import { resolveOptions } from '../options';
 import type { AllureTestStepMetadata } from '../metadata';
 import { MetadataSquasher, StepExtractor } from '../metadata';
-import { STOP, WORKER_ID } from '../constants';
+import { OUT_DIR, STOP, WORKER_ID } from '../constants';
 import attempt from '../utils/attempt';
 import isError from '../utils/isError';
 import { ThreadService } from '../utils/ThreadService';
@@ -32,15 +34,26 @@ import md5 from '../utils/md5';
 
 export class JestAllure2Reporter extends JestMetadataReporter {
   private readonly _globalConfig: Config.GlobalConfig;
-  private readonly _options: ReporterOptions;
+  private readonly _config: ReporterConfig;
   private readonly _threadService = new ThreadService();
-  private _config?: ReporterConfig;
 
   constructor(globalConfig: Config.GlobalConfig, options: ReporterOptions) {
     super(globalConfig);
 
     this._globalConfig = globalConfig;
-    this._options = resolveOptions(options);
+    this._config = resolveOptions(options);
+
+    state.set(OUT_DIR, path.join(this._config.resultsDir, 'attachments'));
+  }
+
+  async onRunStart(
+    results: AggregatedResult,
+    options: ReporterOnStartOptions,
+  ): Promise<void> {
+    await super.onRunStart(results, options);
+    if (this._config.overwrite) {
+      await rimraf(this._config.resultsDir);
+    }
   }
 
   onTestFileStart(test: Test) {
@@ -76,11 +89,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
   ): Promise<void> {
     await super.onRunComplete(testContexts, results);
 
-    const config = (this._config = resolveOptions(this._options));
-    if (config.overwrite) {
-      await rimraf(config.resultsDir);
-    }
-
+    const config = this._config;
     const allure = new AllureRuntime({
       resultsDir: config.resultsDir,
     });
@@ -117,8 +126,8 @@ export class JestAllure2Reporter extends JestMetadataReporter {
       allure.writeCategoriesDefinitions(categories);
     }
 
-    const squasher = new MetadataSquasher(true);
-    const stepper = new StepExtractor(true);
+    const squasher = new MetadataSquasher();
+    const stepper = new StepExtractor();
 
     for (const testResult of results.testResults) {
       for (const testCaseResult of testResult.testResults) {
@@ -181,7 +190,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
             [() => allureGroup.addBefore(), testInvocationMetadata.beforeAll],
             [() => allureGroup.addBefore(), testInvocationMetadata.beforeEach],
             [
-              () => allureTest.startStep('', 0),
+              () => allureTest,
               testInvocationMetadata.fn ? [testInvocationMetadata.fn] : [],
             ],
             [() => allureGroup.addAfter(), testInvocationMetadata.afterEach],
@@ -190,11 +199,17 @@ export class JestAllure2Reporter extends JestMetadataReporter {
 
           for (const [createExecutable, invocationMetadatas] of batches) {
             for (const invocationMetadata of invocationMetadatas) {
-              this._createStep(
-                testCaseContext,
-                createExecutable(),
-                stepper.extractFromInvocation(invocationMetadata),
-              );
+              const testStepMetadata =
+                stepper.extractFromInvocation(invocationMetadata);
+              if (testStepMetadata) {
+                const executable = createExecutable();
+                this._createStep(
+                  testCaseContext,
+                  executable,
+                  testStepMetadata,
+                  executable === allureTest,
+                );
+              }
             }
           }
 
@@ -209,6 +224,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     testCaseContext: TestCaseExtractorContext<any>,
     executable: ExecutableItemWrapper,
     testStep: AllureTestStepMetadata,
+    isTest: boolean,
   ) {
     const customize: ResolvedTestStepCustomizer = this._config!.testStep;
     const testStepContext = {
@@ -216,17 +232,21 @@ export class JestAllure2Reporter extends JestMetadataReporter {
       testStep,
     };
 
-    executable.name = customize.name(testStepContext) ?? executable.name;
-    executable.wrappedItem.start = customize.start(testStepContext);
-    executable.wrappedItem.stop = customize.stop(testStepContext);
-    executable.stage = customize.stage(testStepContext) ?? executable.stage;
-    executable.status = customize.status(testStepContext) ?? executable.status;
-    executable.statusDetails =
-      customize.statusDetails(testStepContext) ?? executable.statusDetails;
+    if (!isTest) {
+      executable.name = customize.name(testStepContext) ?? executable.name;
+      executable.wrappedItem.start = customize.start(testStepContext);
+      executable.wrappedItem.stop = customize.stop(testStepContext);
+      executable.stage = customize.stage(testStepContext) ?? executable.stage;
+      executable.status =
+        customize.status(testStepContext) ?? executable.status;
+      executable.statusDetails =
+        customize.statusDetails(testStepContext) ?? executable.statusDetails;
 
-    executable.wrappedItem.attachments =
-      customize.attachments(testStepContext)!;
-    executable.wrappedItem.parameters = customize.parameters(testStepContext)!;
+      executable.wrappedItem.attachments =
+        customize.attachments(testStepContext)!;
+      executable.wrappedItem.parameters =
+        customize.parameters(testStepContext)!;
+    }
 
     if (testStep.steps) {
       for (const innerStep of testStep.steps) {
@@ -234,6 +254,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
           testCaseContext,
           executable.startStep('', 0),
           innerStep,
+          false,
         );
       }
     }

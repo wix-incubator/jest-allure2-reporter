@@ -35,7 +35,10 @@ module.exports = {
     "unicorn/consistent-function-scoping": "off",
     "unicorn/filename-case": "off",
     "unicorn/no-array-callback-reference": "off",
+    "unicorn/no-array-method-this-argument": "off",
+    "unicorn/no-array-reduce": "off",
     "unicorn/no-null": "off",
+    "unicorn/no-this-assignment": "off",
     "unicorn/prefer-event-target": "off",
     "unicorn/prefer-module": "off",
     "import/no-extraneous-dependencies": ["error", {
@@ -43,6 +46,7 @@ module.exports = {
       optionalDependencies: false,
     }],
     "@typescript-eslint/consistent-type-imports": "error",
+    "@typescript-eslint/no-this-alias": "off",
     "@typescript-eslint/no-unused-vars": [
       "error",
       {

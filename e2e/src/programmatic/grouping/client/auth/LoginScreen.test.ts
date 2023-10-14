@@ -1,4 +1,5 @@
 import { $Epic, $Feature, $Story, $Tag } from 'jest-allure2-reporter';
+import LoginHelper from '../../../../utils/LoginHelper';
 
 $Tag('client');
 $Epic('Authentication');
@@ -13,8 +14,9 @@ describe('Login screen', () => {
 
   $Story('Validation');
   describe('Form Submission', () => {
-    it('should show error on invalid e-mail format', () => {
-      // ...
+    it('should show error on invalid e-mail format', async () => {
+      await LoginHelper.typeEmail('someone#example.com');
+      expect(LoginHelper.getValidationSummary()).toBe('fixtures/invalid-email.xml');
     });
 
     it('should show error on short or invalid password format', () => {
