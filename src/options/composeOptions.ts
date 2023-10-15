@@ -4,6 +4,7 @@ import type {
   ResolvedTestCaseCustomizer,
   TestCaseCustomizer,
   TestStepCustomizer,
+  AttachmentsOptions,
 } from './ReporterOptions';
 import { aggregateLabelCustomizers } from './aggregateLabelCustomizers';
 import { aggregateLinkCustomizers } from './aggregateLinkCustomizers';
@@ -23,6 +24,7 @@ export function composeOptions(
 
     overwrite: custom.overwrite ?? base.overwrite,
     resultsDir: custom.resultsDir ?? base.resultsDir,
+    attachments: composeAttachments(base.attachments, custom.attachments),
     testCase: composeTestCaseCustomizers(base.testCase, custom.testCase),
     testStep: composeTestStepCustomizers(
       base.testStep as TestStepCustomizer,
@@ -37,6 +39,20 @@ export function composeOptions(
       asExtractor(custom.categories),
       base.categories,
     ),
+  };
+}
+
+function composeAttachments(
+  base: Required<AttachmentsOptions>,
+  custom: AttachmentsOptions | undefined,
+): Required<AttachmentsOptions> {
+  if (!custom) {
+    return base;
+  }
+
+  return {
+    subDir: custom?.subDir ?? base.subDir,
+    fileHandler: custom?.fileHandler ?? base.fileHandler,
   };
 }
 

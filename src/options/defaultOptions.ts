@@ -74,6 +74,10 @@ export function defaultOptions(): ReporterConfig {
   const config: ReporterConfig = {
     overwrite: true,
     resultsDir: 'allure-results',
+    attachments: {
+      subDir: 'attachments',
+      fileHandler: 'ref',
+    },
     testCase,
     testStep,
     environment: identity,

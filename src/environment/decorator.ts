@@ -42,7 +42,8 @@ export function WithAllure2<E extends WithEmitter>(
           .on('hook_success', this.#executableSuccess.bind(this))
           .on('test_fn_start', this.#executableStart.bind(this))
           .on('test_fn_success', this.#executableSuccess.bind(this))
-          .on('test_fn_failure', this.#executableFailure.bind(this));
+          .on('test_fn_failure', this.#executableFailure.bind(this))
+          .on('teardown', this.#flushFiles.bind(this));
       }
 
       #addHook({
@@ -101,6 +102,10 @@ export function WithAllure2<E extends WithEmitter>(
         };
 
         state.currentMetadata.assign(PREFIX, metadata);
+      }
+
+      async #flushFiles() {
+        await realm.runtime.flush();
       }
 
       // eslint-disable-next-line no-empty-pattern

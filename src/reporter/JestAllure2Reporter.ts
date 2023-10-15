@@ -21,12 +21,13 @@ import type {
   ReporterConfig,
   ReporterOptions,
   ResolvedTestStepCustomizer,
+  SharedReporterConfig,
   TestCaseExtractorContext,
-} from '../options/ReporterOptions';
+} from '../options';
 import { resolveOptions } from '../options';
 import type { AllureTestStepMetadata } from '../metadata';
 import { MetadataSquasher, StepExtractor } from '../metadata';
-import { OUT_DIR, STOP, WORKER_ID } from '../constants';
+import { SHARED_CONFIG, STOP, WORKER_ID } from '../constants';
 import attempt from '../utils/attempt';
 import isError from '../utils/isError';
 import { ThreadService } from '../utils/ThreadService';
@@ -43,7 +44,11 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     this._globalConfig = globalConfig;
     this._config = resolveOptions(options);
 
-    state.set(OUT_DIR, path.join(this._config.resultsDir, 'attachments'));
+    state.set(SHARED_CONFIG, {
+      resultsDir: this._config.resultsDir,
+      overwrite: this._config.overwrite,
+      attachments: this._config.attachments,
+    } as SharedReporterConfig);
   }
 
   async onRunStart(
@@ -51,6 +56,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     options: ReporterOnStartOptions,
   ): Promise<void> {
     await super.onRunStart(results, options);
+
     if (this._config.overwrite) {
       await rimraf(this._config.resultsDir);
     }
@@ -258,9 +264,5 @@ export class JestAllure2Reporter extends JestMetadataReporter {
         );
       }
     }
-  }
-
-  getLastError(): void {
-    // TODO: investigate what this method is for
   }
 }

@@ -1,5 +1,5 @@
 import realm from '../realms';
-import type { ParameterOrString } from '../utils/types';
+import type { ParameterOrString } from '../runtime';
 
 const allure = realm.runtime;
 

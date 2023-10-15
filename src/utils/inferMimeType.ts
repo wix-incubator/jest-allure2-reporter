@@ -1,11 +1,21 @@
 /**
  * Infers the mime type of a file based on its extension.
+ * If file has multiple paths, the first one with a known mime type is used.
  * @param filePath Path to the file.
  * @returns The mime type of the file or `application/octet-stream` if the mime type could not be inferred.
  */
-export function inferMimeType(filePath: string): string {
+export function inferMimeType(...filePaths: string[]): string {
+  for (const filePath of filePaths) {
+    const mimeType = inferMimeType1(filePath);
+    if (mimeType) return mimeType;
+  }
+
+  return 'application/octet-stream';
+}
+
+function inferMimeType1(filePath: string): string {
   const extension = filePath.split('.').pop()!;
-  return mimeTypes[extension] || 'application/octet-stream';
+  return mimeTypes[extension];
 }
 
 const mimeTypes: Record<string, string> = {
