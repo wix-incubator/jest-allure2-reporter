@@ -38,6 +38,8 @@ module.exports = {
     "unicorn/no-array-method-this-argument": "off",
     "unicorn/no-array-reduce": "off",
     "unicorn/no-null": "off",
+    "prefer-rest-params": "off",
+    "@typescript-eslint/ban-types": "off",
     "unicorn/no-this-assignment": "off",
     "unicorn/prefer-event-target": "off",
     "unicorn/prefer-module": "off",

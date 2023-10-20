@@ -16,6 +16,8 @@ describe('Login screen', () => {
   describe('Form Submission', () => {
     it('should show error on invalid e-mail format', async () => {
       await LoginHelper.typeEmail('someone#example.com');
+      await LoginHelper.typePassword('123456');
+      expect(LoginHelper.snapshotForm()).toContain('someone#example.com');
       expect(LoginHelper.getValidationSummary()).toBe('fixtures/invalid-email.xml');
     });
 

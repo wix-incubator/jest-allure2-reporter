@@ -1,13 +1,12 @@
-/* eslint-disable @typescript-eslint/ban-types, prefer-rest-params */
 import path from 'node:path';
 
 import type { Metadata } from 'jest-metadata';
-import { Status, Stage } from '@noomorph/allure-js-commons';
 import type {
-  StatusDetails,
-  ParameterOptions,
   LabelName,
+  ParameterOptions,
+  StatusDetails,
 } from '@noomorph/allure-js-commons';
+import { Stage, Status } from '@noomorph/allure-js-commons';
 
 import {
   CURRENT_STEP,
@@ -17,32 +16,38 @@ import {
   LINKS,
   PREFIX,
 } from '../constants';
-import type { AllureTestStepMetadata } from '../metadata/metadata';
+import type { AllureTestStepMetadata } from '../metadata';
 import { isPromiseLike } from '../utils/isPromiseLike';
 import { inferMimeType } from '../utils/inferMimeType';
-import { hijackValue } from '../utils/hijackValue';
+import { hijackFunction } from '../utils/hijackFunction';
 import type {
   AttachmentContent,
   Function_,
   MaybePromise,
-  ParameterOrString,
 } from '../utils/types';
+import { processMaybePromise } from '../utils/processMaybePromise';
+import { wrapFunction } from '../utils/wrapFunction';
+import { formatString } from '../utils/formatString';
+
+import type { IAttachmentsHandler } from './AttachmentsHandler';
+import type {
+  AttachmentOptions,
+  IAllureRuntime,
+  ParameterOrString,
+} from './IAllureRuntime';
 
 export type AllureRuntimeConfig = {
+  attachmentsHandler: IAttachmentsHandler;
   metadataProvider: () => Metadata;
   nowProvider: () => number;
-  placeAttachment: (name: string, content: AttachmentContent) => string;
-  writeAttachment: <T extends AttachmentContent>(
-    filePath: string,
-    content: T,
-  ) => Promise<void>;
 };
 
-export class AllureRuntime {
+const noop = (..._arguments: unknown[]) => void 0;
+
+export class AllureRuntime implements IAllureRuntime {
+  readonly #attachmentsHandler: AllureRuntimeConfig['attachmentsHandler'];
   readonly #metadataProvider: AllureRuntimeConfig['metadataProvider'];
   readonly #now: AllureRuntimeConfig['nowProvider'];
-  readonly #placeAttachment: AllureRuntimeConfig['placeAttachment'];
-  readonly #writeAttachment: AllureRuntimeConfig['writeAttachment'];
   #idle = Promise.resolve();
 
   get #metadata(): Metadata {
@@ -50,10 +55,9 @@ export class AllureRuntime {
   }
 
   constructor(config: AllureRuntimeConfig) {
+    this.#attachmentsHandler = config.attachmentsHandler;
     this.#metadataProvider = config.metadataProvider;
     this.#now = config.nowProvider;
-    this.#placeAttachment = config.placeAttachment;
-    this.#writeAttachment = config.writeAttachment;
   }
 
   async flush(): Promise<void> {
@@ -92,134 +96,52 @@ export class AllureRuntime {
     }
   }
 
-  createAttachment<T extends AttachmentContent>(
-    name: string,
-    content: T,
-    mimeType?: string,
-  ): T;
-  createAttachment<T extends AttachmentContent>(
+  attachment<T extends AttachmentContent>(
     name: string,
     content: MaybePromise<T>,
     mimeType?: string,
-  ): Promise<T>;
-  createAttachment<F extends Function_<AttachmentContent>>(
-    name: string,
-    function_: F,
-    mimeType?: string,
-  ): F;
-  createAttachment<F extends Function_<Promise<AttachmentContent>>>(
-    name: string,
-    function_: F,
-    mimeType?: string,
-  ): F;
-  createAttachment(
-    name: string,
-    maybeFunction:
-      | AttachmentContent
-      | Promise<AttachmentContent>
-      | Function_<MaybePromise<AttachmentContent>>,
-    mimeType?: string,
-  ): typeof maybeFunction {
-    return hijackValue<AttachmentContent>(maybeFunction, (content) => {
-      const source = this.#placeAttachment(name, content);
-      this.#addFileAttachment(name, source, mimeType);
-      const promise = this.#writeAttachment(source, content);
-      this.#idle = this.#idle.then(() => promise);
-    });
+  ): typeof content {
+    return processMaybePromise(
+      content,
+      this.#handleDynamicAttachment({ name, mimeType }),
+    );
+  }
+
+  createAttachment<T extends AttachmentContent>(
+    function_: Function_<MaybePromise<T>>,
+    rawOptions: string | AttachmentOptions,
+  ): typeof function_ {
+    const options = this.#resolveAttachmentOptions(rawOptions);
+    return hijackFunction(function_, this.#handleDynamicAttachment(options));
+  }
+
+  fileAttachment(
+    filePathOrPromise: MaybePromise<string>,
+    rawOptions?: string | AttachmentOptions,
+  ): any {
+    const options = this.#resolveAttachmentOptions(rawOptions);
+    return processMaybePromise(
+      filePathOrPromise,
+      this.#handleStaticAttachment(options),
+    );
   }
 
   createFileAttachment(
-    name: string,
-    filePath: string,
-    mimeType?: string,
-  ): string;
-  createFileAttachment(
-    name: string,
-    filePathPromise: MaybePromise<string>,
-    mimeType?: string,
-  ): Promise<string>;
-  createFileAttachment(
-    name: string,
-    function_: Function_<string>,
-    mimeType?: string,
-  ): Function_<string>;
-  createFileAttachment(
-    name: string,
-    function_: Function_<Promise<string>>,
-    mimeType?: string,
-  ): Function_<Promise<string>>;
-  createFileAttachment(
-    name: string,
-    maybeFunction: string | Promise<string> | Function_<MaybePromise<string>>,
-    mimeType?: string,
-  ): typeof maybeFunction {
-    return hijackValue<string>(maybeFunction, (filePath) => {
-      this.#addFileAttachment(name, filePath, mimeType);
-    });
+    function_: Function_<MaybePromise<string>>,
+    rawOptions?: string | AttachmentOptions,
+  ): typeof function_ {
+    const options = this.#resolveAttachmentOptions(rawOptions);
+    return hijackFunction<string>(
+      function_,
+      this.#handleStaticAttachment(options),
+    );
   }
 
-  #addFileAttachment(name: string, filePath: string, mimeType?: string) {
-    this.#metadata.push(this.#localPath('attachments'), [
-      {
-        name,
-        source: path.resolve(filePath),
-        type: mimeType ?? inferMimeType(name),
-      },
-    ]);
-  }
-
-  createStep<F extends Function>(
-    name: string,
-    arguments_: ParameterOrString[],
-    function_: F,
-  ): F;
-  createStep<F extends Function>(name: string, function_: F): F;
-  createStep<F extends Function>(
-    name: string,
-    maybeArguments: F | ParameterOrString[],
-    maybeFunction?: F,
-  ): F {
-    const runtime = this;
-    const function_ =
-      typeof maybeArguments === 'function' ? maybeArguments : maybeFunction!;
-    const definitions = Array.isArray(maybeArguments) ? maybeArguments : null;
-
-    function wrapped(this: unknown) {
-      const thisWrapped = () => Reflect.apply(function_, this, arguments);
-      const wrapper = () => {
-        const parameters =
-          definitions ?? Array.from(arguments, (_, index) => `${index}`);
-
-        // eslint-disable-next-line unicorn/no-for-loop
-        for (let index = 0; index < parameters.length; index++) {
-          const parameter = parameters[index];
-          const {
-            name,
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            value: _value,
-            ...options
-          } = typeof parameter === 'string'
-            ? { name: parameter, value: undefined }
-            : parameter;
-          runtime.parameter(name ?? parameter, arguments[index], options);
-        }
-        return thisWrapped();
-      };
-      wrapper.toString = function_.toString.bind(function_);
-      return runtime.step(name, wrapper);
-    }
-
-    wrapped.toString = function_.toString.bind(function_);
-    return wrapped as unknown as F;
-  }
-
-  step(name: string, function_: () => Promise<unknown>): Promise<unknown>;
-  step(name: string, function_: () => unknown): unknown;
-  step(name: string, function_: () => unknown) {
+  step<T = unknown>(name: string, function_: () => T): T {
     this.#startStep(name, function_);
     const end = this.#stopStep;
 
-    let result: unknown;
+    let result: T;
     try {
       result = function_();
 
@@ -245,7 +167,47 @@ export class AllureRuntime {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  createStep<F extends Function>(
+    nameFormat: string,
+    maybeParameters: F | ParameterOrString[],
+    maybeFunction?: F,
+  ): F {
+    const function_: any = maybeFunction ?? (maybeParameters as F);
+    if (typeof function_ !== 'function') {
+      throw new TypeError(
+        `Expected a function, got ${typeof function_} instead`,
+      );
+    }
+
+    const runtime = this;
+    const userParameters = Array.isArray(maybeParameters)
+      ? maybeParameters
+      : null;
+
+    const handleArguments = (arguments_: IArguments) => {
+      const parameters = userParameters ?? Array.from(arguments_, noop);
+      const allureParameters = parameters.map(resolveParameter, arguments_);
+      for (const [name, value, options] of allureParameters) {
+        runtime.parameter(name, value, options);
+      }
+    };
+
+    return wrapFunction(function_, function (this: unknown) {
+      const arguments_ = arguments;
+      const name = formatString(nameFormat, ...arguments_);
+      return runtime.step(
+        name,
+        wrapFunction(
+          function_,
+          function step(this: unknown) {
+            handleArguments(arguments_);
+            return Reflect.apply(function_, this, arguments_);
+          }.bind(this),
+        ),
+      );
+    });
+  }
+
   #startStep = (name: string, function_: Function) => {
     const count = this.#metadata.get(this.#localPath('steps', 'length'), 0);
     this.#metadata.push(this.#localPath('steps'), [
@@ -281,4 +243,67 @@ export class AllureRuntime {
     const allKeys = key ? [key, ...innerKeys] : innerKeys;
     return [PREFIX, ...stepPath, ...allKeys];
   }
+
+  #resolveAttachmentOptions(rawOptions?: string | AttachmentOptions) {
+    return !rawOptions || typeof rawOptions === 'string'
+      ? { name: rawOptions, mimeType: undefined }
+      : rawOptions;
+  }
+
+  #handleDynamicAttachment =
+    ({ name: nameFormat, mimeType }: AttachmentOptions) =>
+    (content: AttachmentContent, arguments_?: unknown[]) => {
+      const name = this.#formatName(nameFormat, arguments_);
+      const source = this.#attachmentsHandler.placeAttachment(name, content);
+      this.#metadata.push(this.#localPath('attachments'), [
+        {
+          name,
+          source: path.resolve(source),
+          type: mimeType ?? inferMimeType(name),
+        },
+      ]);
+      const promise = this.#attachmentsHandler.writeAttachment(source, content);
+      this.#idle = this.#idle.then(() => promise);
+    };
+
+  #handleStaticAttachment =
+    ({ name: rawName, mimeType }: AttachmentOptions) =>
+    (filePath: string, arguments_?: unknown[]) => {
+      const name = this.#formatName(
+        rawName ?? path.basename(filePath),
+        arguments_,
+      );
+      const securedPath = this.#attachmentsHandler.placeAttachment(name);
+      const result = this.#attachmentsHandler.secureAttachment(
+        filePath,
+        securedPath,
+      );
+      this.#metadata.push(this.#localPath('attachments'), [
+        {
+          name,
+          source: path.resolve(result.destinationPath),
+          type: mimeType ?? inferMimeType(name, filePath),
+        },
+      ]);
+      if (result.promise) {
+        this.#idle = this.#idle.then(() => result.promise);
+      }
+    };
+
+  #formatName(nameFormat?: string, arguments_?: unknown[]) {
+    return arguments_
+      ? formatString(nameFormat ?? 'untitled', ...arguments_)
+      : nameFormat ?? 'untitled';
+  }
+}
+
+function resolveParameter(
+  this: unknown[],
+  parameter: ParameterOrString | undefined,
+  index: number,
+) {
+  const { name = `${index}`, ...options } =
+    typeof parameter === 'string' ? { name: parameter } : parameter ?? {};
+
+  return [name, this[index], options] as const;
 }

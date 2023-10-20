@@ -62,6 +62,10 @@ export type ReporterOptions = {
    */
   resultsDir?: string;
   /**
+   * Configures how external attachments are attached to the report.
+   */
+  attachments?: AttachmentsOptions;
+  /**
    * Configures the defect categories for the report.
    *
    * By default, the report will have the following categories:
@@ -90,12 +94,38 @@ export type ReporterOptions = {
 };
 
 export type ReporterConfig = Required<ReporterOptions> & {
+  attachments: Required<AttachmentsOptions>;
   testCase: ResolvedTestCaseCustomizer;
   testStep: ResolvedTestStepCustomizer;
   categories: CategoriesCustomizer;
   environment: EnvironmentCustomizer;
   executor: ExecutorCustomizer;
 };
+
+export type SharedReporterConfig = Pick<
+  ReporterConfig,
+  'resultsDir' | 'overwrite' | 'attachments'
+>;
+
+export type AttachmentsOptions = {
+  /**
+   * Defines a subdirectory within the {@link ReporterOptions#resultsDir} where attachments will be stored.
+   * @default 'attachments'
+   */
+  subDir?: string;
+  /**
+   * Specifies strategy for attaching files to the report by their path.
+   * - `copy` - copy the file to {@link AttachmentsOptions#subDir}
+   * - `move` - move the file to {@link AttachmentsOptions#subDir}
+   * - `ref` - use the file path as is
+   * @default 'ref'
+   * @see {@link AllureRuntime#createFileAttachment}
+   */
+  fileHandler?: BuiltinFileHandler;
+};
+
+/** @see {@link AttachmentsOptions#fileHandler} */
+export type BuiltinFileHandler = 'copy' | 'move' | 'ref';
 
 /**
  * Global customizations for how test cases are reported

@@ -27,7 +27,7 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
       "code": "async () => {
             try {
                 runtime.step('inner step 1', () => {
-                    runtime.createAttachment('attachment2', 'second', 'text/plain');
+                    runtime.attachment('attachment2', 'second', 'text/plain');
                     const error = new Error('Sync error');
                     error.stack = 'Test stack';
                     throw error;
@@ -39,15 +39,8 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
             runtime.step('inner step 2', () => {
                 /* empty */
             });
-            await runtime.createAttachment('attachment3', 'third', 'text/plain');
-            await runtime
-                .step('inner step 3', async () => {
-                await runtime.createAttachment('attachment4', 'fourth', 'text/plain');
-                const error = new Error('Async error');
-                error.stack = 'Test stack';
-                throw error;
-            })
-                .catch(() => {
+            runtime.attachment('attachment3', 'third', 'text/plain');
+            await innerStep3('fourth').catch(() => {
                 /* empty */
             });
         }",
@@ -66,7 +59,7 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
             },
           ],
           "code": "() => {
-                    runtime.createAttachment('attachment2', 'second', 'text/plain');
+                    runtime.attachment('attachment2', 'second', 'text/plain');
                     const error = new Error('Sync error');
                     error.stack = 'Test stack';
                     throw error;
@@ -100,13 +93,19 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
               "type": "text/plain",
             },
           ],
-          "code": "async () => {
-                await runtime.createAttachment('attachment4', 'fourth', 'text/plain');
-                const error = new Error('Async error');
-                error.stack = 'Test stack';
-                throw error;
-            }",
+          "code": "async (message) => {
+            runtime.attachment('attachment4', message, 'text/plain');
+            const error = new Error('Async error');
+            error.stack = 'Test stack';
+            throw error;
+        }",
           "name": "inner step 3",
+          "parameters": [
+            {
+              "name": "0",
+              "value": "fourth",
+            },
+          ],
           "stage": "finished",
           "start": 5,
           "status": "failed",

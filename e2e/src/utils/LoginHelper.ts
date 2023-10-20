@@ -1,10 +1,24 @@
 import {Attachment, FileAttachment, Step} from 'jest-allure2-reporter';
 
 class LoginHelper {
-  @Step('Type e-mail', ['E-mail'])
-  @Attachment('email.txt')
+  #email?: string;
+  #password?: string;
+
+  @Step('Type e-mail: %s', ['email'])
   async typeEmail(email: string) {
+    this.#email = email;
     return 'Entered: ' + email;
+  }
+
+  @Step('Type password', [{ name: 'password', mode: 'masked' }])
+  async typePassword(password: string) {
+    this.#password = password;
+    return 'Entered: ' + password;
+  }
+
+  @Attachment('form.json', 'application/json')
+  snapshotForm() {
+    return JSON.stringify({ email: this.#email, password: this.#password }, null, 2);
   }
 
   @FileAttachment('summary.xml', 'text/xml')
