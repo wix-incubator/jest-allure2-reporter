@@ -20,13 +20,13 @@
   "engines": {
     "node": ">=16.20.0"
   },
-  "main": "./dist/index.js",
-  "typings": "./dist/index.d.ts",
+  "main": "./index.js",
+  "typings": "./index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "import": "./index.js",
+      "require": "./index.js",
+      "types": "./index.d.ts"
     },
     "./environment-decorator": {
       "import": "./dist/environment/decorator.js",
@@ -76,14 +76,14 @@
     "@typescript-eslint/eslint-plugin": "^5.28.0",
     "@typescript-eslint/parser": "^5.28.0",
     "cz-conventional-changelog": "^3.3.0",
-    "eslint": "^8.17.0",
-    "eslint-config-prettier": "^8.5.0",
+    "eslint": "^8.52.0",
+    "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-ecmascript-compat": "^3.0.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-jsdoc": "^39.3.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prefer-arrow": "^1.2.3",
-    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-prettier": "^5.0.1",
     "eslint-plugin-unicorn": "^47.0.0",
     "fs-extra": "^10.1.0",
     "glob": "^8.0.3",
@@ -92,7 +92,6 @@
     "lerna": "^6.6.2",
     "lint-staged": "^14.0.1",
     "lodash": "^4.17.21",
-    "prettier": "^2.7.0",
     "semantic-release": "^22.0.5",
     "tempfile": "^3.0.0",
     "ts-jest": "^29.0.0",
@@ -104,6 +103,12 @@
     "ci-info": "^3.8.0",
     "jest-metadata": "^1.1.1",
     "pkg-up": "^3.1.0",
+    "prettier": "^3.0.3",
+    "remark": "^15.0.1",
+    "rehype-highlight": "^7.0.0",
+    "remark-rehype": "^11.0.0",
+    "rehype-sanitize": "^6.0.0",
+    "rehype-stringify": "^10.0.0",
     "rimraf": "^4.3.1",
     "strip-ansi": "^6.0.0"
   },

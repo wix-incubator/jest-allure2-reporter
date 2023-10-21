@@ -1,12 +1,19 @@
 import path from 'node:path';
 
-import type { Metadata } from 'jest-metadata';
 import type {
   LabelName,
   ParameterOptions,
   StatusDetails,
 } from '@noomorph/allure-js-commons';
 import { Stage, Status } from '@noomorph/allure-js-commons';
+import type { Metadata } from 'jest-metadata';
+import type {
+  AllureTestStepMetadata,
+  AttachmentContent,
+  AttachmentOptions,
+  IAllureRuntime,
+  ParameterOrString,
+} from 'jest-allure2-reporter';
 
 import {
   CURRENT_STEP,
@@ -16,25 +23,15 @@ import {
   LINKS,
   PREFIX,
 } from '../constants';
-import type { AllureTestStepMetadata } from '../metadata';
 import { isPromiseLike } from '../utils/isPromiseLike';
 import { inferMimeType } from '../utils/inferMimeType';
 import { hijackFunction } from '../utils/hijackFunction';
-import type {
-  AttachmentContent,
-  Function_,
-  MaybePromise,
-} from '../utils/types';
+import type { Function_, MaybePromise } from '../utils/types';
 import { processMaybePromise } from '../utils/processMaybePromise';
 import { wrapFunction } from '../utils/wrapFunction';
 import { formatString } from '../utils/formatString';
 
 import type { IAttachmentsHandler } from './AttachmentsHandler';
-import type {
-  AttachmentOptions,
-  IAllureRuntime,
-  ParameterOrString,
-} from './IAllureRuntime';
 
 export type AllureRuntimeConfig = {
   attachmentsHandler: IAttachmentsHandler;

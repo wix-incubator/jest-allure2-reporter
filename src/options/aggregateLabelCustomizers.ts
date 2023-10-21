@@ -1,12 +1,12 @@
 /* eslint-disable unicorn/no-array-reduce */
 import type { Label } from '@noomorph/allure-js-commons';
-
 import type {
   LabelExtractor,
   LabelsCustomizer,
   TestCaseExtractor,
   TestCaseExtractorContext,
-} from './ReporterOptions';
+} from 'jest-allure2-reporter';
+
 import { asExtractor } from './asExtractor';
 
 export function aggregateLabelCustomizers(
@@ -16,22 +16,28 @@ export function aggregateLabelCustomizers(
     return labels;
   }
 
-  const extractors = Object.keys(labels).reduce((accumulator, key) => {
-    const extractor = asExtractor(labels[key]) as LabelExtractor;
-    if (extractor) {
-      accumulator[key] = extractor;
-    }
-    return accumulator;
-  }, {} as Record<string, LabelExtractor>);
+  const extractors = Object.keys(labels).reduce(
+    (accumulator, key) => {
+      const extractor = asExtractor(labels[key]) as LabelExtractor;
+      if (extractor) {
+        accumulator[key] = extractor;
+      }
+      return accumulator;
+    },
+    {} as Record<string, LabelExtractor>,
+  );
 
   const names = Object.keys(extractors);
 
   return (context: TestCaseExtractorContext<Label[]>) => {
     const other: Label[] = [];
-    const found = names.reduce((found, key) => {
-      found[key] = [];
-      return found;
-    }, {} as Record<string, string[]>);
+    const found = names.reduce(
+      (found, key) => {
+        found[key] = [];
+        return found;
+      },
+      {} as Record<string, string[]>,
+    );
 
     if (context.value) {
       for (const label of context.value) {
@@ -50,7 +56,7 @@ export function aggregateLabelCustomizers(
         const value = asArray(
           extractor({ ...context, value: asArray(found[name]) }),
         );
-        return value ? value.map((value) => ({ name, value } as Label)) : [];
+        return value ? value.map((value) => ({ name, value }) as Label) : [];
       }),
     ];
 

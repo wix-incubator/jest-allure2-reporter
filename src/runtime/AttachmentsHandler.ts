@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 
-import type { SharedReporterConfig } from '../options';
+import type { SharedReporterConfig } from 'jest-allure2-reporter';
 
 export interface IAttachmentsHandler {
   placeAttachment(name: string, content?: Buffer | string): string;

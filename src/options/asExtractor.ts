@@ -1,4 +1,4 @@
-import type { Extractor } from './ReporterOptions';
+import type { Extractor } from 'jest-allure2-reporter';
 
 /**
  * Resolves the unknown value either as an extractor or it

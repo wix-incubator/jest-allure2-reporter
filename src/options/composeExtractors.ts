@@ -1,4 +1,4 @@
-import type { Extractor, ExtractorContext } from './ReporterOptions';
+import type { Extractor, ExtractorContext } from 'jest-allure2-reporter';
 
 export function composeExtractors<T, C extends ExtractorContext<T>>(
   a: Extractor<T, C> | undefined,

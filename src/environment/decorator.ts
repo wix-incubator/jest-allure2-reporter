@@ -5,11 +5,11 @@ import type {
 } from 'jest-metadata/environment-decorator';
 import { state } from 'jest-metadata';
 import { Stage, Status } from '@noomorph/allure-js-commons';
-
 import type {
   AllureTestCaseMetadata,
   AllureTestStepMetadata,
-} from '../metadata';
+} from 'jest-allure2-reporter';
+
 import { PREFIX, WORKER_ID } from '../constants';
 import realm from '../realms';
 

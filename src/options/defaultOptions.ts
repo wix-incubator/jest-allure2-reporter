@@ -3,22 +3,25 @@ import path from 'node:path';
 import type { TestCaseResult } from '@jest/reporters';
 import type { Attachment, StatusDetails } from '@noomorph/allure-js-commons';
 import { Stage, Status } from '@noomorph/allure-js-commons';
-
-import { stripStatusDetails } from '../metadata/utils';
-
+import type { PluginContext } from 'jest-allure2-reporter';
 import type {
   ExtractorContext,
   ReporterConfig,
   ResolvedTestCaseCustomizer,
   ResolvedTestStepCustomizer,
-} from './ReporterOptions';
+} from 'jest-allure2-reporter';
+
+import * as plugins from '../builtin-plugins';
+import { stripStatusDetails } from '../metadata/utils';
+
 import { aggregateLabelCustomizers } from './aggregateLabelCustomizers';
+import { resolvePlugins } from './resolvePlugins';
 
 const identity = <T>(context: ExtractorContext<T>) => context.value;
 const last = <T>(context: ExtractorContext<T[]>) => context.value?.at(-1);
 const all = identity;
 
-export function defaultOptions(): ReporterConfig {
+export function defaultOptions(context: PluginContext): ReporterConfig {
   const testCase: ResolvedTestCaseCustomizer = {
     historyId: ({ testCase }) => testCase.fullName,
     name: ({ testCase }) => testCase.title,
@@ -61,14 +64,15 @@ export function defaultOptions(): ReporterConfig {
   };
 
   const testStep: ResolvedTestStepCustomizer = {
-    name: ({ testStep }) => testStep.name,
-    start: ({ testStep }) => testStep.start,
-    stop: ({ testStep }) => testStep.stop,
-    stage: ({ testStep }) => testStep.stage,
-    status: ({ testStep }) => testStep.status,
-    statusDetails: ({ testStep }) => stripStatusDetails(testStep.statusDetails),
-    attachments: ({ testStep }) => testStep.attachments ?? [],
-    parameters: ({ testStep }) => testStep.parameters ?? [],
+    name: ({ testStepMetadata }) => testStepMetadata.name,
+    start: ({ testStepMetadata }) => testStepMetadata.start,
+    stop: ({ testStepMetadata }) => testStepMetadata.stop,
+    stage: ({ testStepMetadata }) => testStepMetadata.stage,
+    status: ({ testStepMetadata }) => testStepMetadata.status,
+    statusDetails: ({ testStepMetadata }) =>
+      stripStatusDetails(testStepMetadata.statusDetails),
+    attachments: ({ testStepMetadata }) => testStepMetadata.attachments ?? [],
+    parameters: ({ testStepMetadata }) => testStepMetadata.parameters ?? [],
   };
 
   const config: ReporterConfig = {
@@ -83,6 +87,11 @@ export function defaultOptions(): ReporterConfig {
     environment: identity,
     executor: identity,
     categories: identity,
+    plugins: resolvePlugins(context, [
+      plugins.manifest,
+      plugins.prettier,
+      plugins.remark,
+    ]),
   };
 
   return config;

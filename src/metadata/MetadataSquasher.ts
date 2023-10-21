@@ -7,11 +7,11 @@ import type {
   TestInvocationMetadata,
   HookInvocationMetadata,
 } from 'jest-metadata';
+import type { AllureTestCaseMetadata } from 'jest-allure2-reporter';
 
 import { WORKER_ID } from '../constants';
 
 import { chain, extractCode, getStart, getStop } from './utils';
-import type { AllureTestCaseMetadata } from './metadata';
 
 export class MetadataSquasher {
   protected readonly testInvocationConfig: MetadataSquasherConfig<AllureTestCaseMetadata>;

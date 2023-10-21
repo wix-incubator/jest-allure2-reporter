@@ -40,6 +40,7 @@ module.exports = {
     "unicorn/no-null": "off",
     "prefer-rest-params": "off",
     "@typescript-eslint/ban-types": "off",
+    "@typescript-eslint/triple-slash-reference": "off",
     "unicorn/no-this-assignment": "off",
     "unicorn/prefer-event-target": "off",
     "unicorn/prefer-module": "off",
