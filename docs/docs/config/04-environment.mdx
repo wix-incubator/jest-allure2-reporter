@@ -22,7 +22,9 @@ It is always a good idea to include environment information in your test reports
 
 ## Configuration
 
-By default, the environment information is not included in the report. To enable it, you need to add the following configuration to your `jest.config.js` file. In the example below, we're using the [lodash] library to filter out any sensitive information from the environment variables, and we also include the name and version of the package under test, as well as the type of the operating system:
+By default, the environment information is not included in the report. To enable it, you need to add the following configuration to your `jest.config.js` file.
+
+In the example below, we're using the [lodash] library to filter out any sensitive information from the environment variables, and we also include the name and version of the package under test, as well as the type of the operating system:
 
 <Tabs groupId="configTab">
   <TabItem value="config" label="Config">
@@ -54,7 +56,7 @@ module.exports = {
 ```
 
   </TabItem>
-  <TabItem value="demo" label="Report">
+  <TabItem value="demo" label="Preview">
     <img src={require('../../img/screenshots/config-environment-01.jpg').default} width={398} alt="Environment" />
   </TabItem>
 </Tabs>

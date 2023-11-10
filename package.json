@@ -101,19 +101,28 @@
   "dependencies": {
     "@noomorph/allure-js-commons": "^2.3.0",
     "ci-info": "^3.8.0",
-    "jest-metadata": "^1.1.1",
+    "jest-metadata": "^1.2.1",
     "pkg-up": "^3.1.0",
     "prettier": "^3.0.3",
-    "remark": "^15.0.1",
     "rehype-highlight": "^7.0.0",
-    "remark-rehype": "^11.0.0",
     "rehype-sanitize": "^6.0.0",
     "rehype-stringify": "^10.0.0",
+    "remark": "^15.0.1",
+    "remark-rehype": "^11.0.0",
     "rimraf": "^4.3.1",
     "strip-ansi": "^6.0.0"
   },
   "peerDependencies": {
-    "jest": ">=27.2.5"
+    "jest": ">=27.2.5",
+    "jest-docblock": ">=27.2.5"
+  },
+  "peerDependenciesMeta": {
+    "jest": {
+      "optional": true
+    },
+    "jest-docblock": {
+      "optional": true
+    }
   },
   "browserslist": [
     "node 16"

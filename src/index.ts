@@ -9,4 +9,16 @@ export { JestAllure2Reporter as default } from './reporter/JestAllure2Reporter';
 export * from './annotations';
 export * from './decorators';
 
+export {
+  Category,
+  Link,
+  LinkType,
+  Parameter,
+  ParameterOptions,
+  ExecutorInfo,
+  Severity,
+  Status,
+  Stage,
+} from '@noomorph/allure-js-commons';
+
 export const allure = realm.runtime as IAllureRuntime;

@@ -35,7 +35,7 @@ and inspect all the necessary details of their execution.
 
 :::tip
 
-If you attempt to retry your tests using methods not typically employed, such as
+If you attempt to retry your tests using unconventional methods, such as
 running `jest` multiple times, you'll need to make sure that you don't delete the
 `allure-results` directory between the runs:
 
@@ -106,7 +106,7 @@ To make the history feature work in an environment where tests can be renamed,
 skipped, or moved around, Allure 2 Framework needs a way to identify tests
 across multiple test runs in the past, present, and future.
 
-The core component behind test identification is `testCaseId` &mdash; a unique identifier
+The property behind test identification is `testCaseId` &mdash; a unique identifier
 generated for each test[^1]. When Allure 2 framework aggregates reports from multiple
 test runs in the past, this identifier is the only way to tell which tests are the same,
 and which are different.

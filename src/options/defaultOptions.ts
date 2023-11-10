@@ -12,10 +12,11 @@ import type {
 } from 'jest-allure2-reporter';
 
 import * as plugins from '../builtin-plugins';
-import { stripStatusDetails } from '../metadata/utils';
 
+import { stripStatusDetails } from './stripStatusDetails';
 import { aggregateLabelCustomizers } from './aggregateLabelCustomizers';
 import { resolvePlugins } from './resolvePlugins';
+import { composeExtractors } from './composeExtractors';
 
 const identity = <T>(context: ExtractorContext<T>) => context.value;
 const last = <T>(context: ExtractorContext<T[]>) => context.value?.at(-1);
@@ -39,27 +40,34 @@ export function defaultOptions(context: PluginContext): ReporterConfig {
       (testCaseMetadata.stop ?? Date.now()) - (testCase.duration ?? 0),
     stop: ({ testCaseMetadata }) => testCaseMetadata.stop ?? Date.now(),
     stage: ({ testCase }) => getTestCaseStage(testCase),
-    status: ({ testCase }) => getTestCaseStatus(testCase),
-    statusDetails: ({ testCase }) => getTestCaseStatusDetails(testCase),
+    status: ({ testCase, testCaseMetadata }) =>
+      testCaseMetadata.status ?? getTestCaseStatus(testCase),
+    statusDetails: ({ testCase, testCaseMetadata }) =>
+      stripStatusDetails(
+        testCaseMetadata.statusDetails ?? getTestCaseStatusDetails(testCase),
+      ),
     attachments: ({ config, testCaseMetadata }) =>
       (testCaseMetadata.attachments ?? []).map(relativizeAttachment, config),
     parameters: ({ testCaseMetadata }) => testCaseMetadata.parameters ?? [],
-    labels: aggregateLabelCustomizers({
-      package: last,
-      testClass: last,
-      testMethod: last,
-      parentSuite: last,
-      suite: ({ testCase, testFile }) =>
-        testCase.ancestorTitles[0] ?? path.basename(testFile.testFilePath),
-      subSuite: ({ testCase }) => testCase.ancestorTitles.slice(1).join(' '),
-      epic: all,
-      feature: all,
-      story: all,
-      thread: ({ testCaseMetadata }) => testCaseMetadata.workerId,
-      severity: last,
-      tag: all,
-      owner: last,
-    })!,
+    labels: composeExtractors(
+      aggregateLabelCustomizers({
+        package: last,
+        testClass: last,
+        testMethod: last,
+        parentSuite: last,
+        suite: ({ testCase, testFile }) =>
+          testCase.ancestorTitles[0] ?? path.basename(testFile.testFilePath),
+        subSuite: ({ testCase }) => testCase.ancestorTitles.slice(1).join(' '),
+        epic: all,
+        feature: all,
+        story: all,
+        thread: ({ testCaseMetadata }) => testCaseMetadata.workerId,
+        severity: last,
+        tag: all,
+        owner: last,
+      }),
+      ({ testCaseMetadata }) => testCaseMetadata.labels ?? [],
+    ),
     links: ({ testCaseMetadata }) => testCaseMetadata.links ?? [],
   };
 
@@ -88,6 +96,7 @@ export function defaultOptions(context: PluginContext): ReporterConfig {
     executor: identity,
     categories: identity,
     plugins: resolvePlugins(context, [
+      plugins.jsdoc,
       plugins.manifest,
       plugins.prettier,
       plugins.remark,
@@ -99,7 +108,6 @@ export function defaultOptions(context: PluginContext): ReporterConfig {
 
 function getTestCaseStatus(testCase: TestCaseResult): Status {
   const hasErrors = testCase.failureMessages?.length > 0;
-  // TODO: Add support for 'broken' status
   switch (testCase.status) {
     case 'passed': {
       return Status.PASSED;

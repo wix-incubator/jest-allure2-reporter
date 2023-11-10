@@ -93,6 +93,14 @@ export class AllureRuntime implements IAllureRuntime {
     }
   }
 
+  status(status?: Status | StatusDetails, statusDetails?: StatusDetails) {
+    this.#metadata.assign(this.#localPath(), { status, statusDetails });
+  }
+
+  statusDetails(statusDetails: StatusDetails) {
+    this.#metadata.assign(this.#localPath(), { statusDetails });
+  }
+
   attachment<T extends AttachmentContent>(
     name: string,
     content: MaybePromise<T>,
@@ -220,10 +228,12 @@ export class AllureRuntime implements IAllureRuntime {
   };
 
   #stopStep = (status: Status, statusDetails?: StatusDetails) => {
+    const existing = this.#metadata.get(this.#localPath(), {} as any);
+
     this.#metadata.assign(this.#localPath(), {
       stage: Stage.FINISHED,
-      status,
-      statusDetails,
+      status: existing.status ?? status,
+      statusDetails: existing.statusDetails ?? statusDetails,
       stop: this.#now(),
     });
 

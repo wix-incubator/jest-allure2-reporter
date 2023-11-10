@@ -1,5 +1,6 @@
 ---
 description: Developer-oriented way to group test results.
+toc_min_heading_level: 3
 ---
 
 import Tabs from '@theme/Tabs';
@@ -24,8 +25,10 @@ It strictly follows `com.example.package.ClassName` naming convention, where:
 * `com.example.package.ClassName` is a **test class**,
 * `shouldAssertAndDoSomething` is a **test method**.
 
-It doesn't map well to JavaScript, hence for the most time you'll be able to utilize
-only two grouping levels: **package** and **test method**. [^1]
+It doesn't map well to JavaScript
+[⁽¹⁾](https://github.com/orgs/allure-framework/discussions/2027).
+Hence, normally you'll be able to utilize only two grouping levels: **package** and **test method**.
+
 
 A couple of feasible options are:
 
@@ -34,12 +37,28 @@ A couple of feasible options are:
 * use `testMethod` to group tests by the full test name
 
 <Tabs groupId="configTab">
-  <TabItem value="demo" label="Report">
+  <TabItem value="config" label="Config">
 
-![Grouping by Story: configuration-based](../../../img/screenshots/config-01-grouping-07.jpg)
+```js title="jest.config.js"
+/** @type {import('@jest/types').Config.InitialOptions} */
+module.exports = {
+  testEnvironment: 'jest-allure2-reporter/environment-node',
+  reporters: [
+    'default',
+    ['jest-allure2-reporter', /** @type {import('jest-allure2-reporter').Options}*/ {
+      labels: {
+        package: ({ manifest }) => manifest.name,
+        // ⚠️ `testClass` won't work due to the aforementioned issue
+        testClass: ({ file }) => file.path,
+        testMethod: ({ test }) => test.fullName,
+      },
+    }],
+  ],
+};
+```
 
   </TabItem>
-  <TabItem value="structure" label="Structure">
+  <TabItem value="demo" label="Preview">
 
 ```plain
 └─ @my-company/my-package
@@ -55,30 +74,9 @@ A couple of feasible options are:
 ```
 
   </TabItem>
-  <TabItem value="config" label="Config">
-
-```js title="jest.config.js"
-/** @type {import('@jest/types').Config.InitialOptions} */
-module.exports = {
-  testEnvironment: 'jest-allure2-reporter/environment-node',
-  reporters: [
-    'default',
-    ['jest-allure2-reporter', /** @type {import('jest-allure2-reporter').Options}*/ {
-      labels: {
-        package: ({ manifest }) => manifest.name,
-        // NOTE: `testClass` won't work due to the aforementioned issue
-        testClass: ({ file }) => file.path,
-        testMethod: ({ test }) => test.fullName,
-      },
-    }],
-  ],
-};
-```
-
-  </TabItem>
 </Tabs>
 
-### Achieving three levels
+## Achieving three levels
 
 :::info Disclaimer
 
@@ -111,4 +109,3 @@ module.exports = {
 This example is a proof of concept to help you understand better how this grouping strategy was supposed to work in the first place.
 It demonstrates that if you map file paths like `src/components/MyComponent.test.js` to pseudo-classes like `src.components.MyComponent`,
 the generated report will recognize these labels and group tests accordingly.
-

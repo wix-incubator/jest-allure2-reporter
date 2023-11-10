@@ -261,8 +261,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
       executable.stage = customize.stage(testStepContext) ?? executable.stage;
       executable.status =
         customize.status(testStepContext) ?? executable.status;
-      executable.statusDetails =
-        customize.statusDetails(testStepContext) ?? executable.statusDetails;
+      executable.statusDetails = customize.statusDetails(testStepContext) ?? {};
 
       executable.wrappedItem.attachments =
         customize.attachments(testStepContext)!;

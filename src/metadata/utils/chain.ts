@@ -20,3 +20,13 @@ export function chain<T extends object, K extends keyof T>(
     return metadatas.flatMap((metadata) => metadata.get(path, [])) as T[K];
   };
 }
+
+export function chainLast<T extends object, K extends keyof T>(
+  sources: (keyof MetadataSquasherContext)[],
+): MetadataSquasherMapping<T, K> {
+  const function_ = chain<T, K>(sources);
+
+  return (context: MetadataSquasherContext, key: K) => {
+    return (function_(context, key) as unknown as any[]).pop();
+  };
+}

@@ -11,7 +11,7 @@ import type { AllureTestCaseMetadata } from 'jest-allure2-reporter';
 
 import { WORKER_ID } from '../constants';
 
-import { chain, extractCode, getStart, getStop } from './utils';
+import { chain, chainLast, extractCode, getStart, getStop } from './utils';
 
 export class MetadataSquasher {
   protected readonly testInvocationConfig: MetadataSquasherConfig<AllureTestCaseMetadata>;
@@ -55,6 +55,8 @@ export class MetadataSquasher {
       ]),
       attachments: chain(['testEntry', 'testInvocation', 'anyInvocation']),
       parameters: chain(['testEntry', 'testInvocation', 'anyInvocation']),
+      status: chainLast(['testInvocation']),
+      statusDetails: chainLast(['anyInvocation', 'testInvocation']),
       labels: chain([
         'globalMetadata',
         'testFile',
@@ -75,14 +77,6 @@ export class MetadataSquasher {
       stop: getStop,
     };
   }
-
-  // private static deepConfig(): MetadataSquasherConfig<AllureTestCaseMetadata> {
-  //   return {
-  //     ...this.flatConfig(),
-  //     attachments: chain(['testEntry', 'testInvocation']),
-  //     parameters: chain(['testEntry', 'testInvocation']),
-  //   };
-  // }
 }
 
 export type MetadataSquasherConfig<T extends object> = {

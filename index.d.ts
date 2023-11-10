@@ -473,6 +473,10 @@ declare module 'jest-allure2-reporter' {
 
     descriptionHtml(value: string): void;
 
+    status(status: Status, statusDetails?: StatusDetails): void;
+
+    statusDetails(statusDetails: StatusDetails): void;
+
     label(name: LabelName | string, value: string): void;
 
     link(name: string, url: string, type?: string): void;
@@ -570,4 +574,17 @@ declare module 'jest-allure2-reporter' {
     name: string,
     arguments_?: ParameterOrString[],
   ): MethodDecorator;
+
+  // Common types
+  export {
+    Category,
+    Link,
+    LinkType,
+    Parameter,
+    ParameterOptions,
+    ExecutorInfo,
+    Severity,
+    Status,
+    Stage,
+  } from '@noomorph/allure-js-commons';
 }

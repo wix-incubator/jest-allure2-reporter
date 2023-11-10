@@ -26,6 +26,7 @@ const jestAllure2ReporterOptions = {
       package: ({ filePath }) => filePath.slice(0, -1).join('.'),
       testClass: ({ filePath }) => filePath.join('.').replace(/\.test\.[jt]s$/, ''),
       testMethod: ({ testCase }) => testCase.fullName,
+      owner: ({ value }) => value ?? 'Unknown',
     },
   },
 };
