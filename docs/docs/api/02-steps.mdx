@@ -26,36 +26,36 @@ The simplest steps to start with are the built-in hooks in Jest: `beforeAll`, `b
 This way, you will see the name and status of each hook in the report.
 
 <Tabs groupId="approach">
-  <TabItem value="jsdoc" label="JSDoc">
+  <TabItem value="docblock" label="Docblocks">
 
 ```js
 beforeAll(async () => {
   /**
-    * Launch the browser for all tests
-    */
+   * Launch the browser for all tests
+   */
 });
 
 beforeEach(async () => {
   /**
-    * Visit the page before the test starts
-    */
+   * Visit the page before the test starts
+   */
 });
 
 afterEach(async () => {
   /**
-    * Take a screenshot after each test
-    */
+   * Take a screenshot after each test
+   */
 });
 
 afterAll(async () => {
   /**
-    * Close the browser after all tests
-    */
+   * Close the browser after all tests
+   */
 });
 ```
 
   </TabItem>
-  <TabItem value="dsl" label="Function">
+  <TabItem value="dsl" label="DSL">
 
 ```js
 import { $Description } from 'jest-allure2-reporter';
@@ -82,7 +82,7 @@ afterAll(async () => {
 ```
 
   </TabItem>
-  <TabItem value="demo" label="Demo">
+  <TabItem value="demo" label="Preview">
 
     TODO: add screenshot
 
@@ -185,16 +185,16 @@ class LoginPageObject {
 ```
 
   </TabItem>
-  <TabItem value="demo" label="Demo">
+  <TabItem value="demo" label="Preview">
 
     TODO: add screenshot
 
   </TabItem>
 </Tabs>
 
-### Instant steps
+### Status override
 
-Sometimes you need to log a step in the middle of the test, for example, to add a screenshot when an exception is thrown. Use `allure.logStep` function for this:
+In some cases, you might want to have control over the step status and its status details. Furthermore, you might want to make the status conditional and programmatic, and here's how:
 
 <Tabs>
   <TabItem value="logStep">
@@ -206,25 +206,29 @@ test('Login test', async () => {
   try {
     // ...
   } catch (error) {
-    allure.logStep('Unexpected error', Status.FAILED, [
-      {
-        name: 'screenshot',
-        content: await page.screenshot({ fullPage: true }),
-        type: 'image/png',
-      },
-    ]);
+    await allure.step('Unexpected error (Recoverable)', () => {
+      await allure.attachment(
+        'screenshot.png',
+        page.screenshot({ fullPage: true },
+      );
 
-    throw error;
+      if (isRecoverable()) {
+        allure.status(Status.SKIPPED, {
+          message: error.message,
+          trace: error.stack,
+        });
+      } else {
+        throw error;
+      }
+    });
   }
 });
 ```
 
   </TabItem>
-  <TabItem value="demo" label="Demo">
+  <TabItem value="demo" label="Preview">
 
     TODO: add screenshot
 
   </TabItem>
 </Tabs>
-
-As you can see, `allure.logStep` has an optional third parameter (TODO) for attachments. This is just one of possible ways to add attachments to the report. See [Attachments](03-attachments.mdx) for more details.

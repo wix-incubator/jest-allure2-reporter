@@ -63,7 +63,7 @@ test('broken test', () => {
 If your test assertions _throw errors directly_ instead of using or extending
 Jest's [`expect` API][expect], they will be reported as &#8288;🟡&nbsp;Broken tests by default.
 
-To report them as 🔴&nbsp;Failed tests, you should disable `brokenStatus`:
+To report them as 🔴&nbsp;Failed tests, you can use a `status` customizer function:
 
 ```js title="jest.config.js"
 module.exports = {
@@ -72,7 +72,7 @@ module.exports = {
     // ...
     ['jest-allure2-reporter', {
 // highlight-next-line
-      brokenStatus: false,
+      status: ({ value }) => value === 'broken' ? 'failed' : value,
     }],
   ],
 };

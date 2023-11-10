@@ -1,12 +1,19 @@
 import path from 'node:path';
 
-import type { Metadata } from 'jest-metadata';
 import type {
   LabelName,
   ParameterOptions,
   StatusDetails,
 } from '@noomorph/allure-js-commons';
 import { Stage, Status } from '@noomorph/allure-js-commons';
+import type { Metadata } from 'jest-metadata';
+import type {
+  AllureTestStepMetadata,
+  AttachmentContent,
+  AttachmentOptions,
+  IAllureRuntime,
+  ParameterOrString,
+} from 'jest-allure2-reporter';
 
 import {
   CURRENT_STEP,
@@ -16,25 +23,15 @@ import {
   LINKS,
   PREFIX,
 } from '../constants';
-import type { AllureTestStepMetadata } from '../metadata';
 import { isPromiseLike } from '../utils/isPromiseLike';
 import { inferMimeType } from '../utils/inferMimeType';
 import { hijackFunction } from '../utils/hijackFunction';
-import type {
-  AttachmentContent,
-  Function_,
-  MaybePromise,
-} from '../utils/types';
+import type { Function_, MaybePromise } from '../utils/types';
 import { processMaybePromise } from '../utils/processMaybePromise';
 import { wrapFunction } from '../utils/wrapFunction';
 import { formatString } from '../utils/formatString';
 
 import type { IAttachmentsHandler } from './AttachmentsHandler';
-import type {
-  AttachmentOptions,
-  IAllureRuntime,
-  ParameterOrString,
-} from './IAllureRuntime';
 
 export type AllureRuntimeConfig = {
   attachmentsHandler: IAttachmentsHandler;
@@ -94,6 +91,14 @@ export class AllureRuntime implements IAllureRuntime {
     for (const [name, value] of Object.entries(parameters)) {
       this.parameter(name, value);
     }
+  }
+
+  status(status?: Status | StatusDetails, statusDetails?: StatusDetails) {
+    this.#metadata.assign(this.#localPath(), { status, statusDetails });
+  }
+
+  statusDetails(statusDetails: StatusDetails) {
+    this.#metadata.assign(this.#localPath(), { statusDetails });
   }
 
   attachment<T extends AttachmentContent>(
@@ -223,10 +228,12 @@ export class AllureRuntime implements IAllureRuntime {
   };
 
   #stopStep = (status: Status, statusDetails?: StatusDetails) => {
+    const existing = this.#metadata.get(this.#localPath(), {} as any);
+
     this.#metadata.assign(this.#localPath(), {
       stage: Stage.FINISHED,
-      status,
-      statusDetails,
+      status: existing.status ?? status,
+      statusDetails: existing.statusDetails ?? statusDetails,
       stop: this.#now(),
     });
 

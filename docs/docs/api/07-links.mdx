@@ -30,7 +30,7 @@ There are two ways to add links to your test cases:
 You can link an issue in your issue tracker to a test case.
 
 <Tabs groupId="approach">
-  <TabItem value="jsdoc" label="JSDoc">
+  <TabItem value="docblock" label="Docblocks">
 
 ```js
 it('should validate non-ASCII passwords', () => {
@@ -43,7 +43,7 @@ it('should validate non-ASCII passwords', () => {
 });
 ```
   </TabItem>
-  <TabItem value="dsl" label="Function">
+  <TabItem value="dsl" label="DSL">
 
 ```js
 import { $Issue } from 'jest-allure2-reporter';
@@ -55,7 +55,7 @@ it('should validate non-ASCII passwords', () => {
 });
 ```
   </TabItem>
-  <TabItem value="demo" label="Demo">
+  <TabItem value="demo" label="Preview">
 
     TODO: add screenshot
 
@@ -67,7 +67,7 @@ it('should validate non-ASCII passwords', () => {
 You can link a test case in your Test Management System (TMS) to a test case as shown below.
 
 <Tabs groupId="approach">
-  <TabItem value="jsdoc" label="JSDoc">
+  <TabItem value="docblock" label="Docblocks">
 
 ```js
 it('should be connected to TMS', () => {
@@ -79,7 +79,7 @@ it('should be connected to TMS', () => {
 });
 ```
   </TabItem>
-  <TabItem value="dsl" label="Function">
+  <TabItem value="dsl" label="DSL">
 
 ```js
 import { $TmsLink } from 'jest-allure2-reporter';
@@ -90,7 +90,7 @@ it('should be connected to TMS', () => {
 });
 ```
   </TabItem>
-  <TabItem value="demo" label="Demo">
+  <TabItem value="demo" label="Preview">
 
     TODO: add screenshot
 
@@ -102,7 +102,7 @@ it('should be connected to TMS', () => {
 You can link an arbitrary URL to a test case:
 
 <Tabs groupId="approach">
-  <TabItem value="jsdoc" label="JSDoc">
+  <TabItem value="docblock" label="Docblocks">
 
 ```js
 it('should demonstrate how the links work', () => {
@@ -114,7 +114,7 @@ it('should demonstrate how the links work', () => {
 });
 ```
   </TabItem>
-  <TabItem value="dsl" label="Function">
+  <TabItem value="dsl" label="DSL">
 
 ```js
 import { $Link } from 'jest-allure2-reporter';
@@ -125,7 +125,7 @@ it('should demonstrate how the links work', () => {
 });
 ```
   </TabItem>
-  <TabItem value="demo" label="Demo">
+  <TabItem value="demo" label="Preview">
 
     TODO: add screenshot
 
@@ -135,7 +135,7 @@ it('should demonstrate how the links work', () => {
 Advanced users can also specify a custom link type and [configure the URL pattern](#configuration) for it.
 
 <Tabs groupId="approach">
-  <TabItem value="jsdoc" label="JSDoc">
+  <TabItem value="docblock" label="Docblocks">
 
 ```js
 it('should demonstrate how the links work', () => {
@@ -147,7 +147,7 @@ it('should demonstrate how the links work', () => {
 });
 ```
   </TabItem>
-  <TabItem value="dsl" label="Function">
+  <TabItem value="dsl" label="DSL">
 
 ```js
 import { $Link } from 'jest-allure2-reporter';
@@ -158,7 +158,7 @@ it('should demonstrate how the links work', () => {
 });
 ```
   </TabItem>
-  <TabItem value="demo" label="Demo">
+  <TabItem value="demo" label="Preview">
 
     TODO: add screenshot
 

@@ -31,7 +31,7 @@ The owner of a test suite is the person who is responsible for the test suite an
 Here is how you can associate an entire test file with an owner:
 
 <Tabs groupId="approach">
-  <TabItem value="jsdoc" label="JSDoc">
+  <TabItem value="docblock" label="Docblocks">
 
 ```js
 /**
@@ -52,7 +52,7 @@ describe('Sanity: Dashboard', () => {
 ```
 
   </TabItem>
-  <TabItem value="dsl" label="Function">
+  <TabItem value="dsl" label="DSL">
 
 ```js
 import { allure } from 'jest-allure2-reporter';
@@ -78,7 +78,7 @@ describe('Sanity: Dashboard', () => {
 Here is how you can associate a selected test suite with an owner:
 
 <Tabs groupId="approach">
-  <TabItem value="jsdoc" label="JSDoc">
+  <TabItem value="docblock" label="Docblocks">
 
 ```js
 describe('Sanity: Login flow', () => {
@@ -95,7 +95,7 @@ describe('Sanity: Login flow', () => {
 Please note that you have to put the JSDoc comment inside the test suite function body.
 
 </TabItem>
-  <TabItem value="dsl" label="Function">
+  <TabItem value="dsl" label="DSL">
 
 ```js
 import { $Owner } from 'jest-allure2-reporter';
@@ -114,7 +114,7 @@ describe('Sanity: Login flow', () => {
 You can also assign an owner for each test case individually.
 
 <Tabs groupId="approach">
-  <TabItem value="jsdoc" label="JSDoc">
+  <TabItem value="docblock" label="Docblocks">
 
 ```js
 it('should login with valid credentials', () => {
@@ -129,7 +129,7 @@ it('should login with valid credentials', () => {
 Please note that you have to put the JSDoc comment inside the test function body.
 
   </TabItem>
-  <TabItem value="dsl" label="Function">
+  <TabItem value="dsl" label="DSL">
 
     ```js
     $Owner('John Doe <john.doe@example.com>');

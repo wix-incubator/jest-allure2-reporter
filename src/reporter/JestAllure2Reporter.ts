@@ -6,34 +6,36 @@ import type {
   ReporterOnStartOptions,
   Test,
   TestCaseResult,
+  TestContext,
   TestResult,
 } from '@jest/reporters';
 import { state } from 'jest-metadata';
 import { JestMetadataReporter, query } from 'jest-metadata/reporter';
-import pkgUp from 'pkg-up';
 import rimraf from 'rimraf';
 import type { ExecutableItemWrapper } from '@noomorph/allure-js-commons';
 import { AllureRuntime } from '@noomorph/allure-js-commons';
-import type { TestContext } from '@jest/reporters';
-
 import type {
+  AllureTestStepMetadata,
   GlobalExtractorContext,
+  Plugin,
+  PluginHookName,
   ReporterConfig,
   ReporterOptions,
   ResolvedTestStepCustomizer,
   SharedReporterConfig,
   TestCaseExtractorContext,
-} from '../options';
+  TestStepExtractorContext,
+  TestFileExtractorContext,
+} from 'jest-allure2-reporter';
+
 import { resolveOptions } from '../options';
-import type { AllureTestStepMetadata } from '../metadata';
 import { MetadataSquasher, StepExtractor } from '../metadata';
 import { SHARED_CONFIG, STOP, WORKER_ID } from '../constants';
-import attempt from '../utils/attempt';
-import isError from '../utils/isError';
 import { ThreadService } from '../utils/ThreadService';
 import md5 from '../utils/md5';
 
 export class JestAllure2Reporter extends JestMetadataReporter {
+  private _plugins: readonly Plugin[] = [];
   private readonly _globalConfig: Config.GlobalConfig;
   private readonly _config: ReporterConfig;
   private readonly _threadService = new ThreadService();
@@ -42,7 +44,8 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     super(globalConfig);
 
     this._globalConfig = globalConfig;
-    this._config = resolveOptions(options);
+    const pluginContext = { globalConfig };
+    this._config = resolveOptions(pluginContext, options);
 
     state.set(SHARED_CONFIG, {
       resultsDir: this._config.resultsDir,
@@ -55,6 +58,8 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     results: AggregatedResult,
     options: ReporterOnStartOptions,
   ): Promise<void> {
+    this._plugins = await this._config.plugins;
+
     await super.onRunStart(results, options);
 
     if (this._config.overwrite) {
@@ -100,22 +105,13 @@ export class JestAllure2Reporter extends JestMetadataReporter {
       resultsDir: config.resultsDir,
     });
 
-    const { rootDir } = this._globalConfig;
-    const packageJsonPath = await pkgUp({ cwd: rootDir });
-    let manifest: any = packageJsonPath
-      ? attempt(() => require(packageJsonPath))
-      : null;
-
-    if (isError(manifest)) {
-      manifest = null;
-    }
-
     const globalContext: GlobalExtractorContext<any> = {
       globalConfig: this._globalConfig,
       config,
-      manifest,
       value: undefined,
     };
+
+    await this._callPlugins('globalContext', globalContext);
 
     const environment = config.environment(globalContext);
     if (environment) {
@@ -136,6 +132,16 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     const stepper = new StepExtractor();
 
     for (const testResult of results.testResults) {
+      const testFileContext: TestFileExtractorContext<any> = {
+        ...globalContext,
+        filePath: path
+          .relative(globalContext.globalConfig.rootDir, testResult.testFilePath)
+          .split(path.sep),
+        testFile: testResult,
+      };
+
+      await this._callPlugins('testFileContext', testFileContext);
+
       for (const testCaseResult of testResult.testResults) {
         const allInvocations =
           query.testCaseResult(testCaseResult).invocations ?? [];
@@ -145,17 +151,12 @@ export class JestAllure2Reporter extends JestMetadataReporter {
             testInvocationMetadata,
           );
           const testCaseContext: TestCaseExtractorContext<any> = {
-            ...globalContext,
-            filePath: path
-              .relative(
-                globalContext.globalConfig.rootDir,
-                testResult.testFilePath,
-              )
-              .split(path.sep),
-            testFile: testResult,
+            ...testFileContext,
             testCase: testCaseResult,
             testCaseMetadata,
           };
+
+          await this._callPlugins('testCaseContext', testCaseContext);
 
           const invocationIndex = allInvocations.indexOf(
             testInvocationMetadata,
@@ -170,9 +171,22 @@ export class JestAllure2Reporter extends JestMetadataReporter {
             config.testCase.historyId(testCaseContext)!,
           );
           allureTest.fullName = config.testCase.fullName(testCaseContext)!;
-          allureTest.description = config.testCase.description(testCaseContext);
-          allureTest.descriptionHtml =
+
+          const description = config.testCase.description(testCaseContext);
+          const descriptionHtml =
             config.testCase.descriptionHtml(testCaseContext);
+
+          if (
+            !descriptionHtml &&
+            description &&
+            testCaseContext.processMarkdown
+          ) {
+            const newHTML = await testCaseContext.processMarkdown(description);
+            allureTest.descriptionHtml = newHTML;
+          } else {
+            allureTest.description = description;
+            allureTest.descriptionHtml = descriptionHtml;
+          }
 
           allureTest.status = config.testCase.status(testCaseContext)!;
           allureTest.statusDetails =
@@ -209,7 +223,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
                 stepper.extractFromInvocation(invocationMetadata);
               if (testStepMetadata) {
                 const executable = createExecutable();
-                this._createStep(
+                await this._createStep(
                   testCaseContext,
                   executable,
                   testStepMetadata,
@@ -226,17 +240,19 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     }
   }
 
-  _createStep(
+  private async _createStep(
     testCaseContext: TestCaseExtractorContext<any>,
     executable: ExecutableItemWrapper,
-    testStep: AllureTestStepMetadata,
+    testStepMetadata: AllureTestStepMetadata,
     isTest: boolean,
   ) {
     const customize: ResolvedTestStepCustomizer = this._config!.testStep;
     const testStepContext = {
       ...testCaseContext,
-      testStep,
-    };
+      testStepMetadata,
+    } as TestStepExtractorContext<any>;
+
+    await this._callPlugins('testStepContext', testStepContext);
 
     if (!isTest) {
       executable.name = customize.name(testStepContext) ?? executable.name;
@@ -245,8 +261,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
       executable.stage = customize.stage(testStepContext) ?? executable.stage;
       executable.status =
         customize.status(testStepContext) ?? executable.status;
-      executable.statusDetails =
-        customize.statusDetails(testStepContext) ?? executable.statusDetails;
+      executable.statusDetails = customize.statusDetails(testStepContext) ?? {};
 
       executable.wrappedItem.attachments =
         customize.attachments(testStepContext)!;
@@ -254,9 +269,9 @@ export class JestAllure2Reporter extends JestMetadataReporter {
         customize.parameters(testStepContext)!;
     }
 
-    if (testStep.steps) {
-      for (const innerStep of testStep.steps) {
-        this._createStep(
+    if (testStepMetadata.steps) {
+      for (const innerStep of testStepMetadata.steps) {
+        await this._createStep(
           testCaseContext,
           executable.startStep('', 0),
           innerStep,
@@ -264,5 +279,13 @@ export class JestAllure2Reporter extends JestMetadataReporter {
         );
       }
     }
+  }
+
+  async _callPlugins(method: PluginHookName, context: any) {
+    await Promise.all(
+      this._plugins.map((p) => {
+        return p[method]?.(context);
+      }),
+    );
   }
 }

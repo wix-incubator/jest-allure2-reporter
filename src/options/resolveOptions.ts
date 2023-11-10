@@ -1,11 +1,15 @@
-import type { ReporterOptions, ReporterConfig } from './ReporterOptions';
+import type {
+  PluginContext,
+  ReporterOptions,
+  ReporterConfig,
+} from 'jest-allure2-reporter';
+
 import { composeOptions } from './composeOptions';
 import { defaultOptions } from './defaultOptions';
 
-export * from './ReporterOptions';
-
 export function resolveOptions(
+  context: PluginContext,
   options?: ReporterOptions | undefined,
 ): ReporterConfig {
-  return composeOptions(defaultOptions(), options);
+  return composeOptions(context, defaultOptions(context), options);
 }

@@ -1,3 +1,4 @@
+import type { PluginContext } from 'jest-allure2-reporter';
 import type {
   ReporterOptions,
   ReporterConfig,
@@ -5,13 +6,17 @@ import type {
   TestCaseCustomizer,
   TestStepCustomizer,
   AttachmentsOptions,
-} from './ReporterOptions';
+} from 'jest-allure2-reporter';
+
 import { aggregateLabelCustomizers } from './aggregateLabelCustomizers';
 import { aggregateLinkCustomizers } from './aggregateLinkCustomizers';
 import { composeExtractors } from './composeExtractors';
 import { asExtractor } from './asExtractor';
+import { resolvePlugins } from './resolvePlugins';
+import { composePlugins } from './composePlugins';
 
 export function composeOptions(
+  context: PluginContext,
   base: ReporterConfig,
   custom: ReporterOptions | undefined,
 ): ReporterConfig {
@@ -38,6 +43,10 @@ export function composeOptions(
     categories: composeExtractors(
       asExtractor(custom.categories),
       base.categories,
+    ),
+    plugins: composePlugins(
+      base.plugins,
+      resolvePlugins(context, custom.plugins),
     ),
   };
 }

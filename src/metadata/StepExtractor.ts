@@ -3,10 +3,9 @@ import type {
   HookInvocationMetadata,
   TestFnInvocationMetadata,
 } from 'jest-metadata';
+import type { AllureTestStepMetadata } from 'jest-allure2-reporter';
 
 import { HIDDEN, PREFIX } from '../constants';
-
-import type { AllureTestStepMetadata } from './metadata';
 
 export class StepExtractor {
   public extractFromInvocation(

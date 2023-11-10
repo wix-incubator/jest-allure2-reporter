@@ -19,24 +19,13 @@ This article is just a draft. It is not yet complete, and you should not read it
 
 There are a few things to know about Jest failures and how they are reported to Allure.
 
-## Defect categories
+## Early failures
 
-## `beforeAll` and `afterAll` hooks
+If your test environment setup fails, Jest will not run any tests. If your test file has syntax errors, Jest even won't be able to understand which tests are defined in the file. Therefore, the only way to report these failures is to report them as a test case failure.
 
-Jest's test runner lifecycle is not similar to Java testing frameworks, therefore some concepts do not translate well. Here are some things to keep in mind:
-
-* a failure in a `beforeAll` hook will be reported as a test failure for all tests in the suite. (TODO: check if this is true for `afterAll` as well)
-  ```
-  TODO: add a screenshot
-  ```
-* a `beforeAll` hook is not considered a test, so it will not be reported as a test in Allure. The only sane place to report it is as the first step of the first test in the suite.
-  ```
-  TODO: add a screenshot
-  ```
-* even this approach is not perfect, especially when you use `jest.retryTimes()` – if the first test is retried, the `beforeAll` step will be reported only once, whereas the test will be reported multiple times in "Retries" section.
-  ```
-  TODO: add a screenshot
-  ```
+```
+TODO: add a screenshot
+```
 
 ## `--bail` option
 
@@ -46,12 +35,3 @@ If you use the `--bail` option, Jest will stop running tests after the first fai
 TODO: add a screenshot
 ```
 
-## Early failures
-
-If your test environment setup fails, Jest will not run any tests. If your test file has syntax errors, Jest even won't be able to understand which tests are defined in the file. Therefore, the only way to report these failures is to report them as a test case failure.
-
-```
-TODO: add a screenshot
-```
-
-TODO: how to configure this?

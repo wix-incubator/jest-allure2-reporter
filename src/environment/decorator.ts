@@ -5,13 +5,14 @@ import type {
 } from 'jest-metadata/environment-decorator';
 import { state } from 'jest-metadata';
 import { Stage, Status } from '@noomorph/allure-js-commons';
-
 import type {
   AllureTestCaseMetadata,
   AllureTestStepMetadata,
-} from '../metadata';
+} from 'jest-allure2-reporter';
+
 import { PREFIX, WORKER_ID } from '../constants';
 import realm from '../realms';
+import { splitDocblock } from '../utils/splitDocblock';
 
 export function WithAllure2<E extends WithEmitter>(
   JestEnvironmentClass: new (...arguments_: any[]) => E,
@@ -49,26 +50,30 @@ export function WithAllure2<E extends WithEmitter>(
       #addHook({
         event,
       }: ForwardedCircusEvent<Circus.Event & { name: 'add_hook' }>) {
-        const sourceCode = event.fn.toString();
-        const hidden = sourceCode.includes(
+        const code = event.fn.toString();
+        const hidden = code.includes(
           "during setup, this cannot be null (and it's fine to explode if it is)",
         );
 
         const metadata = {
-          code: [sourceCode],
-        } as AllureTestStepMetadata;
+          code,
+        } as Record<string, unknown>;
+
         if (hidden) {
           delete metadata.code;
           metadata.hidden = true;
         }
+
         state.currentMetadata.assign(PREFIX, metadata);
       }
 
       #addTest({
         event,
       }: ForwardedCircusEvent<Circus.Event & { name: 'add_test' }>) {
-        const metadata: AllureTestCaseMetadata = {
-          code: [event.fn.toString()],
+        const [docblock, code] = splitDocblock(event.fn.toString());
+        const metadata: Record<string, unknown> = {
+          code,
+          docblock,
         };
 
         state.currentMetadata.assign(PREFIX, metadata);
@@ -93,13 +98,14 @@ export function WithAllure2<E extends WithEmitter>(
           stop: Date.now(),
           stage: Stage.INTERRUPTED,
           status: Status.FAILED,
-          statusDetails: event.error
-            ? {
-                message: event.error.message,
-                trace: event.error.stack,
-              }
-            : {},
         };
+
+        if (event.error) {
+          metadata.statusDetails = {
+            message: event.error.message,
+            trace: event.error.stack,
+          };
+        }
 
         state.currentMetadata.assign(PREFIX, metadata);
       }
@@ -114,7 +120,6 @@ export function WithAllure2<E extends WithEmitter>(
           stop: Date.now(),
           stage: Stage.FINISHED,
           status: Status.PASSED,
-          statusDetails: {},
         };
 
         state.currentMetadata.assign(PREFIX, metadata);
@@ -133,16 +138,29 @@ export function WithAllure2<E extends WithEmitter>(
       #testDone({
         event,
       }: ForwardedCircusEvent<Circus.Event & { name: 'test_done' }>) {
+        const hasErrors = event.test.errors.length > 0;
+        const errorStatus = event.test.errors.some((errors) => {
+          return Array.isArray(errors)
+            ? errors.some(isMatcherError)
+            : isMatcherError(errors);
+        })
+          ? Status.FAILED
+          : Status.BROKEN;
+
         const metadata: AllureTestCaseMetadata = {
           stop: Date.now(),
-          stage: event.test.failing ? Stage.INTERRUPTED : Stage.FINISHED,
-          status: event.test.failing ? Status.FAILED : Status.PASSED,
+          stage: hasErrors ? Stage.INTERRUPTED : Stage.FINISHED,
+          status: hasErrors ? errorStatus : Status.PASSED,
         };
 
         state.currentMetadata.assign(PREFIX, metadata);
       }
     },
   }[compositeName] as unknown as new (...arguments_: any[]) => E;
+}
+
+function isMatcherError(error: any) {
+  return Boolean(error?.matcherResult);
 }
 
 /**

@@ -1,10 +1,9 @@
 import type { Link } from '@noomorph/allure-js-commons';
-
 import type {
   LinksCustomizer,
   TestCaseExtractor,
   TestCaseExtractorContext,
-} from './ReporterOptions';
+} from 'jest-allure2-reporter';
 
 export function aggregateLinkCustomizers(
   links: LinksCustomizer | undefined,

@@ -1,13 +1,17 @@
+import type { ParameterOrString } from 'jest-allure2-reporter';
+
 import realm from '../realms';
-import type { ParameterOrString } from '../runtime';
 
 const allure = realm.runtime;
 
-export function Step(name: string, arguments_?: ParameterOrString[]) {
+export function Step(
+  name: string,
+  arguments_?: ParameterOrString[],
+): MethodDecorator {
   return function (
     _target: object,
-    _propertyName: string,
-    descriptor: TypedPropertyDescriptor<(...arguments_: any[]) => Promise<any>>,
+    _propertyName: string | symbol,
+    descriptor: TypedPropertyDescriptor<any>,
   ) {
     descriptor.value = arguments_
       ? allure.createStep(name, arguments_, descriptor.value!)

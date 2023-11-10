@@ -5,7 +5,7 @@ description: QA and Product Manager perspective on test results.
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# By Defect Category
+# By Category
 
 :::caution
 
@@ -18,18 +18,25 @@ Please use GitHub docs for the latest stable version, `1.x.x`.
 
 One of the most important things when your builds start failing is to understand _what exactly is broken_.
 
-By defining defect categories, you can easily distinguish between different types of errors and failures.
+By defining **test result categories**, you can easily distinguish between different types of errors and failures.
 
-There are two built-in defect categories:
+There are two built-in categories for test results:
 
 <dl>
-  <dt><strong>Product defect</strong></dt>
+  <dt>
+    <b>🔴 &nbsp;Product defect</b>
+  </dt>
   <dd>A failed Jest assertion, e.g. <code>expect(countOfPosts).toBe(1)</code>.</dd>
-  <dt><strong>Test defect</strong></dt>
-  <dd>A failed test, e.g. <code>throw new TypeError('Cannot read property 'name' of null')</code>.</dd>
+  <dt>
+    <b>🟡 &nbsp;Test defect</b>
+  </dt>
+  <dd>A broken test, e.g. <code>TypeError: Cannot read property 'foo' of undefined</code>, timeout or syntax errors.</dd>
 </dl>
 
-We recommend to invest some time into configuring the reporter to distinguish between different types of product defects, especially if you have end-to-end tests that are prone to flakiness, e.g.:
+This doesn't mean that you can't have categories for 🟢 _passed_ or ⚪ _skipped_ tests, but usually it makes more sense
+to  develop a comprehensive taxonomy for various failure types.
+
+For example, you can also distinguish between **Visual regression**, **Timeout error** and as many others as you need.
 
 ```js title="jest.config.js"
 /**
@@ -63,3 +70,26 @@ module.exports = {
   ],
 };
 ```
+
+:::tip
+
+If you need to overwrite the default categories, use a function customizer instead of an array:
+
+```js title="jest.config.js"
+module.exports = {
+  // ... your jest config
+  reporters: [
+    'default',
+    ['jest-allure2-reporter',
+      /** @type {import('jest-allure2-reporter').JestAllure2ReporterOptions} */
+      {
+// highlight-start
+        categories: () => [/* ... */],
+// highlight-end
+      }
+    ],
+  ],
+};
+```
+
+:::

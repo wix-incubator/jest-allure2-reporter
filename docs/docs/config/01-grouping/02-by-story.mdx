@@ -47,7 +47,7 @@ Before you start using this grouping option, you need to decide how exactly you 
 * via [configuration](#configuration-api) – a quick option to enable it all at once, based on general rules;
 * via _mixing these approaches_ – a compromise between the two, where the configuration serves as a fallback for missing annotations.
 
-## Annotations API
+## Using annotations
 
 The [annotation-based approach](../../api/08-labels.mdx) gives you a fine-grained control over the names of your epic, feature and story labels, but it requires you to add annotations to _every and each test case_ (sic!) which can be tedious.
 
@@ -56,30 +56,28 @@ Both them deal with the same functionality – authentication and restoring forg
 Hence, it would make sense to group both client and server tests under the same epic named **Authentication**, and continue grouping them by features and stories regardless of the application layer.
 
 <Tabs groupId="configTab">
-  <TabItem value="demo" label="Report">
+  <TabItem value="docblock" label="Docblocks">
 
-![Grouping by Story: annotation-based](../../../img/screenshots/config-01-grouping-06.jpg)
+```js title="login.test.js"
+/**
+ * @epic Authentication
+ * @feature Login screen
+ */
+describe('Login controller', () => {
+  it('should validate e-mail', () => {
+    /** @story Validation */
+    // ...
+  });
 
-  </TabItem>
-  <TabItem value="structure" label="Structure">
-
-```plain
-└─ Authentication
-   ├─ Login screen
-   │  ├─ should validate e-mail on client
-   │  ├─ should validate e-mail on server
-   │  ├─ should display login form on client
-   │  ├─ should return 401 if user is not found
-   │  └─ should return 401 if password is incorrect
-   └─ Forgot password screen
-      ├─ should validate e-mail on client
-      ├─ should validate e-mail on server
-      ├─ should return 401 if user is not found
-      └─ should return 401 if password is incorrect
+  it('should return 401 if user is not found', () => {
+    /** @story Validation */
+    // ...
+  });
+});
 ```
 
   </TabItem>
-  <TabItem value="config" label="Code">
+  <TabItem value="dsl" label="DSL">
 
 ```js title="login.test.js"
 import { $Epic, $Feature, $Story } from 'jest-allure2-reporter';
@@ -87,16 +85,37 @@ import { $Epic, $Feature, $Story } from 'jest-allure2-reporter';
 $Epic('Authentication');
 $Feature('Login screen');
 describe('Login controller', () => {
-  $Story('should validate e-mail on server');
+  $Story('Validation');
   it('should validate e-mail', () => {
     // ...
   });
 
-  $Story('should return 401 if user is not found');
+  $Story('Validation');
   it('should return 401 if user is not found', () => {
     // ...
   });
 });
+```
+
+  </TabItem>
+  <TabItem value="demo" label="Preview">
+
+```plain
+└─ Authentication
+   ├─ Login screen
+   │  ├─ General
+   │  │  ├─ should display login form on client
+   │  ├─ Validation
+   │  │  ├─ should validate e-mail on client
+   │  │  ├─ should validate e-mail on server
+   │  │  ├─ should return 401 if user is not found
+   │  │  └─ should return 401 if password is incorrect
+   └─ Forgot password screen
+      └─ Validation
+         ├─ should validate e-mail on client
+         ├─ should validate e-mail on server
+         ├─ should return 401 if user is not found
+         └─ should return 401 if password is incorrect
 ```
 
   </TabItem>
@@ -115,20 +134,24 @@ module.exports = {
   testEnvironment: 'jest-allure2-reporter/environment-node',
   reporters: [
     'default',
-    ['jest-allure2-reporter', /** @type {import('jest-allure2-reporter').Options}*/ {
-      labels: {
-        epic: ({ value }) => value ?? 'Uncategorized',
-        feature: ({ value }) => value ?? 'Untitled feature',
-        story: ({ value }) => value ?? 'Untitled story',
+    [
+      'jest-allure2-reporter',
+      /** @type {import('jest-allure2-reporter').Options} */
+      {
+        labels: {
+          epic: ({ value }) => value ?? 'Uncategorized',
+          feature: ({ value }) => value ?? 'Untitled feature',
+          story: ({ value }) => value ?? 'Untitled story',
+        },
       },
-    }],
+    ],
   ],
 };
 ```
 
 :::
 
-## Configuration API
+## Using configuration
 
 The **configuration-based approach** allows you to group test cases based on the available attributes like the test file path, the ancestor describe blocks and any
 other contextually available information.
@@ -145,12 +168,27 @@ Let's explore a simple example, where we'll map:
 * **story** to the lowest-level describe block
 
 <Tabs groupId="configTab">
-  <TabItem value="demo" label="Report">
+  <TabItem value="config" label="Config">
 
-![Grouping by Story: configuration-based](../../../img/screenshots/config-01-grouping-07.jpg)
+```js title="jest.config.js"
+/** @type {import('@jest/types').Config.InitialOptions} */
+module.exports = {
+  testEnvironment: 'jest-allure2-reporter/environment-node',
+  reporters: [
+    'default',
+    ['jest-allure2-reporter', /** @type {import('jest-allure2-reporter').Options}*/ {
+      labels: {
+        epic: ({ testCase }) => testCase.ancestorTitles.at(0) ?? '(uncategorized)',
+        feature: ({ testCase }) => testCase.ancestorTitles.slice(1, -1).join(' > ') || '(uncategorized)',
+        story: ({ testCase }) => testCase.ancestorTitles.slice(2).at(-1) ?? '(uncategorized)',
+      },
+    }],
+  ],
+};
+```
 
   </TabItem>
-  <TabItem value="structure" label="Structure">
+  <TabItem value="demo" label="Preview">
 
 ```plain
 ├─ Login screen
@@ -173,26 +211,6 @@ Let's explore a simple example, where we'll map:
 ```
 
   </TabItem>
-  <TabItem value="config" label="Config">
-
-```js title="jest.config.js"
-/** @type {import('@jest/types').Config.InitialOptions} */
-module.exports = {
-  testEnvironment: 'jest-allure2-reporter/environment-node',
-  reporters: [
-    'default',
-    ['jest-allure2-reporter', /** @type {import('jest-allure2-reporter').Options}*/ {
-      labels: {
-        epic: ({ testCase }) => testCase.ancestorTitles.at(0) ?? '(uncategorized)',
-        feature: ({ testCase }) => testCase.ancestorTitles.slice(1, -1).join(' > ') ?? '(uncategorized)',
-        story: ({ testCase }) => testCase.ancestorTitles.at(-1) ?? '(uncategorized)',
-      },
-    }],
-  ],
-};
-```
-
-  </TabItem>
 </Tabs>
 
 ## Many-to-many mapping
@@ -201,7 +219,7 @@ It is worth mentioning that Allure allows you to map a test case to multiple epi
 you should use this feature with caution, as it may lead to a very complex report structure.
 
 <Tabs groupId="approach">
-  <TabItem value="jsdoc" label="JSDoc">
+  <TabItem value="docblock" label="Docblocks">
 
 ```js title="login.test.js"
 it('should validate e-mail', () => {
@@ -219,7 +237,7 @@ it('should validate e-mail', () => {
 });
 ```
   </TabItem>
-  <TabItem value="dsl" label="Function">
+  <TabItem value="dsl" label="DSL">
 
 ```js title="login.test.js"
 $Epic('Authentication');

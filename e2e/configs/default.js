@@ -5,6 +5,14 @@ const PRESET = process.env.ALLURE_PRESET ?? 'default';
 /** @type {import('jest-allure2-reporter').ReporterOptions} */
 const jestAllure2ReporterOptions = {
   resultsDir: `allure-results/${PRESET}`,
+  environment: (context) => {
+    return ({
+      'version.node': process.version,
+      'version.jest': require('jest/package.json').version,
+      'package.name': context.manifest.name,
+      'package.version': context.manifest.version,
+    });
+  },
   testCase: {
     name: ({ testCase }) =>
       [...testCase.ancestorTitles, testCase.title].join(' » '),
@@ -18,6 +26,7 @@ const jestAllure2ReporterOptions = {
       package: ({ filePath }) => filePath.slice(0, -1).join('.'),
       testClass: ({ filePath }) => filePath.join('.').replace(/\.test\.[jt]s$/, ''),
       testMethod: ({ testCase }) => testCase.fullName,
+      owner: ({ value }) => value ?? 'Unknown',
     },
   },
 };
