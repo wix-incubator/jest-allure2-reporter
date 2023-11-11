@@ -101,10 +101,10 @@ export function WithAllure2<E extends WithEmitter>(
         };
 
         if (event.error) {
-          metadata.statusDetails = {
-            message: event.error.message,
-            trace: event.error.stack,
-          };
+          const message = event.error.message ?? `${event.error}`;
+          const trace = event.error.stack;
+
+          metadata.statusDetails = { message, trace };
         }
 
         state.currentMetadata.assign(PREFIX, metadata);
