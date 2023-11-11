@@ -17,6 +17,7 @@ import { stripStatusDetails } from './stripStatusDetails';
 import { aggregateLabelCustomizers } from './aggregateLabelCustomizers';
 import { resolvePlugins } from './resolvePlugins';
 import { composeExtractors } from './composeExtractors';
+import { DEFAULT_CATEGORIES } from './defaultCategories';
 
 const identity = <T>(context: ExtractorContext<T>) => context.value;
 const last = <T>(context: ExtractorContext<T[]>) => context.value?.at(-1);
@@ -94,7 +95,7 @@ export function defaultOptions(context: PluginContext): ReporterConfig {
     testStep,
     environment: identity,
     executor: identity,
-    categories: identity,
+    categories: () => DEFAULT_CATEGORIES,
     plugins: resolvePlugins(context, [
       plugins.jsdoc,
       plugins.manifest,

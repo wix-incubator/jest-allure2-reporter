@@ -1,10 +1,23 @@
 // eslint-disable-next-line node/no-extraneous-require,@typescript-eslint/no-var-requires,import/no-extraneous-dependencies
 const _ = require('lodash');
+const { Status } = require('jest-allure2-reporter');
 const PRESET = process.env.ALLURE_PRESET ?? 'default';
 
 /** @type {import('jest-allure2-reporter').ReporterOptions} */
 const jestAllure2ReporterOptions = {
   resultsDir: `allure-results/${PRESET}`,
+  categories: [
+    {
+      name: 'Snapshot mismatches',
+      matchedStatuses: [Status.FAILED],
+      messageRegex: /.*\btoMatch(?:[A-Za-z]+)?Snapshot\b.*/,
+    },
+    {
+      name: 'Timeouts',
+      matchedStatuses: [Status.BROKEN],
+      messageRegex: /.*Exceeded timeout of.*/,
+    },
+  ],
   environment: (context) => {
     return ({
       'version.node': process.version,
