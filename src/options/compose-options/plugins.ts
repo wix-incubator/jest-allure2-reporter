@@ -1,10 +1,24 @@
-import type { Plugin } from 'jest-allure2-reporter';
+import type {
+  Plugin,
+  PluginContext,
+  PluginDeclaration,
+} from 'jest-allure2-reporter';
+
+import { resolvePlugins } from '../utils';
 
 export async function composePlugins(
-  basePromise: Promise<Plugin[]>,
-  customPromise: Promise<Plugin[]>,
+  context: PluginContext,
+  basePlugins: Promise<Plugin[]>,
+  customPlugins: PluginDeclaration[] | undefined,
 ): Promise<Plugin[]> {
-  const [base, custom] = await Promise.all([basePromise, customPromise]);
+  if (!customPlugins) {
+    return basePlugins;
+  }
+
+  const [base, custom] = await Promise.all([
+    basePlugins,
+    resolvePlugins(context, customPlugins),
+  ]);
 
   const result: Plugin[] = [];
   const indices: Record<string, number> = {};
