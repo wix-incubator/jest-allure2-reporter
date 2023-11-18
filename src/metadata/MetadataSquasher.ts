@@ -21,8 +21,8 @@ export class MetadataSquasher {
       workerId: chainLast(['testFile']),
       description: chain(['globalMetadata', 'testFile']),
       descriptionHtml: chain(['globalMetadata', 'testFile']),
-      attachments: chain(['testEntry', 'testInvocation', 'anyInvocation']),
-      parameters: chain(['testEntry', 'testInvocation', 'anyInvocation']),
+      attachments: chain(['testFile']),
+      parameters: chain(['testFile']),
       status: chainLast(['testFile']),
       statusDetails: chainLast(['testFile']),
       labels: chain(['globalMetadata', 'testFile']),
@@ -35,8 +35,16 @@ export class MetadataSquasher {
     {
       code: extractCode,
       workerId: chainLast(['testFile']),
-      description: chain(['testEntry', 'testInvocation', 'testFnInvocation']),
+      description: chain([
+        'globalMetadata',
+        'testFile',
+        'testEntry',
+        'testInvocation',
+        'testFnInvocation',
+      ]),
       descriptionHtml: chain([
+        'globalMetadata',
+        'testFile',
         'testEntry',
         'testInvocation',
         'testFnInvocation',
@@ -66,7 +74,7 @@ export class MetadataSquasher {
     };
 
   testFile(metadata: TestFileMetadata): AllureTestFileMetadata {
-    const config = this.testInvocationConfig as any;
+    const config = this.testFileConfig as any;
     const keys = Object.keys(config) as (keyof AllureTestCaseMetadata)[];
     const result: Partial<AllureTestCaseMetadata> = {};
     const context: MetadataSquasherContext = {

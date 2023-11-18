@@ -24,8 +24,9 @@ const all = identity;
 export const testFile: ResolvedTestFileCustomizer = {
   ignored: ({ testFile }) => !testFile.testExecError,
   historyId: ({ filePath }) => filePath.join('/'),
-  name: () => '(generic suite error)',
-  fullName: ({ testFile }) => testFile.testFilePath,
+  name: ({ filePath }) => filePath.join(path.sep),
+  fullName: ({ globalConfig, testFile }) =>
+    path.relative(globalConfig.rootDir, testFile.testFilePath),
   description: ({ detectLanguage, testFile, testFileMetadata }) => {
     const text = testFileMetadata.description?.join('\n') ?? '';
     const contents = fs.readFileSync(testFile.testFilePath, 'utf8');
@@ -50,7 +51,8 @@ export const testFile: ResolvedTestFileCustomizer = {
       testClass: last,
       testMethod: last,
       parentSuite: last,
-      suite: ({ testFile }) => path.basename(testFile.testFilePath),
+      subSuite: last,
+      suite: () => '(test file execution)',
       epic: all,
       feature: all,
       story: all,
@@ -69,7 +71,7 @@ function getTestFileStatusDetails(
   testFile: TestResult,
 ): StatusDetails | undefined {
   const message =
-    testFile.testExecError?.stack ?? `${testFile.testExecError ?? ''}`;
+    testFile.testExecError?.stack || `${testFile.testExecError || ''}`;
 
   return message
     ? stripStatusDetails({

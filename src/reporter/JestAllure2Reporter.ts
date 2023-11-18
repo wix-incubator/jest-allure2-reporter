@@ -15,6 +15,12 @@ import rimraf from 'rimraf';
 import type {
   Attachment,
   ExecutableItemWrapper,
+  Label,
+  Link,
+  Parameter,
+  Stage,
+  Status,
+  StatusDetails,
 } from '@noomorph/allure-js-commons';
 import { AllureRuntime } from '@noomorph/allure-js-commons';
 import type {
@@ -33,7 +39,7 @@ import type {
 
 import { resolveOptions } from '../options';
 import { MetadataSquasher, StepExtractor } from '../metadata';
-import { SHARED_CONFIG, STOP, WORKER_ID } from '../constants';
+import { SHARED_CONFIG, START, STOP, WORKER_ID } from '../constants';
 import { ThreadService } from '../utils/ThreadService';
 import md5 from '../utils/md5';
 
@@ -81,6 +87,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     const testFileMetadata = query.test(test);
     const threadId = this._threadService.allocateThread(test.path);
     testFileMetadata.set(WORKER_ID, String(1 + threadId));
+    testFileMetadata.set(START, Date.now());
   }
 
   onTestCaseResult(test: Test, testCaseResult: TestCaseResult) {
@@ -99,6 +106,10 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     aggregatedResult: AggregatedResult,
   ) {
     this._threadService.freeThread(test.path);
+
+    const testFileMetadata = query.test(test);
+    testFileMetadata.set(STOP, Date.now());
+
     return super.onTestFileResult(test, testResult, aggregatedResult);
   }
 
@@ -137,12 +148,21 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     const stepper = new StepExtractor();
 
     for (const testResult of results.testResults) {
-      const testFileContext: TestFileExtractorContext<any> = {
+      const beforeTestFileContext: Omit<
+        TestFileExtractorContext,
+        'testFileMetadata'
+      > = {
         ...globalContext,
         filePath: path
           .relative(globalContext.globalConfig.rootDir, testResult.testFilePath)
           .split(path.sep),
         testFile: testResult,
+      };
+
+      await this._callPlugins('beforeTestFileContext', beforeTestFileContext);
+
+      const testFileContext: TestFileExtractorContext<any> = {
+        ...beforeTestFileContext,
         testFileMetadata: squasher.testFile(query.testResult(testResult)),
       };
 
@@ -209,6 +229,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
               parameters: config.testCase.parameters(testCaseContext),
               attachments: config.testCase.attachments(testCaseContext),
             },
+            testCaseContext,
             beforeAll: testInvocationMetadata.beforeAll.map((m) =>
               stepper.extractFromInvocation(m),
             ),
@@ -232,18 +253,23 @@ export class JestAllure2Reporter extends JestMetadataReporter {
 
   private async _createTest({
     test,
+    testCaseContext,
     containerName,
     beforeAll = [],
     beforeEach = [],
     testFn,
     afterEach = [],
     afterAll = [],
-  }: any) {
+  }: AllurePayload) {
     const allure = this._allure;
     const allureGroup = allure.startGroup(containerName);
     const allureTest = allureGroup.startTest(test.name, test.start);
-    allureTest.historyId = md5(test.historyId);
-    allureTest.fullName = test.fullName;
+    if (test.historyId) {
+      allureTest.historyId = md5(test.historyId);
+    }
+    if (test.fullName) {
+      allureTest.fullName = test.fullName;
+    }
 
     if (!test.descriptionHtml && test.description && this._processMarkdown) {
       const newHTML = await this._processMarkdown(test.description);
@@ -253,16 +279,28 @@ export class JestAllure2Reporter extends JestMetadataReporter {
       allureTest.descriptionHtml = test.descriptionHtml;
     }
 
-    allureTest.status = test.status;
-    allureTest.statusDetails = test.statusDetails;
-    allureTest.stage = test.stage;
-
-    for (const link of test.links ?? []) {
-      allureTest.addLink(link.url, link.name, link.type);
+    if (test.status) {
+      allureTest.status = test.status;
     }
 
-    for (const label of test.labels ?? []) {
-      allureTest.addLabel(label.name, label.value);
+    if (test.statusDetails) {
+      allureTest.statusDetails = test.statusDetails;
+    }
+
+    if (test.stage) {
+      allureTest.stage = test.stage;
+    }
+
+    if (test.links) {
+      for (const link of test.links) {
+        allureTest.addLink(link.url, link.name, link.type);
+      }
+    }
+
+    if (test.labels) {
+      for (const label of test.labels) {
+        allureTest.addLabel(label.name, label.value);
+      }
     }
 
     allureTest.wrappedItem.parameters = test.parameters ?? [];
@@ -270,18 +308,32 @@ export class JestAllure2Reporter extends JestMetadataReporter {
       this._relativizeAttachment,
     );
 
-    for (const testStepMetadata of [...beforeAll, ...beforeEach]) {
-      if (!testStepMetadata) continue;
-      await this._createStep(test, allureGroup.addBefore(), testStepMetadata);
-    }
+    if (testCaseContext) {
+      const befores = [...beforeAll, ...beforeEach].filter(
+        Boolean,
+      ) as AllureTestStepMetadata[];
+      for (const testStepMetadata of befores) {
+        await this._createStep(
+          testCaseContext,
+          allureGroup.addBefore(),
+          testStepMetadata,
+        );
+      }
 
-    if (testFn) {
-      await this._createStep(test, allureGroup.addBefore(), test.testFn, true);
-    }
+      if (testFn) {
+        await this._createStep(testCaseContext, allureTest, testFn, true);
+      }
 
-    for (const testStepMetadata of [...afterEach, ...afterAll]) {
-      if (!testStepMetadata) continue;
-      await this._createStep(test, allureGroup.addAfter(), testStepMetadata);
+      const afters = [...afterEach, ...afterAll].filter(
+        Boolean,
+      ) as AllureTestStepMetadata[];
+      for (const testStepMetadata of afters) {
+        await this._createStep(
+          testCaseContext,
+          allureGroup.addAfter(),
+          testStepMetadata,
+        );
+      }
     }
 
     allureTest.endTest(test.stop);
@@ -346,3 +398,36 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     };
   };
 }
+
+type AllurePayload = {
+  containerName: string;
+  test: AllurePayloadTest;
+  testCaseContext?: TestCaseExtractorContext<unknown>;
+  testFn?: AllureTestStepMetadata | null;
+  beforeAll?: (AllureTestStepMetadata | null)[];
+  beforeEach?: (AllureTestStepMetadata | null)[];
+  afterEach?: (AllureTestStepMetadata | null)[];
+  afterAll?: (AllureTestStepMetadata | null)[];
+};
+
+type AllurePayloadStep = Partial<{
+  name: string;
+  start: number;
+  stop: number;
+  status: Status;
+  statusDetails: StatusDetails;
+  stage: Stage;
+  steps: AllurePayloadStep[];
+  attachments: Attachment[];
+  parameters: Parameter[];
+}>;
+
+type AllurePayloadTest = Partial<{
+  historyId: string;
+  fullName: string;
+  description: string;
+  descriptionHtml: string;
+  labels: Label[];
+  links: Link[];
+}> &
+  AllurePayloadStep;

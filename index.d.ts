@@ -446,7 +446,7 @@ declare module 'jest-allure2-reporter' {
     value: T | undefined;
   }
 
-  export interface GlobalExtractorContext<T>
+  export interface GlobalExtractorContext<T = unknown>
     extends ExtractorContext<T>,
       GlobalExtractorContextAugmentation {
     globalConfig: Config.GlobalConfig;
@@ -461,14 +461,14 @@ declare module 'jest-allure2-reporter' {
     testFileMetadata: AllureTestCaseMetadata;
   }
 
-  export interface TestCaseExtractorContext<T>
+  export interface TestCaseExtractorContext<T = unknown>
     extends TestFileExtractorContext<T>,
       TestCaseExtractorContextAugmentation {
     testCase: TestCaseResult;
     testCaseMetadata: AllureTestCaseMetadata;
   }
 
-  export interface TestStepExtractorContext<T>
+  export interface TestStepExtractorContext<T = unknown>
     extends TestCaseExtractorContext<T>,
       TestStepExtractorContextAugmentation {
     testStepMetadata: AllureTestStepMetadata;
@@ -561,26 +561,26 @@ declare module 'jest-allure2-reporter' {
     extend?(previous: Plugin): Plugin;
 
     /** Method to extend global context. */
-    globalContext?(context: GlobalExtractorContext<any>): void | Promise<void>;
+    globalContext?(context: GlobalExtractorContext): void | Promise<void>;
+
+    /** Method to affect test file metadata before it is created. */
+    beforeTestFileContext?(
+      context: Omit<TestFileExtractorContext, 'testFileMetadata'>,
+    ): void | Promise<void>;
 
     /** Method to extend test file context. */
-    testFileContext?(
-      context: TestFileExtractorContext<unknown>,
-    ): void | Promise<void>;
+    testFileContext?(context: TestFileExtractorContext): void | Promise<void>;
 
     /** Method to extend test entry context. */
-    testCaseContext?(
-      context: TestCaseExtractorContext<unknown>,
-    ): void | Promise<void>;
+    testCaseContext?(context: TestCaseExtractorContext): void | Promise<void>;
 
     /** Method to extend test step context. */
-    testStepContext?(
-      context: TestStepExtractorContext<unknown>,
-    ): void | Promise<void>;
+    testStepContext?(context: TestStepExtractorContext): void | Promise<void>;
   }
 
   export type PluginHookName =
     | 'globalContext'
+    | 'beforeTestFileContext'
     | 'testFileContext'
     | 'testCaseContext'
     | 'testStepContext';
