@@ -10,9 +10,8 @@ import type {
   AllureTestStepMetadata,
 } from 'jest-allure2-reporter';
 
-import { PREFIX, WORKER_ID } from '../constants';
+import { CODE, PREFIX, WORKER_ID } from '../constants';
 import realm from '../realms';
-import { splitDocblock } from '../utils/splitDocblock';
 
 export function WithAllure2<E extends WithEmitter>(
   JestEnvironmentClass: new (...arguments_: any[]) => E,
@@ -22,9 +21,6 @@ export function WithAllure2<E extends WithEmitter>(
   return {
     // @ts-expect-error TS2415: Class '[`${compositeName}`]' incorrectly extends base class 'E'.
     [`${compositeName}`]: class extends JestEnvironmentClass {
-      // @ts-expect-error TS2564
-      private readonly allure: AllureRuntime;
-
       constructor(...arguments_: any[]) {
         super(...arguments_);
 
@@ -70,13 +66,7 @@ export function WithAllure2<E extends WithEmitter>(
       #addTest({
         event,
       }: ForwardedCircusEvent<Circus.Event & { name: 'add_test' }>) {
-        const [docblock, code] = splitDocblock(event.fn.toString());
-        const metadata: Record<string, unknown> = {
-          code,
-          docblock,
-        };
-
-        state.currentMetadata.assign(PREFIX, metadata);
+        state.currentMetadata.set(CODE, event.fn.toString());
       }
 
       // eslint-disable-next-line no-empty-pattern
