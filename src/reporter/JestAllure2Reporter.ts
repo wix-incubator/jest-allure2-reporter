@@ -1,3 +1,4 @@
+import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import type {
@@ -78,6 +79,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
 
     if (this._config.overwrite) {
       await rimraf(this._config.resultsDir);
+      await fs.mkdir(this._config.resultsDir, { recursive: true });
     }
   }
 
