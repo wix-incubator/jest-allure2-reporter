@@ -82,8 +82,6 @@ declare module 'jest-allure2-reporter' {
     environment?: Record<string, string> | EnvironmentCustomizer;
     /**
      * Configures the executor information that will be reported.
-     * By default, the executor information is inferred from `ci-info` package.
-     * Local runs won't have any executor information unless you customize this.
      */
     executor?: ExecutorInfo | ExecutorCustomizer;
     /**

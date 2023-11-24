@@ -35,12 +35,14 @@ jobs:
         with:
           useLockFile: false
           working-directory: e2e
-      - name: Run E2E Tests (Fallback)
-        run: npm test -- --testEnvironment=node
-        working-directory: e2e
       - name: Run E2E Tests (Default)
         run: npm test
         working-directory: e2e
+      - name: Upload Allure results
+        uses: actions/upload-artifact@v3
+        with:
+          name: allure-results
+          path: e2e/allure-results
 
   publish:
     name: Publish
@@ -56,7 +58,7 @@ jobs:
         with:
           useLockFile: false
       - name: Semantic release
-        run: npx --no-install semantic-release --debug
+        run: npx --no-install semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
