@@ -9,6 +9,7 @@ import { defaultPlugins } from './plugins';
 import { testCase } from './testCase';
 import { testFile } from './testFile';
 import { testStep } from './testStep';
+import { executor } from './executor';
 
 const identity = <T>(context: ExtractorContext<T>) => context.value;
 
@@ -25,7 +26,7 @@ export function defaultOptions(context: PluginContext): ReporterConfig {
     testStep,
     categories,
     environment: identity,
-    executor: identity,
+    executor: executor(),
     plugins: defaultPlugins(context),
   };
 }
