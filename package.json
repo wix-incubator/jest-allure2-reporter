@@ -33,6 +33,11 @@
       "require": "./dist/environment/decorator.js",
       "types": "./dist/environment/decorator.d.ts"
     },
+    "./environment-listener": {
+      "import": "./dist/environment/listener.js",
+      "require": "./dist/environment/listener.js",
+      "types": "./dist/environment/listener.d.ts"
+    },
     "./environment-jsdom": {
       "import": "./dist/environment/jsdom.js",
       "require": "./dist/environment/jsdom.js",
