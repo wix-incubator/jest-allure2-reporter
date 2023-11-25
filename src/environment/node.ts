@@ -1,6 +1,10 @@
 import JestEnvironmentNode from 'jest-metadata/environment-node';
 
-import { WithAllure2 } from './decorator';
+import listener from './listener';
 
-export const TestEnvironment = WithAllure2(JestEnvironmentNode);
+export const TestEnvironment = JestEnvironmentNode.derive(
+  listener,
+  'WithAllure',
+);
+
 export default TestEnvironment;
