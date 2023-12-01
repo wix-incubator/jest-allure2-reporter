@@ -1,0 +1,330 @@
+---
+description: Make your tests more understandable with rich descriptions
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Descriptions
+
+:::caution
+
+This website version refers to the unreleased version of `jest-allure2-reporter`, partially available as `2.0.0-alpha.*` release.
+Please use GitHub docs for the latest stable version, `1.x.x`.
+
+:::
+
+A well-written description can enhance the usefulness of a test by providing clear context and expected outcomes.
+Anyone who sees your test for the first time may benefit from a rich description.
+
+There are two ways to define a description for a test:
+
+* declaratively, via `@desc`, `@description`, `@descriptionHtml` docblocks (or even without them);
+* programmatically, via our DSL – `$Description` or `$DescriptionHtml` pseudo-decorators.
+
+:::info Note
+
+Descriptions are **not supported** on a _suite_ (`describe`) or _test hooks_ (`beforeAll`, `beforeEach`, `afterAll`, `afterEach`) level due to limitations of Jest and Allure Framework.
+
+Anyway, we have a few workarounds for you down below. :wink:
+
+:::
+
+## Test cases
+
+Allure Framework supports rich text descriptions for tests in Markdown and HTML formats.
+
+To make your experience better, `jest-allure2-reporter` appends a _source code_ of every
+test to its description, so you can always get value from this feature.
+
+<Tabs groupId="approach">
+  <TabItem value="docblock" label="Docblocks">
+
+:::info Note
+
+Docblocks must be **inside** the test function to work.
+
+:::
+
+
+```js
+test('should add two numbers', () => {
+  /**
+   * This test demonstrates the `+` operator.
+   */
+  expect(1 + 2).toBe(3);
+});
+
+test('should multiply two numbers', () => {
+  /**
+   * @description
+   * This test demonstrates the `*` operator.
+   */
+  expect(3 * 2).toBe(6);
+});
+
+test('should subtract two numbers', () => {
+  /**
+   * @descriptionHtml
+   * This test demonstrates the <code>-</code> operator.
+   */
+  expect(2 - 1).toBe(1);
+});
+```
+
+  </TabItem>
+  <TabItem value="dsl" label="DSL">
+
+:::info Note
+
+Pseudo-annotations must be **before** the `test` statement to work.
+
+:::
+
+```js
+import { $Description } from 'jest-allure2-reporter';
+
+$Description('This test demonstrates the `+` operator.')
+test('should add two numbers', () => {
+  expect(1 + 2).toBe(3);
+});
+
+$DescriptionHtml('This test demonstrates the <code>-</code> operator.')
+test('should subtract two numbers', () => {
+  expect(2 - 1).toBe(1);
+});
+```
+
+  </TabItem>
+  <TabItem value="demo" label="Preview">
+
+    TODO: add screenshot
+
+  </TabItem>
+</Tabs>
+
+## Test hooks
+
+Test hooks such as `beforeAll`, `beforeEach`, `afterAll`, `afterEach` are treated [as steps](02-steps.mdx) in Allure Framework. Therefore, they can have only a plain name, but no description.
+
+<Tabs groupId="approach">
+  <TabItem value="docblock" label="Docblocks">
+
+```js
+beforeAll(() => {
+  /** This hook runs before all tests. */
+});
+
+beforeEach(() => {
+  /** This hook runs before each test. */
+});
+
+afterEach(() => {
+  /** This hook runs after each test. */
+});
+```
+
+  </TabItem>
+  <TabItem value="dsl" label="DSL">
+
+```js
+import { $Description } from 'jest-allure2-reporter';
+
+$Description('This hook runs before all tests.')
+beforeAll(() => {
+  // ...
+});
+
+$Description('This hook runs before each test.')
+beforeEach(() => {
+  // ...
+});
+
+$Description('This hook runs after each test.')
+afterEach(() => {
+  // ...
+});
+```
+
+  </TabItem>
+  <TabItem value="demo" label="Preview">
+
+    TODO: add screenshot
+
+  </TabItem>
+</Tabs>
+
+
+## Test suites
+
+Allure Framework doesn't treat test suites as separate entities, so the best we can offer is to prepend their descriptions to every test within the suite.
+
+Due to Jest limitations, you can't use docblocks on a suite level, so the only way to add a description is to use our DSL.
+
+<Tabs groupId="approach">
+  <TabItem value="dsl" label="DSL">
+
+```js
+import { $Description } from 'jest-allure2-reporter';
+
+$Description('The test is operating on `/login` page.')
+describe('Sanity: Login flow', () => {
+  it('should login with valid credentials', () => {
+    /** Testing the transition to the `/dashboard` page. */
+    // ...
+  });
+
+  it('should login with invalid credentials', () => {
+    /** Testing the validation summary component. */
+    // ...
+  });
+});
+```
+
+  </TabItem>
+  <TabItem value="demo" label="Preview">
+
+    TODO: add screenshot
+
+  </TabItem>
+</Tabs>
+
+## Test files
+
+In many cases you may find it acceptable to describe the whole test file, which usually is equal to adding a description to the top-level `describe` block. More often than not you have a single top-level `describe` block, so you won't notice the difference:
+
+<Tabs groupId="approach">
+  <TabItem value="docblock" label="Docblocks">
+
+```js
+/**
+ * @description
+ * The test is operating on `/login` page.
+ */
+import { $Description } from 'jest-allure2-reporter';
+
+describe('Sanity: Login flow', () => {
+  it('should login with valid credentials', () => {
+    /** Testing the transition to the `/dashboard` page. */
+    // ...
+  });
+
+  it('should login with invalid credentials', () => {
+    /** Testing the validation summary component. */
+    // ...
+  });
+});
+```
+
+:::info Note
+
+You **must** use `@desc` or `@description` pragma due to Jest limitations regarding file-level docblocks.
+
+:::
+
+  </TabItem>
+  <TabItem value="dsl" label="DSL">
+
+```js
+import { allure } from 'jest-allure2-reporter';
+
+allure.description('The test is operating on `/login` page.')
+
+describe('Sanity: Login flow', () => {
+  it('should login with valid credentials', () => {
+    /** Testing the transition to the `/dashboard` page. */
+    // ...
+  });
+
+  it('should login with invalid credentials', () => {
+    /** Testing the validation summary component. */
+    // ...
+  });
+});
+```
+
+:::info Note
+
+We use `allure.description` to ensure that the metadata is added to exactly to the actual context, which is the **test file** itself.
+
+To simulate the behavior of `$Description` pseudo-decorator, we'd have to put it inside the `describe` block:
+
+```js
+describe('Sanity: Login flow', () => {
+  allure.description('The test is operating on `/login` page.')
+  // ...
+});
+```
+
+:::
+
+  </TabItem>
+  <TabItem value="demo" label="Preview">
+
+    TODO: add screenshot
+
+  </TabItem>
+</Tabs>
+
+## Configuration
+
+### Description template
+
+As mentioned before, a test description is a sequence of user-defined paragraphs, followed by a source code of the test itself.
+
+To customize the template, you can use `description` option in your `jest.config.js`. Below is a rough example of how you can do it:
+
+```js
+/** @type {import('@jest/types').Config.InitialOptions} */
+module.exports = {
+  testEnvironment: 'jest-allure2-reporter/environment-node',
+  reporters: [
+    'default',
+    [
+      'jest-allure2-reporter',
+      /** @type {import('jest-allure2-reporter').Options} */
+      {
+        testCase: {
+          description: ({ testCaseMetadata }) => [
+            ...testCaseMetadata.description,
+            '```js',
+            ...(testCaseMetadata.code?.beforeAll ?? []),
+            ...(testCaseMetadata.code?.beforeEach ?? []),
+            ...(testCaseMetadata.code?.test ?? []),
+            ...(testCaseMetadata.code?.afterEach ?? []),
+            ...(testCaseMetadata.code?.afterAll ?? []),
+            '```',
+          ].join('\n\n'),
+        }
+      }
+  ],
+};
+```
+
+To switch to a HTML template, reset the `description` customizer to
+return undefined and use `descriptionHtml` option instead:
+
+```js
+/** @type {import('@jest/types').Config.InitialOptions} */
+module.exports = {
+  testEnvironment: 'jest-allure2-reporter/environment-node',
+  reporters: [
+    'default',
+    [
+      'jest-allure2-reporter',
+      /** @type {import('jest-allure2-reporter').Options} */
+      {
+        testCase: {
+          description: () => {}, // suppress the default template
+          descriptionHtml: ({ testCaseMetadata }) => { /* ... */ },
+        }
+      }
+  ],
+};
+```
+
+### Markdown support
+
+By default, `jest-allure2-reporter` uses `remark` processor to render Markdown descriptions. It is not possible to customize it right now, but we're working on it.
+
+You'll be able to define your own `remark` plugins and configure the processor in one of the next releases.

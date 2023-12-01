@@ -1,0 +1,194 @@
+---
+description: Track your test cases in external systems and link them to your Allure report.
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Links
+
+:::caution
+
+This website version refers to the unreleased version of `jest-allure2-reporter`, partially available as `2.0.0-alpha.*` release.
+Please use GitHub docs for the latest stable version, `1.x.x`.
+
+:::
+
+In Allure reports, you can add different types of links to your test cases for better context and traceability, e.g.:
+
+* links to **issues** in your issue tracker (e.g. JIRA, GitHub, etc.);
+* links to test cases in your Test Management System (**TMS**);
+* links to any **custom** URL.
+
+There are two ways to add links to your test cases:
+
+* declaratively, using JSDoc annotations such as `@link`, `@issue`, and `@tms`;
+* programmatically, using annotation functions from the 'jest-allure2-reporter' package such as `$Link`, `$Issue`, and `$TmsLink`.
+
+## Issue Links
+
+You can link an issue in your issue tracker to a test case.
+
+<Tabs groupId="approach">
+  <TabItem value="docblock" label="Docblocks">
+
+```js
+it('should validate non-ASCII passwords', () => {
+  /**
+   * A customer ticket from our Support team.
+   * @issue AUTH-123
+   */
+
+  /* ... test code ... */
+});
+```
+  </TabItem>
+  <TabItem value="dsl" label="DSL">
+
+```js
+import { $Issue } from 'jest-allure2-reporter';
+
+// A customer ticket from our Support team.
+$Issue('AUTH-123');
+it('should validate non-ASCII passwords', () => {
+  /* ... test code ... */
+});
+```
+  </TabItem>
+  <TabItem value="demo" label="Preview">
+
+    TODO: add screenshot
+
+  </TabItem>
+</Tabs>
+
+## TMS Links
+
+You can link a test case in your Test Management System (TMS) to a test case as shown below.
+
+<Tabs groupId="approach">
+  <TabItem value="docblock" label="Docblocks">
+
+```js
+it('should be connected to TMS', () => {
+  /**
+   * @tms TMS-123
+   */
+
+  /* ... test code ... */
+});
+```
+  </TabItem>
+  <TabItem value="dsl" label="DSL">
+
+```js
+import { $TmsLink } from 'jest-allure2-reporter';
+
+$TmsLink('TMS-123');
+it('should be connected to TMS', () => {
+  /* ... */
+});
+```
+  </TabItem>
+  <TabItem value="demo" label="Preview">
+
+    TODO: add screenshot
+
+  </TabItem>
+</Tabs>
+
+## Custom Links
+
+You can link an arbitrary URL to a test case:
+
+<Tabs groupId="approach">
+  <TabItem value="docblock" label="Docblocks">
+
+```js
+it('should demonstrate how the links work', () => {
+  /**
+   * @link https://example.com/custom
+   */
+
+  /* ... test code ... */
+});
+```
+  </TabItem>
+  <TabItem value="dsl" label="DSL">
+
+```js
+import { $Link } from 'jest-allure2-reporter';
+
+$Link('https://example.com/custom');
+it('should demonstrate how the links work', () => {
+  /* ... */
+});
+```
+  </TabItem>
+  <TabItem value="demo" label="Preview">
+
+    TODO: add screenshot
+
+  </TabItem>
+</Tabs>
+
+Advanced users can also specify a custom link type and [configure the URL pattern](#configuration) for it.
+
+<Tabs groupId="approach">
+  <TabItem value="docblock" label="Docblocks">
+
+```js
+it('should demonstrate how the links work', () => {
+/**
+ * @link docs features/links
+ */
+
+  /* ... test code ... */
+});
+```
+  </TabItem>
+  <TabItem value="dsl" label="DSL">
+
+```js
+import { $Link } from 'jest-allure2-reporter';
+
+$Link('docs', 'features/links');
+it('should demonstrate how the links work', () => {
+  /* ... */
+});
+```
+  </TabItem>
+  <TabItem value="demo" label="Preview">
+
+    TODO: add screenshot
+
+  </TabItem>
+</Tabs>
+
+## Configuration
+
+:::caution Work in progress
+:::
+
+To handle link generation for custom link types, TMS, and issue ids, you need to configure the 'jest-allure2-reporter' in your `jest.config.js` file.
+
+You can specify URL patterns for each type of link. When generating the Allure report, the annotation function or JSDoc will replace the ID in the URL pattern with the actual ID provided in your test case.
+
+Below is an example configuration:
+
+```js
+module.exports = {
+  reporters: [
+    [
+      "jest-allure2-reporter",
+      {
+        issueLinkTemplate: "http://your-tracker.com/issue/{}",
+        tmsLinkTemplate: "http://your-tms.com/case/{}",
+        customLinkTemplate: "https://your-custom-url/{}"
+      }
+    ]
+  ]
+}
+```
+
+In this example, `{}` will be replaced with the issue id, tms id, or custom id you've specified

@@ -2,99 +2,63 @@ name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [master, alpha, beta]
     paths-ignore:
       - '**/*.md'
   pull_request:
-    branches: [master]
+    branches: [master, alpha, beta]
     paths-ignore:
       - '**/*.md'
 
 jobs:
 
-  lint:
-    name: Lint
+  sanity:
+    name: Sanity
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version-file: '.nvmrc'
-      - uses: bahmutov/npm-install@v1
+      - name: Install main project
+        uses: bahmutov/npm-install@v1
         with:
           useLockFile: false
       - name: Lint
         run: npm run lint:ci
-
-  unit:
-    name: Unit Tests
-    needs: lint
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        jest: ['27.x.x', '28.x.x', '29.x.x']
-        include:
-          - node: 14
-            jest: '27.x.x'
-          - node: 16
-            jest: '28.x.x'
-          - node: 18
-            jest: '29.x.x'
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node }}
-      - uses: bahmutov/npm-install@v1
+      - name: Unit Tests
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Install E2E Project
+        uses: bahmutov/npm-install@v1
         with:
           useLockFile: false
-      - name: Record fixtures
-        run: npm run record
-        env:
-          JEST_VERSION: ${{ matrix.jest }}
-      - name: Unit tests
-        run: npm test -- --coverage
-
-  docs:
-    name: Docs
-    needs: unit
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+          working-directory: e2e
+      - name: Run E2E Tests (Default)
+        run: npm test
+        working-directory: e2e
+      - name: Upload Allure results
+        uses: actions/upload-artifact@v3
         with:
-          node-version-file: '.nvmrc'
-      - uses: bahmutov/npm-install@v1
-        with:
-          useLockFile: false
-      - name: Build docs
-        run: npm run docs
-      - name: Deploy to GH pages
-        uses: peaceiris/actions-gh-pages@v3
-        if: github.ref == 'refs/heads/master'
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./website
-          force_orphan: true
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
+          name: allure-results
+          path: e2e/allure-results
 
   publish:
     name: Publish
-    needs: docs
+    needs: [sanity]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version-file: '.nvmrc'
-      - uses: bahmutov/npm-install@v1
+      - name: Install main project
+        uses: bahmutov/npm-install@v1
         with:
           useLockFile: false
       - name: Semantic release
-        if: github.ref == 'refs/heads/master'
-        run: npx --no-install semantic-release --debug
+        run: npx --no-install semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -1,0 +1,36 @@
+---
+slug: /docs/usage
+---
+
+# Usage
+
+:::caution
+
+This website version refers to the unreleased version of `jest-allure2-reporter`, partially available as `2.0.0-alpha.*` release.
+Please use GitHub docs for the latest stable version, `1.x.x`.
+
+:::
+
+Assuming you have already [installed the reporter][installation], run your tests with `jest` as usual, e.g.:
+
+```bash
+npm test
+# jest ...
+# PASS  ./my.test.js
+```
+
+and then browse the results stored in the `allure-results` directory via:
+
+```bash
+allure serve
+```
+
+If you want to generate a static report, e.g., for CI, run:
+
+```bash
+allure generate
+```
+
+For more information on `allure` CLI itself, see the documentation on its [official website](https://docs.qameta.io/allure/#_get_started).
+
+[installation]: 01-installation.mdx

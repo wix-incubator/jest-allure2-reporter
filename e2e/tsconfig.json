@@ -1,0 +1,9 @@
+{
+  "extends": "..",
+  "compilerOptions": {
+    "module": "node16",
+    "ignoreDeprecations": "5.0",
+    "experimentalDecorators": true,
+    "noEmit": true
+  }
+}

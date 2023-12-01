@@ -1,0 +1,234 @@
+---
+description: Fine-grained control over the test flow
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Steps
+
+:::caution
+
+This website version refers to the unreleased version of `jest-allure2-reporter`, partially available as `2.0.0-alpha.*` release.
+Please use GitHub docs for the latest stable version, `1.x.x`.
+
+:::
+
+Steps are the building blocks of your tests.
+
+Each test is composed of one or more steps, and each step can have its own [status](../config/02-statuses.mdx),
+[description](01-descriptions.mdx), [attachments](03-attachments.mdx) and even nested steps.
+
+## Built-in hooks
+
+The simplest steps to start with are the built-in hooks in Jest: `beforeAll`, `beforeEach`, `afterEach` and `afterAll`.
+
+This way, you will see the name and status of each hook in the report.
+
+<Tabs groupId="approach">
+  <TabItem value="docblock" label="Docblocks">
+
+```js
+beforeAll(async () => {
+  /**
+   * Launch the browser for all tests
+   */
+});
+
+beforeEach(async () => {
+  /**
+   * Visit the page before the test starts
+   */
+});
+
+afterEach(async () => {
+  /**
+   * Take a screenshot after each test
+   */
+});
+
+afterAll(async () => {
+  /**
+   * Close the browser after all tests
+   */
+});
+```
+
+  </TabItem>
+  <TabItem value="dsl" label="DSL">
+
+```js
+import { $Description } from 'jest-allure2-reporter';
+
+$Description('Launch the browser for all tests')
+beforeAll(async () => {
+  // ...
+});
+
+$Description('Visit the page before the test starts')
+beforeEach(async () => {
+  // ...
+});
+
+$Description('Take a screenshot after each test')
+afterEach(async () => {
+  // ...
+});
+
+$Description('Close the browser after all tests')
+afterAll(async () => {
+  // ...
+});
+```
+
+  </TabItem>
+  <TabItem value="demo" label="Preview">
+
+    TODO: add screenshot
+
+  </TabItem>
+</Tabs>
+
+## Custom steps
+
+Custom steps add more structure to your tests and make them easier to read and understand.
+You can add additional information to the report such as step description, parameters, attachments, etc.
+
+Moreover, custom steps can be nested, which allows you to create a tree-like structure of your tests.
+
+### Wrapping functions
+
+There are several ways to turn your functions into steps:
+
+* `allure.step` function – best for anonymous, one-time steps.
+* `allure.createStep` function – best for reusable functions.
+* `@Step` decorator – best for reusable class methods.
+
+<Tabs>
+  <TabItem value="step">
+
+Using `allure.step` function is the simplest way to define a step:
+
+```js
+import { allure } from 'jest-allure2-reporter';
+
+test('Login test', async () => {
+  await allure.step('Open login page', async () => {
+    // ...
+  });
+
+  await allure.step('Enter credentials', async () => {
+    allure.parameter('login', 'admin');
+    // ...
+  });
+
+  await allure.step('Submit the form', async () => {
+    // ...
+  });
+});
+```
+
+The drawback of this approach is that you can't reuse steps in other tests.
+Besides, adding parameters is going to be a bit verbose.
+
+  </TabItem>
+  <TabItem value="createStep">
+
+A more advanced technique is to wrap your functions with `allure.createStep`,
+which allows you to reuse steps in other tests and add parameters:
+
+```js
+import { allure } from 'jest-allure2-reporter';
+
+export const open = allure.createStep('Open login page', async () => {
+  // ...
+});
+
+export const enterCredentials = allure.createStep(
+  'Enter credentials',
+  ['Login'],
+  async (login, password) => {
+    // ...
+  }
+);
+
+export const submit = allure.createStep('Submit the form', async () => {
+  // ...
+});
+```
+
+  </TabItem>
+  <TabItem value="@Step">
+
+For aspect-oriented programmers, there is a decorator-based approach. It works only with class methods,
+but otherwise it's similar to `allure.createStep`:
+
+```js
+import { Step } from 'jest-allure2-reporter';
+
+class LoginPageObject {
+  @Step('Open login page')
+  async open() {
+    // ...
+  }
+
+  @Step('Enter credentials', ['Login'])
+  async enterCredentials(login, password) {
+    // ...
+  }
+
+  @Step('Submit the form')
+  async submit() {
+    // ...
+  }
+}
+```
+
+  </TabItem>
+  <TabItem value="demo" label="Preview">
+
+    TODO: add screenshot
+
+  </TabItem>
+</Tabs>
+
+### Status override
+
+In some cases, you might want to have control over the step status and its status details. Furthermore, you might want to make the status conditional and programmatic, and here's how:
+
+<Tabs>
+  <TabItem value="logStep">
+
+```js
+import { allure, Status } from 'jest-allure2-reporter';
+
+test('Login test', async () => {
+  try {
+    // ...
+  } catch (error) {
+    await allure.step('Unexpected error (Recoverable)', () => {
+      await allure.attachment(
+        'screenshot.png',
+        page.screenshot({ fullPage: true },
+      );
+
+      if (isRecoverable()) {
+        allure.status(Status.SKIPPED, {
+          message: error.message,
+          trace: error.stack,
+        });
+      } else {
+        throw error;
+      }
+    });
+  }
+});
+```
+
+  </TabItem>
+  <TabItem value="demo" label="Preview">
+
+    TODO: add screenshot
+
+  </TabItem>
+</Tabs>

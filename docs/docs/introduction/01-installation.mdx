@@ -1,0 +1,55 @@
+---
+slug: /docs/installation
+---
+
+# Installation
+
+:::caution
+
+This website version refers to the unreleased version of `jest-allure2-reporter`, partially available as `2.0.0-alpha.*` release.
+Please use GitHub docs for the latest stable version, `1.x.x`.
+
+:::
+
+## Prerequisites
+
+Before you start, make sure you have [Allure CLI](https://docs.qameta.io/allure/#_get_started) installed globally:
+
+```bash
+$ allure --version
+2.22.1
+```
+
+To use `jest-allure2-reporter` in your project, you have to be using
+[`jest`](https://jestjs.io) as your test runner. The minimum supported version is `27.x`.
+
+:::tip
+
+Use Jest's default `jest-circus` runner for the full reporting functionality. Reports generated with any other runners like `jest-jasmine` will be incomplete and contain only the most essential information.
+
+:::
+
+## Setup
+
+Run in your project:
+
+```bash
+npm install --save-dev jest-allure2-reporter
+```
+
+Edit your Jest configuration file, e.g.:
+
+```js title="jest.config.js"
+ /** @type {import('@jest/types').Config.InitialOptions} */
+ module.exports = {
+    // …
+// highlight-start
+    testEnvironment: 'jest-allure2-reporter/environment-node',
+    reporters: [
+      'default',
+      'jest-allure2-reporter',
+    ],
+// highlight-end
+   // …
+ };
+```

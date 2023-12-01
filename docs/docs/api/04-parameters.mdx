@@ -1,0 +1,67 @@
+---
+description: Parametrize your tests and steps
+---
+
+# Parameters
+
+:::caution
+
+This website version refers to the unreleased version of `jest-allure2-reporter`, partially available as `2.0.0-alpha.*` release.
+Please use GitHub docs for the latest stable version, `1.x.x`.
+
+:::
+
+Utilize parameterized testing to avoid code duplication and reduce your maintenance costs:
+
+```js
+import {allure} from 'jest-allure2-reporter';
+
+test.each([
+  [1, 1, 2],
+  [1, 2, 3],
+  [2, 1, 3],
+])('sum(a, b) = (a + b)', (a, b, expected) => {
+  allure.parameters({a, b, expected});
+});
+```
+
+`jest-allure2-reporter` also supports attaching individual parameters, where you can also customize their `options`, e.g.:
+
+```js
+allure.parameter('expected', expected, { mode: 'hidden' });
+```
+
+The `options` parameter is an object of [type `Parameter`](https://github.com/allure-framework/allure-js/blob/224e6ce4b51c80e62961c4b2ba44408042d79930/packages/allure-js-commons/src/model.ts#L48-L53):
+
+```typescript
+export interface Parameter {
+  name: string;
+  value: string;
+  excluded?: boolean;
+  mode?: "hidden" | "masked" | "default";
+}
+```
+
+The options allow you to fine-tune the way your parameters are displayed in the report:
+
+* `excluded: true` - exclude the parameter from the report
+* `mode: "hidden"` - hide the parameter value, e.g. when it is too long yet still useful for debugging
+* `mode: "masked"` - mask the parameter value, e.g. when it contains sensitive information
+
+The `allure.parameter` API can be used also on the top level, e.g.:
+
+```typescript
+import {allure} from 'jest-allure2-reporter';
+
+describe('Login Screen (New)', () => {
+  allure.parameter('featureToggles', { 'com.ShowNewLogin': 'true' });
+
+  // ...
+});
+
+describe('Login Screen (Legacy)', () => {
+  allure.parameter('featureToggles', { 'com.ShowNewLogin': 'false' });
+
+  // ...
+});
+```

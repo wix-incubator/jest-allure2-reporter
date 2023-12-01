@@ -1,0 +1,37 @@
+---
+description: Distinguish between types of test failures.
+---
+
+# Error handling 🚧
+
+:::caution
+
+This website version refers to the unreleased version of `jest-allure2-reporter`, partially available as `2.0.0-alpha.*` release.
+Please use GitHub docs for the latest stable version, `1.x.x`.
+
+:::
+
+:::danger
+
+This article is just a draft. It is not yet complete, and you should not read it meanwhile :)
+
+:::
+
+There are a few things to know about Jest failures and how they are reported to Allure.
+
+## Early failures
+
+If your test environment setup fails, Jest will not run any tests. If your test file has syntax errors, Jest even won't be able to understand which tests are defined in the file. Therefore, the only way to report these failures is to report them as a test case failure.
+
+```
+TODO: add a screenshot
+```
+
+## `--bail` option
+
+If you use the `--bail` option, Jest will stop running tests after the first failure. This is useful for debugging, but it also means that you will not see all the failures in the report, and the report itself might be incomplete.
+
+```
+TODO: add a screenshot
+```
+

@@ -1,89 +1,81 @@
+[![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner-direct-single.svg)](https://stand-with-ukraine.pp.ua)
+
+<div align="center">
+
+<img src="docs/img/logo-full.svg" height="300" />
+
 # jest-allure2-reporter
+
+Idiomatic Jest reporter for Allure Framework
 
 [![npm version](https://badge.fury.io/js/jest-allure2-reporter.svg)](https://badge.fury.io/js/jest-allure2-reporter)
 [![CI](https://github.com/wix-incubator/jest-allure2-reporter/actions/workflows/ci.yml/badge.svg)](https://github.com/wix-incubator/jest-allure2-reporter/actions/workflows/ci.yml)
 [![semantic-release: angular](https://img.shields.io/badge/semantic--release-angular-e10079?logo=semantic-release)](https://github.com/semantic-release/semantic-release)
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 
-![Example screenshot](docs/example.png)
+</div>
 
 ## Installation
 
-Before you start, make sure you have [Allure CLI](https://docs.qameta.io/allure/#_get_started) installed.
+> This is an express guide to get you started quickly. Please visit [our documentation website] for more information.
 
-Your project should have [`jest`](https://jestjs.io) installed. The minimum supported version is `27.x`.
+Your project should have [`jest`] installed. The minimum supported version is `27.x`.
 
 Run in your project:
 
 ```bash
-npm install --save-dev jest-allure2-reporter
+npm install --save-dev jest-allure2-reporter@alpha
 ```
 
-Edit your `jest.config.js`:
+Edit your Jest config, e.g. `jest.config.js`:
 
 ```diff
+/** @type {import('@jest/types').Config.InitialOptions} */
 module.exports = {
-  // ...
-  reporters: [
-    'default',
-+   'jest-allure2-reporter',
-  ],
+   // ...
+   reporters: [
+     'default',
++    'jest-allure2-reporter',
+   ],
+   // For the most of the features you'll need the custom environment:
++  testEnvironment: 'jest-allure2-reporter/environment-node',
 };
 ```
-
-## Customization
-
-By default, the reporter will write the results to `allure-results` directory. You can change this by setting the `resultsDir` option:
-
-```diff
-module.exports = {
-  // ...
-  reporters: [
-    'default',
-    [
-      'jest-allure2-reporter',
-+     { resultsDir: 'my-results-dir' },
-    ],
-  ],
-};
-```
-
-Below is a list of all the available options:
-
-| Property                   | Type                     | Default                          | Description                                                                                                                                                                                                                                |
-|----------------------------|--------------------------|----------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `errorsAsFailedAssertions` | `boolean`                | `false`                          | Treat thrown errors as failed assertions. By default, the reporter distinguishes between failed assertions and thrown errors. The former are reported as FAILED tests, the latter as BROKEN tests.                                         |
-| `getEnvironmentInfo`       | `function` or `boolean`  | `true`                           | Can be customized with an async function to extract environment information from the test environment. By default, the environment information is extracted from the `process.env` object. Use `false` to disable environment information. |
-| `overwriteResultsDir`      | `boolean`                | `true`                           | Whether the reporter should delete the results directory before running tests.                                                                                                                                                             |
-| `packageName`              | `string`                 | `require('./package.json').name` | Add an extra label to each test case with the package name. Helpful when running tests from multiple packages in a monorepo.                                                                                                               |
-| `resultsDir`               | `string`                 | `<rootDir>/allure-results`       | Path to the directory where the report will be generated.                                                                                                                                                                                  |
 
 ## Usage
 
-Run your tests with `jest` as usual and then view the results:
+Run your tests with `jest` as usual, e.g.:
 
 ```bash
-allure serve
+npm test
 ```
 
-If you use a custom `resultsDir`, you should specify it in the `allure serve` command, e.g.:
+and then view the results:
 
 ```bash
-allure serve your-results-dir # if you use a custom `resultsDir`
+ALLURE_NO_ANALYTICS=1 allure serve
 ```
 
-If you want to generate a static report, e.g., for CI, run:
+![Example screenshot](docs/img/example.png)
+
+If you need to generate a static report, e.g., on CI, run instead:
 
 ```bash
-allure generate
+ALLURE_NO_ANALYTICS=1 allure generate
 ```
 
-For more information, see the [Allure CLI documentation](https://docs.qameta.io/allure/#_get_started).
+Make sure you have `allure` CLI installed beforehand. For more information about it, refer to the official [Allure docs].
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+See the [Contributing] guide on the website.
 
 ## License
 
-[MIT License](LICENSE)
+Licensed under [MIT License].
+
+[`jest`]: https://jestjs.io
+[our documentation website]: https://wix-incubator.github.io/jest-allure2-reporter/
+[Allure docs]: https://docs.qameta.io/allure/#_get_started
+[Contributing]: https://wix-incubator.github.io/jest-allure2-reporter/about/contributing
+[MIT License]: LICENSE

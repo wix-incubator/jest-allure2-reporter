@@ -1,0 +1,123 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AllureRuntime should add attachments within the steps 1`] = `
+{
+  "attachments": [
+    {
+      "name": "attachment1",
+      "source": "/attachments/first",
+      "type": "text/plain",
+    },
+    {
+      "name": "attachment5",
+      "source": "/attachments/fifth",
+      "type": "text/plain",
+    },
+  ],
+  "currentStep": [],
+  "steps": [
+    {
+      "attachments": [
+        {
+          "name": "attachment3",
+          "source": "/attachments/third",
+          "type": "text/plain",
+        },
+      ],
+      "code": "async () => {
+            try {
+                runtime.step('inner step 1', () => {
+                    runtime.attachment('attachment2', 'second', 'text/plain');
+                    const error = new Error('Sync error');
+                    error.stack = 'Test stack';
+                    throw error;
+                });
+            }
+            catch {
+                /* empty */
+            }
+            runtime.step('inner step 2', () => {
+                /* empty */
+            });
+            runtime.attachment('attachment3', 'third', 'text/plain');
+            await innerStep3('fourth').catch(() => {
+                /* empty */
+            });
+        }",
+      "name": "outer step",
+      "stage": "finished",
+      "start": 0,
+      "status": "passed",
+      "statusDetails": undefined,
+      "steps": [
+        {
+          "attachments": [
+            {
+              "name": "attachment2",
+              "source": "/attachments/second",
+              "type": "text/plain",
+            },
+          ],
+          "code": "() => {
+                    runtime.attachment('attachment2', 'second', 'text/plain');
+                    const error = new Error('Sync error');
+                    error.stack = 'Test stack';
+                    throw error;
+                }",
+          "name": "inner step 1",
+          "stage": "finished",
+          "start": 1,
+          "status": "failed",
+          "statusDetails": {
+            "message": "Sync error",
+            "trace": "Test stack",
+          },
+          "stop": 2,
+        },
+        {
+          "code": "() => {
+                /* empty */
+            }",
+          "name": "inner step 2",
+          "stage": "finished",
+          "start": 3,
+          "status": "passed",
+          "statusDetails": undefined,
+          "stop": 4,
+        },
+        {
+          "attachments": [
+            {
+              "name": "attachment4",
+              "source": "/attachments/fourth",
+              "type": "text/plain",
+            },
+          ],
+          "code": "async (message) => {
+            runtime.attachment('attachment4', message, 'text/plain');
+            const error = new Error('Async error');
+            error.stack = 'Test stack';
+            throw error;
+        }",
+          "name": "inner step 3",
+          "parameters": [
+            {
+              "name": "0",
+              "value": "fourth",
+            },
+          ],
+          "stage": "finished",
+          "start": 5,
+          "status": "failed",
+          "statusDetails": {
+            "message": "Async error",
+            "trace": "Test stack",
+          },
+          "stop": 6,
+        },
+      ],
+      "stop": 7,
+    },
+  ],
+}
+`;
