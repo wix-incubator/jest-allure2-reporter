@@ -6,9 +6,9 @@ import type {
   AllureTestStepMetadata,
 } from 'jest-allure2-reporter';
 import type {
-  TestEnvironmentSetupEvent,
-  TestEnvironmentCircusEvent,
   EnvironmentListenerFn,
+  TestEnvironmentCircusEvent,
+  TestEnvironmentSetupEvent,
 } from 'jest-environment-emit';
 
 import { CODE, PREFIX, WORKER_ID } from '../constants';
@@ -16,9 +16,33 @@ import realm from '../realms';
 
 const listener: EnvironmentListenerFn = (context) => {
   context.testEvents
-    .on('test_environment_setup', testEnvironmentSetup)
-    .on('add_hook', addHook)
-    .on('add_test', addTest)
+    .on(
+      'test_environment_setup',
+      function ({ env }: TestEnvironmentSetupEvent) {
+        env.global.__ALLURE__ = realm;
+        state.currentMetadata.set(WORKER_ID, process.env.JEST_WORKER_ID);
+      },
+    )
+    .on('add_hook', function ({ event }) {
+      const code = event.fn.toString();
+      const hidden = code.includes(
+        "during setup, this cannot be null (and it's fine to explode if it is)",
+      );
+
+      const metadata = {
+        code,
+      } as Record<string, unknown>;
+
+      if (hidden) {
+        delete metadata.code;
+        metadata.hidden = true;
+      }
+
+      state.currentMetadata.assign(PREFIX, metadata);
+    })
+    .on('add_test', function ({ event }) {
+      state.currentMetadata.set(CODE, event.fn.toString());
+    })
     .on('test_start', executableStart)
     .on('test_todo', testSkip)
     .on('test_skip', testSkip)
@@ -29,39 +53,10 @@ const listener: EnvironmentListenerFn = (context) => {
     .on('test_fn_start', executableStart)
     .on('test_fn_success', executableSuccess)
     .on('test_fn_failure', executableFailure)
-    .on('teardown', flushFiles);
+    .on('teardown', async function () {
+      await realm.runtime.flush();
+    });
 };
-
-function testEnvironmentSetup({ env }: TestEnvironmentSetupEvent) {
-  env.global.__ALLURE__ = realm;
-  state.currentMetadata.set(WORKER_ID, process.env.JEST_WORKER_ID);
-}
-
-function addHook({
-  event,
-}: TestEnvironmentCircusEvent<Circus.Event & { name: 'add_hook' }>) {
-  const code = event.fn.toString();
-  const hidden = code.includes(
-    "during setup, this cannot be null (and it's fine to explode if it is)",
-  );
-
-  const metadata = {
-    code,
-  } as Record<string, unknown>;
-
-  if (hidden) {
-    delete metadata.code;
-    metadata.hidden = true;
-  }
-
-  state.currentMetadata.assign(PREFIX, metadata);
-}
-
-function addTest({
-  event,
-}: TestEnvironmentCircusEvent<Circus.Event & { name: 'add_test' }>) {
-  state.currentMetadata.set(CODE, event.fn.toString());
-}
 
 // eslint-disable-next-line no-empty-pattern
 function executableStart({}: TestEnvironmentCircusEvent) {
@@ -92,10 +87,6 @@ function executableFailure({
   }
 
   state.currentMetadata.assign(PREFIX, metadata);
-}
-
-async function flushFiles() {
-  await realm.runtime.flush();
 }
 
 // eslint-disable-next-line no-empty-pattern
