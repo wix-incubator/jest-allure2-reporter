@@ -1,2 +1,1 @@
-// Fallback for Jest 27.x.x
-module.exports = require('./dist/environment/listener');
+module.exports = require('./dist/environment/listener').default;

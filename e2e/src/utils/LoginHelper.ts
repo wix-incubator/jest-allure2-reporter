@@ -1,5 +1,3 @@
-import {Attachment, FileAttachment, Step} from 'jest-allure2-reporter';
-
 class LoginHelper {
   #email?: string;
   #password?: string;

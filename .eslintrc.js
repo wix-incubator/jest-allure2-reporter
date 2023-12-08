@@ -77,7 +77,10 @@ module.exports = {
     "coverage",
     "dist",
     "e2e",
+    "package-e2e",
     "website",
-    "/*.js"
+    "/*.js",
+    "/*.mjs",
+    "/*.d.ts"
   ]
 };

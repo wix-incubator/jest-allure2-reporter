@@ -1,5 +1,10 @@
-import { LabelName } from '@noomorph/allure-js-commons';
-
 import { $Label } from './$Label';
 
-export const $Severity = (value: string) => $Label(LabelName.SEVERITY, value);
+export type SeverityType =
+  | 'blocker'
+  | 'critical'
+  | 'normal'
+  | 'minor'
+  | 'trivial';
+
+export const $Severity = (value: SeverityType) => $Label('severity', value);

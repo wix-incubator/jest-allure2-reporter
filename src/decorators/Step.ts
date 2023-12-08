@@ -1,5 +1,4 @@
-import type { ParameterOrString } from 'jest-allure2-reporter';
-
+import type { ParameterOrString } from '../runtime';
 import realm from '../realms';
 
 const allure = realm.runtime;

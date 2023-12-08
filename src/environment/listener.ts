@@ -1,9 +1,9 @@
 import type { Circus } from '@jest/types';
 import { state } from 'jest-metadata';
-import { Stage, Status } from '@noomorph/allure-js-commons';
 import type {
   AllureTestCaseMetadata,
   AllureTestStepMetadata,
+  Status,
 } from 'jest-allure2-reporter';
 import type {
   EnvironmentListenerFn,
@@ -11,8 +11,10 @@ import type {
   TestEnvironmentSetupEvent,
 } from 'jest-environment-emit';
 
-import { CODE, PREFIX, WORKER_ID } from '../constants';
+import * as api from '../api';
+import { CODE, PREFIX, SHARED_CONFIG, WORKER_ID } from '../constants';
 import realm from '../realms';
+import type { SharedReporterConfig } from '../runtime';
 
 const listener: EnvironmentListenerFn = (context) => {
   context.testEvents
@@ -20,6 +22,14 @@ const listener: EnvironmentListenerFn = (context) => {
       'test_environment_setup',
       function ({ env }: TestEnvironmentSetupEvent) {
         env.global.__ALLURE__ = realm;
+        const { injectGlobals } = state.get(
+          SHARED_CONFIG,
+        ) as SharedReporterConfig;
+
+        if (injectGlobals) {
+          Object.assign(env.global, api);
+        }
+
         state.currentMetadata.set(WORKER_ID, process.env.JEST_WORKER_ID);
       },
     )
@@ -62,7 +72,7 @@ const listener: EnvironmentListenerFn = (context) => {
 function executableStart({}: TestEnvironmentCircusEvent) {
   const metadata: AllureTestStepMetadata = {
     start: Date.now(),
-    stage: Stage.RUNNING,
+    stage: 'running',
   };
 
   state.currentMetadata.assign(PREFIX, metadata);
@@ -75,8 +85,8 @@ function executableFailure({
 >) {
   const metadata: AllureTestStepMetadata = {
     stop: Date.now(),
-    stage: Stage.INTERRUPTED,
-    status: Status.FAILED,
+    stage: 'interrupted',
+    status: 'failed',
   };
 
   if (event.error) {
@@ -93,8 +103,8 @@ function executableFailure({
 function executableSuccess({}: TestEnvironmentCircusEvent) {
   const metadata: AllureTestStepMetadata = {
     stop: Date.now(),
-    stage: Stage.FINISHED,
-    status: Status.PASSED,
+    stage: 'finished',
+    status: 'passed',
   };
 
   state.currentMetadata.assign(PREFIX, metadata);
@@ -103,8 +113,8 @@ function executableSuccess({}: TestEnvironmentCircusEvent) {
 function testSkip() {
   const metadata: AllureTestCaseMetadata = {
     stop: Date.now(),
-    stage: Stage.PENDING,
-    status: Status.SKIPPED,
+    stage: 'pending',
+    status: 'skipped',
   };
 
   state.currentMetadata.assign(PREFIX, metadata);
@@ -114,18 +124,18 @@ function testDone({
   event,
 }: TestEnvironmentCircusEvent<Circus.Event & { name: 'test_done' }>) {
   const hasErrors = event.test.errors.length > 0;
-  const errorStatus = event.test.errors.some((errors) => {
+  const errorStatus: Status = event.test.errors.some((errors) => {
     return Array.isArray(errors)
       ? errors.some(isMatcherError)
       : isMatcherError(errors);
   })
-    ? Status.FAILED
-    : Status.BROKEN;
+    ? 'failed'
+    : 'broken';
 
   const metadata: AllureTestCaseMetadata = {
     stop: Date.now(),
-    stage: hasErrors ? Stage.INTERRUPTED : Stage.FINISHED,
-    status: hasErrors ? errorStatus : Status.PASSED,
+    stage: hasErrors ? 'interrupted' : 'finished',
+    status: hasErrors ? errorStatus : 'passed',
   };
 
   state.currentMetadata.assign(PREFIX, metadata);

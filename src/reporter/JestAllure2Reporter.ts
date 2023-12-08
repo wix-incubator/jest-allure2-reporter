@@ -11,18 +11,8 @@ import type {
   TestResult,
 } from '@jest/reporters';
 import { state } from 'jest-metadata';
-import { JestMetadataReporter, query } from 'jest-metadata/reporter';
+import JestMetadataReporter from 'jest-metadata/reporter';
 import rimraf from 'rimraf';
-import type {
-  Attachment,
-  ExecutableItemWrapper,
-  Label,
-  Link,
-  Parameter,
-  Stage,
-  Status,
-  StatusDetails,
-} from '@noomorph/allure-js-commons';
 import { AllureRuntime } from '@noomorph/allure-js-commons';
 import type {
   AllureTestStepMetadata,
@@ -32,15 +22,26 @@ import type {
   ReporterConfig,
   ReporterOptions,
   ResolvedTestStepCustomizer,
-  SharedReporterConfig,
   TestCaseExtractorContext,
   TestStepExtractorContext,
   TestFileExtractorContext,
 } from 'jest-allure2-reporter';
+import type {
+  Attachment,
+  Category,
+  ExecutableItemWrapper,
+  Label,
+  Link,
+  Parameter,
+  Stage,
+  Status,
+  StatusDetails,
+} from '@noomorph/allure-js-commons';
 
 import { resolveOptions } from '../options';
 import { MetadataSquasher, StepExtractor } from '../metadata';
 import { SHARED_CONFIG, START, STOP, WORKER_ID } from '../constants';
+import type { SharedReporterConfig } from '../runtime';
 import { ThreadService } from '../utils/ThreadService';
 import md5 from '../utils/md5';
 
@@ -66,6 +67,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
       resultsDir: this._config.resultsDir,
       overwrite: this._config.overwrite,
       attachments: this._config.attachments,
+      injectGlobals: this._config.injectGlobals,
     } as SharedReporterConfig);
   }
 
@@ -86,7 +88,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
   onTestFileStart(test: Test) {
     super.onTestFileStart(test);
 
-    const testFileMetadata = query.test(test);
+    const testFileMetadata = JestAllure2Reporter.query.test(test);
     const threadId = this._threadService.allocateThread(test.path);
     testFileMetadata.set(WORKER_ID, String(1 + threadId));
     testFileMetadata.set(START, Date.now());
@@ -95,7 +97,8 @@ export class JestAllure2Reporter extends JestMetadataReporter {
   onTestCaseResult(test: Test, testCaseResult: TestCaseResult) {
     const now = Date.now();
     super.onTestCaseResult(test, testCaseResult);
-    const metadata = query.testCaseResult(testCaseResult).lastInvocation!;
+    const metadata =
+      JestAllure2Reporter.query.testCaseResult(testCaseResult).lastInvocation!;
     const stop = metadata.get(STOP, Number.NaN);
     if (Number.isNaN(stop)) {
       metadata.set(STOP, now);
@@ -109,7 +112,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
   ) {
     this._threadService.freeThread(test.path);
 
-    const testFileMetadata = query.test(test);
+    const testFileMetadata = JestAllure2Reporter.query.test(test);
     testFileMetadata.set(STOP, Date.now());
 
     return super.onTestFileResult(test, testResult, aggregatedResult);
@@ -143,7 +146,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
 
     const categories = config.categories(globalContext);
     if (categories) {
-      this._allure.writeCategoriesDefinitions(categories);
+      this._allure.writeCategoriesDefinitions(categories as Category[]);
     }
 
     const squasher = new MetadataSquasher();
@@ -165,7 +168,9 @@ export class JestAllure2Reporter extends JestMetadataReporter {
 
       const testFileContext: TestFileExtractorContext<any> = {
         ...beforeTestFileContext,
-        testFileMetadata: squasher.testFile(query.testResult(testResult)),
+        testFileMetadata: squasher.testFile(
+          JestAllure2Reporter.query.testResult(testResult),
+        ),
       };
 
       await this._callPlugins('testFileContext', testFileContext);
@@ -182,9 +187,9 @@ export class JestAllure2Reporter extends JestMetadataReporter {
             fullName: config.testFile.fullName(testFileContext),
             description: config.testFile.description(testFileContext),
             descriptionHtml: config.testFile.descriptionHtml(testFileContext),
-            status: config.testFile.status(testFileContext),
+            status: config.testFile.status(testFileContext) as string as Status,
             statusDetails: config.testFile.statusDetails(testFileContext),
-            stage: config.testFile.stage(testFileContext),
+            stage: config.testFile.stage(testFileContext) as string as Stage,
             links: config.testFile.links(testFileContext),
             labels: config.testFile.labels(testFileContext),
             parameters: config.testFile.parameters(testFileContext),
@@ -195,7 +200,8 @@ export class JestAllure2Reporter extends JestMetadataReporter {
 
       for (const testCaseResult of testResult.testResults) {
         const allInvocations =
-          query.testCaseResult(testCaseResult).invocations ?? [];
+          JestAllure2Reporter.query.testCaseResult(testCaseResult)
+            .invocations ?? [];
 
         for (const testInvocationMetadata of allInvocations) {
           const testCaseMetadata = squasher.testInvocation(
@@ -223,9 +229,11 @@ export class JestAllure2Reporter extends JestMetadataReporter {
               fullName: config.testCase.fullName(testCaseContext),
               description: config.testCase.description(testCaseContext),
               descriptionHtml: config.testCase.descriptionHtml(testCaseContext),
-              status: config.testCase.status(testCaseContext),
+              status: config.testCase.status(
+                testCaseContext,
+              ) as string as Status,
               statusDetails: config.testCase.statusDetails(testCaseContext),
-              stage: config.testCase.stage(testCaseContext),
+              stage: config.testCase.stage(testCaseContext) as string as Stage,
               links: config.testCase.links(testCaseContext),
               labels: config.testCase.labels(testCaseContext),
               parameters: config.testCase.parameters(testCaseContext),
@@ -361,9 +369,12 @@ export class JestAllure2Reporter extends JestMetadataReporter {
       executable.name = customize.name(testStepContext) ?? executable.name;
       executable.wrappedItem.start = customize.start(testStepContext);
       executable.wrappedItem.stop = customize.stop(testStepContext);
-      executable.stage = customize.stage(testStepContext) ?? executable.stage;
+      executable.stage =
+        (customize.stage(testStepContext) as string as Stage) ??
+        executable.stage;
       executable.status =
-        customize.status(testStepContext) ?? executable.status;
+        (customize.status(testStepContext) as string as Status) ??
+        executable.status;
       executable.statusDetails = customize.statusDetails(testStepContext) ?? {};
 
       executable.wrappedItem.attachments = customize

@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 
-import type { SharedReporterConfig } from 'jest-allure2-reporter';
+import type { SharedReporterConfig } from './SharedReporterConfig';
 
 export interface IAttachmentsHandler {
   placeAttachment(name: string, content?: Buffer | string): string;
@@ -27,6 +27,7 @@ export class AttachmentsHandler implements IAttachmentsHandler {
       getSharedConfig() ?? {
         resultsDir: path.join(os.tmpdir(), 'jest_allure2_reporter'),
         overwrite: false,
+        injectGlobals: true,
         attachments: {
           subDir: 'attachments',
           fileHandler: 'ref',

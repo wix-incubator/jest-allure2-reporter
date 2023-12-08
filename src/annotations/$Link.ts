@@ -1,5 +1,5 @@
 import { $Push } from 'jest-metadata';
-import type { Link } from '@noomorph/allure-js-commons';
+import type { Link } from 'jest-allure2-reporter';
 
 import { LINKS } from '../constants';
 

@@ -1,5 +1,5 @@
-import type { StatusDetails } from '@noomorph/allure-js-commons';
 import stripAnsi from 'strip-ansi';
+import type { StatusDetails } from 'jest-allure2-reporter';
 
 export function stripStatusDetails(
   statusDetails?: StatusDetails,

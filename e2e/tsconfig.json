@@ -4,6 +4,7 @@
     "module": "node16",
     "ignoreDeprecations": "5.0",
     "experimentalDecorators": true,
-    "noEmit": true
+    "noEmit": true,
+    "types": ["node", "jest", "jest-allure2-reporter/globals"]
   }
 }

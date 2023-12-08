@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 import type { Plugin, PluginConstructor } from 'jest-allure2-reporter';
 import { state } from 'jest-metadata';
 import type { Metadata } from 'jest-metadata';
-import type { Label } from '@noomorph/allure-js-commons';
+import type { Label } from 'jest-allure2-reporter';
 
 import { CODE, DESCRIPTION, LABELS } from '../constants';
 import { splitDocblock } from '../utils/splitDocblock';
