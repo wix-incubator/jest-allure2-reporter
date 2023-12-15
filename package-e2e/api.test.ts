@@ -1,4 +1,5 @@
 import {
+  IAllureRuntime,
   Attachment,
   FileAttachment,
   Step,
@@ -37,6 +38,9 @@ $Severity('critical');
 $Tag('e2e');
 $TmsLink('TEST-456');
 test('typings of jest-allure2-reporter/api', async () => {
+  assertType<IAllureRuntime>(allure);
+  assertType<IAllureRuntime>(allure.$bind());
+  assertType<IAllureRuntime>(allure.$bind({ metadata: false, time: true }));
   allure.description('This is a _description_ generated in runtime');
   allure.descriptionHtml('This is a <i>description</i> generated in runtime');
   allure.status('failed');

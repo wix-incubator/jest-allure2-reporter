@@ -30,7 +30,11 @@ import { processMaybePromise } from '../utils/processMaybePromise';
 import { wrapFunction } from '../utils/wrapFunction';
 import { formatString } from '../utils/formatString';
 
-import type { IAllureRuntime, ParameterOptions } from './IAllureRuntime';
+import type {
+  AllureRuntimeBindOptions,
+  IAllureRuntime,
+  ParameterOptions,
+} from './IAllureRuntime';
 import type { IAttachmentsHandler } from './AttachmentsHandler';
 
 export type AllureRuntimeConfig = {
@@ -39,6 +43,10 @@ export type AllureRuntimeConfig = {
   nowProvider: () => number;
 };
 
+const constant =
+  <T>(value: T) =>
+  () =>
+    value;
 const noop = (..._arguments: unknown[]) => void 0;
 
 export class AllureRuntime implements IAllureRuntime {
@@ -57,11 +65,15 @@ export class AllureRuntime implements IAllureRuntime {
     this.#now = config.nowProvider;
   }
 
-  bind(config: Partial<AllureRuntimeConfig>): AllureRuntime {
+  $bind(options?: AllureRuntimeBindOptions): AllureRuntime {
+    const { metadata = true, time = false } = options ?? {};
+
     return new AllureRuntime({
-      attachmentsHandler: config.attachmentsHandler ?? this.#attachmentsHandler,
-      metadataProvider: config.metadataProvider ?? this.#metadataProvider,
-      nowProvider: config.nowProvider ?? this.#now,
+      attachmentsHandler: this.#attachmentsHandler,
+      metadataProvider: metadata
+        ? constant(this.#metadata)
+        : this.#metadataProvider,
+      nowProvider: time ? constant(this.#now()) : this.#now,
     });
   }
 

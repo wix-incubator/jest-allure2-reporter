@@ -9,6 +9,12 @@ import type {
 import type { Function_, MaybePromise } from '../utils/types';
 
 export interface IAllureRuntime {
+  /**
+   * Advanced API for attaching metadata to the same step or test.
+   * Useful when your artifacts are delayed and are created asynchronously.
+   */
+  $bind(options?: AllureRuntimeBindOptions): IAllureRuntime;
+
   description(value: string): void;
 
   descriptionHtml(value: string): void;
@@ -89,3 +95,10 @@ export type AttachmentOptions = {
 export type ParameterOrString = string | Omit<Parameter, 'value'>;
 
 export type ParameterOptions = Pick<Parameter, 'mode' | 'excluded'>;
+
+export type AllureRuntimeBindOptions = {
+  /** @default true */
+  metadata?: boolean;
+  /** @default false */
+  time?: boolean;
+};
