@@ -17,6 +17,7 @@ export function defaultOptions(context: PluginContext): ReporterConfig {
   return {
     overwrite: true,
     resultsDir: 'allure-results',
+    injectGlobals: true,
     attachments: {
       subDir: 'attachments',
       fileHandler: 'ref',

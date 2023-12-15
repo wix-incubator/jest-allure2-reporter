@@ -22,9 +22,8 @@ export const remarkPlugin: PluginConstructor = () => {
         .use(rehypeHighlight.default)
         .use(rehypeStringify.default);
 
-      context.processMarkdown = (markdown: string) => {
-        const result = processor.processSync(markdown);
-        return String(result);
+      context.processMarkdown = async (markdown: string) => {
+        return processor.process(markdown).then((result) => result.toString());
       };
     },
   };

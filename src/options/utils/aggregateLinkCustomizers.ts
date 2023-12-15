@@ -1,10 +1,10 @@
-import type { Link } from '@noomorph/allure-js-commons';
 import type {
   Extractor,
   ExtractorContext,
   TestFileCustomizer,
   TestCaseCustomizer,
 } from 'jest-allure2-reporter';
+import type { Link } from 'jest-allure2-reporter';
 
 type Customizer = TestFileCustomizer | TestCaseCustomizer;
 

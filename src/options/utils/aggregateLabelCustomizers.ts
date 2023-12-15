@@ -1,11 +1,11 @@
 /* eslint-disable unicorn/no-array-reduce */
-import type { Label } from '@noomorph/allure-js-commons';
 import type {
   Extractor,
   ExtractorContext,
   TestFileCustomizer,
   TestCaseCustomizer,
 } from 'jest-allure2-reporter';
+import type { Label } from 'jest-allure2-reporter';
 
 import { asExtractor } from './asExtractor';
 

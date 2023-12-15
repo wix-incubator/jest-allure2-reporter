@@ -1,9 +1,9 @@
 import { state } from 'jest-metadata';
-import type { SharedReporterConfig } from 'jest-allure2-reporter';
 
 import { AllureRuntime } from '../runtime';
 import { SHARED_CONFIG } from '../constants';
-import { AttachmentsHandler } from '../runtime/AttachmentsHandler';
+import { AttachmentsHandler } from '../runtime';
+import type { SharedReporterConfig } from '../runtime';
 
 export class AllureRealm {
   runtime = new AllureRuntime({

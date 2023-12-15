@@ -1,7 +1,6 @@
-import type { Category } from '@noomorph/allure-js-commons';
-import { Status } from '@noomorph/allure-js-commons';
+import type { Category } from 'jest-allure2-reporter';
 
 export const categories: () => Category[] = () => [
-  { name: 'Product defects', matchedStatuses: [Status.FAILED] },
-  { name: 'Test defects', matchedStatuses: [Status.BROKEN] },
+  { name: 'Product defects', matchedStatuses: ['failed'] },
+  { name: 'Test defects', matchedStatuses: ['broken'] },
 ];

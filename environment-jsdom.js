@@ -1,2 +1,1 @@
-// Fallback for Jest 27.x.x
-module.exports = require('./dist/environment/jsdom');
+module.exports = require('./dist/environment/jsdom').default;

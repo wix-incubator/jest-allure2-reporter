@@ -1,24 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
 import type { Config, TestCaseResult, TestResult } from '@jest/reporters';
-import type {
-  Attachment,
-  Category,
-  ExecutorInfo,
-  Label,
-  LabelName,
-  Link,
-  LinkType,
-  Parameter,
-  ParameterOptions,
-  Severity,
-  Stage,
-  Status,
-  StatusDetails,
-} from '@noomorph/allure-js-commons';
-
-import type { Function_, MaybePromise } from './utils/types';
-import type { JestAllure2Reporter } from './src';
+import JestMetadataReporter from 'jest-metadata/reporter';
 
 declare module 'jest-allure2-reporter' {
   /**
@@ -65,6 +48,14 @@ declare module 'jest-allure2-reporter' {
      */
     resultsDir?: string;
     /**
+     * Inject Allure's global variables into the test environment.
+     * Those who don't want to pollute the global scope can disable this option
+     * and import the `jest-allure2-reporter/api` module in their test files.
+     *
+     * @default true
+     */
+    injectGlobals?: boolean;
+    /**
      * Configures how external attachments are attached to the report.
      */
     attachments?: AttachmentsOptions;
@@ -108,6 +99,7 @@ declare module 'jest-allure2-reporter' {
   export type ReporterConfig = {
     overwrite: boolean;
     resultsDir: string;
+    injectGlobals: boolean;
     attachments: Required<AttachmentsOptions>;
     categories: CategoriesCustomizer;
     environment: EnvironmentCustomizer;
@@ -117,11 +109,6 @@ declare module 'jest-allure2-reporter' {
     testStep: ResolvedTestStepCustomizer;
     plugins: Promise<Plugin[]>;
   };
-
-  export type SharedReporterConfig = Pick<
-    ReporterConfig,
-    'resultsDir' | 'overwrite' | 'attachments'
-  >;
 
   export type _LabelName =
     | 'package'
@@ -346,12 +333,6 @@ declare module 'jest-allure2-reporter' {
     parameters: TestFileExtractor<Parameter[]>;
   }
 
-  /**
-   * Global customizations for how test cases are reported
-   * @inheritDoc
-   */
-  export type TestCaseCustomizer = GenericTestCaseCustomizer<TestCaseExtractor>;
-
   export type ResolvedTestFileCustomizer = Required<TestFileCustomizer> & {
     labels: TestFileExtractor<Label[]>;
     links: TestFileExtractor<Link[]>;
@@ -519,7 +500,7 @@ declare module 'jest-allure2-reporter' {
 
   export interface GlobalExtractorContextAugmentation {
     detectLanguage?(filePath: string, contents: string): string | undefined;
-    processMarkdown?(markdown: string): MaybePromise<string>;
+    processMarkdown?(markdown: string): Promise<string>;
 
     // This should be extended by plugins
   }
@@ -583,125 +564,89 @@ declare module 'jest-allure2-reporter' {
     | 'testCaseContext'
     | 'testStepContext';
 
-  export interface IAllureRuntime {
-    flush(): Promise<void>;
+  //region Allure types
 
-    description(value: string): void;
-
-    descriptionHtml(value: string): void;
-
-    status(status: Status, statusDetails?: StatusDetails): void;
-
-    statusDetails(statusDetails: StatusDetails): void;
-
-    label(name: LabelName | string, value: string): void;
-
-    link(name: string, url: string, type?: string): void;
-
-    parameter(name: string, value: unknown, options?: ParameterOptions): void;
-
-    parameters(parameters: Record<string, unknown>): void;
-
-    attachment<T extends AttachmentContent>(
-      name: string,
-      content: MaybePromise<T>,
-      mimeType?: string,
-    ): typeof content;
-
-    createAttachment<T extends AttachmentContent>(
-      function_: Function_<MaybePromise<T>>,
-      name: string,
-    ): typeof function_;
-    createAttachment<T extends AttachmentContent>(
-      function_: Function_<MaybePromise<T>>,
-      options: AttachmentOptions,
-    ): typeof function_;
-
-    fileAttachment(filePath: string, name?: string): string;
-    fileAttachment(filePath: string, options?: AttachmentOptions): string;
-    fileAttachment(
-      filePathPromise: Promise<string>,
-      name?: string,
-    ): Promise<string>;
-    fileAttachment(
-      filePathPromise: Promise<string>,
-      options?: AttachmentOptions,
-    ): Promise<string>;
-
-    createFileAttachment(
-      function_: Function_<MaybePromise<string>>,
-    ): typeof function_;
-    createFileAttachment(
-      function_: Function_<MaybePromise<string>>,
-      name: string,
-    ): typeof function_;
-    createFileAttachment(
-      function_: Function_<MaybePromise<string>>,
-      options: AttachmentOptions,
-    ): typeof function_;
-
-    createStep<F extends Function>(name: string, function_: F): F;
-    createStep<F extends Function>(
-      name: string,
-      arguments_: ParameterOrString[],
-      function_: F,
-    ): F;
-
-    step<T>(name: string, function_: () => T): T;
+  export interface Attachment {
+    name: string;
+    type: string;
+    source: string;
   }
 
-  export type ParameterOrString = string | Omit<Parameter, 'value'>;
-
-  export type AttachmentContent = Buffer | string;
-
-  export type AttachmentOptions = {
+  export interface Category {
     name?: string;
-    mimeType?: string;
-  };
+    description?: string;
+    descriptionHtml?: string;
+    messageRegex?: string | RegExp;
+    traceRegex?: string | RegExp;
+    matchedStatuses?: Status[];
+    flaky?: boolean;
+  }
 
-  // Reporter
-  export const reporter: JestAllure2Reporter;
-  export default reporter;
+  export interface ExecutorInfo {
+    name?: string;
+    type?:
+      | 'jenkins'
+      | 'bamboo'
+      | 'teamcity'
+      | 'gitlab'
+      | 'github'
+      | 'circleci'
+      | string;
+    url?: string;
+    buildOrder?: number;
+    buildName?: string;
+    buildUrl?: string;
+    reportUrl?: string;
+    reportName?: string;
+  }
 
-  // Runtime
-  export const allure: IAllureRuntime;
+  export interface Label {
+    name: LabelName | string;
+    value: string;
+  }
 
-  // Pseudo-annotations
-  export const $Description: (description: string) => void;
-  export const $DescriptionHtml: (descriptionHtml: string) => void;
-  export const $Epic: (epic: string) => void;
-  export const $Feature: (feature: string) => void;
-  export const $Issue: (issue: string) => void;
-  export const $Link:
-    | ((link: Link) => void)
-    | ((url: string, name?: string) => void);
-  export const $Owner: (owner: string) => void;
-  export const $Severity: (severity: Severity[keyof Severity]) => void;
-  export const $Story: (story: string) => void;
-  export const $Tag: (...tagNames: string[]) => void;
-  export const $TmsLink: (tmsLink: string) => void;
+  export type LabelName =
+    | 'epic'
+    | 'feature'
+    | 'owner'
+    | 'package'
+    | 'parentSuite'
+    | 'severity'
+    | 'story'
+    | 'subSuite'
+    | 'suite'
+    | 'tag'
+    | 'testClass'
+    | 'testMethod'
+    | 'thread';
 
-  // Decorators
-  export function Attachment(name: string, mimeType?: string): MethodDecorator;
-  export function FileAttachment(
-    name: string,
-    mimeType?: string,
-  ): MethodDecorator;
-  export function Step(
-    name: string,
-    arguments_?: ParameterOrString[],
-  ): MethodDecorator;
+  export interface Link {
+    name?: string;
+    url: string;
+    type?: LinkType | string;
+  }
 
-  // Common types
-  export {
-    Category,
-    Link,
-    LinkType,
-    Parameter,
-    ParameterOptions,
-    ExecutorInfo,
-    Severity,
-    Status,
-    Stage,
-  } from '@noomorph/allure-js-commons';
+  export type LinkType = 'issue' | 'tms';
+
+  export interface Parameter {
+    name: string;
+    value: string;
+    excluded?: boolean;
+    mode?: 'hidden' | 'masked' | 'default';
+  }
+
+  export type Severity = 'blocker' | 'critical' | 'normal' | 'minor' | 'trivial';
+  export type Stage = 'scheduled' | 'running' | 'finished' | 'pending' | 'interrupted';
+  export type Status = 'failed' | 'broken' | 'passed' | 'skipped' | 'unknown';
+
+  export interface StatusDetails {
+    message?: string;
+    trace?: string;
+  }
+
+  //endregion
+}
+
+export default class JestAllure2Reporter extends JestMetadataReporter {
+  constructor(globalConfig: Config.GlobalConfig, options: ReporterOptions);
 }

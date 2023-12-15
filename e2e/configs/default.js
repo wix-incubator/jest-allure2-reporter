@@ -1,6 +1,5 @@
 // eslint-disable-next-line node/no-extraneous-require,@typescript-eslint/no-var-requires,import/no-extraneous-dependencies
 const _ = require('lodash');
-const { Status } = require('jest-allure2-reporter');
 const PRESET = process.env.ALLURE_PRESET ?? 'default';
 
 /** @type {import('jest-allure2-reporter').ReporterOptions} */
@@ -9,12 +8,12 @@ const jestAllure2ReporterOptions = {
   categories: [
     {
       name: 'Snapshot mismatches',
-      matchedStatuses: [Status.FAILED],
+      matchedStatuses: ['failed'],
       messageRegex: /.*\btoMatch(?:[A-Za-z]+)?Snapshot\b.*/,
     },
     {
       name: 'Timeouts',
-      matchedStatuses: [Status.BROKEN],
+      matchedStatuses: ['broken'],
       messageRegex: /.*Exceeded timeout of.*/,
     },
   ],

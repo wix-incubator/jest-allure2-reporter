@@ -2,14 +2,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import type { TestResult } from '@jest/reporters';
-import type { Label, Link, StatusDetails } from '@noomorph/allure-js-commons';
-import { Stage, Status } from '@noomorph/allure-js-commons';
 import type {
   ExtractorContext,
   TestFileExtractorContext,
   ResolvedTestFileCustomizer,
   TestCaseCustomizer,
 } from 'jest-allure2-reporter';
+import type { Label, Link, StatusDetails } from 'jest-allure2-reporter';
 
 import {
   aggregateLabelCustomizers,
@@ -38,9 +37,9 @@ export const testFile: ResolvedTestFileCustomizer = {
   descriptionHtml: () => void 0,
   start: ({ testFileMetadata }) => testFileMetadata.start,
   stop: ({ testFileMetadata }) => testFileMetadata.stop,
-  stage: () => Stage.FINISHED,
+  stage: () => 'finished',
   status: ({ testFile }: TestFileExtractorContext) =>
-    testFile.testExecError ? Status.BROKEN : Status.PASSED,
+    testFile.testExecError ? 'broken' : 'passed',
   statusDetails: ({ testFile }) =>
     stripStatusDetails(getTestFileStatusDetails(testFile)),
   attachments: ({ testFileMetadata }) => testFileMetadata.attachments ?? [],

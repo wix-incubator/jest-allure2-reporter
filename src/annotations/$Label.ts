@@ -1,5 +1,5 @@
-import type { LabelName } from '@noomorph/allure-js-commons';
 import { $Push } from 'jest-metadata';
+import type { LabelName } from 'jest-allure2-reporter';
 
 import { LABELS } from '../constants';
 

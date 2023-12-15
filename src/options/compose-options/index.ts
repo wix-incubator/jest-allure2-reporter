@@ -27,6 +27,7 @@ export function composeOptions(
 
     overwrite: custom.overwrite ?? base.overwrite,
     resultsDir: custom.resultsDir ?? base.resultsDir,
+    injectGlobals: custom.injectGlobals ?? base.injectGlobals,
     attachments: composeAttachments(base.attachments, custom.attachments),
     testCase: composeTestCaseCustomizers(base.testCase, custom.testCase),
     testFile: composeTestFileCustomizers(base.testFile, custom.testFile),

@@ -1,7 +1,7 @@
 import os from 'node:os';
 
 import type { ExecutorCustomizer } from 'jest-allure2-reporter';
-import type { ExecutorInfo } from '@noomorph/allure-js-commons';
+import type { ExecutorInfo } from 'jest-allure2-reporter';
 
 export function executor(): ExecutorCustomizer {
   if (process.env.GITHUB_ACTIONS) return githubActions;

@@ -1,5 +1,3 @@
-import { $Tag } from 'jest-allure2-reporter';
-
 $Tag('client');
 describe('Validators', () => {
   describe('emailValidator', () => {

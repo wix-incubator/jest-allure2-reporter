@@ -1,13 +1,17 @@
 import path from 'node:path';
 
 import type { TestCaseResult } from '@jest/reporters';
-import type { Label, StatusDetails } from '@noomorph/allure-js-commons';
-import { Stage, Status } from '@noomorph/allure-js-commons';
 import type {
   ExtractorContext,
   ResolvedTestCaseCustomizer,
   TestCaseCustomizer,
   TestCaseExtractorContext,
+} from 'jest-allure2-reporter';
+import type {
+  Label,
+  Stage,
+  Status,
+  StatusDetails,
 } from 'jest-allure2-reporter';
 
 import {
@@ -71,21 +75,21 @@ function getTestCaseStatus(testCase: TestCaseResult): Status {
   const hasErrors = testCase.failureMessages?.length > 0;
   switch (testCase.status) {
     case 'passed': {
-      return Status.PASSED;
+      return 'passed';
     }
     case 'failed': {
-      return Status.FAILED;
+      return 'failed';
     }
     case 'skipped': {
-      return Status.SKIPPED;
+      return 'skipped';
     }
     case 'pending':
     case 'todo':
     case 'disabled': {
-      return Status.SKIPPED;
+      return 'skipped';
     }
     case 'focused': {
-      return hasErrors ? Status.FAILED : Status.PASSED;
+      return hasErrors ? 'failed' : 'passed';
     }
     default: {
       return 'unknown' as Status;
@@ -98,16 +102,16 @@ function getTestCaseStage(testCase: TestCaseResult): Stage {
     case 'passed':
     case 'focused':
     case 'failed': {
-      return Stage.FINISHED;
+      return 'finished';
     }
     case 'todo':
     case 'disabled':
     case 'pending':
     case 'skipped': {
-      return Stage.PENDING;
+      return 'pending';
     }
     default: {
-      return Stage.INTERRUPTED;
+      return 'interrupted';
     }
   }
 }

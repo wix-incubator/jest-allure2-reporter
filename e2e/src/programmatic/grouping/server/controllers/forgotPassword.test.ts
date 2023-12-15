@@ -1,5 +1,3 @@
-import { $Epic, $Feature, $Story, $Tag } from 'jest-allure2-reporter';
-
 $Tag('server');
 $Epic('Authentication');
 $Feature('Restore account');

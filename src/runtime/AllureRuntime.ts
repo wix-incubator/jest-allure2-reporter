@@ -1,20 +1,19 @@
 import path from 'node:path';
 
-import type {
-  LabelName,
-  ParameterOptions,
-  StatusDetails,
-} from '@noomorph/allure-js-commons';
-import { Stage, Status } from '@noomorph/allure-js-commons';
 import type { Metadata } from 'jest-metadata';
 import type {
   AllureTestStepMetadata,
-  AttachmentContent,
-  AttachmentOptions,
-  IAllureRuntime,
-  ParameterOrString,
+  LabelName,
+  Stage,
+  Status,
+  StatusDetails,
 } from 'jest-allure2-reporter';
 
+import type {
+  AttachmentContent,
+  AttachmentOptions,
+  ParameterOrString,
+} from '../runtime';
 import {
   CURRENT_STEP,
   DESCRIPTION,
@@ -31,6 +30,7 @@ import { processMaybePromise } from '../utils/processMaybePromise';
 import { wrapFunction } from '../utils/wrapFunction';
 import { formatString } from '../utils/formatString';
 
+import type { IAllureRuntime, ParameterOptions } from './IAllureRuntime';
 import type { IAttachmentsHandler } from './AttachmentsHandler';
 
 export type AllureRuntimeConfig = {
@@ -73,7 +73,7 @@ export class AllureRuntime implements IAllureRuntime {
     this.#metadata.push(LABELS, [{ name, value }]);
   }
 
-  link(name: string, url: string, type?: string) {
+  link(url: string, name = url, type?: string) {
     this.#metadata.push(LINKS, [{ name, url, type }]);
   }
 
@@ -151,20 +151,20 @@ export class AllureRuntime implements IAllureRuntime {
       result = function_();
 
       if (isPromiseLike(result)) {
-        this.#updateStep(Stage.RUNNING);
+        this.#updateStep('running');
 
         result.then(
-          () => end(Status.PASSED),
+          () => end('passed'),
           (error) =>
-            end(Status.FAILED, { message: error.message, trace: error.stack }),
+            end('failed', { message: error.message, trace: error.stack }),
         );
       } else {
-        end(Status.PASSED);
+        end('passed');
       }
 
       return result;
     } catch (error: unknown) {
-      end(Status.FAILED, {
+      end('failed', {
         message: (error as Error).message,
         trace: (error as Error).stack,
       });
@@ -218,7 +218,7 @@ export class AllureRuntime implements IAllureRuntime {
     this.#metadata.push(this.#localPath('steps'), [
       {
         name,
-        stage: Stage.SCHEDULED,
+        stage: 'scheduled',
         start: this.#now(),
         code: function_.toString(),
       },
@@ -231,7 +231,7 @@ export class AllureRuntime implements IAllureRuntime {
     const existing = this.#metadata.get(this.#localPath(), {} as any);
 
     this.#metadata.assign(this.#localPath(), {
-      stage: Stage.FINISHED,
+      stage: 'finished',
       status: existing.status ?? status,
       statusDetails: existing.statusDetails ?? statusDetails,
       stop: this.#now(),
