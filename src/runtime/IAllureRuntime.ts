@@ -9,9 +9,6 @@ import type {
 import type { Function_, MaybePromise } from '../utils/types';
 
 export interface IAllureRuntime {
-  // TODO: hide this method
-  flush(): Promise<void>;
-
   description(value: string): void;
 
   descriptionHtml(value: string): void;

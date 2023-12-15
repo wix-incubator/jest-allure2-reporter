@@ -57,6 +57,14 @@ export class AllureRuntime implements IAllureRuntime {
     this.#now = config.nowProvider;
   }
 
+  bind(config: Partial<AllureRuntimeConfig>): AllureRuntime {
+    return new AllureRuntime({
+      attachmentsHandler: config.attachmentsHandler ?? this.#attachmentsHandler,
+      metadataProvider: config.metadataProvider ?? this.#metadataProvider,
+      nowProvider: config.nowProvider ?? this.#now,
+    });
+  }
+
   async flush(): Promise<void> {
     await this.#idle;
   }
