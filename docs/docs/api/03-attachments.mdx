@@ -30,7 +30,7 @@ The simplest way to start with attachments is to use the built-in ones:
   <TabItem value="function" label="DSL">
 
 ```js
-import { allure } from 'jest-allure2-reporter';
+import { allure } from 'jest-allure2-reporter/api';
 
 test('Sample test', async () => {
   await allure.attachment('My attachment', 'This is a simple text attachment', 'text/plain');
@@ -54,7 +54,7 @@ For advanced use cases, you may want to create your own custom attachments:
 Using `allure.attachment` function is the most straightforward way to add a custom attachment:
 
 ```js
-import { allure } from 'jest-allure2-reporter';
+import { allure } from 'jest-allure2-reporter/api';
 
 test('Sample test', async () => {
   const myData = JSON.stringify({a: 1, b: 2});
@@ -70,7 +70,7 @@ The disadvantage of this approach is that it is less flexible and more verbose f
 The `allure.createAttachment` function provides a more advanced way to define a custom attachment:
 
 ```js
-import { allure } from 'jest-allure2-reporter';
+import { allure } from 'jest-allure2-reporter/api';
 
 const attachJson = allure.createAttachment('JSON attachment', (data) => {
   return JSON.stringify(data);
@@ -90,7 +90,7 @@ The `allure.createAttachment` function is particularly useful for reusable attac
 For aspect-oriented programmers, there is a decorator-based approach:
 
 ```js
-import { Attachment } from 'jest-allure2-reporter';
+import { Attachment } from 'jest-allure2-reporter/api';
 
 class DeviceHelper {
   @Attachment('device-status-%s.json', 'application/json')

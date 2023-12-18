@@ -80,7 +80,7 @@ describe('Login controller', () => {
   <TabItem value="dsl" label="DSL">
 
 ```js title="login.test.js"
-import { $Epic, $Feature, $Story } from 'jest-allure2-reporter';
+import { $Epic, $Feature, $Story } from 'jest-allure2-reporter/api';
 
 $Epic('Authentication');
 $Feature('Login screen');
@@ -136,7 +136,7 @@ module.exports = {
     'default',
     [
       'jest-allure2-reporter',
-      /** @type {import('jest-allure2-reporter').Options} */
+      /** @type {import('jest-allure2-reporter').ReporterOptions} */
       {
         labels: {
           epic: ({ value }) => value ?? 'Uncategorized',
@@ -176,7 +176,7 @@ module.exports = {
   testEnvironment: 'jest-allure2-reporter/environment-node',
   reporters: [
     'default',
-    ['jest-allure2-reporter', /** @type {import('jest-allure2-reporter').Options}*/ {
+    ['jest-allure2-reporter', /** @type {import('jest-allure2-reporter').ReporterOptions}*/ {
       labels: {
         epic: ({ testCase }) => testCase.ancestorTitles.at(0) ?? '(uncategorized)',
         feature: ({ testCase }) => testCase.ancestorTitles.slice(1, -1).join(' > ') || '(uncategorized)',

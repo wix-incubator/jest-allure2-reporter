@@ -58,7 +58,7 @@ afterAll(async () => {
   <TabItem value="dsl" label="DSL">
 
 ```js
-import { $Description } from 'jest-allure2-reporter';
+import { $Description } from 'jest-allure2-reporter/api';
 
 $Description('Launch the browser for all tests')
 beforeAll(async () => {
@@ -110,7 +110,7 @@ There are several ways to turn your functions into steps:
 Using `allure.step` function is the simplest way to define a step:
 
 ```js
-import { allure } from 'jest-allure2-reporter';
+import { allure } from 'jest-allure2-reporter/api';
 
 test('Login test', async () => {
   await allure.step('Open login page', async () => {
@@ -138,7 +138,7 @@ A more advanced technique is to wrap your functions with `allure.createStep`,
 which allows you to reuse steps in other tests and add parameters:
 
 ```js
-import { allure } from 'jest-allure2-reporter';
+import { allure } from 'jest-allure2-reporter/api';
 
 export const open = allure.createStep('Open login page', async () => {
   // ...
@@ -164,7 +164,7 @@ For aspect-oriented programmers, there is a decorator-based approach. It works o
 but otherwise it's similar to `allure.createStep`:
 
 ```js
-import { Step } from 'jest-allure2-reporter';
+import { Step } from 'jest-allure2-reporter/api';
 
 class LoginPageObject {
   @Step('Open login page')
@@ -200,7 +200,7 @@ In some cases, you might want to have control over the step status and its statu
   <TabItem value="logStep">
 
 ```js
-import { allure, Status } from 'jest-allure2-reporter';
+import { allure } from 'jest-allure2-reporter/api';
 
 test('Login test', async () => {
   try {
@@ -213,7 +213,7 @@ test('Login test', async () => {
       );
 
       if (isRecoverable()) {
-        allure.status(Status.SKIPPED, {
+        allure.status('skipped', {
           message: error.message,
           trace: error.stack,
         });

@@ -55,7 +55,7 @@ describe('Sanity: Dashboard', () => {
   <TabItem value="dsl" label="DSL">
 
 ```js
-import { allure } from 'jest-allure2-reporter';
+import { allure } from 'jest-allure2-reporter/api';
 
 allure.owner('John Doe <john.doe@example.com>');
 
@@ -98,7 +98,7 @@ Please note that you have to put the JSDoc comment inside the test suite functio
   <TabItem value="dsl" label="DSL">
 
 ```js
-import { $Owner } from 'jest-allure2-reporter';
+import { $Owner } from 'jest-allure2-reporter/api';
 
 $Owner('John Doe <john.doe@example.com>');
 describe('Sanity: Login flow', () => {

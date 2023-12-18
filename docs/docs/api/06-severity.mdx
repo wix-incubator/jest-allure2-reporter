@@ -60,7 +60,7 @@ describe('Sanity: Dashboard', () => {
   <TabItem value="dsl" label="DSL">
 
 ```js
-import { allure } from 'jest-allure2-reporter';
+import { allure } from 'jest-allure2-reporter/api';
 
 allure.severity('critical');
 
@@ -120,7 +120,7 @@ Please note that you have to put the JSDoc comment inside the test suite functio
   <TabItem value="dsl" label="DSL">
 
 ```js
-import { $Severity } from 'jest-allure2-reporter';
+import { $Severity } from 'jest-allure2-reporter/api';
 
 $Severity('blocker')
 describe('Sanity: Login flow', () => {

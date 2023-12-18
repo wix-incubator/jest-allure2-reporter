@@ -45,7 +45,7 @@ module.exports = {
   testEnvironment: 'jest-allure2-reporter/environment-node',
   reporters: [
     'default',
-    ['jest-allure2-reporter', /** @type {import('jest-allure2-reporter').Options}*/ {
+    ['jest-allure2-reporter', /** @type {import('jest-allure2-reporter').ReporterOptions}*/ {
       labels: {
         package: ({ manifest }) => manifest.name,
         // ⚠️ `testClass` won't work due to the aforementioned issue
@@ -94,7 +94,7 @@ module.exports = {
   reporters: [
     'default',
     ['jest-allure2-reporter',
-    /** @type {import('jest-allure2-reporter').Options}*/
+    /** @type {import('jest-allure2-reporter').ReporterOptions}*/
     {
       labels: {
         package: ({ filePath }) => filePath.slice(0, -1).join('.'),

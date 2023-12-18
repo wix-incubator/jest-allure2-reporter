@@ -82,7 +82,7 @@ Pseudo-annotations must be **before** the `test` statement to work.
 :::
 
 ```js
-import { $Description } from 'jest-allure2-reporter';
+import { $Description } from 'jest-allure2-reporter/api';
 
 $Description('This test demonstrates the `+` operator.')
 test('should add two numbers', () => {
@@ -128,7 +128,7 @@ afterEach(() => {
   <TabItem value="dsl" label="DSL">
 
 ```js
-import { $Description } from 'jest-allure2-reporter';
+import { $Description } from 'jest-allure2-reporter/api';
 
 $Description('This hook runs before all tests.')
 beforeAll(() => {
@@ -165,7 +165,7 @@ Due to Jest limitations, you can't use docblocks on a suite level, so the only w
   <TabItem value="dsl" label="DSL">
 
 ```js
-import { $Description } from 'jest-allure2-reporter';
+import { $Description } from 'jest-allure2-reporter/api';
 
 $Description('The test is operating on `/login` page.')
 describe('Sanity: Login flow', () => {
@@ -201,7 +201,7 @@ In many cases you may find it acceptable to describe the whole test file, which 
  * @description
  * The test is operating on `/login` page.
  */
-import { $Description } from 'jest-allure2-reporter';
+import { $Description } from 'jest-allure2-reporter/api';
 
 describe('Sanity: Login flow', () => {
   it('should login with valid credentials', () => {
@@ -226,7 +226,7 @@ You **must** use `@desc` or `@description` pragma due to Jest limitations regard
   <TabItem value="dsl" label="DSL">
 
 ```js
-import { allure } from 'jest-allure2-reporter';
+import { allure } from 'jest-allure2-reporter/api';
 
 allure.description('The test is operating on `/login` page.')
 
@@ -282,7 +282,7 @@ module.exports = {
     'default',
     [
       'jest-allure2-reporter',
-      /** @type {import('jest-allure2-reporter').Options} */
+      /** @type {import('jest-allure2-reporter').ReporterOptions} */
       {
         testCase: {
           description: ({ testCaseMetadata }) => [
@@ -312,7 +312,7 @@ module.exports = {
     'default',
     [
       'jest-allure2-reporter',
-      /** @type {import('jest-allure2-reporter').Options} */
+      /** @type {import('jest-allure2-reporter').ReporterOptions} */
       {
         testCase: {
           description: () => {}, // suppress the default template

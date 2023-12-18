@@ -14,7 +14,7 @@ Please use GitHub docs for the latest stable version, `1.x.x`.
 Utilize parameterized testing to avoid code duplication and reduce your maintenance costs:
 
 ```js
-import {allure} from 'jest-allure2-reporter';
+import {allure} from 'jest-allure2-reporter/api';
 
 test.each([
   [1, 1, 2],
@@ -51,7 +51,7 @@ The options allow you to fine-tune the way your parameters are displayed in the 
 The `allure.parameter` API can be used also on the top level, e.g.:
 
 ```typescript
-import {allure} from 'jest-allure2-reporter';
+import {allure} from 'jest-allure2-reporter/api';
 
 describe('Login Screen (New)', () => {
   allure.parameter('featureToggles', { 'com.ShowNewLogin': 'true' });

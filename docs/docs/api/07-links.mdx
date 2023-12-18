@@ -23,7 +23,7 @@ In Allure reports, you can add different types of links to your test cases for b
 There are two ways to add links to your test cases:
 
 * declaratively, using JSDoc annotations such as `@link`, `@issue`, and `@tms`;
-* programmatically, using annotation functions from the 'jest-allure2-reporter' package such as `$Link`, `$Issue`, and `$TmsLink`.
+* programmatically, using annotation functions from the 'jest-allure2-reporter/api' package such as `$Link`, `$Issue`, and `$TmsLink`.
 
 ## Issue Links
 
@@ -46,7 +46,7 @@ it('should validate non-ASCII passwords', () => {
   <TabItem value="dsl" label="DSL">
 
 ```js
-import { $Issue } from 'jest-allure2-reporter';
+import { $Issue } from 'jest-allure2-reporter/api';
 
 // A customer ticket from our Support team.
 $Issue('AUTH-123');
@@ -82,7 +82,7 @@ it('should be connected to TMS', () => {
   <TabItem value="dsl" label="DSL">
 
 ```js
-import { $TmsLink } from 'jest-allure2-reporter';
+import { $TmsLink } from 'jest-allure2-reporter/api';
 
 $TmsLink('TMS-123');
 it('should be connected to TMS', () => {
@@ -117,7 +117,7 @@ it('should demonstrate how the links work', () => {
   <TabItem value="dsl" label="DSL">
 
 ```js
-import { $Link } from 'jest-allure2-reporter';
+import { $Link } from 'jest-allure2-reporter/api';
 
 $Link('https://example.com/custom');
 it('should demonstrate how the links work', () => {
@@ -150,7 +150,7 @@ it('should demonstrate how the links work', () => {
   <TabItem value="dsl" label="DSL">
 
 ```js
-import { $Link } from 'jest-allure2-reporter';
+import { $Link } from 'jest-allure2-reporter/api';
 
 $Link('docs', 'features/links');
 it('should demonstrate how the links work', () => {
