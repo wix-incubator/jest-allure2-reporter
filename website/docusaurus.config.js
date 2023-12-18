@@ -79,13 +79,7 @@ const config = {
             label: 'Docs',
           },
           {
-            type: 'docSidebar',
-            sidebarId: 'referenceSidebar',
-            position: 'left',
-            label: 'Reference',
-          },
-          {
-            href: 'https://allure-framework.github.io/allure-demo/5/',
+            href: 'https://allure-report-20231215124928.surge.sh/',
             label: 'Demo',
             position: 'left',
           },
@@ -113,10 +107,6 @@ const config = {
               {
                 label: 'API',
                 to: '/docs/api',
-              },
-              {
-                label: 'Reference',
-                to: '/docs/reference',
               },
             ],
           },
