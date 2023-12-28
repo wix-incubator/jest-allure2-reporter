@@ -110,21 +110,6 @@ declare module 'jest-allure2-reporter' {
     plugins: Promise<Plugin[]>;
   };
 
-  export type _LabelName =
-    | 'package'
-    | 'testClass'
-    | 'testMethod'
-    | 'parentSuite'
-    | 'suite'
-    | 'subSuite'
-    | 'epic'
-    | 'feature'
-    | 'story'
-    | 'thread'
-    | 'severity'
-    | 'tag'
-    | 'owner';
-
   export type AttachmentsOptions = {
     /**
      * Defines a subdirectory within the {@link ReporterOptions#resultsDir} where attachments will be stored.
@@ -210,8 +195,8 @@ declare module 'jest-allure2-reporter' {
     labels:
       | TestCaseExtractor<Label[]>
       | Record<
-          _LabelName | string,
-          TestCaseExtractor<string[], string | string[]>
+          LabelName | string,
+          string | string[] | TestCaseExtractor<string[], string | string[]>
         >;
     /**
      * Resolve issue links for the test case.
@@ -305,8 +290,8 @@ declare module 'jest-allure2-reporter' {
     labels:
       | TestFileExtractor<Label[]>
       | Record<
-          _LabelName | string,
-          TestFileExtractor<string[], string | string[]>
+          LabelName | string,
+          string | string[] | TestFileExtractor<string[], string | string[]>
         >;
     /**
      * Resolve issue links for the test file.

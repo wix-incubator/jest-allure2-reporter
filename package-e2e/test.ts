@@ -19,6 +19,26 @@ assertType<ReporterOptions>({
     subDir: 'attachments',
     fileHandler: 'copy',
   },
+  testFile: {
+    labels: {
+      tag: ['unit', 'javascript'],
+      package: 'Some Package',
+      severity: (context) => context.value ?? 'critical',
+    },
+    links: {
+      github: ({ filePath }) => ({
+        name: 'GitHub',
+        url: `https://github.com/owner/repo/tree/master/${filePath.join('/')}`,
+      }),
+    },
+  },
+  testCase: {
+    labels: {
+      tag: ['unit', 'javascript'],
+      severity: 'normal',
+      story: () => 'Some Story',
+    },
+  },
 });
 
 assertType<Function>($Owner);

@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "test": "node test.cjs && node test.mjs && tsc",
+    "test": "node test.cjs && node test.mjs && tsc && tsc -p tsconfig.isolated.json",
     "test:cjs": "node test.cjs",
     "test:mjs": "node test.mjs",
     "test:ts": "tsc && tsc -p tsconfig.isolated.json"
