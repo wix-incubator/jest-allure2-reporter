@@ -1,4 +1,5 @@
 import type {
+  AttachmentsOptions as AttachmentsConfigOptions,
   LabelName,
   LinkType,
   Parameter,
@@ -49,18 +50,18 @@ export interface IAllureRuntime {
     F extends Function_<MaybePromise<T>>,
   >(
     function_: F,
-    options: AttachmentOptions,
+    options: ContentAttachmentOptions,
   ): typeof function_;
 
   fileAttachment(filePath: string, name?: string): string;
-  fileAttachment(filePath: string, options?: AttachmentOptions): string;
+  fileAttachment(filePath: string, options?: FileAttachmentOptions): string;
   fileAttachment(
     filePathPromise: Promise<string>,
     name?: string,
   ): Promise<string>;
   fileAttachment(
     filePathPromise: Promise<string>,
-    options?: AttachmentOptions,
+    options?: FileAttachmentOptions,
   ): Promise<string>;
 
   createFileAttachment<F extends Function_<MaybePromise<string>>>(
@@ -72,7 +73,7 @@ export interface IAllureRuntime {
   ): F;
   createFileAttachment<F extends Function_<MaybePromise<string>>>(
     function_: F,
-    options: AttachmentOptions,
+    options: FileAttachmentOptions,
   ): F;
 
   createStep<F extends Function>(name: string, function_: F): F;
@@ -85,11 +86,16 @@ export interface IAllureRuntime {
   step<T>(name: string, function_: () => T): T;
 }
 
-export type AttachmentContent = Buffer | string;
+export type FileAttachmentOptions = {
+  name?: AttachmentContext['name'];
+  mimeType?: AttachmentContext['mimeType'];
+  handler?: AttachmentsConfigOptions['fileHandler'];
+};
 
-export type AttachmentOptions = {
-  name?: string;
-  mimeType?: string;
+export type ContentAttachmentOptions = {
+  name?: AttachmentContext['name'];
+  mimeType?: AttachmentContext['mimeType'];
+  handler?: AttachmentsConfigOptions['contentHandler'];
 };
 
 export type ParameterOrString = string | Omit<Parameter, 'value'>;
@@ -102,3 +108,40 @@ export type AllureRuntimeBindOptions = {
   /** @default false */
   time?: boolean;
 };
+
+export interface AttachmentContext {
+  outDir: string;
+  name?: string;
+  mimeType?: string;
+}
+
+export interface FileAttachmentContext extends AttachmentContext {
+  fileHandlers: Record<string, FileAttachmentHandler>;
+  sourcePath: string;
+}
+
+export interface ContentAttachmentContext extends AttachmentContext {
+  contentHandlers: Record<string, ContentAttachmentHandler>;
+  content: AttachmentContent;
+}
+
+export type AttachmentContent = Buffer | string;
+
+export type FileAttachmentHandler = (
+  context: FileAttachmentContext,
+) => string | Promise<string>;
+
+export type ContentAttachmentHandler = (
+  context: ContentAttachmentContext,
+) => string | Promise<string>;
+
+export interface MIMEInfererContext {
+  sourcePath?: string;
+  content?: AttachmentContent;
+}
+
+export interface RuntimeAugmentation {
+  contentAttachmentHandlers: Record<string, ContentAttachmentHandler>;
+  fileAttachmentHandlers: Record<string, FileAttachmentHandler>;
+  inferMimeType?: (context: MIMEInfererContext) => string | undefined;
+}

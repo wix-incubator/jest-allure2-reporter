@@ -3,7 +3,7 @@ import { state } from 'jest-metadata';
 import { PREFIX } from '../constants';
 
 import { AllureRuntime } from './AllureRuntime';
-import type { IAttachmentsHandler } from './AttachmentsHandler';
+import type { IAttachmentsHandler } from './attachments/AttachmentsHandler';
 
 describe('AllureRuntime', () => {
   it('should add attachments within the steps', async () => {

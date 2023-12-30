@@ -117,18 +117,26 @@ declare module 'jest-allure2-reporter' {
      */
     subDir?: string;
     /**
-     * Specifies strategy for attaching files to the report by their path.
+     * Specifies default strategy for attaching files to the report by their path.
      * - `copy` - copy the file to {@link AttachmentsOptions#subDir}
      * - `move` - move the file to {@link AttachmentsOptions#subDir}
      * - `ref` - use the file path as is
      * @default 'ref'
      * @see {@link AllureRuntime#createFileAttachment}
      */
-    fileHandler?: BuiltinFileHandler;
+    fileHandler?: BuiltinFileAttachmentHandler | string;
+    /**
+     * Specifies default strategy for attaching dynamic content to the report.
+     * Uses simple file writing by default.
+     */
+    contentHandler?: BuiltinContentAttachmentHandler | string;
   };
 
   /** @see {@link AttachmentsOptions#fileHandler} */
-  export type BuiltinFileHandler = 'copy' | 'move' | 'ref';
+  export type BuiltinFileAttachmentHandler = 'copy' | 'move' | 'ref';
+
+  /** @see {@link AttachmentsOptions#contentHandler} */
+  export type BuiltinContentAttachmentHandler = 'write';
 
   /**
    * Global customizations for how test cases are reported

@@ -6,5 +6,5 @@ export {
 } from './IAllureRuntime';
 
 export * from './AllureRuntime';
-export * from './AttachmentsHandler';
+export * from './attachments/AttachmentsHandler';
 export * from './SharedReporterConfig';

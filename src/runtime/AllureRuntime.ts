@@ -3,6 +3,10 @@ import path from 'node:path';
 import type { Metadata } from 'jest-metadata';
 import type {
   AllureTestStepMetadata,
+  ContentAttachmentHandler,
+  ContentAttachmentContext,
+  FileAttachmentHandler,
+  FileAttachmentContext,
   LabelName,
   Stage,
   Status,
@@ -31,14 +35,14 @@ import { wrapFunction } from '../utils/wrapFunction';
 import { formatString } from '../utils/formatString';
 
 import type {
-  AllureRuntimeBindOptions,
+  AllureRuntimeBindOptions, ContentAttachmentOptions, FileAttachmentOptions,
   IAllureRuntime,
   ParameterOptions,
 } from './IAllureRuntime';
-import type { IAttachmentsHandler } from './AttachmentsHandler';
 
 export type AllureRuntimeConfig = {
-  attachmentsHandler: IAttachmentsHandler;
+  contentHandlers: Record<string, ContentAttachmentHandler>;
+  fileHandlers: Record<string, FileAttachmentHandler>;
   metadataProvider: () => Metadata;
   nowProvider: () => number;
 };
@@ -50,7 +54,8 @@ const constant =
 const noop = (..._arguments: unknown[]) => void 0;
 
 export class AllureRuntime implements IAllureRuntime {
-  readonly #attachmentsHandler: AllureRuntimeConfig['attachmentsHandler'];
+  readonly #contentHandlers: AllureRuntimeConfig['contentHandlers'];
+  readonly #fileHandlers: AllureRuntimeConfig['fileHandlers'];
   readonly #metadataProvider: AllureRuntimeConfig['metadataProvider'];
   readonly #now: AllureRuntimeConfig['nowProvider'];
   #idle = Promise.resolve();
@@ -60,7 +65,8 @@ export class AllureRuntime implements IAllureRuntime {
   }
 
   constructor(config: AllureRuntimeConfig) {
-    this.#attachmentsHandler = config.attachmentsHandler;
+    this.#contentHandlers = config.contentHandlers;
+    this.#fileHandlers = config.fileHandlers;
     this.#metadataProvider = config.metadataProvider;
     this.#now = config.nowProvider;
   }
@@ -69,7 +75,8 @@ export class AllureRuntime implements IAllureRuntime {
     const { metadata = true, time = false } = options ?? {};
 
     return new AllureRuntime({
-      attachmentsHandler: this.#attachmentsHandler,
+      contentHandlers: this.#contentHandlers,
+      fileHandlers: this.#fileHandlers,
       metadataProvider: metadata
         ? constant(this.#metadata)
         : this.#metadataProvider,
@@ -128,7 +135,7 @@ export class AllureRuntime implements IAllureRuntime {
   ): typeof content {
     return processMaybePromise(
       content,
-      this.#handleDynamicAttachment({ name, mimeType }),
+      this.#handleContentAttachment({ name, mimeType }),
     );
   }
 
@@ -137,7 +144,7 @@ export class AllureRuntime implements IAllureRuntime {
     rawOptions: string | AttachmentOptions,
   ): typeof function_ {
     const options = this.#resolveAttachmentOptions(rawOptions);
-    return hijackFunction(function_, this.#handleDynamicAttachment(options));
+    return hijackFunction(function_, this.#handleContentAttachment(options));
   }
 
   fileAttachment(
@@ -147,7 +154,7 @@ export class AllureRuntime implements IAllureRuntime {
     const options = this.#resolveAttachmentOptions(rawOptions);
     return processMaybePromise(
       filePathOrPromise,
-      this.#handleStaticAttachment(options),
+      this.#handleFileAttachment(options),
     );
   }
 
@@ -158,7 +165,7 @@ export class AllureRuntime implements IAllureRuntime {
     const options = this.#resolveAttachmentOptions(rawOptions);
     return hijackFunction<string>(
       function_,
-      this.#handleStaticAttachment(options),
+      this.#handleFileAttachment(options),
     );
   }
 
@@ -277,24 +284,33 @@ export class AllureRuntime implements IAllureRuntime {
       : rawOptions;
   }
 
-  #handleDynamicAttachment =
-    ({ name: nameFormat, mimeType }: AttachmentOptions) =>
+  #handleContentAttachment =
+    ({ name: nameFormat, mimeType }: ContentAttachmentOptions) =>
     (content: AttachmentContent, arguments_?: unknown[]) => {
       const name = this.#formatName(nameFormat, arguments_);
       const source = this.#attachmentsHandler.placeAttachment(name, content);
-      this.#metadata.push(this.#localPath('attachments'), [
-        {
-          name,
-          source: path.resolve(source),
-          type: mimeType ?? inferMimeType(name),
+      const context: ContentAttachmentContext = {
+        contentHandlers: this.#contentHandlers,
+        content: '',
+        outDir: ''
+      }
+      };
+      const promise = Promise.resolve(this.#contentHandler(context)).then(
+        (destinationPath) => {
+          this.#metadata.push(this.#localPath('attachments'), [
+            {
+              name: context.name,
+              source: path.resolve(destinationPath),
+              type: context.mimeType,
+            },
+          ]);
         },
-      ]);
-      const promise = this.#attachmentsHandler.writeAttachment(source, content);
+      );
       this.#idle = this.#idle.then(() => promise);
     };
 
-  #handleStaticAttachment =
-    ({ name: rawName, mimeType }: AttachmentOptions) =>
+  #handleFileAttachment =
+    ({ name: rawName, mimeType }: FileAttachmentOptions) =>
     (filePath: string, arguments_?: unknown[]) => {
       const name = this.#formatName(
         rawName ?? path.basename(filePath),
