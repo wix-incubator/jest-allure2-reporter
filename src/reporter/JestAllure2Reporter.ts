@@ -41,7 +41,7 @@ import type {
 import { resolveOptions } from '../options';
 import { MetadataSquasher, StepExtractor } from '../metadata';
 import { SHARED_CONFIG, START, STOP, WORKER_ID } from '../constants';
-import type { SharedReporterConfig } from '../runtime';
+import type { SharedReporterConfig } from '../api/runtime';
 import { ThreadService } from '../utils/ThreadService';
 import md5 from '../utils/md5';
 
@@ -153,25 +153,18 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     const stepper = new StepExtractor();
 
     for (const testResult of results.testResults) {
-      const beforeTestFileContext: Omit<
-        TestFileExtractorContext,
-        'testFileMetadata'
-      > = {
+      const testFileContext: TestFileExtractorContext<any> = {
         ...globalContext,
         filePath: path
           .relative(globalContext.globalConfig.rootDir, testResult.testFilePath)
           .split(path.sep),
         testFile: testResult,
-      };
-
-      await this._callPlugins('beforeTestFileContext', beforeTestFileContext);
-
-      const testFileContext: TestFileExtractorContext<any> = {
-        ...beforeTestFileContext,
         testFileMetadata: squasher.testFile(
           JestAllure2Reporter.query.testResult(testResult),
         ),
       };
+
+      // TODO: augment testFileContext with .docblock metadata
 
       await this._callPlugins('testFileContext', testFileContext);
       this._processMarkdown = testFileContext.processMarkdown;
@@ -213,6 +206,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
             testCaseMetadata,
           };
 
+          // TODO: augment testCaseContext with .docblock metadata
           await this._callPlugins('testCaseContext', testCaseContext);
 
           const invocationIndex = allInvocations.indexOf(

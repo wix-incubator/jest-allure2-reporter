@@ -1,7 +1,7 @@
 import { $Push } from 'jest-metadata';
 import type { Link } from 'jest-allure2-reporter';
 
-import { LINKS } from '../constants';
+import { LINKS } from '../../constants';
 
 export const $Link = (maybeUrl: string | Link, maybeName?: string) => {
   const link =

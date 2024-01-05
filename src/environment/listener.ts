@@ -14,7 +14,7 @@ import type {
 import * as api from '../api';
 import { CODE, PREFIX, SHARED_CONFIG, WORKER_ID } from '../constants';
 import realm from '../realms';
-import type { SharedReporterConfig } from '../runtime';
+import type { SharedReporterConfig } from '../api/runtime';
 
 const listener: EnvironmentListenerFn = (context) => {
   context.testEvents

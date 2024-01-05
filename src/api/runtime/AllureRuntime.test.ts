@@ -1,6 +1,6 @@
 import { state } from 'jest-metadata';
 
-import { PREFIX } from '../constants';
+import { PREFIX } from '../../constants';
 
 import { AllureRuntime } from './AllureRuntime';
 import type { IAttachmentsHandler } from './attachments/AttachmentsHandler';

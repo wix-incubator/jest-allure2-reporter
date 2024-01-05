@@ -8,7 +8,7 @@ export const detectPlugin: PluginConstructor = () => {
   const plugin: Plugin = {
     name: 'jest-allure2-reporter/plugins/detect',
     async globalContext(context) {
-      context.detectLanguage = (filePath) => {
+      context.detectLanguage = (_contents, filePath = '') => {
         switch (path.extname(filePath)) {
           case '.js':
           case '.jsx':

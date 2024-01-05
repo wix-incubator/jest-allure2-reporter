@@ -1,8 +1,8 @@
-import type { IAllureRuntime } from './runtime';
+import type { IAllureRuntime } from './api/runtime';
 import realm from './realms';
 
-export * from './annotations';
-export * from './decorators';
+export * from './api/annotations';
+export * from './api/decorators';
 
 export const allure = realm.runtime as IAllureRuntime;
 
@@ -11,4 +11,4 @@ export type {
   AttachmentOptions,
   IAllureRuntime,
   ParameterOrString,
-} from './runtime';
+} from './api/runtime';

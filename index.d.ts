@@ -429,8 +429,9 @@ declare module 'jest-allure2-reporter' {
     extends GlobalExtractorContext<T>,
       TestFileExtractorContextAugmentation {
     filePath: string[];
+    docblock?: DocblockContext;
     testFile: TestResult;
-    testFileMetadata: AllureTestCaseMetadata;
+    testFileMetadata: AllureTestFileMetadata;
   }
 
   export interface TestCaseExtractorContext<T = unknown>
@@ -446,68 +447,102 @@ declare module 'jest-allure2-reporter' {
     testStepMetadata: AllureTestStepMetadata;
   }
 
-  export interface AllureTestStepMetadata {
-    steps?: AllureTestStepMetadata[];
-    hidden?: boolean;
+  export interface AllureTestItemMetadata {
+    /**
+     * File attachments to be added to the test case, test step or a test file.
+     */
+    attachments?: Attachment[];
     /**
      * Source code of the test case, test step or a hook.
      */
-    code?: string[];
-
-    name?: string;
-    status?: Status;
-    statusDetails?: StatusDetails;
-    stage?: Stage;
-    attachments?: Attachment[];
+    code?: string;
+    /**
+     * Position of the code snippet in the test file: [line, column?]
+     */
+    position?: [number, number?];
+    /**
+     * Markdown description of the test case or test file, or plain text description of a test step.
+     */
+    description?: string[];
+    /**
+     * Key-value pairs to disambiguate test cases or to provide additional information.
+     */
     parameters?: Parameter[];
+    /**
+     * Indicates test item execution progress.
+     */
+    stage?: Stage;
+    /**
+     * Start timestamp in milliseconds.
+     */
     start?: number;
+    /**
+     * Test result: failed, broken, passed, skipped or unknown.
+     */
+    status?: Status;
+    /**
+     * Extra information about the test result: message and stack trace.
+     */
+    statusDetails?: StatusDetails;
+    /**
+     * Recursive data structure to represent test steps for more granular reporting.
+     */
+    steps?: AllureTestStepMetadata[];
+    /**
+     * Stop timestamp in milliseconds.
+     */
     stop?: number;
   }
 
-  export interface AllureTestCaseMetadata extends AllureTestStepMetadata {
+  export interface AllureTestStepMetadata extends AllureTestItemMetadata {
     /**
-     * Pointer to the child step that is currently being added or executed.
-     * @example ['steps', '0', 'steps', '0']
-     * @internal
+     * Some steps may be hidden from the report.
      */
+    hidden?: boolean;
+    /**
+     * Steps produced by Jest hooks will have this property set.
+     * User-defined steps don't have this property.
+     */
+    hookType?: 'beforeAll' | 'beforeEach' | 'afterEach' | 'afterAll';
+  }
+
+  export interface AllureTestCaseMetadata extends AllureTestItemMetadata {
     currentStep?: string[];
-    /**
-     * Jest worker ID.
-     * @internal Used to generate unique thread names.
-     * @see {import('@noomorph/allure-js-commons').LabelName.THREAD}
-     */
-    workerId?: string;
-    /**
-     * Only steps can have names.
-     */
-    name?: never;
-    description?: string[];
     descriptionHtml?: string[];
     labels?: Label[];
     links?: Link[];
   }
 
   export interface AllureTestFileMetadata extends AllureTestCaseMetadata {
-    currentStep?: never;
+    code?: never;
+    steps?: never;
+    workerId?: string;
+  }
+
+  export interface DocblockContext {
+    comments: string;
+    pragmas: Record<string, string[]>;
+    raw: string;
   }
 
   export interface GlobalExtractorContextAugmentation {
-    detectLanguage?(filePath: string, contents: string): string | undefined;
+    detectLanguage?(contents: string, filePath?: string): string | undefined;
     processMarkdown?(markdown: string): Promise<string>;
+    processDocblock?(context: DocblockContext): void;
 
-    // This should be extended by plugins
+    // This may be extended by plugins
   }
 
   export interface TestFileExtractorContextAugmentation {
-    // This should be extended by plugins
+    // This may be extended by plugins
   }
 
   export interface TestCaseExtractorContextAugmentation {
-    // This should be extended by plugins
+    // This may be extended by plugins
   }
 
   export interface TestStepExtractorContextAugmentation {
-    // This should be extended by plugins
+    // This may be extended by plugins
   }
 
   export type PluginDeclaration =

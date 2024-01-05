@@ -3,7 +3,8 @@ import type { ResolvedTestStepCustomizer } from 'jest-allure2-reporter';
 import { stripStatusDetails } from '../utils';
 
 export const testStep: ResolvedTestStepCustomizer = {
-  name: ({ testStepMetadata }) => testStepMetadata.name,
+  name: ({ testStepMetadata }) =>
+    testStepMetadata.description?.at(-1) ?? testStepMetadata.hookType,
   start: ({ testStepMetadata }) => testStepMetadata.start,
   stop: ({ testStepMetadata }) => testStepMetadata.stop,
   stage: ({ testStepMetadata }) => testStepMetadata.stage,

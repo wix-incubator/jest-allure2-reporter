@@ -15,7 +15,7 @@ import type {
 import { chain, chainLast, extractCode, getStart, getStop } from './utils';
 
 export class MetadataSquasher {
-  protected readonly testFileConfig: MetadataSquasherConfig<AllureTestCaseMetadata> =
+  protected readonly testFileConfig: MetadataSquasherConfig<AllureTestFileMetadata> =
     {
       code: chainLast(['testFile']),
       workerId: chainLast(['testFile']),
@@ -34,7 +34,6 @@ export class MetadataSquasher {
   protected readonly testInvocationConfig: MetadataSquasherConfig<AllureTestCaseMetadata> =
     {
       code: extractCode,
-      workerId: chainLast(['testFile']),
       description: chain([
         'globalMetadata',
         'testFile',

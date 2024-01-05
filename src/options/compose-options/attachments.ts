@@ -10,6 +10,7 @@ export function composeAttachments(
 
   return {
     subDir: custom?.subDir ?? base.subDir,
+    contentHandler: custom?.contentHandler ?? base.contentHandler,
     fileHandler: custom?.fileHandler ?? base.fileHandler,
   };
 }

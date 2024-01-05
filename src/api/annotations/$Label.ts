@@ -1,7 +1,7 @@
 import { $Push } from 'jest-metadata';
 import type { LabelName } from 'jest-allure2-reporter';
 
-import { LABELS } from '../constants';
+import { LABELS } from '../../constants';
 
 export const $Label = (name: LabelName, ...values: unknown[]) =>
   $Push(LABELS, ...values.map((value) => ({ name, value: `${value}` })));
