@@ -5,7 +5,7 @@ import type {
   AttachmentContext,
   ContentAttachmentContext,
   FileAttachmentContext,
-} from 'jest-allure2-reporter';
+} from '../types';
 
 export function placeAttachment(context: AttachmentContext): string {
   const { outDir, name, sourcePath } = context as FileAttachmentContext &

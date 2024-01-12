@@ -1,4 +1,4 @@
-import type { FileAttachmentHandler } from 'jest-allure2-reporter';
+import type { FileAttachmentHandler } from '../types';
 
 export const referenceHandler: FileAttachmentHandler = ({ sourcePath }) =>
   sourcePath;

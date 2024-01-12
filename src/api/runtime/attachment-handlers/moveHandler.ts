@@ -1,13 +1,13 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
 
-import type { ContentAttachmentHandler } from 'jest-allure2-reporter';
+import type { FileAttachmentHandler } from '../types';
 
 import { placeAttachment } from './placeAttachment';
 
-export const writeHandler: ContentAttachmentHandler = async (context) => {
+export const moveHandler: FileAttachmentHandler = async (context) => {
   const destination = placeAttachment(context);
   await fs.mkdir(path.dirname(destination), { recursive: true });
-  await fs.writeFile(destination, context.content);
+  await fs.rename(context.sourcePath, destination);
   return destination;
 };

@@ -1,9 +1,2 @@
-export {
-  IAllureRuntime,
-  ParameterOrString,
-  AttachmentOptions,
-  AttachmentContent,
-} from './IAllureRuntime';
-
+export * from './types';
 export * from './AllureRuntime';
-export * from './SharedReporterConfig';
