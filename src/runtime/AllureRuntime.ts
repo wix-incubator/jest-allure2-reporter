@@ -7,7 +7,7 @@ import type {
   StatusDetails,
 } from 'jest-allure2-reporter';
 
-import { constant } from '../../utils';
+import { constant } from '../utils';
 
 import type {
   AllureRuntimeBindOptions,
@@ -17,11 +17,9 @@ import type {
   ParameterOrString,
 } from './types';
 import * as runtimeModules from './modules';
-import { AllureRuntimeContext } from './AllureRuntimeContext';
-import type { AllureRuntimeConfig } from './AllureRuntimeConfig';
+import type { AllureRuntimeContext } from './AllureRuntimeContext';
 
 export class AllureRuntime implements IAllureRuntime {
-  readonly #config: AllureRuntimeConfig;
   readonly #context: AllureRuntimeContext;
   readonly #coreModule: runtimeModules.CoreModule;
   readonly #basicStepsModule: runtimeModules.StepsModule;
@@ -29,11 +27,8 @@ export class AllureRuntime implements IAllureRuntime {
   readonly #fileAttachmentsModule: runtimeModules.FileAttachmentsModule;
   readonly #stepsDecorator: runtimeModules.StepsDecorator;
 
-  constructor(config: AllureRuntimeConfig) {
-    this.#config = config;
-    this.#context = new AllureRuntimeContext(config);
-
-    const context = this.#context;
+  constructor(context: AllureRuntimeContext) {
+    this.#context = context;
     this.#coreModule = runtimeModules.CoreModule.create(context);
     this.#basicStepsModule = runtimeModules.StepsModule.create(context);
     this.#contentAttachmentsModule =
@@ -47,11 +42,11 @@ export class AllureRuntime implements IAllureRuntime {
     const { metadata = true, time = false } = options ?? {};
 
     return new AllureRuntime({
-      ...this.#config,
-      getMetadata: metadata
-        ? constant(this.#config.getMetadata())
-        : this.#config.getMetadata,
-      getNow: time ? constant(this.#config.getNow()) : this.#config.getNow,
+      ...this.#context,
+      getCurrentMetadata: metadata
+        ? constant(this.#context.getCurrentMetadata())
+        : this.#context.getCurrentMetadata,
+      getNow: time ? constant(this.#context.getNow()) : this.#context.getNow,
     });
   }
 

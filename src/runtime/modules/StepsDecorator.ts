@@ -1,5 +1,5 @@
-import type { Function_ } from '../../../utils';
-import { formatString, wrapFunction } from '../../../utils';
+import type { Function_ } from '../../utils';
+import { formatString, wrapFunction } from '../../utils';
 import type { IAllureRuntime, ParameterOrString } from '../types';
 
 export type FunctionalStepsModuleContext = {

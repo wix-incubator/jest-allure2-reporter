@@ -4,12 +4,12 @@ import type {
   StatusDetails,
 } from 'jest-allure2-reporter';
 
-import { isPromiseLike } from '../../../utils';
-import type { AllureTestCaseMetadataProxy } from '../proxies';
+import { isPromiseLike } from '../../utils';
+import type { AllureTestItemMetadataProxy } from '../../metadata';
 import type { AllureRuntimeContext } from '../AllureRuntimeContext';
 
 export type BasicStepsModuleContext = {
-  readonly metadata: AllureTestCaseMetadataProxy;
+  readonly metadata: AllureTestItemMetadataProxy;
   readonly now: number;
 };
 
@@ -19,7 +19,7 @@ export class StepsModule {
   static create(context: AllureRuntimeContext): StepsModule {
     return new StepsModule({
       get metadata() {
-        return context.getMetadata();
+        return context.getCurrentMetadata();
       },
       get now() {
         return context.getNow();

@@ -1,15 +1,15 @@
+import type { AllureGlobalMetadata } from 'jest-allure2-reporter';
 import type {
   BuiltinFileAttachmentHandler,
   BuiltinContentAttachmentHandler,
   LabelName,
   LinkType,
   Parameter,
-  ReporterConfig,
   Status,
   StatusDetails,
 } from 'jest-allure2-reporter';
 
-import type { Function_, MaybePromise } from '../../utils';
+import type { Function_, MaybePromise } from '../utils';
 
 export interface IAllureRuntime {
   /**
@@ -91,10 +91,7 @@ export interface IAllureRuntime {
   step<T>(name: string, function_: () => T): T;
 }
 
-export type SharedReporterConfig = Pick<
-  ReporterConfig,
-  'resultsDir' | 'overwrite' | 'attachments' | 'injectGlobals'
->;
+export type SharedReporterConfig = AllureGlobalMetadata['config'];
 
 export type AllureRuntimePluginCallback = (
   context: AllureRuntimePluginContext,

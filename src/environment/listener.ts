@@ -1,5 +1,4 @@
 import type { Circus } from '@jest/types';
-import { state } from 'jest-metadata';
 import type {
   AllureTestCaseMetadata,
   AllureTestStepMetadata,
@@ -12,9 +11,7 @@ import type {
 } from 'jest-environment-emit';
 
 import * as api from '../api';
-import { CODE, PREFIX, SHARED_CONFIG, WORKER_ID } from '../constants';
 import realm from '../realms';
-import type { SharedReporterConfig } from '../api/runtime';
 
 const listener: EnvironmentListenerFn = (context) => {
   context.testEvents
@@ -22,15 +19,14 @@ const listener: EnvironmentListenerFn = (context) => {
       'test_environment_setup',
       function ({ env }: TestEnvironmentSetupEvent) {
         env.global.__ALLURE__ = realm;
-        const { injectGlobals } = state.get(
-          SHARED_CONFIG,
-        ) as SharedReporterConfig;
-
+        const { injectGlobals } = realm.runtimeContext.getReporterConfig();
         if (injectGlobals) {
           Object.assign(env.global, api);
         }
 
-        state.currentMetadata.set(WORKER_ID, process.env.JEST_WORKER_ID);
+        realm.runtimeContext
+          .getFileMetadata()
+          .set('workerId', process.env.JEST_WORKER_ID);
       },
     )
     .on('add_hook', function ({ event }) {
@@ -48,10 +44,12 @@ const listener: EnvironmentListenerFn = (context) => {
         metadata.hidden = true;
       }
 
-      state.currentMetadata.assign(PREFIX, metadata);
+      realm.runtimeContext.getCurrentMetadata().assign(metadata);
     })
     .on('add_test', function ({ event }) {
-      state.currentMetadata.set(CODE, event.fn.toString());
+      realm.runtimeContext
+        .getCurrentMetadata()
+        .set('code', event.fn.toString());
     })
     .on('test_start', executableStart)
     .on('test_todo', testSkip)
@@ -75,7 +73,7 @@ function executableStart({}: TestEnvironmentCircusEvent) {
     stage: 'running',
   };
 
-  state.currentMetadata.assign(PREFIX, metadata);
+  realm.runtimeContext.getCurrentMetadata().assign(metadata);
 }
 
 function executableFailure({
@@ -96,7 +94,7 @@ function executableFailure({
     metadata.statusDetails = { message, trace };
   }
 
-  state.currentMetadata.assign(PREFIX, metadata);
+  realm.runtimeContext.getCurrentMetadata().assign(metadata);
 }
 
 // eslint-disable-next-line no-empty-pattern
@@ -107,7 +105,7 @@ function executableSuccess({}: TestEnvironmentCircusEvent) {
     status: 'passed',
   };
 
-  state.currentMetadata.assign(PREFIX, metadata);
+  realm.runtimeContext.getCurrentMetadata().assign(metadata);
 }
 
 function testSkip() {
@@ -117,7 +115,7 @@ function testSkip() {
     status: 'skipped',
   };
 
-  state.currentMetadata.assign(PREFIX, metadata);
+  realm.runtimeContext.getCurrentMetadata().assign(metadata);
 }
 
 function testDone({
@@ -138,7 +136,7 @@ function testDone({
     status: hasErrors ? errorStatus : 'passed',
   };
 
-  state.currentMetadata.assign(PREFIX, metadata);
+  realm.runtimeContext.getCurrentMetadata().assign(metadata);
 }
 
 function isMatcherError(error: any) {

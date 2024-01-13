@@ -6,11 +6,11 @@ import type {
   StatusDetails,
 } from 'jest-allure2-reporter';
 
-import type { AllureTestCaseMetadataProxy } from '../proxies';
+import type { AllureTestItemMetadataProxy } from '../../metadata';
 import type { AllureRuntimeContext } from '../AllureRuntimeContext';
 
 export type CoreModuleContext = {
-  readonly metadata: AllureTestCaseMetadataProxy;
+  readonly metadata: AllureTestItemMetadataProxy;
 };
 
 export class CoreModule {
@@ -19,7 +19,7 @@ export class CoreModule {
   static create(context: AllureRuntimeContext): CoreModule {
     return new CoreModule({
       get metadata() {
-        return context.getMetadata();
+        return context.getCurrentMetadata();
       },
     });
   }

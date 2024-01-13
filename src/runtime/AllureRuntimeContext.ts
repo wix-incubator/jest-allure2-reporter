@@ -1,8 +1,13 @@
-import { once } from '../../utils';
+import type {
+  AllureGlobalMetadata,
+  AllureTestFileMetadata,
+} from 'jest-allure2-reporter';
+
+import { once } from '../utils';
+import { AllureMetadataProxy, AllureTestItemMetadataProxy } from '../metadata';
 
 import type { AllureRuntimeConfig } from './AllureRuntimeConfig';
 import * as attachmentHandlers from './attachment-handlers';
-import { AllureTestCaseMetadataProxy } from './proxies';
 import type {
   ContentAttachmentHandler,
   FileAttachmentHandler,
@@ -22,15 +27,21 @@ export class AllureRuntimeContext {
   };
   inferMimeType: MIMEInferer = attachmentHandlers.inferMimeType;
   readonly getReporterConfig: () => SharedReporterConfig;
-  readonly getMetadata: () => AllureTestCaseMetadataProxy;
+  readonly getFileMetadata: () => AllureMetadataProxy<AllureTestFileMetadata>;
+  readonly getGlobalMetadata: () => AllureMetadataProxy<AllureGlobalMetadata>;
+  readonly getCurrentMetadata: () => AllureTestItemMetadataProxy;
   readonly getNow: () => number;
   idle: Promise<unknown> = Promise.resolve();
 
   constructor(config: AllureRuntimeConfig) {
     this.getNow = config.getNow;
     this.getReporterConfig = once(config.getReporterConfig);
-    this.getMetadata = () =>
-      new AllureTestCaseMetadataProxy(config.getMetadata());
+    this.getCurrentMetadata = () =>
+      new AllureTestItemMetadataProxy(config.getCurrentMetadata());
+    this.getFileMetadata = () =>
+      new AllureMetadataProxy(config.getFileMetadata());
+    this.getGlobalMetadata = () =>
+      new AllureMetadataProxy(config.getGlobalMetadata());
 
     Object.defineProperty(this.contentAttachmentHandlers, 'default', {
       get: () => {

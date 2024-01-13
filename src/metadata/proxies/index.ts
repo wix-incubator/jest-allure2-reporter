@@ -1,2 +1,2 @@
+export * from './AllureMetadataProxy';
 export * from './AllureTestItemMetadataProxy';
-export * from './AllureTestCaseMetadataProxy';

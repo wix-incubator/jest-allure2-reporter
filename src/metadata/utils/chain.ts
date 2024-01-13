@@ -1,6 +1,6 @@
 import type { Metadata } from 'jest-metadata';
 
-import { PREFIX } from '../../constants';
+import { PREFIX } from '../constants';
 import type {
   MetadataSquasherContext,
   MetadataSquasherMapping,

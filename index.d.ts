@@ -2,6 +2,7 @@
 
 import type { Config, TestCaseResult, TestResult } from '@jest/reporters';
 import JestMetadataReporter from 'jest-metadata/reporter';
+import {SharedReporterConfig} from "./src/api/runtime";
 
 declare module 'jest-allure2-reporter' {
   /**
@@ -453,6 +454,12 @@ declare module 'jest-allure2-reporter' {
      */
     attachments?: Attachment[];
     /**
+     * Property path to the current step metadata object.
+     * @see {steps}
+     * @example ['steps', '0']
+     */
+    currentStep?: string[];
+    /**
      * Source code of the test case, test step or a hook.
      */
     code?: string;
@@ -507,7 +514,6 @@ declare module 'jest-allure2-reporter' {
   }
 
   export interface AllureTestCaseMetadata extends AllureTestItemMetadata {
-    currentStep?: string[];
     descriptionHtml?: string[];
     labels?: Label[];
     links?: Link[];
@@ -517,6 +523,10 @@ declare module 'jest-allure2-reporter' {
     code?: never;
     steps?: never;
     workerId?: string;
+  }
+
+  export interface AllureGlobalMetadata {
+    config: Pick<ReporterConfig, 'resultsDir' | 'overwrite' | 'attachments' | 'injectGlobals'>;
   }
 
   export interface DocblockContext {

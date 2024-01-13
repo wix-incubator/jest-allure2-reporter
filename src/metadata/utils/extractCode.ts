@@ -2,7 +2,7 @@ import type { Metadata } from 'jest-metadata';
 import type { AllureTestCaseMetadata } from 'jest-allure2-reporter';
 
 import type { MetadataSquasherMapping } from '../MetadataSquasher';
-import { CODE } from '../../constants';
+import { CODE } from '../constants';
 
 export const extractCode: MetadataSquasherMapping<
   AllureTestCaseMetadata,

@@ -5,7 +5,7 @@ import type {
 } from 'jest-metadata';
 import type { AllureTestStepMetadata } from 'jest-allure2-reporter';
 
-import { HIDDEN, PREFIX } from '../constants';
+import { HIDDEN, PREFIX } from './constants';
 
 export class StepExtractor {
   public extractFromInvocation(

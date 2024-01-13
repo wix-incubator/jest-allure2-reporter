@@ -6,7 +6,7 @@ import { state } from 'jest-metadata';
 import type { Metadata } from 'jest-metadata';
 import type { Label } from 'jest-allure2-reporter';
 
-import { CODE, DESCRIPTION, LABELS } from '../constants';
+import { CODE, DESCRIPTION, LABELS } from '../metadata/constants';
 import { splitDocblock } from '../utils';
 
 type ParseWithComments = typeof import('jest-docblock').parseWithComments;

@@ -1,6 +1,5 @@
 import realm from '../realms';
-
-import type { IAllureRuntime } from './runtime';
+import type { IAllureRuntime } from '../runtime';
 
 export * from './annotations';
 export * from './decorators';
@@ -12,4 +11,4 @@ export type {
   AttachmentOptions,
   IAllureRuntime,
   ParameterOrString,
-} from './runtime';
+} from '../runtime';

@@ -1,16 +1,19 @@
 import { state } from 'jest-metadata';
 
-import { PREFIX } from '../../constants';
+import { AllureMetadataProxy } from '../metadata';
 
 import { AllureRuntime } from './AllureRuntime';
 import type { SharedReporterConfig } from './types';
+import { AllureRuntimeContext } from './AllureRuntimeContext';
 
 describe('AllureRuntime', () => {
   it('should add attachments within the steps', async () => {
     let now = 0;
 
-    const runtime = new AllureRuntime({
-      getMetadata: () => state,
+    const context = new AllureRuntimeContext({
+      getCurrentMetadata: () => state.currentMetadata,
+      getFileMetadata: () => state.lastTestFile!,
+      getGlobalMetadata: () => state,
       getNow: () => now++,
       getReporterConfig(): SharedReporterConfig {
         return {
@@ -26,6 +29,7 @@ describe('AllureRuntime', () => {
       },
     });
 
+    const runtime = new AllureRuntime(context);
     runtime.attachment('attachment1', Buffer.from('first'), 'text/plain');
 
     const innerStep3 = runtime.createStep(
@@ -59,6 +63,6 @@ describe('AllureRuntime', () => {
       });
     });
     runtime.attachment('attachment5', Buffer.from('fifth'), 'text/plain');
-    expect(state.get(PREFIX)).toMatchSnapshot();
+    expect(new AllureMetadataProxy(state).get()).toMatchSnapshot();
   });
 });

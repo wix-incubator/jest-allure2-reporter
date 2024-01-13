@@ -1,11 +1,7 @@
 import path from 'node:path';
 
-import {
-  formatString,
-  hijackFunction,
-  processMaybePromise,
-} from '../../../utils';
-import type { Function_, MaybePromise } from '../../../utils';
+import { formatString, hijackFunction, processMaybePromise } from '../../utils';
+import type { Function_, MaybePromise } from '../../utils';
 import type {
   AttachmentContent,
   AttachmentContext,
@@ -19,7 +15,7 @@ import type {
   FileAttachmentOptions,
   MIMEInfererContext,
 } from '../types';
-import type { AllureTestCaseMetadataProxy } from '../proxies';
+import type { AllureTestItemMetadataProxy } from '../../metadata';
 import type { AllureRuntimeContext } from '../AllureRuntimeContext';
 
 export type AttachmentsModuleContext<
@@ -28,7 +24,7 @@ export type AttachmentsModuleContext<
 > = {
   readonly handlers: Record<string, Handler>;
   readonly inferMimeType: (context: MIMEInfererContext) => string | undefined;
-  readonly metadata: AllureTestCaseMetadataProxy;
+  readonly metadata: AllureTestItemMetadataProxy;
   readonly outDir: string;
   readonly waitFor: (promise: Promise<unknown>) => void;
 };
@@ -130,7 +126,7 @@ export class FileAttachmentsModule extends AttachmentsModule<
         return context.inferMimeType;
       },
       get metadata() {
-        return context.getMetadata();
+        return context.getCurrentMetadata();
       },
       get outDir() {
         const config = context.getReporterConfig();
@@ -167,7 +163,7 @@ export class ContentAttachmentsModule extends AttachmentsModule<
         return context.inferMimeType;
       },
       get metadata() {
-        return context.getMetadata();
+        return context.getCurrentMetadata();
       },
       get outDir() {
         const config = context.getReporterConfig();

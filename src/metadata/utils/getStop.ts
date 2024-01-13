@@ -1,7 +1,7 @@
 import type { AllureTestCaseMetadata } from 'jest-allure2-reporter';
 
 import type { MetadataSquasherMapping } from '../MetadataSquasher';
-import { STOP } from '../../constants';
+import { STOP } from '../constants';
 
 export const getStop: MetadataSquasherMapping<
   AllureTestCaseMetadata,

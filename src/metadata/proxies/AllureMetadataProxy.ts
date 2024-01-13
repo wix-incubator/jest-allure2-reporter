@@ -1,26 +1,16 @@
 import type { Metadata } from 'jest-metadata';
-import type { AllureTestItemMetadata } from 'jest-allure2-reporter';
 
-import { CURRENT_STEP, PREFIX } from '../../../constants';
+import { PREFIX } from '../constants';
 
-export class AllureTestItemMetadataProxy<T extends AllureTestItemMetadata> {
+export class AllureMetadataProxy<T = unknown> {
   protected readonly $metadata: Metadata;
-  protected readonly $boundPath?: string[];
 
-  constructor(metadata: Metadata, boundPath?: string[]) {
+  constructor(metadata: Metadata) {
     this.$metadata = metadata;
-    this.$boundPath = boundPath;
-  }
-
-  $bind(path?: string[]): AllureTestItemMetadataProxy<T> {
-    return new AllureTestItemMetadataProxy(
-      this.$metadata,
-      path ?? this.$localPath(),
-    );
   }
 
   get id(): string {
-    return this.$metadata.id + ':' + this.$localPath().join('.');
+    return this.$metadata.id;
   }
 
   get<V>(path?: keyof T, fallbackValue?: V): V {
@@ -28,7 +18,7 @@ export class AllureTestItemMetadataProxy<T extends AllureTestItemMetadata> {
     return this.$metadata.get(fullPath, fallbackValue);
   }
 
-  set(path: keyof T, value: unknown): this {
+  set(path: keyof T, value: T[keyof T]): this {
     const fullPath = this.$localPath(path);
     this.$metadata.set(fullPath, value);
     return this;
@@ -46,8 +36,7 @@ export class AllureTestItemMetadataProxy<T extends AllureTestItemMetadata> {
   }
 
   protected $localPath(key?: keyof T, ...innerKeys: string[]): string[] {
-    const stepPath = this.$boundPath ?? this.$metadata.get(CURRENT_STEP, []);
     const allKeys = key ? [key as string, ...innerKeys] : innerKeys;
-    return [PREFIX, ...stepPath, ...allKeys];
+    return [PREFIX, ...allKeys];
   }
 }
