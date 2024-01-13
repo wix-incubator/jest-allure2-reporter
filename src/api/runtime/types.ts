@@ -1,4 +1,6 @@
 import type {
+  BuiltinFileAttachmentHandler,
+  BuiltinContentAttachmentHandler,
   LabelName,
   LinkType,
   Parameter,
@@ -7,7 +9,7 @@ import type {
   StatusDetails,
 } from 'jest-allure2-reporter';
 
-import type { Function_, MaybePromise } from '../../utils/types';
+import type { Function_, MaybePromise } from '../../utils';
 
 export interface IAllureRuntime {
   /**
@@ -100,8 +102,14 @@ export type AllureRuntimePluginCallback = (
 
 export interface AllureRuntimePluginContext {
   readonly runtime: IAllureRuntime;
-  readonly contentHandlers: Record<string, ContentAttachmentHandler>;
-  readonly fileHandlers: Record<string, FileAttachmentHandler>;
+  readonly contentAttachmentHandlers: Record<
+    BuiltinContentAttachmentHandler | 'default',
+    ContentAttachmentHandler
+  >;
+  readonly fileAttachmentHandlers: Record<
+    BuiltinFileAttachmentHandler | 'default',
+    FileAttachmentHandler
+  >;
   inferMimeType: MIMEInferer;
 }
 

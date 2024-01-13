@@ -3,28 +3,27 @@ import { state } from 'jest-metadata';
 import { PREFIX } from '../../constants';
 
 import { AllureRuntime } from './AllureRuntime';
-import type { IAttachmentsHandler } from './attachments/AttachmentsHandler';
+import type { SharedReporterConfig } from './types';
 
 describe('AllureRuntime', () => {
   it('should add attachments within the steps', async () => {
     let now = 0;
 
-    const attachmentsHandler: IAttachmentsHandler = {
-      placeAttachment: (_name, content) => {
-        return `/attachments/${content}`;
-      },
-      secureAttachment(filePath) {
-        return { destinationPath: filePath };
-      },
-      writeAttachment: async () => {
-        /* noop */
-      },
-    };
-
     const runtime = new AllureRuntime({
-      metadataProvider: () => state,
-      nowProvider: () => now++,
-      attachmentsHandler,
+      getMetadata: () => state,
+      getNow: () => now++,
+      getReporterConfig(): SharedReporterConfig {
+        return {
+          overwrite: true,
+          resultsDir: '/tmp',
+          injectGlobals: false,
+          attachments: {
+            subDir: 'allure-attachments',
+            contentHandler: 'write',
+            fileHandler: 'copy',
+          },
+        };
+      },
     });
 
     runtime.attachment('attachment1', Buffer.from('first'), 'text/plain');

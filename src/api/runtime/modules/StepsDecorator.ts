@@ -1,8 +1,6 @@
-import type { Function_ } from '../../utils/types';
-import { wrapFunction } from '../../utils/wrapFunction';
-import { formatString } from '../../utils/formatString';
-
-import type { IAllureRuntime, ParameterOrString } from './types';
+import type { Function_ } from '../../../utils';
+import { formatString, wrapFunction } from '../../../utils';
+import type { IAllureRuntime, ParameterOrString } from '../types';
 
 export type FunctionalStepsModuleContext = {
   runtime: Pick<IAllureRuntime, 'step' | 'parameter'>;

@@ -1,3 +1,4 @@
 export * from './AttachmentsModule';
-export * from './StepsModule';
 export * from './CoreModule';
+export * from './StepsDecorator';
+export * from './StepsModule';

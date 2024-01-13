@@ -7,30 +7,40 @@ import type {
   StatusDetails,
 } from 'jest-allure2-reporter';
 
-import { constant } from '../../utils/constant';
+import { constant } from '../../utils';
 
 import type {
   AllureRuntimeBindOptions,
+  AllureRuntimePluginCallback,
   IAllureRuntime,
   ParameterOptions,
   ParameterOrString,
 } from './types';
-import type {
-  AllureRuntimeConfig,
-  AllureRuntimeContext,
-} from './AllureRuntimeContext';
-import { StepsDecorator } from './StepsDecorator';
+import * as runtimeModules from './modules';
+import { AllureRuntimeContext } from './AllureRuntimeContext';
+import type { AllureRuntimeConfig } from './AllureRuntimeConfig';
 
 export class AllureRuntime implements IAllureRuntime {
-  readonly #context: AllureRuntimeContext;
   readonly #config: AllureRuntimeConfig;
-  readonly #modules: AllureRuntimeContext['modules'];
-  readonly #stepsDecorator = new StepsDecorator({ runtime: this });
+  readonly #context: AllureRuntimeContext;
+  readonly #coreModule: runtimeModules.CoreModule;
+  readonly #basicStepsModule: runtimeModules.StepsModule;
+  readonly #contentAttachmentsModule: runtimeModules.ContentAttachmentsModule;
+  readonly #fileAttachmentsModule: runtimeModules.FileAttachmentsModule;
+  readonly #stepsDecorator: runtimeModules.StepsDecorator;
 
-  constructor(context: AllureRuntimeContext) {
-    this.#context = context;
-    this.#config = context.config;
-    this.#modules = context.modules;
+  constructor(config: AllureRuntimeConfig) {
+    this.#config = config;
+    this.#context = new AllureRuntimeContext(config);
+
+    const context = this.#context;
+    this.#coreModule = runtimeModules.CoreModule.create(context);
+    this.#basicStepsModule = runtimeModules.StepsModule.create(context);
+    this.#contentAttachmentsModule =
+      runtimeModules.ContentAttachmentsModule.create(context);
+    this.#fileAttachmentsModule =
+      runtimeModules.FileAttachmentsModule.create(context);
+    this.#stepsDecorator = new runtimeModules.StepsDecorator({ runtime: this });
   }
 
   $bind(options?: AllureRuntimeBindOptions): AllureRuntime {
@@ -38,17 +48,22 @@ export class AllureRuntime implements IAllureRuntime {
 
     return new AllureRuntime({
       ...this.#config,
-      metadataProvider: metadata
-        ? constant(this.#config.metadataProvider())
-        : this.#config.metadataProvider,
-      nowProvider: time
-        ? constant(this.#config.nowProvider())
-        : this.#config.nowProvider,
-    } as any); // TODO: fix type
+      getMetadata: metadata
+        ? constant(this.#config.getMetadata())
+        : this.#config.getMetadata,
+      getNow: time ? constant(this.#config.getNow()) : this.#config.getNow,
+    });
   }
 
-  $plug(_callback: any): any {
-    // TODO: implement
+  $plug(callback: AllureRuntimePluginCallback): this {
+    callback({
+      runtime: this,
+      contentAttachmentHandlers: this.#context.contentAttachmentHandlers,
+      fileAttachmentHandlers: this.#context.fileAttachmentHandlers,
+      inferMimeType: this.#context.inferMimeType,
+    });
+
+    return this;
   }
 
   async flush(): Promise<void> {
@@ -56,23 +71,23 @@ export class AllureRuntime implements IAllureRuntime {
   }
 
   description(value: string) {
-    this.#modules.core.description(value);
+    this.#coreModule.description(value);
   }
 
   descriptionHtml(value: string) {
-    this.#modules.core.descriptionHtml(value);
+    this.#coreModule.descriptionHtml(value);
   }
 
   label(name: LabelName, value: string) {
-    this.#modules.core.label(name, value);
+    this.#coreModule.label(name, value);
   }
 
   link(url: string, name = url, type?: string) {
-    this.#modules.core.link({ name, url, type });
+    this.#coreModule.link({ name, url, type });
   }
 
   parameter(name: string, value: unknown, options?: ParameterOptions) {
-    this.#modules.core.parameter({
+    this.#coreModule.parameter({
       name,
       value: String(value),
       ...options,
@@ -83,7 +98,7 @@ export class AllureRuntime implements IAllureRuntime {
     for (const [name, value] of Object.entries(parameters)) {
       if (value && typeof value === 'object') {
         const raw = value as Parameter;
-        this.#modules.core.parameter({ ...raw, name });
+        this.#coreModule.parameter({ ...raw, name });
       } else {
         this.parameter(name, value);
       }
@@ -91,18 +106,18 @@ export class AllureRuntime implements IAllureRuntime {
   }
 
   status(status: Status, statusDetails?: StatusDetails) {
-    this.#modules.core.status(status);
+    this.#coreModule.status(status);
     if (statusDetails !== undefined) {
-      this.#modules.core.statusDetails(statusDetails || {});
+      this.#coreModule.statusDetails(statusDetails || {});
     }
   }
 
   statusDetails(statusDetails: StatusDetails | null) {
-    this.#modules.core.statusDetails(statusDetails || {});
+    this.#coreModule.statusDetails(statusDetails || {});
   }
 
   step<T = unknown>(name: string, function_: () => T): T {
-    return this.#modules.basicSteps.step<T>(name, function_);
+    return this.#basicStepsModule.step<T>(name, function_);
   }
 
   createStep<F extends Function>(
@@ -129,7 +144,7 @@ export class AllureRuntime implements IAllureRuntime {
   }
 
   attachment: IAllureRuntime['attachment'] = (name, content, mimeType) =>
-    this.#modules.contentAttachments.attachment(content, {
+    this.#contentAttachmentsModule.attachment(content, {
       name,
       mimeType,
     }) as any; // TODO: fix type
@@ -143,7 +158,7 @@ export class AllureRuntime implements IAllureRuntime {
         ? { name: nameOrOptions }
         : { ...nameOrOptions };
 
-    return this.#modules.fileAttachments.attachment(filePath, options) as any; // TODO: fix type
+    return this.#fileAttachmentsModule.attachment(filePath, options) as any; // TODO: fix type
   };
 
   createAttachment: IAllureRuntime['createAttachment'] = (
@@ -155,7 +170,7 @@ export class AllureRuntime implements IAllureRuntime {
         ? { name: nameOrOptions }
         : { ...nameOrOptions };
 
-    return this.#modules.contentAttachments.createAttachment(
+    return this.#contentAttachmentsModule.createAttachment(
       function_,
       options,
     ) as any; // TODO: fix type
@@ -170,7 +185,7 @@ export class AllureRuntime implements IAllureRuntime {
         ? { name: nameOrOptions }
         : { ...nameOrOptions };
 
-    return this.#modules.fileAttachments.createAttachment(
+    return this.#fileAttachmentsModule.createAttachment(
       function_,
       options,
     ) as any; // TODO: fix type

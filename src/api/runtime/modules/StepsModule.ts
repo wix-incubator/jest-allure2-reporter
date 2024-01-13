@@ -4,8 +4,9 @@ import type {
   StatusDetails,
 } from 'jest-allure2-reporter';
 
-import { isPromiseLike } from '../../../utils/isPromiseLike';
+import { isPromiseLike } from '../../../utils';
 import type { AllureTestCaseMetadataProxy } from '../proxies';
+import type { AllureRuntimeContext } from '../AllureRuntimeContext';
 
 export type BasicStepsModuleContext = {
   readonly metadata: AllureTestCaseMetadataProxy;
@@ -14,6 +15,17 @@ export type BasicStepsModuleContext = {
 
 export class StepsModule {
   constructor(protected readonly context: BasicStepsModuleContext) {}
+
+  static create(context: AllureRuntimeContext): StepsModule {
+    return new StepsModule({
+      get metadata() {
+        return context.getMetadata();
+      },
+      get now() {
+        return context.getNow();
+      },
+    });
+  }
 
   step<T = unknown>(name: string, function_: () => T): T {
     this.#startStep(name, function_);

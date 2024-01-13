@@ -31,7 +31,7 @@
     "./api": {
       "import": "./api.mjs",
       "require": "./api.js",
-      "types": "./dist/api.d.ts"
+      "types": "./dist/api/index.d.ts"
     },
     "./globals": {
       "import": "./globals.mjs",

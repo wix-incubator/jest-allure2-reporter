@@ -42,8 +42,9 @@ import { resolveOptions } from '../options';
 import { MetadataSquasher, StepExtractor } from '../metadata';
 import { SHARED_CONFIG, START, STOP, WORKER_ID } from '../constants';
 import type { SharedReporterConfig } from '../api/runtime';
-import { ThreadService } from '../utils/ThreadService';
-import md5 from '../utils/md5';
+import { md5 } from '../utils';
+
+import { ThreadService } from './ThreadService';
 
 export class JestAllure2Reporter extends JestMetadataReporter {
   private _plugins: readonly Plugin[] = [];

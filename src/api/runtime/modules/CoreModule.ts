@@ -7,6 +7,7 @@ import type {
 } from 'jest-allure2-reporter';
 
 import type { AllureTestCaseMetadataProxy } from '../proxies';
+import type { AllureRuntimeContext } from '../AllureRuntimeContext';
 
 export type CoreModuleContext = {
   readonly metadata: AllureTestCaseMetadataProxy;
@@ -14,6 +15,14 @@ export type CoreModuleContext = {
 
 export class CoreModule {
   constructor(protected readonly context: CoreModuleContext) {}
+
+  static create(context: AllureRuntimeContext): CoreModule {
+    return new CoreModule({
+      get metadata() {
+        return context.getMetadata();
+      },
+    });
+  }
 
   description(value: string) {
     this.context.metadata.push('description', [value]);

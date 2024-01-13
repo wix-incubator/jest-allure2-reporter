@@ -1,9 +1,11 @@
 import path from 'node:path';
 
-import { formatString } from '../../../utils/formatString';
-import type { Function_, MaybePromise } from '../../../utils/types';
-import { processMaybePromise } from '../../../utils/processMaybePromise';
-import { hijackFunction } from '../../../utils/hijackFunction';
+import {
+  formatString,
+  hijackFunction,
+  processMaybePromise,
+} from '../../../utils';
+import type { Function_, MaybePromise } from '../../../utils';
 import type {
   AttachmentContent,
   AttachmentContext,
@@ -18,6 +20,7 @@ import type {
   MIMEInfererContext,
 } from '../types';
 import type { AllureTestCaseMetadataProxy } from '../proxies';
+import type { AllureRuntimeContext } from '../AllureRuntimeContext';
 
 export type AttachmentsModuleContext<
   Context extends AttachmentContext,
@@ -118,6 +121,27 @@ export class FileAttachmentsModule extends AttachmentsModule<
   FileAttachmentHandler,
   FileAttachmentOptions
 > {
+  static create(context: AllureRuntimeContext): FileAttachmentsModule {
+    return new FileAttachmentsModule({
+      get handlers() {
+        return context.fileAttachmentHandlers;
+      },
+      get inferMimeType() {
+        return context.inferMimeType;
+      },
+      get metadata() {
+        return context.getMetadata();
+      },
+      get outDir() {
+        const config = context.getReporterConfig();
+        return path.join(config.resultsDir, config.attachments.subDir);
+      },
+      waitFor: (promise) => {
+        context.idle = context.idle.then(() => promise);
+      },
+    });
+  }
+
   protected _createMimeContext(_name: string, sourcePath: string) {
     return { sourcePath };
   }
@@ -134,6 +158,27 @@ export class ContentAttachmentsModule extends AttachmentsModule<
   ContentAttachmentHandler,
   ContentAttachmentOptions
 > {
+  static create(context: AllureRuntimeContext): ContentAttachmentsModule {
+    return new ContentAttachmentsModule({
+      get handlers() {
+        return context.contentAttachmentHandlers;
+      },
+      get inferMimeType() {
+        return context.inferMimeType;
+      },
+      get metadata() {
+        return context.getMetadata();
+      },
+      get outDir() {
+        const config = context.getReporterConfig();
+        return path.join(config.resultsDir, config.attachments.subDir);
+      },
+      waitFor: (promise) => {
+        context.idle = context.idle.then(() => promise);
+      },
+    });
+  }
+
   protected _createMimeContext(name: string, content: AttachmentContent) {
     return { sourcePath: name, content };
   }

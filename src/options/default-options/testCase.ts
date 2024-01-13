@@ -31,7 +31,7 @@ export const testCase: ResolvedTestCaseCustomizer = {
   description: ({ testCaseMetadata }) => {
     const text = testCaseMetadata.description?.join('\n') ?? '';
     const code = testCaseMetadata.code?.length
-      ? '```javascript\n' + testCaseMetadata.code.join('\n\n') + '\n```'
+      ? '```javascript\n' + testCaseMetadata.code + '\n```'
       : '';
     return [text, code].filter(Boolean).join('\n\n');
   },
@@ -61,7 +61,7 @@ export const testCase: ResolvedTestCaseCustomizer = {
       epic: all,
       feature: all,
       story: all,
-      thread: ({ testCaseMetadata }) => testCaseMetadata.workerId,
+      thread: ({ testFileMetadata }) => testFileMetadata.workerId,
       severity: last,
       tag: all,
       owner: last,
