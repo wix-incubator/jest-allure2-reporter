@@ -1,130 +1,47 @@
 import type {
-  DescribeBlockMetadata,
-  GlobalMetadata,
-  HookInvocationMetadata,
-  TestEntryMetadata,
   TestFileMetadata,
-  TestFnInvocationMetadata,
   TestInvocationMetadata,
 } from 'jest-metadata';
 import type {
   AllureTestFileMetadata,
   AllureTestCaseMetadata,
+  AllureTestStepMetadata,
 } from 'jest-allure2-reporter';
 
-import { chain, chainLast, extractCode, getStart, getStop } from './utils';
+import { getStart, getStop } from './utils';
+import { PREFIX } from './constants';
+import { mergeTestCaseMetadata, mergeTestFileMetadata } from './mergers';
 
 export class MetadataSquasher {
-  protected readonly testFileConfig: MetadataSquasherConfig<AllureTestFileMetadata> =
-    {
-      code: chainLast(['testFile']),
-      workerId: chainLast(['testFile']),
-      description: chain(['globalMetadata', 'testFile']),
-      descriptionHtml: chain(['globalMetadata', 'testFile']),
-      attachments: chain(['testFile']),
-      parameters: chain(['testFile']),
-      status: chainLast(['testFile']),
-      statusDetails: chainLast(['testFile']),
-      labels: chain(['globalMetadata', 'testFile']),
-      links: chain(['globalMetadata', 'testFile']),
-      start: chainLast(['testFile']),
-      stop: chainLast(['testFile']),
-    };
-
-  protected readonly testInvocationConfig: MetadataSquasherConfig<AllureTestCaseMetadata> =
-    {
-      code: extractCode,
-      description: chain([
-        'globalMetadata',
-        'testFile',
-        'testEntry',
-        'testInvocation',
-        'testFnInvocation',
-      ]),
-      descriptionHtml: chain([
-        'globalMetadata',
-        'testFile',
-        'testEntry',
-        'testInvocation',
-        'testFnInvocation',
-      ]),
-      attachments: chain(['testEntry', 'testInvocation', 'anyInvocation']),
-      parameters: chain(['testEntry', 'testInvocation', 'anyInvocation']),
-      status: chainLast(['testInvocation']),
-      statusDetails: chainLast(['anyInvocation', 'testInvocation']),
-      labels: chain([
-        'globalMetadata',
-        'testFile',
-        'describeBlock',
-        'testEntry',
-        'testInvocation',
-        'anyInvocation',
-      ]),
-      links: chain([
-        'globalMetadata',
-        'testFile',
-        'describeBlock',
-        'testEntry',
-        'testInvocation',
-        'anyInvocation',
-      ]),
-      start: getStart,
-      stop: getStop,
-    };
-
   testFile(metadata: TestFileMetadata): AllureTestFileMetadata {
-    const config = this.testFileConfig as any;
-    const keys = Object.keys(config) as (keyof AllureTestCaseMetadata)[];
-    const result: Partial<AllureTestCaseMetadata> = {};
-    const context: MetadataSquasherContext = {
-      globalMetadata: metadata.globalMetadata,
-      testFile: metadata,
-    };
-
-    for (const key of keys) {
-      result[key] = config[key](context, key);
-    }
-
-    return result as AllureTestFileMetadata;
+    const input = [metadata.globalMetadata.get(PREFIX), metadata.get(PREFIX)];
+    return (input as AllureTestFileMetadata[]).reduce(mergeTestFileMetadata);
   }
 
   testInvocation(metadata: TestInvocationMetadata): AllureTestCaseMetadata {
-    const config = this.testInvocationConfig as any;
-    const keys = Object.keys(config) as (keyof AllureTestCaseMetadata)[];
-    const result: Partial<AllureTestCaseMetadata> = {};
-    const context: MetadataSquasherContext = {
-      globalMetadata: metadata.file.globalMetadata,
-      testFile: metadata.file,
-      describeBlock: [...metadata.definition.ancestors()],
-      testEntry: metadata.definition,
-      testInvocation: metadata,
-      testFnInvocation: [...metadata.invocations()],
-      anyInvocation: [...metadata.allInvocations()],
+    const ancestors = [
+      metadata.file.globalMetadata,
+      metadata.file,
+      ...metadata.definition.ancestors(),
+      metadata.definition,
+      metadata,
+    ].map((item) => item.get(PREFIX) as AllureTestCaseMetadata);
+    const result = ancestors.reduce(mergeTestCaseMetadata);
+    // TODO: handle .hidden metadata
+    const befores = [...metadata.beforeAll, ...metadata.beforeEach].map(
+      (item) => item.get(PREFIX) as AllureTestStepMetadata,
+    );
+    const afters = [...metadata.afterEach, ...metadata.afterAll].map(
+      (item) => item.get(PREFIX) as AllureTestStepMetadata,
+    );
+    const steps = result.steps ?? [];
+
+    return {
+      ...result,
+
+      start: getStart(metadata),
+      stop: getStop(metadata),
+      steps: [...befores, ...steps, ...afters],
     };
-
-    for (const key of keys) {
-      result[key] = config[key](context, key);
-    }
-
-    return result as AllureTestCaseMetadata;
   }
 }
-
-export type MetadataSquasherConfig<T extends object> = {
-  [K in keyof T]: MetadataSquasherMapping<T, K>;
-};
-
-export type MetadataSquasherMapping<T, K extends keyof T = keyof T> = (
-  context: MetadataSquasherContext,
-  key: K,
-) => T[K];
-
-export type MetadataSquasherContext = {
-  globalMetadata: GlobalMetadata;
-  testFile: TestFileMetadata;
-  describeBlock?: DescribeBlockMetadata[];
-  testEntry?: TestEntryMetadata;
-  testInvocation?: TestInvocationMetadata;
-  testFnInvocation?: (HookInvocationMetadata<any> | TestFnInvocationMetadata)[];
-  anyInvocation?: (HookInvocationMetadata<any> | TestFnInvocationMetadata)[];
-};

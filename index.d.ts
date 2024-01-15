@@ -494,7 +494,7 @@ declare module 'jest-allure2-reporter' {
     /**
      * Recursive data structure to represent test steps for more granular reporting.
      */
-    steps?: AllureTestStepMetadata[];
+    steps?: Omit<AllureTestStepMetadata, 'currentStep'>[];
     /**
      * Stop timestamp in milliseconds.
      */
@@ -580,11 +580,6 @@ declare module 'jest-allure2-reporter' {
     /** Method to extend global context. */
     globalContext?(context: GlobalExtractorContext): void | Promise<void>;
 
-    /** Method to affect test file metadata before it is created. */
-    beforeTestFileContext?(
-      context: Omit<TestFileExtractorContext, 'testFileMetadata'>,
-    ): void | Promise<void>;
-
     /** Method to extend test file context. */
     testFileContext?(context: TestFileExtractorContext): void | Promise<void>;
 
@@ -597,7 +592,6 @@ declare module 'jest-allure2-reporter' {
 
   export type PluginHookName =
     | 'globalContext'
-    | 'beforeTestFileContext'
     | 'testFileContext'
     | 'testCaseContext'
     | 'testStepContext';

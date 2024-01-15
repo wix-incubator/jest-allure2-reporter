@@ -1,19 +1,13 @@
-import type { AllureTestCaseMetadata } from 'jest-allure2-reporter';
+import type { TestInvocationMetadata } from 'jest-metadata';
 
-import type { MetadataSquasherMapping } from '../MetadataSquasher';
 import { STOP } from '../constants';
 
-export const getStop: MetadataSquasherMapping<
-  AllureTestCaseMetadata,
-  'stop'
-> = ({ testEntry, testInvocation }) => {
+export const getStop = (testInvocation: TestInvocationMetadata) => {
   const lastBlock =
-    testInvocation &&
-    (testInvocation.afterAll.at(-1) ??
-      testInvocation.afterEach.at(-1) ??
-      testInvocation.fn);
+    testInvocation.afterAll.at(-1) ??
+    testInvocation.afterEach.at(-1) ??
+    testInvocation.fn ??
+    testInvocation;
 
-  return (lastBlock?.get(STOP) ??
-    testInvocation?.get(STOP) ??
-    testEntry?.get(STOP)) as number;
+  return lastBlock.get(STOP) as number;
 };
