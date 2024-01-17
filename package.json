@@ -94,7 +94,7 @@
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-ecmascript-compat": "^3.0.0",
     "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-jsdoc": "^39.3.2",
+    "eslint-plugin-jsdoc": "^48.0.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prefer-arrow": "^1.2.3",
     "eslint-plugin-prettier": "^5.0.1",
@@ -127,6 +127,7 @@
     "remark": "^15.0.1",
     "remark-rehype": "^11.0.0",
     "rimraf": "^4.3.1",
+    "stacktrace-js": "^2.0.2",
     "strip-ansi": "^6.0.0"
   },
   "peerDependencies": {

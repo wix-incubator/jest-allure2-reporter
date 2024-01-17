@@ -21,9 +21,9 @@ export const prettierPlugin: PluginConstructor = (
       };
     },
     async testCaseContext(context) {
-      const code = context.testCaseMetadata.code;
+      const code = context.testCaseMetadata.sourceCode;
       if (code) {
-        context.testCaseMetadata.code = await prettier.format(
+        context.testCaseMetadata.sourceCode = await prettier.format(
           code.trim(),
           prettierConfig,
         );

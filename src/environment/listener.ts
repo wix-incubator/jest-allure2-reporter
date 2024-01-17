@@ -9,6 +9,7 @@ import type {
   TestEnvironmentCircusEvent,
   TestEnvironmentSetupEvent,
 } from 'jest-environment-emit';
+import * as StackTrace from 'stacktrace-js';
 
 import * as api from '../api';
 import realm from '../realms';
@@ -31,33 +32,23 @@ const listener: EnvironmentListenerFn = (context) => {
     )
     .on('add_hook', function ({ event }) {
       const code = event.fn.toString();
-      const hidden = code.includes(
-        "during setup, this cannot be null (and it's fine to explode if it is)",
-      );
-
-      const metadata = {
-        code,
-      } as Record<string, unknown>;
-
-      if (hidden) {
-        delete metadata.code;
-        metadata.hidden = true;
+      const MSG =
+        "during setup, this cannot be null (and it's fine to explode if it is)";
+      if (code.includes(MSG)) {
+        realm.runtimeContext.getCurrentMetadata().set('hidden', true);
       }
-
-      realm.runtimeContext.getCurrentMetadata().assign(metadata);
     })
-    .on('add_test', function ({ event }) {
-      realm.runtimeContext
-        .getCurrentMetadata()
-        .set('code', event.fn.toString());
-    })
+    .on('add_hook', addSourceLocation)
+    .on('add_test', addSourceLocation)
     .on('test_start', executableStart)
     .on('test_todo', testSkip)
     .on('test_skip', testSkip)
     .on('test_done', testDone)
+    .on('hook_start', addSourceCode)
     .on('hook_start', executableStart)
     .on('hook_failure', executableFailure)
     .on('hook_success', executableSuccess)
+    .on('test_fn_start', addSourceCode)
     .on('test_fn_start', executableStart)
     .on('test_fn_success', executableSuccess)
     .on('test_fn_failure', executableFailure)
@@ -65,6 +56,38 @@ const listener: EnvironmentListenerFn = (context) => {
       await realm.runtime.flush();
     });
 };
+
+function addSourceLocation({
+  event,
+}: TestEnvironmentCircusEvent<
+  Circus.Event & { name: 'add_hook' | 'add_test' }
+>) {
+  const metadata = realm.runtimeContext.getCurrentMetadata();
+  const task = StackTrace.fromError(event.asyncError).then(([frame]) => {
+    if (frame) {
+      metadata.set('sourceLocation', {
+        fileName: frame.fileName,
+        lineNumber: frame.lineNumber,
+        columnNumber: frame.columnNumber,
+      });
+    }
+  });
+
+  realm.runtimeContext.enqueueTask(task);
+}
+
+function addSourceCode({ event }: TestEnvironmentCircusEvent) {
+  let code = '';
+  if (event.name === 'hook_start') {
+    code = event.hook.fn.toString();
+  }
+  if (event.name === 'test_fn_start') {
+    code = event.test.fn.toString();
+  }
+  if (code) {
+    realm.runtimeContext.getCurrentMetadata().set('sourceCode', code);
+  }
+}
 
 // eslint-disable-next-line no-empty-pattern
 function executableStart({}: TestEnvironmentCircusEvent) {

@@ -18,7 +18,7 @@ export class AllureMetadataProxy<T = unknown> {
     return this.$metadata.get(fullPath, fallbackValue);
   }
 
-  set(path: keyof T, value: T[keyof T]): this {
+  set<K extends keyof T>(path: K, value: T[K]): this {
     const fullPath = this.$localPath(path);
     this.$metadata.set(fullPath, value);
     return this;

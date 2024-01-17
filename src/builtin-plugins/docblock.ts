@@ -43,7 +43,7 @@ function createLabel(entry: [string, string | string[]]): Label | Label[] {
 export const docblockPlugin: PluginConstructor = () => {
   const plugin: Plugin = {
     name: 'jest-allure2-reporter/plugins/docblock',
-    async beforeTestFileContext({ testFile: { testFilePath } }) {
+    async testFileContext({ testFile: { testFilePath } }) {
       try {
         const { parseWithComments } = await import('jest-docblock');
         const testFileMetadata = state.getTestFileMetadata(testFilePath);

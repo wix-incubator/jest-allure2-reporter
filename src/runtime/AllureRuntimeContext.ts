@@ -57,4 +57,11 @@ export class AllureRuntimeContext {
       },
     });
   }
+
+  enqueueTask = (task: Promise<unknown> | (() => Promise<unknown>)): void => {
+    this.idle =
+      typeof task === 'function'
+        ? this.idle.then(task)
+        : this.idle.then(() => task);
+  };
 }

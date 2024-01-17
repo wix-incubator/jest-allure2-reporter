@@ -30,8 +30,8 @@ export const testCase: ResolvedTestCaseCustomizer = {
   fullName: ({ testCase }) => testCase.fullName,
   description: ({ testCaseMetadata }) => {
     const text = testCaseMetadata.description?.join('\n') ?? '';
-    const code = testCaseMetadata.code?.length
-      ? '```javascript\n' + testCaseMetadata.code + '\n```'
+    const code = testCaseMetadata.sourceCode
+      ? '```javascript\n' + testCaseMetadata.sourceCode + '\n```'
       : '';
     return [text, code].filter(Boolean).join('\n\n');
   },

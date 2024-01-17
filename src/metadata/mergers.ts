@@ -35,8 +35,8 @@ function mergeTestItemMetadata(
   return {
     attachments: mergeArrays(a.attachments, b.attachments),
     currentStep: b.currentStep ?? a.currentStep,
-    code: b.code ?? a.code,
-    position: b.position ?? a.position,
+    sourceCode: b.sourceCode ?? a.sourceCode,
+    sourceLocation: b.sourceLocation ?? a.sourceLocation,
     description: mergeArrays(a.description, b.description),
     parameters: mergeArrays(a.parameters, b.parameters),
     stage: b.stage ?? a.stage,

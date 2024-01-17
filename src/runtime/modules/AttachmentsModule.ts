@@ -132,9 +132,7 @@ export class FileAttachmentsModule extends AttachmentsModule<
         const config = context.getReporterConfig();
         return path.join(config.resultsDir, config.attachments.subDir);
       },
-      waitFor: (promise) => {
-        context.idle = context.idle.then(() => promise);
-      },
+      waitFor: context.enqueueTask,
     });
   }
 
@@ -169,9 +167,7 @@ export class ContentAttachmentsModule extends AttachmentsModule<
         const config = context.getReporterConfig();
         return path.join(config.resultsDir, config.attachments.subDir);
       },
-      waitFor: (promise) => {
-        context.idle = context.idle.then(() => promise);
-      },
+      waitFor: context.enqueueTask,
     });
   }
 

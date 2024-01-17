@@ -430,8 +430,8 @@ declare module 'jest-allure2-reporter' {
     extends GlobalExtractorContext<T>,
       TestFileExtractorContextAugmentation {
     filePath: string[];
-    docblock?: DocblockContext;
     testFile: TestResult;
+    testFileDocblock?: DocblockContext;
     testFileMetadata: AllureTestFileMetadata;
   }
 
@@ -439,14 +439,24 @@ declare module 'jest-allure2-reporter' {
     extends TestFileExtractorContext<T>,
       TestCaseExtractorContextAugmentation {
     testCase: TestCaseResult;
+    testCaseDocblock?: DocblockContext;
     testCaseMetadata: AllureTestCaseMetadata;
   }
 
   export interface TestStepExtractorContext<T = unknown>
     extends TestCaseExtractorContext<T>,
       TestStepExtractorContextAugmentation {
+    testStepDocblock?: DocblockContext;
     testStepMetadata: AllureTestStepMetadata;
   }
+
+  export interface AllureTestItemSourceLocation {
+    fileName?: string;
+    lineNumber?: number;
+    columnNumber?: number;
+  }
+
+  export type AllureTestStepPath = string[];
 
   export interface AllureTestItemMetadata {
     /**
@@ -458,15 +468,15 @@ declare module 'jest-allure2-reporter' {
      * @see {steps}
      * @example ['steps', '0']
      */
-    currentStep?: string[];
+    currentStep?: AllureTestStepPath;
     /**
      * Source code of the test case, test step or a hook.
      */
-    code?: string;
+    sourceCode?: string;
     /**
-     * Position of the code snippet in the test file: [line, column?]
+     * Location (file, line, column) of the test case, test step or a hook.
      */
-    position?: [number, number?];
+    sourceLocation?: AllureTestItemSourceLocation;
     /**
      * Markdown description of the test case or test file, or plain text description of a test step.
      */

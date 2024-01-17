@@ -28,7 +28,7 @@ export class StepsModule {
   }
 
   step<T = unknown>(name: string, function_: () => T): T {
-    this.#startStep(name, function_);
+    this.#startStep(name);
     const end = this.#stopStep;
 
     let result: T;
@@ -57,11 +57,10 @@ export class StepsModule {
     }
   }
 
-  #startStep = (name: string, function_: Function) => {
+  #startStep = (name: string) => {
     this.context.metadata.$startStep().assign({
       stage: 'scheduled',
       start: this.context.now,
-      code: function_.toString(),
       description: [name],
     });
   };
