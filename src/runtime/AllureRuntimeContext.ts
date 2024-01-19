@@ -3,7 +3,7 @@ import type {
   AllureTestFileMetadata,
 } from 'jest-allure2-reporter';
 
-import { once } from '../utils';
+import { type MaybeFunction, once } from '../utils';
 import { AllureMetadataProxy, AllureTestItemMetadataProxy } from '../metadata';
 
 import type { AllureRuntimeConfig } from './AllureRuntimeConfig';
@@ -16,24 +16,29 @@ import type {
 } from './types';
 
 export class AllureRuntimeContext {
-  readonly contentAttachmentHandlers: Record<string, ContentAttachmentHandler> =
-    {
-      write: attachmentHandlers.writeHandler,
-    };
-  readonly fileAttachmentHandlers: Record<string, FileAttachmentHandler> = {
-    copy: attachmentHandlers.copyHandler,
-    move: attachmentHandlers.moveHandler,
-    ref: attachmentHandlers.referenceHandler,
-  };
-  inferMimeType: MIMEInferer = attachmentHandlers.inferMimeType;
+  readonly contentAttachmentHandlers: Record<string, ContentAttachmentHandler>;
+  readonly fileAttachmentHandlers: Record<string, FileAttachmentHandler>;
+  readonly inferMimeType: MIMEInferer;
   readonly getReporterConfig: () => SharedReporterConfig;
   readonly getFileMetadata: () => AllureMetadataProxy<AllureTestFileMetadata>;
   readonly getGlobalMetadata: () => AllureMetadataProxy<AllureGlobalMetadata>;
   readonly getCurrentMetadata: () => AllureTestItemMetadataProxy;
   readonly getNow: () => number;
-  idle: Promise<unknown> = Promise.resolve();
+
+  readonly flush: () => Promise<unknown>;
+  readonly enqueueTask: (task: MaybeFunction<Promise<unknown>>) => void;
 
   constructor(config: AllureRuntimeConfig) {
+    this.contentAttachmentHandlers = config.contentAttachmentHandlers ?? {
+      write: attachmentHandlers.writeHandler,
+    };
+    this.fileAttachmentHandlers = config.fileAttachmentHandlers ?? {
+      copy: attachmentHandlers.copyHandler,
+      move: attachmentHandlers.moveHandler,
+      ref: attachmentHandlers.referenceHandler,
+    };
+    this.inferMimeType =
+      config.inferMimeType ?? attachmentHandlers.inferMimeType;
     this.getNow = config.getNow;
     this.getReporterConfig = once(config.getReporterConfig);
     this.getCurrentMetadata = () =>
@@ -42,6 +47,13 @@ export class AllureRuntimeContext {
       new AllureMetadataProxy(config.getFileMetadata());
     this.getGlobalMetadata = () =>
       new AllureMetadataProxy(config.getGlobalMetadata());
+
+    let idle: Promise<unknown> = Promise.resolve();
+    this.flush = () => idle;
+    this.enqueueTask = (task) => {
+      idle =
+        typeof task === 'function' ? idle.then(task) : idle.then(() => task);
+    };
 
     Object.defineProperty(this.contentAttachmentHandlers, 'default', {
       get: () => {
@@ -57,11 +69,4 @@ export class AllureRuntimeContext {
       },
     });
   }
-
-  enqueueTask = (task: Promise<unknown> | (() => Promise<unknown>)): void => {
-    this.idle =
-      typeof task === 'function'
-        ? this.idle.then(task)
-        : this.idle.then(() => task);
-  };
 }

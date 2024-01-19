@@ -1,3 +1,5 @@
+import path from 'node:path';
+
 import type {
   PluginContext,
   ReporterOptions,
@@ -11,5 +13,7 @@ export function resolveOptions(
   context: PluginContext,
   options?: ReporterOptions | undefined,
 ): ReporterConfig {
-  return composeOptions(context, defaultOptions(context), options);
+  const result = composeOptions(context, defaultOptions(context), options);
+  result.resultsDir = path.resolve(result.resultsDir);
+  return result;
 }

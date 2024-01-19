@@ -39,12 +39,15 @@ abstract class AttachmentsModule<
     protected readonly context: AttachmentsModuleContext<Context, Handler>,
   ) {}
 
-  attachment(content: MaybePromise<Content>, options: Options): typeof content {
+  attachment<T extends Content>(
+    content: MaybePromise<T>,
+    options: Options,
+  ): typeof content {
     return processMaybePromise(content, this.#handleAttachment(options));
   }
 
-  createAttachment(
-    function_: Function_<MaybePromise<Content>>,
+  createAttachment<T extends Content>(
+    function_: Function_<MaybePromise<T>>,
     options: Options,
   ): typeof function_ {
     return hijackFunction(function_, this.#handleAttachment(options));
@@ -98,7 +101,7 @@ abstract class AttachmentsModule<
         metadata.push('attachments', [
           {
             name: context.name,
-            source: path.resolve(destinationPath),
+            source: destinationPath,
             type: context.mimeType,
           },
         ]);

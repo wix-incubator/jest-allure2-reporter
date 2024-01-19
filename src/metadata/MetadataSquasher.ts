@@ -1,21 +1,26 @@
+import type { HookInvocationMetadata } from 'jest-metadata';
+import type { TestFileMetadata, TestInvocationMetadata } from 'jest-metadata';
 import type {
-  TestFileMetadata,
-  TestInvocationMetadata,
-} from 'jest-metadata';
-import type {
-  AllureTestFileMetadata,
   AllureTestCaseMetadata,
+  AllureTestFileMetadata,
   AllureTestStepMetadata,
 } from 'jest-allure2-reporter';
 
 import { getStart, getStop } from './utils';
 import { PREFIX } from './constants';
-import { mergeTestCaseMetadata, mergeTestFileMetadata } from './mergers';
+import {
+  mergeTestCaseMetadata,
+  mergeTestFileMetadata,
+  mergeTestStepMetadata,
+} from './mergers';
 
 export class MetadataSquasher {
   testFile(metadata: TestFileMetadata): AllureTestFileMetadata {
     const input = [metadata.globalMetadata.get(PREFIX), metadata.get(PREFIX)];
-    return (input as AllureTestFileMetadata[]).reduce(mergeTestFileMetadata);
+    return (input as AllureTestFileMetadata[]).reduce(
+      mergeTestFileMetadata,
+      {},
+    );
   }
 
   testInvocation(metadata: TestInvocationMetadata): AllureTestCaseMetadata {
@@ -25,14 +30,16 @@ export class MetadataSquasher {
       ...metadata.definition.ancestors(),
       metadata.definition,
       metadata,
-    ].map((item) => item.get(PREFIX) as AllureTestCaseMetadata);
-    const result = ancestors.reduce(mergeTestCaseMetadata);
-    // TODO: handle .hidden metadata
+      metadata.fn,
+    ].map((item) =>
+      item ? (item.get(PREFIX) as AllureTestCaseMetadata) : undefined,
+    );
+    const result = ancestors.reduce(mergeTestCaseMetadata, {});
     const befores = [...metadata.beforeAll, ...metadata.beforeEach].map(
-      (item) => item.get(PREFIX) as AllureTestStepMetadata,
+      resolveTestStep,
     );
     const afters = [...metadata.afterEach, ...metadata.afterAll].map(
-      (item) => item.get(PREFIX) as AllureTestStepMetadata,
+      resolveTestStep,
     );
     const steps = result.steps ?? [];
 
@@ -45,3 +52,9 @@ export class MetadataSquasher {
     };
   }
 }
+
+const resolveTestStep = (item: HookInvocationMetadata) =>
+  mergeTestStepMetadata(
+    item.definition.get(PREFIX) as AllureTestStepMetadata,
+    item.get(PREFIX) as AllureTestStepMetadata,
+  );

@@ -12,6 +12,7 @@ import type {
   Stage,
   Status,
   StatusDetails,
+  AllureTestStepMetadata,
 } from 'jest-allure2-reporter';
 
 import {
@@ -24,16 +25,39 @@ const identity = <T>(context: ExtractorContext<T>) => context.value;
 const last = <T>(context: ExtractorContext<T[]>) => context.value?.at(-1);
 const all = identity;
 
+function extractCode(
+  steps: AllureTestStepMetadata[] | undefined,
+): string | undefined {
+  return joinCode(steps?.map((step) => step.sourceCode));
+}
+
+function joinCode(
+  code: undefined | (string | undefined)[],
+): string | undefined {
+  return code?.filter(Boolean).join('\n\n') || undefined;
+}
+
 export const testCase: ResolvedTestCaseCustomizer = {
+  hidden: () => false,
   historyId: ({ testCase }) => testCase.fullName,
   name: ({ testCase }) => testCase.title,
   fullName: ({ testCase }) => testCase.fullName,
   description: ({ testCaseMetadata }) => {
     const text = testCaseMetadata.description?.join('\n') ?? '';
-    const code = testCaseMetadata.sourceCode
-      ? '```javascript\n' + testCaseMetadata.sourceCode + '\n```'
-      : '';
-    return [text, code].filter(Boolean).join('\n\n');
+    const before = extractCode(
+      testCaseMetadata.steps?.filter(
+        (step) =>
+          step.hookType === 'beforeAll' || step.hookType === 'beforeEach',
+      ),
+    );
+    const after = extractCode(
+      testCaseMetadata.steps?.filter(
+        (step) => step.hookType === 'afterAll' || step.hookType === 'afterEach',
+      ),
+    );
+    const code = joinCode([before, testCaseMetadata.sourceCode, after]);
+    const snippet = code ? '```javascript\n' + code + '\n```' : '';
+    return [text, snippet].filter(Boolean).join('\n\n');
   },
   descriptionHtml: () => void 0,
   start: ({ testCase, testCaseMetadata }) =>

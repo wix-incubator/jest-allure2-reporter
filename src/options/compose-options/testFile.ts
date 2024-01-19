@@ -17,6 +17,6 @@ export function composeTestFileCustomizers(
 
   return {
     ...(composeTestCaseCustomizers(base, custom) as any),
-    ignored: composeExtractors(custom.ignored, base.ignored),
+    hidden: composeExtractors(custom.hidden, base.hidden),
   };
 }

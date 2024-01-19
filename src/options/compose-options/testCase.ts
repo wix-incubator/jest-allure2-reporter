@@ -18,6 +18,7 @@ export function composeTestCaseCustomizers(
   }
 
   return {
+    hidden: composeExtractors(custom.hidden, base.hidden),
     historyId: composeExtractors(custom.historyId, base.historyId),
     fullName: composeExtractors(custom.fullName, base.fullName),
     name: composeExtractors(custom.name, base.name),

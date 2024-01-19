@@ -25,23 +25,22 @@ export class AllureTestItemMetadataProxy<
     return localPath ? `${this.$metadata.id}:${localPath}` : this.$metadata.id;
   }
 
-  $bind(path?: string[]): AllureTestItemMetadataProxy<T> {
-    return new AllureTestItemMetadataProxy(
-      this.$metadata,
-      path ?? this.$localPath(),
-    );
+  $bind(): AllureTestItemMetadataProxy<T> {
+    return new AllureTestItemMetadataProxy(this.$metadata, [
+      ...this.$metadata.get(CURRENT_STEP, []),
+    ]);
   }
 
   $startStep(): this {
     const count = this.get('steps', []).length;
-    this.$metadata.push('steps', [{}]);
-    this.push('currentStep', ['steps', `${count}`]);
+    this.push('steps', [{}]);
+    this.$metadata.push(CURRENT_STEP, ['steps', `${count}`]);
     return this;
   }
 
   $stopStep(): this {
-    const currentStep = this.$metadata.get('currentStep', []) as string[];
-    this.$metadata.set('currentStep', currentStep.slice(0, -2));
+    const currentStep = this.$metadata.get(CURRENT_STEP, []) as string[];
+    this.$metadata.set(CURRENT_STEP, currentStep.slice(0, -2));
     return this;
   }
 

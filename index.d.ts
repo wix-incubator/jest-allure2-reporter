@@ -144,6 +144,10 @@ declare module 'jest-allure2-reporter' {
    */
   export interface TestCaseCustomizer {
     /**
+     * Extractor to omit test file cases from the report.
+     */
+    hidden: TestCaseExtractor<boolean>;
+    /**
      * Test case ID extractor to fine-tune Allure's history feature.
      * @example ({ package, file, test }) => `${package.name}:${file.path}:${test.fullName}`
      * @example ({ test }) => `${test.identifier}:${test.title}`
@@ -237,9 +241,9 @@ declare module 'jest-allure2-reporter' {
    */
   export interface TestFileCustomizer {
     /**
-     * Extractor to omit test cases from the report.
+     * Extractor to omit test file cases from the report.
      */
-    ignored: TestFileExtractor<boolean>;
+    hidden: TestFileExtractor<boolean>;
     /**
      * Test file ID extractor to fine-tune Allure's history feature.
      * @default ({ filePath }) => filePath.join('/')
@@ -341,6 +345,10 @@ declare module 'jest-allure2-reporter' {
 
   export interface TestStepCustomizer {
     /**
+     * Extractor to omit test steps from the report.
+     */
+    hidden: TestStepExtractor<boolean>;
+    /**
      * Extractor for the step name.
      * @example ({ value }) => value.replace(/(before|after)(Each|All)/, (_, p1, p2) => p1 + ' ' + p2.toLowerCase())
      */
@@ -419,14 +427,14 @@ declare module 'jest-allure2-reporter' {
     value: T | undefined;
   }
 
-  export interface GlobalExtractorContext<T = unknown>
+  export interface GlobalExtractorContext<T = any>
     extends ExtractorContext<T>,
       GlobalExtractorContextAugmentation {
     globalConfig: Config.GlobalConfig;
     config: ReporterConfig;
   }
 
-  export interface TestFileExtractorContext<T = unknown>
+  export interface TestFileExtractorContext<T = any>
     extends GlobalExtractorContext<T>,
       TestFileExtractorContextAugmentation {
     filePath: string[];
@@ -435,7 +443,7 @@ declare module 'jest-allure2-reporter' {
     testFileMetadata: AllureTestFileMetadata;
   }
 
-  export interface TestCaseExtractorContext<T = unknown>
+  export interface TestCaseExtractorContext<T = any>
     extends TestFileExtractorContext<T>,
       TestCaseExtractorContextAugmentation {
     testCase: TestCaseResult;
@@ -443,7 +451,7 @@ declare module 'jest-allure2-reporter' {
     testCaseMetadata: AllureTestCaseMetadata;
   }
 
-  export interface TestStepExtractorContext<T = unknown>
+  export interface TestStepExtractorContext<T = any>
     extends TestCaseExtractorContext<T>,
       TestStepExtractorContextAugmentation {
     testStepDocblock?: DocblockContext;
@@ -513,10 +521,6 @@ declare module 'jest-allure2-reporter' {
 
   export interface AllureTestStepMetadata extends AllureTestItemMetadata {
     /**
-     * Some steps may be hidden from the report.
-     */
-    hidden?: boolean;
-    /**
      * Steps produced by Jest hooks will have this property set.
      * User-defined steps don't have this property.
      */
@@ -548,7 +552,6 @@ declare module 'jest-allure2-reporter' {
   export interface GlobalExtractorContextAugmentation {
     detectLanguage?(contents: string, filePath?: string): string | undefined;
     processMarkdown?(markdown: string): Promise<string>;
-    processDocblock?(context: DocblockContext): void;
 
     // This may be extended by plugins
   }

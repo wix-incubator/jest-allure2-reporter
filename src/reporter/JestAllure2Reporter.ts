@@ -13,6 +13,19 @@ import type {
 import { state } from 'jest-metadata';
 import JestMetadataReporter from 'jest-metadata/reporter';
 import rimraf from 'rimraf';
+import type {
+  AllureGroup,
+  AllureTest,
+  Attachment,
+  Category,
+  ExecutableItemWrapper,
+  Label,
+  Link,
+  Parameter,
+  Stage,
+  Status,
+  StatusDetails,
+} from '@noomorph/allure-js-commons';
 import { AllureRuntime } from '@noomorph/allure-js-commons';
 import type {
   AllureGlobalMetadata,
@@ -24,22 +37,9 @@ import type {
   ReporterConfig,
   ReporterOptions,
   TestCaseExtractorContext,
-  TestStepExtractorContext,
   TestFileExtractorContext,
+  TestStepExtractorContext,
 } from 'jest-allure2-reporter';
-import type {
-  Attachment,
-  Category,
-  ExecutableItemWrapper,
-  Label,
-  Link,
-  Parameter,
-  Stage,
-  Status,
-  StatusDetails,
-  AllureGroup,
-  AllureTest,
-} from '@noomorph/allure-js-commons';
 
 import { resolveOptions } from '../options';
 import { AllureMetadataProxy, MetadataSquasher } from '../metadata';
@@ -49,7 +49,6 @@ import { ThreadService } from './ThreadService';
 
 export class JestAllure2Reporter extends JestMetadataReporter {
   private _plugins: readonly Plugin[] = [];
-  private _processMarkdown?: (markdown: string) => Promise<string>;
   private readonly _allure: AllureRuntime;
   private readonly _config: ReporterConfig;
   private readonly _globalConfig: Config.GlobalConfig;
@@ -140,7 +139,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
 
     const config = this._config;
 
-    const globalContext: GlobalExtractorContext<any> = {
+    const globalContext: GlobalExtractorContext = {
       globalConfig: this._globalConfig,
       config,
       value: undefined,
@@ -166,7 +165,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     const squasher = new MetadataSquasher();
 
     for (const testResult of results.testResults) {
-      const testFileContext: TestFileExtractorContext<any> = {
+      const testFileContext: TestFileExtractorContext = {
         ...globalContext,
         filePath: path
           .relative(globalContext.globalConfig.rootDir, testResult.testFilePath)
@@ -177,30 +176,34 @@ export class JestAllure2Reporter extends JestMetadataReporter {
         ),
       };
 
-      // TODO: augment testFileContext with .docblock metadata
-
       await this._callPlugins('testFileContext', testFileContext);
-      this._processMarkdown = testFileContext.processMarkdown;
 
-      if (!config.testFile.ignored(testFileContext)) {
+      if (!config.testFile.hidden(testFileContext)) {
+        // pseudo-test entity, used for reporting file-level errors and other obscure purposes
+        const allureFileTest: AllurePayloadTest = {
+          name: config.testFile.name(testFileContext),
+          start: config.testFile.start(testFileContext),
+          stop: config.testFile.stop(testFileContext),
+          historyId: config.testFile.historyId(testFileContext),
+          fullName: config.testFile.fullName(testFileContext),
+          description: config.testFile.description(testFileContext),
+          descriptionHtml: config.testFile.descriptionHtml(testFileContext),
+          // TODO: merge @noomorph/allure-js-commons into this package and remove casting
+          stage: config.testFile.stage(testFileContext) as string as Stage,
+          status: config.testFile.status(testFileContext) as string as Status,
+          statusDetails: config.testFile.statusDetails(testFileContext),
+          links: config.testFile.links(testFileContext),
+          labels: config.testFile.labels(testFileContext),
+          parameters: config.testFile.parameters(testFileContext),
+          attachments: config.testFile
+            .attachments(testFileContext)
+            ?.map(this._relativizeAttachment),
+        };
+
+        await this._renderHtmlDescription(testFileContext, allureFileTest);
         await this._createTest({
           containerName: `${testResult.testFilePath}`,
-          test: {
-            name: config.testFile.name(testFileContext),
-            start: config.testFile.start(testFileContext),
-            stop: config.testFile.stop(testFileContext),
-            historyId: config.testFile.historyId(testFileContext),
-            fullName: config.testFile.fullName(testFileContext),
-            description: config.testFile.description(testFileContext),
-            descriptionHtml: config.testFile.descriptionHtml(testFileContext),
-            status: config.testFile.status(testFileContext) as string as Status,
-            statusDetails: config.testFile.statusDetails(testFileContext),
-            stage: config.testFile.stage(testFileContext) as string as Stage,
-            links: config.testFile.links(testFileContext),
-            labels: config.testFile.labels(testFileContext),
-            parameters: config.testFile.parameters(testFileContext),
-            attachments: config.testFile.attachments(testFileContext),
-          },
+          test: allureFileTest,
         });
       }
 
@@ -213,59 +216,33 @@ export class JestAllure2Reporter extends JestMetadataReporter {
           const testCaseMetadata = squasher.testInvocation(
             testInvocationMetadata,
           );
-          const testCaseContext: TestCaseExtractorContext<any> = {
+          const testCaseContext: TestCaseExtractorContext = {
             ...testFileContext,
             testCase: testCaseResult,
             testCaseMetadata,
           };
 
-          // TODO: augment testCaseContext with .docblock metadata
           await this._callPlugins('testCaseContext', testCaseContext);
 
-          const invocationIndex = allInvocations.indexOf(
-            testInvocationMetadata,
-          );
-
-          const allureTest: AllurePayloadTest = {
-            name: config.testCase.name(testCaseContext),
-            start: config.testCase.start(testCaseContext),
-            stop: config.testCase.stop(testCaseContext),
-            historyId: config.testCase.historyId(testCaseContext),
-            fullName: config.testCase.fullName(testCaseContext),
-            description: config.testCase.description(testCaseContext),
-            descriptionHtml: config.testCase.descriptionHtml(testCaseContext),
-            status: config.testCase.status(testCaseContext) as string as Status,
-            statusDetails: config.testCase.statusDetails(testCaseContext),
-            stage: config.testCase.stage(testCaseContext) as string as Stage,
-            links: config.testCase.links(testCaseContext),
-            labels: config.testCase.labels(testCaseContext),
-            parameters: config.testCase.parameters(testCaseContext),
-            attachments: config.testCase
-              .attachments(testCaseContext)
-              ?.map(this._relativizeAttachment),
-          };
-
-          if (
-            !allureTest.descriptionHtml &&
-            allureTest.description &&
-            this._processMarkdown
-          ) {
-            const newHTML = await this._processMarkdown(allureTest.description);
-            allureTest.descriptionHtml = newHTML;
+          if (config.testCase.hidden(testCaseContext)) {
+            continue;
           }
 
           const allureSteps = testCaseMetadata.steps
             ? await Promise.all(
                 testCaseMetadata.steps.map(async (testStepMetadata) => {
-                  const testStepContext: TestStepExtractorContext<any> = {
+                  const testStepContext: TestStepExtractorContext = {
                     ...testCaseContext,
                     testStepMetadata,
                   };
 
                   await this._callPlugins('testStepContext', testStepContext);
 
+                  if (await config.testStep.hidden(testStepContext)) {
+                    return null;
+                  }
+
                   const result: AllurePayloadStep = {
-                    hidden: testStepMetadata.hidden,
                     hookType: testStepMetadata.hookType,
                     name: config.testStep.name(testStepContext),
                     start: config.testStep.start(testStepContext),
@@ -289,10 +266,36 @@ export class JestAllure2Reporter extends JestMetadataReporter {
               )
             : [];
 
+          const allureTest: AllurePayloadTest = {
+            name: config.testCase.name(testCaseContext),
+            start: config.testCase.start(testCaseContext),
+            stop: config.testCase.stop(testCaseContext),
+            historyId: config.testCase.historyId(testCaseContext),
+            fullName: config.testCase.fullName(testCaseContext),
+            description: config.testCase.description(testCaseContext),
+            descriptionHtml: config.testCase.descriptionHtml(testCaseContext),
+            // TODO: merge @noomorph/allure-js-commons into this package and remove casting
+            stage: config.testCase.stage(testCaseContext) as string as Stage,
+            status: config.testCase.status(testCaseContext) as string as Status,
+            statusDetails: config.testCase.statusDetails(testCaseContext),
+            links: config.testCase.links(testCaseContext),
+            labels: config.testCase.labels(testCaseContext),
+            parameters: config.testCase.parameters(testCaseContext),
+            attachments: config.testCase
+              .attachments(testCaseContext)
+              ?.map(this._relativizeAttachment),
+          };
+
+          await this._renderHtmlDescription(testCaseContext, allureTest);
+
+          const invocationIndex = allInvocations.indexOf(
+            testInvocationMetadata,
+          );
+
           await this._createTest({
             containerName: `${testCaseResult.fullName} (${invocationIndex})`,
             test: allureTest,
-            steps: allureSteps,
+            steps: allureSteps.filter(Boolean) as AllurePayloadStep[],
           });
         }
       }
@@ -345,6 +348,15 @@ export class JestAllure2Reporter extends JestMetadataReporter {
 
     allureTest.endTest(test.stop);
     allureGroup.endGroup();
+  }
+
+  private async _renderHtmlDescription(
+    context: GlobalExtractorContext,
+    test: AllurePayloadTest,
+  ) {
+    if (test.description && !test.descriptionHtml && context.processMarkdown) {
+      test.descriptionHtml = await context.processMarkdown(test.description);
+    }
   }
 
   private _createStepExecutable(

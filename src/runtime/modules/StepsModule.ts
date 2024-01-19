@@ -66,12 +66,13 @@ export class StepsModule {
   };
 
   #stopStep = (status: Status, statusDetails?: StatusDetails) => {
-    const existing = this.context.metadata.get<Partial<AllureTestCaseMetadata>>(
+    const metadata = this.context.metadata;
+    const existing = metadata.get<Partial<AllureTestCaseMetadata>>(
       undefined,
       {},
     );
 
-    this.context.metadata
+    metadata
       .assign({
         stage: 'finished',
         status: existing.status ?? status,

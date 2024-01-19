@@ -1,20 +1,13 @@
 import util from 'node:util';
 
-import type {
-  LabelName,
-  Parameter,
-  Status,
-  StatusDetails,
-} from 'jest-allure2-reporter';
+import type { Parameter } from 'jest-allure2-reporter';
 
-import { constant } from '../utils';
+import { constant, isObject } from '../utils';
 
 import type {
   AllureRuntimeBindOptions,
   AllureRuntimePluginCallback,
   IAllureRuntime,
-  ParameterOptions,
-  ParameterOrString,
 } from './types';
 import * as runtimeModules from './modules';
 import type { AllureRuntimeContext } from './AllureRuntimeContext';
@@ -38,7 +31,7 @@ export class AllureRuntime implements IAllureRuntime {
     this.#stepsDecorator = new runtimeModules.StepsDecorator({ runtime: this });
   }
 
-  $bind(options?: AllureRuntimeBindOptions): AllureRuntime {
+  $bind = (options?: AllureRuntimeBindOptions): AllureRuntime => {
     const { metadata = true, time = false } = options ?? {};
 
     return new AllureRuntime({
@@ -48,9 +41,9 @@ export class AllureRuntime implements IAllureRuntime {
         : this.#context.getCurrentMetadata,
       getNow: time ? constant(this.#context.getNow()) : this.#context.getNow,
     });
-  }
+  };
 
-  $plug(callback: AllureRuntimePluginCallback): this {
+  $plug = (callback: AllureRuntimePluginCallback): this => {
     callback({
       runtime: this,
       contentAttachmentHandlers: this.#context.contentAttachmentHandlers,
@@ -59,37 +52,35 @@ export class AllureRuntime implements IAllureRuntime {
     });
 
     return this;
-  }
+  };
 
-  async flush(): Promise<void> {
-    await this.#context.idle;
-  }
+  flush = () => this.#context.flush();
 
-  description(value: string) {
+  description: IAllureRuntime['description'] = (value) => {
     this.#coreModule.description(value);
-  }
+  };
 
-  descriptionHtml(value: string) {
+  descriptionHtml: IAllureRuntime['descriptionHtml'] = (value) => {
     this.#coreModule.descriptionHtml(value);
-  }
+  };
 
-  label(name: LabelName, value: string) {
+  label: IAllureRuntime['label'] = (name, value) => {
     this.#coreModule.label(name, value);
-  }
+  };
 
-  link(url: string, name = url, type?: string) {
+  link: IAllureRuntime['link'] = (url, name, type) => {
     this.#coreModule.link({ name, url, type });
-  }
+  };
 
-  parameter(name: string, value: unknown, options?: ParameterOptions) {
+  parameter: IAllureRuntime['parameter'] = (name, value, options) => {
     this.#coreModule.parameter({
       name,
       value: String(value),
       ...options,
     });
-  }
+  };
 
-  parameters(parameters: Record<string, unknown>) {
+  parameters: IAllureRuntime['parameters'] = (parameters) => {
     for (const [name, value] of Object.entries(parameters)) {
       if (value && typeof value === 'object') {
         const raw = value as Parameter;
@@ -98,29 +89,29 @@ export class AllureRuntime implements IAllureRuntime {
         this.parameter(name, value);
       }
     }
-  }
+  };
 
-  status(status: Status, statusDetails?: StatusDetails) {
+  status: IAllureRuntime['status'] = (status, statusDetails) => {
     this.#coreModule.status(status);
-    if (statusDetails !== undefined) {
-      this.#coreModule.statusDetails(statusDetails || {});
+    if (isObject(statusDetails)) {
+      this.#coreModule.statusDetails(statusDetails);
     }
-  }
+  };
 
-  statusDetails(statusDetails: StatusDetails | null) {
+  statusDetails: IAllureRuntime['statusDetails'] = (statusDetails) => {
     this.#coreModule.statusDetails(statusDetails || {});
-  }
+  };
 
-  step<T = unknown>(name: string, function_: () => T): T {
-    return this.#basicStepsModule.step<T>(name, function_);
-  }
+  step: IAllureRuntime['step'] = (name, function_) =>
+    this.#basicStepsModule.step(name, function_);
 
-  createStep<F extends Function>(
-    nameFormat: string,
-    maybeParameters: F | ParameterOrString[],
-    maybeFunction?: F,
-  ): F {
-    const function_: any = maybeFunction ?? (maybeParameters as F);
+  // @ts-expect-error TS2322: too few arguments
+  createStep: IAllureRuntime['createStep'] = (
+    nameFormat,
+    maybeParameters,
+    maybeFunction,
+  ) => {
+    const function_: any = maybeFunction ?? maybeParameters;
     if (typeof function_ !== 'function') {
       throw new TypeError(
         `Expected a function, got instead: ${util.inspect(function_)}`,
@@ -136,14 +127,15 @@ export class AllureRuntime implements IAllureRuntime {
       function_,
       userParameters,
     );
-  }
+  };
 
   attachment: IAllureRuntime['attachment'] = (name, content, mimeType) =>
     this.#contentAttachmentsModule.attachment(content, {
       name,
       mimeType,
-    }) as any; // TODO: fix type
+    });
 
+  // @ts-expect-error TS2322: is not assignable to type 'string'
   fileAttachment: IAllureRuntime['fileAttachment'] = (
     filePath,
     nameOrOptions,
@@ -153,7 +145,7 @@ export class AllureRuntime implements IAllureRuntime {
         ? { name: nameOrOptions }
         : { ...nameOrOptions };
 
-    return this.#fileAttachmentsModule.attachment(filePath, options) as any; // TODO: fix type
+    return this.#fileAttachmentsModule.attachment(filePath, options);
   };
 
   createAttachment: IAllureRuntime['createAttachment'] = (
@@ -165,10 +157,7 @@ export class AllureRuntime implements IAllureRuntime {
         ? { name: nameOrOptions }
         : { ...nameOrOptions };
 
-    return this.#contentAttachmentsModule.createAttachment(
-      function_,
-      options,
-    ) as any; // TODO: fix type
+    return this.#contentAttachmentsModule.createAttachment(function_, options);
   };
 
   createFileAttachment: IAllureRuntime['createFileAttachment'] = (
@@ -180,9 +169,6 @@ export class AllureRuntime implements IAllureRuntime {
         ? { name: nameOrOptions }
         : { ...nameOrOptions };
 
-    return this.#fileAttachmentsModule.createAttachment(
-      function_,
-      options,
-    ) as any; // TODO: fix type
+    return this.#fileAttachmentsModule.createAttachment(function_, options);
   };
 }

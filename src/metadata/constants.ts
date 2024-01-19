@@ -1,10 +1,6 @@
 export const PREFIX = 'allure2' as const;
 
-export const SHARED_CONFIG = [PREFIX, 'config'] as const;
-
 export const CODE = [PREFIX, 'code'] as const;
-export const WORKER_ID = [PREFIX, 'workerId'] as const;
-export const HIDDEN = [PREFIX, 'hidden'] as const;
 
 export const START = [PREFIX, 'start'] as const;
 

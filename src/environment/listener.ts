@@ -30,14 +30,6 @@ const listener: EnvironmentListenerFn = (context) => {
           .set('workerId', process.env.JEST_WORKER_ID);
       },
     )
-    .on('add_hook', function ({ event }) {
-      const code = event.fn.toString();
-      const MSG =
-        "during setup, this cannot be null (and it's fine to explode if it is)";
-      if (code.includes(MSG)) {
-        realm.runtimeContext.getCurrentMetadata().set('hidden', true);
-      }
-    })
     .on('add_hook', addSourceLocation)
     .on('add_test', addSourceLocation)
     .on('test_start', executableStart)
@@ -47,15 +39,21 @@ const listener: EnvironmentListenerFn = (context) => {
     .on('hook_start', addSourceCode)
     .on('hook_start', executableStart)
     .on('hook_failure', executableFailure)
+    .on('hook_failure', flush)
     .on('hook_success', executableSuccess)
+    .on('hook_success', flush)
     .on('test_fn_start', addSourceCode)
     .on('test_fn_start', executableStart)
     .on('test_fn_success', executableSuccess)
+    .on('test_fn_success', flush)
     .on('test_fn_failure', executableFailure)
-    .on('teardown', async function () {
-      await realm.runtime.flush();
-    });
+    .on('test_fn_failure', flush)
+    .on('teardown', flush);
 };
+
+async function flush() {
+  await realm.runtime.flush();
+}
 
 function addSourceLocation({
   event,
@@ -79,10 +77,12 @@ function addSourceLocation({
 function addSourceCode({ event }: TestEnvironmentCircusEvent) {
   let code = '';
   if (event.name === 'hook_start') {
-    code = event.hook.fn.toString();
+    const { type, fn } = event.hook;
+    code = `${type}(${fn});`;
   }
   if (event.name === 'test_fn_start') {
-    code = event.test.fn.toString();
+    const { name, fn } = event.test;
+    code = `test(${JSON.stringify(name)}, ${fn});`;
   }
   if (code) {
     realm.runtimeContext.getCurrentMetadata().set('sourceCode', code);

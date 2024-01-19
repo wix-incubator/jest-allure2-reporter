@@ -1,3 +1,5 @@
+import path from 'node:path';
+
 import { state } from 'jest-metadata';
 
 import { AllureMetadataProxy } from '../metadata';
@@ -11,6 +13,10 @@ describe('AllureRuntime', () => {
     let now = 0;
 
     const context = new AllureRuntimeContext({
+      contentAttachmentHandlers: {
+        write: (context) =>
+          path.join(context.outDir, context.content.toString()),
+      },
       getCurrentMetadata: () => state.currentMetadata,
       getFileMetadata: () => state.lastTestFile!,
       getGlobalMetadata: () => state,
@@ -21,9 +27,9 @@ describe('AllureRuntime', () => {
           resultsDir: '/tmp',
           injectGlobals: false,
           attachments: {
-            subDir: 'allure-attachments',
+            subDir: '../attachments',
             contentHandler: 'write',
-            fileHandler: 'copy',
+            fileHandler: 'ref',
           },
         };
       },
@@ -63,6 +69,7 @@ describe('AllureRuntime', () => {
       });
     });
     runtime.attachment('attachment5', Buffer.from('fifth'), 'text/plain');
+    await runtime.flush();
     expect(new AllureMetadataProxy(state).get()).toMatchSnapshot();
   });
 });

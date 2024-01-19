@@ -11,6 +11,7 @@ export function composeTestStepCustomizers(
   }
 
   return {
+    hidden: composeExtractors(custom.hidden, base.hidden),
     name: composeExtractors(custom.name, base.name),
     stage: composeExtractors(custom.stage, base.stage),
     start: composeExtractors(custom.start, base.start),

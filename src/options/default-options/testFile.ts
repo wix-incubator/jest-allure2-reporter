@@ -21,7 +21,7 @@ const last = <T>(context: ExtractorContext<T[]>) => context.value?.at(-1);
 const all = identity;
 
 export const testFile: ResolvedTestFileCustomizer = {
-  ignored: ({ testFile }) => !testFile.testExecError,
+  hidden: ({ testFile }) => !testFile.testExecError,
   historyId: ({ filePath }) => filePath.join('/'),
   name: ({ filePath }) => filePath.join(path.sep),
   fullName: ({ globalConfig, testFile }) =>
