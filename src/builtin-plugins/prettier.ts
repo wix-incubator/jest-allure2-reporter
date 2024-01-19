@@ -29,6 +29,15 @@ export const prettierPlugin: PluginConstructor = (
         );
       }
     },
+    async testStepContext(context) {
+      const code = context.testStepMetadata.sourceCode;
+      if (code) {
+        context.testStepMetadata.sourceCode = await prettier.format(
+          code.trim(),
+          prettierConfig,
+        );
+      }
+    },
   };
 
   return plugin;
