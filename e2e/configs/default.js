@@ -40,6 +40,9 @@ const jestAllure2ReporterOptions = {
       testMethod: ({ testCase }) => testCase.fullName,
       owner: ({ value }) => value ?? 'Unknown',
     },
+    links: {
+      issue: ({ value }) => ({ ...value, url: `https://youtrack.jetbrains.com/issue/${value.url}/` }),
+    },
   },
 };
 

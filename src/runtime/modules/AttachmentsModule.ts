@@ -43,6 +43,13 @@ abstract class AttachmentsModule<
     content: MaybePromise<T>,
     options: Options,
   ): typeof content {
+    if (
+      typeof options.handler === 'string' &&
+      !this.context.handlers[options.handler]
+    ) {
+      throw new Error(`Unknown attachment handler: ${options.handler}`);
+    }
+
     return processMaybePromise(content, this.#handleAttachment(options));
   }
 

@@ -15,7 +15,6 @@ import JestMetadataReporter from 'jest-metadata/reporter';
 import rimraf from 'rimraf';
 import type {
   AllureGroup,
-  AllureTest,
   Attachment,
   Category,
   ExecutableItemWrapper,
@@ -228,43 +227,50 @@ export class JestAllure2Reporter extends JestMetadataReporter {
             continue;
           }
 
-          const allureSteps = testCaseMetadata.steps
-            ? await Promise.all(
-                testCaseMetadata.steps.map(async (testStepMetadata) => {
-                  const testStepContext: TestStepExtractorContext = {
-                    ...testCaseContext,
-                    testStepMetadata,
-                  };
+          const testCaseSteps = testCaseMetadata.steps ?? [];
+          const visibleTestStepContexts = testCaseSteps
+            .map(
+              (testStepMetadata) =>
+                ({
+                  ...testCaseContext,
+                  testStepMetadata,
+                }) as TestStepExtractorContext,
+            )
+            .filter((testStepMetadataContext) => {
+              return !config.testStep.hidden(testStepMetadataContext);
+            });
 
-                  await this._callPlugins('testStepContext', testStepContext);
+          if (testCaseMetadata.steps) {
+            testCaseMetadata.steps = visibleTestStepContexts.map(
+              (c) => c.testStepMetadata,
+            );
+          }
 
-                  if (await config.testStep.hidden(testStepContext)) {
-                    return null;
-                  }
+          let allureSteps: AllurePayloadStep[] = await Promise.all(
+            visibleTestStepContexts.map(async (testStepContext) => {
+              await this._callPlugins('testStepContext', testStepContext);
 
-                  const result: AllurePayloadStep = {
-                    hookType: testStepMetadata.hookType,
-                    name: config.testStep.name(testStepContext),
-                    start: config.testStep.start(testStepContext),
-                    stop: config.testStep.stop(testStepContext),
-                    stage: config.testStep.stage(
-                      testStepContext,
-                    ) as string as Stage,
-                    status: config.testStep.status(
-                      testStepContext,
-                    ) as string as Status,
-                    statusDetails:
-                      config.testStep.statusDetails(testStepContext),
-                    parameters: config.testStep.parameters(testStepContext),
-                    attachments: config.testStep
-                      .attachments(testStepContext)
-                      ?.map(this._relativizeAttachment),
-                  };
+              const result: AllurePayloadStep = {
+                hookType: testStepContext.testStepMetadata.hookType,
+                name: config.testStep.name(testStepContext),
+                start: config.testStep.start(testStepContext),
+                stop: config.testStep.stop(testStepContext),
+                stage: config.testStep.stage(
+                  testStepContext,
+                ) as string as Stage,
+                status: config.testStep.status(
+                  testStepContext,
+                ) as string as Status,
+                statusDetails: config.testStep.statusDetails(testStepContext),
+                parameters: config.testStep.parameters(testStepContext),
+                attachments: config.testStep
+                  .attachments(testStepContext)
+                  ?.map(this._relativizeAttachment),
+              };
 
-                  return result;
-                }),
-              )
-            : [];
+              return result;
+            }),
+          );
 
           const allureTest: AllurePayloadTest = {
             name: config.testCase.name(testCaseContext),
@@ -284,7 +290,10 @@ export class JestAllure2Reporter extends JestMetadataReporter {
             attachments: config.testCase
               .attachments(testCaseContext)
               ?.map(this._relativizeAttachment),
+            steps: allureSteps.filter((step) => !step.hookType),
           };
+
+          allureSteps = allureSteps.filter((step) => step.hookType);
 
           await this._renderHtmlDescription(testCaseContext, allureTest);
 
@@ -295,7 +304,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
           await this._createTest({
             containerName: `${testCaseResult.fullName} (${invocationIndex})`,
             test: allureTest,
-            steps: allureSteps.filter(Boolean) as AllurePayloadStep[],
+            steps: allureSteps,
           });
         }
       }
@@ -333,13 +342,8 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     }
     if (steps) {
       for (const step of steps) {
-        if (step.hidden) {
-          continue;
-        }
-
         const executable = this._createStepExecutable(
           allureGroup,
-          allureTest,
           step.hookType,
         );
         await this._fillStep(executable, step);
@@ -361,7 +365,6 @@ export class JestAllure2Reporter extends JestMetadataReporter {
 
   private _createStepExecutable(
     parent: AllureGroup,
-    test: AllureTest,
     hookType: AllureTestStepMetadata['hookType'],
   ) {
     switch (hookType) {
@@ -374,7 +377,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
         return parent.addAfter();
       }
       default: {
-        return test;
+        throw new Error(`Cannot create step executable for ${hookType}`);
       }
     }
   }
@@ -426,9 +429,14 @@ export class JestAllure2Reporter extends JestMetadataReporter {
   }
 
   _relativizeAttachment = (attachment: Attachment) => {
+    const source = path.relative(this._config.resultsDir, attachment.source);
+    if (source.startsWith('..')) {
+      return attachment;
+    }
+
     return {
       ...attachment,
-      source: path.relative(this._config.resultsDir, attachment.source),
+      source,
     };
   };
 }
@@ -440,7 +448,6 @@ type AllurePayload = {
 };
 
 type AllurePayloadStep = Partial<{
-  hidden: boolean;
   hookType?: 'beforeAll' | 'beforeEach' | 'afterEach' | 'afterAll';
 
   name: string;

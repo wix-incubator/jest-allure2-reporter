@@ -150,7 +150,7 @@ export interface ContentAttachmentContext extends AttachmentContext {
 export type AttachmentContent = Buffer | string;
 
 export type AttachmentHandler<Context extends AttachmentContext> = (
-  context: Context,
+  context: Readonly<Context>,
 ) => MaybePromise<string | undefined>;
 
 export type FileAttachmentHandler = AttachmentHandler<FileAttachmentContext>;

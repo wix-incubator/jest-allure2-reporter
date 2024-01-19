@@ -31,6 +31,7 @@ const listener: EnvironmentListenerFn = (context) => {
       },
     )
     .on('add_hook', addSourceLocation)
+    .on('add_hook', addHookType)
     .on('add_test', addSourceLocation)
     .on('test_start', executableStart)
     .on('test_todo', testSkip)
@@ -72,6 +73,13 @@ function addSourceLocation({
   });
 
   realm.runtimeContext.enqueueTask(task);
+}
+
+function addHookType({
+  event,
+}: TestEnvironmentCircusEvent<Circus.Event & { name: 'add_hook' }>) {
+  const metadata = realm.runtimeContext.getCurrentMetadata();
+  metadata.set('hookType', event.hookType);
 }
 
 function addSourceCode({ event }: TestEnvironmentCircusEvent) {
