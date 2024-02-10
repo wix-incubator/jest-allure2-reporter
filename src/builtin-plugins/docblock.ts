@@ -54,6 +54,7 @@ function mergeIntoTestItem(
   comments: string,
   pragmas: Record<string, string[]>,
   rawDocblock: string,
+  shouldLeaveComments: boolean,
 ) {
   if (comments) {
     metadata.description ??= [];
@@ -66,8 +67,13 @@ function mergeIntoTestItem(
   }
 
   if (metadata.sourceCode && rawDocblock) {
-    const [left, ...right] = metadata.sourceCode.split(rawDocblock);
-    metadata.sourceCode = [left.trimEnd(), ...right].join('\n');
+    const [left, right, ...rest] = metadata.sourceCode.split(rawDocblock);
+    const leftTrimmed = left.trimEnd();
+    const replacement = shouldLeaveComments
+      ? `/* ${comments.trimStart()} */\n`
+      : '\n';
+    const joined = right ? [leftTrimmed, right].join(replacement) : leftTrimmed;
+    metadata.sourceCode = [joined, ...rest].join('\n');
   }
 }
 
@@ -83,7 +89,7 @@ function mergeIntoTestCase(
   docblock: DocblockContext | undefined,
 ) {
   const { raw = '', comments = '', pragmas = {} } = docblock ?? {};
-  mergeIntoTestItem(metadata, comments, pragmas, raw);
+  mergeIntoTestItem(metadata, comments, pragmas, raw, false);
 
   const epic = pragmas.epic?.map(createLabelMapper('epic')) ?? [];
   const feature = pragmas.feature?.map(createLabelMapper('feature')) ?? [];
@@ -124,7 +130,7 @@ function mergeIntoTestStep(
   docblock: DocblockContext | undefined,
 ) {
   const { raw = '', comments = '', pragmas = {} } = docblock ?? {};
-  mergeIntoTestItem(metadata, comments, pragmas, raw);
+  mergeIntoTestItem(metadata, comments, pragmas, raw, true);
 }
 
 type DocblockParser = (raw: string) => DocblockContext | undefined;

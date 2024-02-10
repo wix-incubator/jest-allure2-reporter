@@ -87,11 +87,24 @@ function addSourceCode({ event }: TestEnvironmentCircusEvent) {
   if (event.name === 'hook_start') {
     const { type, fn } = event.hook;
     code = `${type}(${fn});`;
+
+    if (
+      code.includes(
+        "during setup, this cannot be null (and it's fine to explode if it is)",
+      )
+    ) {
+      code = '';
+      realm.runtimeContext
+        .getCurrentMetadata()
+        .push('description', ['Reset mocks, modules and timers (Jest)']);
+    }
   }
+
   if (event.name === 'test_fn_start') {
     const { name, fn } = event.test;
     code = `test(${JSON.stringify(name)}, ${fn});`;
   }
+
   if (code) {
     realm.runtimeContext.getCurrentMetadata().set('sourceCode', code);
   }
