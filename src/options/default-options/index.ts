@@ -20,6 +20,7 @@ export function defaultOptions(context: PluginContext): ReporterConfig {
     injectGlobals: true,
     attachments: {
       subDir: 'attachments',
+      contentHandler: 'write',
       fileHandler: 'ref',
     },
     testFile,

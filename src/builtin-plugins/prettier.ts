@@ -11,27 +11,6 @@ export const prettierPlugin: PluginConstructor = (
   const prettier = require('prettier');
   let prettierConfig: Options;
 
-  function formatCode(
-    code: string | string[] | undefined,
-  ): undefined | Promise<string[]> {
-    if (!code) {
-      return;
-    }
-
-    return Array.isArray(code)
-      ? Promise.all(
-          code.map((fragment) => {
-            const trimmed = fragment.trim();
-            return prettier
-              .format(trimmed, prettierConfig)
-              .catch((error: unknown) => {
-                throw error;
-              });
-          }),
-        )
-      : formatCode([code]);
-  }
-
   const plugin: Plugin = {
     name: 'jest-allure2-reporter/plugins/prettier',
     async globalContext() {
@@ -42,9 +21,22 @@ export const prettierPlugin: PluginConstructor = (
       };
     },
     async testCaseContext(context) {
-      context.testCaseMetadata.code = await formatCode(
-        context.testCaseMetadata.code,
-      );
+      const code = context.testCaseMetadata.sourceCode;
+      if (code) {
+        context.testCaseMetadata.sourceCode = await prettier.format(
+          code.trim(),
+          prettierConfig,
+        );
+      }
+    },
+    async testStepContext(context) {
+      const code = context.testStepMetadata.sourceCode;
+      if (code) {
+        context.testStepMetadata.sourceCode = await prettier.format(
+          code.trim(),
+          prettierConfig,
+        );
+      }
     },
   };
 

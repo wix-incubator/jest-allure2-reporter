@@ -1,4 +1,4 @@
-import assert from 'assert';
+import assert from 'node:assert';
 import JestAllure2Reporter from 'jest-allure2-reporter';
 import environmentListener from 'jest-allure2-reporter/environment-listener';
 import JsdomTestEnvironment from 'jest-allure2-reporter/environment-jsdom';

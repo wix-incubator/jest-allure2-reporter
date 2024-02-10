@@ -1,32 +1,41 @@
+import path from 'node:path';
+
 import { state } from 'jest-metadata';
 
-import { PREFIX } from '../constants';
+import { AllureMetadataProxy } from '../metadata';
 
 import { AllureRuntime } from './AllureRuntime';
-import type { IAttachmentsHandler } from './AttachmentsHandler';
+import type { SharedReporterConfig } from './types';
+import { AllureRuntimeContext } from './AllureRuntimeContext';
 
 describe('AllureRuntime', () => {
   it('should add attachments within the steps', async () => {
     let now = 0;
 
-    const attachmentsHandler: IAttachmentsHandler = {
-      placeAttachment: (_name, content) => {
-        return `/attachments/${content}`;
+    const context = new AllureRuntimeContext({
+      contentAttachmentHandlers: {
+        write: (context) =>
+          path.join(context.outDir, context.content.toString()),
       },
-      secureAttachment(filePath) {
-        return { destinationPath: filePath };
+      getCurrentMetadata: () => state.currentMetadata,
+      getFileMetadata: () => state.lastTestFile!,
+      getGlobalMetadata: () => state,
+      getNow: () => now++,
+      getReporterConfig(): SharedReporterConfig {
+        return {
+          overwrite: true,
+          resultsDir: '/tmp',
+          injectGlobals: false,
+          attachments: {
+            subDir: '../attachments',
+            contentHandler: 'write',
+            fileHandler: 'ref',
+          },
+        };
       },
-      writeAttachment: async () => {
-        /* noop */
-      },
-    };
-
-    const runtime = new AllureRuntime({
-      metadataProvider: () => state,
-      nowProvider: () => now++,
-      attachmentsHandler,
     });
 
+    const runtime = new AllureRuntime(context);
     runtime.attachment('attachment1', Buffer.from('first'), 'text/plain');
 
     const innerStep3 = runtime.createStep(
@@ -60,6 +69,7 @@ describe('AllureRuntime', () => {
       });
     });
     runtime.attachment('attachment5', Buffer.from('fifth'), 'text/plain');
-    expect(state.get(PREFIX)).toMatchSnapshot();
+    await runtime.flush();
+    expect(new AllureMetadataProxy(state).get()).toMatchSnapshot();
   });
 });

@@ -1,5 +1,3 @@
-import LoginHelper from '../../../../utils/LoginHelper';
-
 /**
  * Client tests for login screen
  * @owner Security Team
@@ -7,6 +5,9 @@ import LoginHelper from '../../../../utils/LoginHelper';
  * @tag regression,auth
  * @tag smoke
  */
+
+import LoginHelper from '../../../../utils/LoginHelper';
+import {allure} from "../../../../../../src/api";
 
 $Tag('client');
 $Epic('Authentication');
@@ -22,12 +23,18 @@ describe('Login screen', () => {
   $Story('Validation');
   describe('Form Submission', () => {
     it('should show error on invalid e-mail format', async () => {
-      /** @owner Samantha Jones */
+      /**
+       * @owner Samantha Jones
+       * @issue IDEA-235211
+       */
 
       await LoginHelper.typeEmail('someone#example.com');
       await LoginHelper.typePassword('123456');
-      expect(LoginHelper.snapshotForm()).toContain('someone#example.com');
-      expect(LoginHelper.getValidationSummary()).toBe('fixtures/invalid-email.xml');
+      await allure.step('Hello', () => {
+        expect(LoginHelper.snapshotForm()).toContain('someone#example.com');
+        expect(LoginHelper.getValidationSummary()).toBe('fixtures/invalid-email.xml');
+        allure.status('passed', { message: 'All is good' });
+      });
     });
 
     it('should show error on short or invalid password format', () => {

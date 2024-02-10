@@ -1,4 +1,4 @@
-import realm from '../realms';
+import realm from '../../realms';
 
 const allure = realm.runtime;
 

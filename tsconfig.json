@@ -12,6 +12,7 @@
     "strictNullChecks": true,
     "strictFunctionTypes": true,
     "strictBindCallApply": true,
+    "experimentalDecorators": true,
     "strictPropertyInitialization": true,
     "noImplicitThis": true,
     "alwaysStrict": true,

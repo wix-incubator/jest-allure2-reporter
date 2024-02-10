@@ -1,16 +1,27 @@
 import { state } from 'jest-metadata';
+import type { AllureGlobalMetadata } from 'jest-allure2-reporter';
 
-import { AllureRuntime } from '../runtime';
-import { SHARED_CONFIG } from '../constants';
-import { AttachmentsHandler } from '../runtime';
 import type { SharedReporterConfig } from '../runtime';
+import { AllureRuntime, AllureRuntimeContext } from '../runtime';
+import { AllureMetadataProxy } from '../metadata';
 
 export class AllureRealm {
-  runtime = new AllureRuntime({
-    metadataProvider: () => state.currentMetadata,
-    nowProvider: () => Date.now(),
-    attachmentsHandler: new AttachmentsHandler(() => {
-      return state.get(SHARED_CONFIG) as SharedReporterConfig;
-    }),
+  runtimeContext = new AllureRuntimeContext({
+    getCurrentMetadata: () => state.currentMetadata,
+    getFileMetadata: () => state.lastTestFile!,
+    getGlobalMetadata: () => state,
+    getNow: () => Date.now(),
+    getReporterConfig() {
+      const config = new AllureMetadataProxy<AllureGlobalMetadata>(state).get(
+        'config',
+      );
+      if (!config) {
+        throw new Error('Shared reporter config is not defined');
+      }
+
+      return config as SharedReporterConfig;
+    },
   });
+
+  runtime = new AllureRuntime(this.runtimeContext);
 }

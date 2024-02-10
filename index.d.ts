@@ -117,23 +117,35 @@ declare module 'jest-allure2-reporter' {
      */
     subDir?: string;
     /**
-     * Specifies strategy for attaching files to the report by their path.
+     * Specifies default strategy for attaching files to the report by their path.
      * - `copy` - copy the file to {@link AttachmentsOptions#subDir}
      * - `move` - move the file to {@link AttachmentsOptions#subDir}
      * - `ref` - use the file path as is
      * @default 'ref'
      * @see {@link AllureRuntime#createFileAttachment}
      */
-    fileHandler?: BuiltinFileHandler;
+    fileHandler?: BuiltinFileAttachmentHandler | string;
+    /**
+     * Specifies default strategy for attaching dynamic content to the report.
+     * Uses simple file writing by default.
+     */
+    contentHandler?: BuiltinContentAttachmentHandler | string;
   };
 
   /** @see {@link AttachmentsOptions#fileHandler} */
-  export type BuiltinFileHandler = 'copy' | 'move' | 'ref';
+  export type BuiltinFileAttachmentHandler = 'copy' | 'move' | 'ref';
+
+  /** @see {@link AttachmentsOptions#contentHandler} */
+  export type BuiltinContentAttachmentHandler = 'write';
 
   /**
    * Global customizations for how test cases are reported
    */
   export interface TestCaseCustomizer {
+    /**
+     * Extractor to omit test file cases from the report.
+     */
+    hidden: TestCaseExtractor<boolean>;
     /**
      * Test case ID extractor to fine-tune Allure's history feature.
      * @example ({ package, file, test }) => `${package.name}:${file.path}:${test.fullName}`
@@ -228,9 +240,9 @@ declare module 'jest-allure2-reporter' {
    */
   export interface TestFileCustomizer {
     /**
-     * Extractor to omit test cases from the report.
+     * Extractor to omit test file cases from the report.
      */
-    ignored: TestFileExtractor<boolean>;
+    hidden: TestFileExtractor<boolean>;
     /**
      * Test file ID extractor to fine-tune Allure's history feature.
      * @default ({ filePath }) => filePath.join('/')
@@ -332,6 +344,10 @@ declare module 'jest-allure2-reporter' {
 
   export interface TestStepCustomizer {
     /**
+     * Extractor to omit test steps from the report.
+     */
+    hidden: TestStepExtractor<boolean>;
+    /**
      * Extractor for the step name.
      * @example ({ value }) => value.replace(/(before|after)(Each|All)/, (_, p1, p2) => p1 + ' ' + p2.toLowerCase())
      */
@@ -410,96 +426,145 @@ declare module 'jest-allure2-reporter' {
     value: T | undefined;
   }
 
-  export interface GlobalExtractorContext<T = unknown>
+  export interface GlobalExtractorContext<T = any>
     extends ExtractorContext<T>,
       GlobalExtractorContextAugmentation {
     globalConfig: Config.GlobalConfig;
     config: ReporterConfig;
   }
 
-  export interface TestFileExtractorContext<T = unknown>
+  export interface TestFileExtractorContext<T = any>
     extends GlobalExtractorContext<T>,
       TestFileExtractorContextAugmentation {
     filePath: string[];
     testFile: TestResult;
-    testFileMetadata: AllureTestCaseMetadata;
+    testFileDocblock?: DocblockContext;
+    testFileMetadata: AllureTestFileMetadata;
   }
 
-  export interface TestCaseExtractorContext<T = unknown>
+  export interface TestCaseExtractorContext<T = any>
     extends TestFileExtractorContext<T>,
       TestCaseExtractorContextAugmentation {
     testCase: TestCaseResult;
+    testCaseDocblock?: DocblockContext;
     testCaseMetadata: AllureTestCaseMetadata;
   }
 
-  export interface TestStepExtractorContext<T = unknown>
+  export interface TestStepExtractorContext<T = any>
     extends TestCaseExtractorContext<T>,
       TestStepExtractorContextAugmentation {
+    testStepDocblock?: DocblockContext;
     testStepMetadata: AllureTestStepMetadata;
   }
 
-  export interface AllureTestStepMetadata {
-    steps?: AllureTestStepMetadata[];
-    hidden?: boolean;
+  export interface AllureTestItemSourceLocation {
+    fileName?: string;
+    lineNumber?: number;
+    columnNumber?: number;
+  }
+
+  export type AllureTestStepPath = string[];
+
+  export interface AllureTestItemMetadata {
+    /**
+     * File attachments to be added to the test case, test step or a test file.
+     */
+    attachments?: Attachment[];
+    /**
+     * Property path to the current step metadata object.
+     * @see {steps}
+     * @example ['steps', '0']
+     */
+    currentStep?: AllureTestStepPath;
     /**
      * Source code of the test case, test step or a hook.
      */
-    code?: string[];
-
-    name?: string;
-    status?: Status;
-    statusDetails?: StatusDetails;
-    stage?: Stage;
-    attachments?: Attachment[];
+    sourceCode?: string;
+    /**
+     * Location (file, line, column) of the test case, test step or a hook.
+     */
+    sourceLocation?: AllureTestItemSourceLocation;
+    /**
+     * Markdown description of the test case or test file, or plain text description of a test step.
+     */
+    description?: string[];
+    /**
+     * Key-value pairs to disambiguate test cases or to provide additional information.
+     */
     parameters?: Parameter[];
+    /**
+     * Indicates test item execution progress.
+     */
+    stage?: Stage;
+    /**
+     * Start timestamp in milliseconds.
+     */
     start?: number;
+    /**
+     * Test result: failed, broken, passed, skipped or unknown.
+     */
+    status?: Status;
+    /**
+     * Extra information about the test result: message and stack trace.
+     */
+    statusDetails?: StatusDetails;
+    /**
+     * Recursive data structure to represent test steps for more granular reporting.
+     */
+    steps?: Omit<AllureTestStepMetadata, 'currentStep'>[];
+    /**
+     * Stop timestamp in milliseconds.
+     */
     stop?: number;
   }
 
-  export interface AllureTestCaseMetadata extends AllureTestStepMetadata {
+  export interface AllureTestStepMetadata extends AllureTestItemMetadata {
     /**
-     * Pointer to the child step that is currently being added or executed.
-     * @example ['steps', '0', 'steps', '0']
-     * @internal
+     * Steps produced by Jest hooks will have this property set.
+     * User-defined steps don't have this property.
      */
-    currentStep?: string[];
-    /**
-     * Jest worker ID.
-     * @internal Used to generate unique thread names.
-     * @see {import('@noomorph/allure-js-commons').LabelName.THREAD}
-     */
-    workerId?: string;
-    /**
-     * Only steps can have names.
-     */
-    name?: never;
-    description?: string[];
+    hookType?: 'beforeAll' | 'beforeEach' | 'afterEach' | 'afterAll';
+  }
+
+  export interface AllureTestCaseMetadata extends AllureTestItemMetadata {
     descriptionHtml?: string[];
     labels?: Label[];
     links?: Link[];
   }
 
   export interface AllureTestFileMetadata extends AllureTestCaseMetadata {
-    currentStep?: never;
+    code?: never;
+    steps?: never;
+    workerId?: string;
+  }
+
+  export interface AllureGlobalMetadata {
+    config: Pick<ReporterConfig, 'resultsDir' | 'overwrite' | 'attachments' | 'injectGlobals'>;
+  }
+
+  export interface DocblockContext {
+    comments: string;
+    pragmas: Record<string, string[]>;
+    raw: string;
   }
 
   export interface GlobalExtractorContextAugmentation {
-    detectLanguage?(filePath: string, contents: string): string | undefined;
+    detectLanguage?(contents: string, filePath?: string): string | undefined;
     processMarkdown?(markdown: string): Promise<string>;
 
-    // This should be extended by plugins
+    // This may be extended by plugins
   }
 
   export interface TestFileExtractorContextAugmentation {
-    // This should be extended by plugins
+    // This may be extended by plugins
   }
 
   export interface TestCaseExtractorContextAugmentation {
-    // This should be extended by plugins
+    // This may be extended by plugins
   }
 
   export interface TestStepExtractorContextAugmentation {
-    // This should be extended by plugins
+    // This may be extended by plugins
   }
 
   export type PluginDeclaration =
@@ -527,11 +592,6 @@ declare module 'jest-allure2-reporter' {
     /** Method to extend global context. */
     globalContext?(context: GlobalExtractorContext): void | Promise<void>;
 
-    /** Method to affect test file metadata before it is created. */
-    beforeTestFileContext?(
-      context: Omit<TestFileExtractorContext, 'testFileMetadata'>,
-    ): void | Promise<void>;
-
     /** Method to extend test file context. */
     testFileContext?(context: TestFileExtractorContext): void | Promise<void>;
 
@@ -544,7 +604,6 @@ declare module 'jest-allure2-reporter' {
 
   export type PluginHookName =
     | 'globalContext'
-    | 'beforeTestFileContext'
     | 'testFileContext'
     | 'testCaseContext'
     | 'testStepContext';
