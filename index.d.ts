@@ -2,7 +2,6 @@
 
 import type { Config, TestCaseResult, TestResult } from '@jest/reporters';
 import JestMetadataReporter from 'jest-metadata/reporter';
-import {SharedReporterConfig} from "./src/api/runtime";
 
 declare module 'jest-allure2-reporter' {
   /**

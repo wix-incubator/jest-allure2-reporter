@@ -1,5 +1,4 @@
 import {
-  IAllureRuntime,
   Attachment,
   FileAttachment,
   Step,
@@ -16,10 +15,24 @@ import {
   $TmsLink,
   allure,
 } from 'jest-allure2-reporter/api';
-import {Status} from "@noomorph/allure-js-commons";
-import {take} from "lodash";
 
-declare var test: (name: string, fn: () => unknown) => void;
+import type {
+  AllureRuntimePluginCallback,
+  AllureRuntimePluginContext,
+  AttachmentContent,
+  ContentAttachmentContext,
+  ContentAttachmentHandler,
+  ContentAttachmentOptions,
+  FileAttachmentContext,
+  FileAttachmentHandler,
+  FileAttachmentOptions,
+  IAllureRuntime,
+  MIMEInferer,
+  MIMEInfererContext,
+  ParameterOrString,
+} from 'jest-allure2-reporter/api';
+
+enablePlugins();
 
 $Description('This is _a test description_');
 $DescriptionHtml('This is <i>a test description</i>');
@@ -69,20 +82,44 @@ test('typings of jest-allure2-reporter/api', async () => {
 
   await allure.attachment('file-async.txt', Promise.resolve('Example log content'));
 
+  const contentAttachmentOptions: ContentAttachmentOptions = {
+    name: '%s.png',
+    mimeType: assertOptional('image/png'),
+    handler: assertOptional(
+      assertOneOf(
+        'copy',
+        async (context) => {
+          assertType<ContentAttachmentContext>(context);
+          return '/path/to/file';
+        }
+      )
+    ),
+  };
+
   const takeScreenshotA1 = allure.createAttachment((s: string) => Buffer.from(s), 'screenshot.png');
-  const takeScreenshotA2 = allure.createAttachment(async (s: string) => Buffer.from(s), {
-    name: 'Screenshot',
-    mimeType: 'image/png',
-  });
+  const takeScreenshotA2 = allure.createAttachment(async (_name: string) => 'content', contentAttachmentOptions);
+
+  const fileAttachmentOptions: FileAttachmentOptions = {
+    name: assertOptional('file.png'),
+    mimeType: assertOptional('image/png'),
+    handler: assertOptional(
+      assertOneOf(
+        'copy',
+        async (context) => {
+          assertType<FileAttachmentContext>(context);
+          return '/path/to/file';
+        }
+      )
+    ),
+  };
+
   const takeScreenshotB1 = allure.createFileAttachment((file: string) => `./${file}.png`);
   const takeScreenshotB2 = allure.createFileAttachment(async (file: string) => `./${file}.png`, 'Screenshot');
-  const takeScreenshotB3 = allure.createFileAttachment(async (file: string, ext: string) => `./${file}${ext}`, {
-    name: 'Screenshot',
-    mimeType: 'image/png',
-  });
+  const takeScreenshotB3 = allure.createFileAttachment(async (file: string, ext: string) => `./${file}${ext}`, fileAttachmentOptions);
 
   assertType<Buffer>(takeScreenshotA1('1'));
-  assertType<Promise<Buffer>>(takeScreenshotA2('2'));
+  assertType<Promise<string>>(takeScreenshotA2('2'));
+
   assertType<string>(takeScreenshotB1('file1'));
   assertType<Promise<string>>(takeScreenshotB2('file2'));
   assertType<Promise<string>>(takeScreenshotB3('file3', '.png'));
@@ -95,8 +132,8 @@ test('typings of jest-allure2-reporter/api', async () => {
   });
 
   const login2 = allure.createStep('Login', [
-    'username',
-    { name: 'password', mode: 'masked'},
+    assertType<ParameterOrString>('username'),
+    assertType<ParameterOrString>({ name: 'password', mode: 'masked'}),
   ], async (username: string, password: string) => {
     console.log('Login executed via %s and %s', username, password);
   });
@@ -138,4 +175,39 @@ test('typings of jest-allure2-reporter/api', async () => {
   assertType<Promise<void>>(helper.login('admin', 'qwerty'));
 });
 
-function assertType<T>(_value: T): void {}
+function enablePlugins() {
+  const inferMimeType: MIMEInferer = (context: MIMEInfererContext) => 'application/octet-stream';
+  const customContent: ContentAttachmentHandler = async ({ content, mimeType, name, outDir }: ContentAttachmentContext) => {
+    assertType<string>(name);
+    assertType<string>(mimeType);
+    assertType<string>(outDir);
+    assertType<AttachmentContent>(content);
+    return '/path/to/file';
+  };
+
+  const customFile: FileAttachmentHandler = async ({ mimeType, name, sourcePath, outDir }: FileAttachmentContext) => {
+    assertType<string>(name);
+    assertType<string>(mimeType);
+    assertType<string>(outDir);
+    assertType<string>(sourcePath);
+
+    return '/path/to/file';
+  };
+
+  assertType<AttachmentContent>('content');
+  assertType<AttachmentContent>(Buffer.from('content'));
+
+  const plugin: AllureRuntimePluginCallback = (context: AllureRuntimePluginContext) => {
+    assertType<IAllureRuntime>(context.runtime);
+    context.contentAttachmentHandlers['custom'] = customContent;
+    context.fileAttachmentHandlers['custom'] = customFile;
+    context.inferMimeType = inferMimeType;
+  };
+
+  allure.$plug(plugin);
+}
+
+declare function test(name: string, fn: () => unknown): void;
+declare function assertType<T>(value: T): T;
+declare function assertOptional<T>(value: T | undefined): T | undefined;
+declare function assertOneOf<A, B>(a: A, b: B): A | B;

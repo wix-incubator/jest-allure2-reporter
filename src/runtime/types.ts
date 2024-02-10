@@ -100,11 +100,11 @@ export type AllureRuntimePluginCallback = (
 export interface AllureRuntimePluginContext {
   readonly runtime: IAllureRuntime;
   readonly contentAttachmentHandlers: Record<
-    BuiltinContentAttachmentHandler | 'default',
+    BuiltinContentAttachmentHandler | 'default' | string,
     ContentAttachmentHandler
   >;
   readonly fileAttachmentHandlers: Record<
-    BuiltinFileAttachmentHandler | 'default',
+    BuiltinFileAttachmentHandler | 'default' | string,
     FileAttachmentHandler
   >;
   inferMimeType: MIMEInferer;
@@ -118,7 +118,7 @@ export type AttachmentOptions<Context extends AttachmentContext> = {
 
 export type FileAttachmentOptions = AttachmentOptions<FileAttachmentContext>;
 export type ContentAttachmentOptions =
-  AttachmentOptions<ContentAttachmentContext>;
+  AttachmentOptions<ContentAttachmentContext> & { name: string };
 
 export type ParameterOrString = string | Omit<Parameter, 'value'>;
 
