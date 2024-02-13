@@ -32,7 +32,7 @@ export const githubPlugin: PluginConstructor = () => {
         const response = await fetch(apiUrl, { headers });
         if (!response.ok) {
           // convert to http error
-          throw new Error(response.statusText);
+          throw new Error(`HTTP ${response.status} ${response.statusText}`);
         }
 
         const data = await response.json();
@@ -47,7 +47,7 @@ export const githubPlugin: PluginConstructor = () => {
         }
       } catch (error: unknown) {
         // TODO: migrate to bunyamin
-        console.error('Failed to fetch job ID due to error:', error);
+        console.error(`Failed to fetch job ID from: ${apiUrl}\nReason:`, error);
       }
 
       process.env.ALLURE_GITHUB_URL ||= `${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}`;
