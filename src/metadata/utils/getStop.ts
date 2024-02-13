@@ -1,11 +1,12 @@
 import type { TestInvocationMetadata } from 'jest-metadata';
 
+import { last } from '../../utils';
 import { STOP } from '../constants';
 
 export const getStop = (testInvocation: TestInvocationMetadata) => {
   const lastBlock =
-    testInvocation.afterAll.at(-1) ??
-    testInvocation.afterEach.at(-1) ??
+    last(testInvocation.afterAll) ??
+    last(testInvocation.afterEach) ??
     testInvocation.fn;
 
   const stop1 = testInvocation.get(STOP);
