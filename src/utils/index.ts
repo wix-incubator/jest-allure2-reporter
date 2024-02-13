@@ -5,6 +5,7 @@ export * from './hijackFunction';
 export * from './isObject';
 export * from './isError';
 export * from './isPromiseLike';
+export * from './last';
 export * from './once';
 export * from './md5';
 export * from './processMaybePromise';
