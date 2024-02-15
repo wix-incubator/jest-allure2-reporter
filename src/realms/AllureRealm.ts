@@ -16,7 +16,9 @@ export class AllureRealm {
         'config',
       );
       if (!config) {
-        throw new Error('Shared reporter config is not defined');
+        throw new Error(
+          "Cannot receive jest-allure2-reporter's config from the parent process. Have you set up Jest test environment correctly?",
+        );
       }
 
       return config as SharedReporterConfig;

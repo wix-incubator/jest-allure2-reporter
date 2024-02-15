@@ -37,9 +37,10 @@ export const testFile: ResolvedTestFileCustomizer = {
   descriptionHtml: () => void 0,
   start: ({ testFileMetadata }) => testFileMetadata.start,
   stop: ({ testFileMetadata }) => testFileMetadata.stop,
-  stage: () => 'finished',
-  status: ({ testFile }: TestFileExtractorContext) =>
-    testFile.testExecError ? 'broken' : 'passed',
+  stage: ({ testFile }) =>
+    testFile.testExecError == null ? 'finished' : 'interrupted',
+  status: ({ testFile }) =>
+    testFile.testExecError == null ? 'passed' : 'broken',
   statusDetails: ({ testFile }) =>
     stripStatusDetails(getTestFileStatusDetails(testFile)),
   attachments: ({ testFileMetadata }) => testFileMetadata.attachments ?? [],

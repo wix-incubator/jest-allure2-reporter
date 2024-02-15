@@ -30,7 +30,6 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
       "stage": "finished",
       "start": 0,
       "status": "passed",
-      "statusDetails": undefined,
       "steps": [
         {
           "attachments": [
@@ -59,7 +58,6 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
           "stage": "finished",
           "start": 3,
           "status": "passed",
-          "statusDetails": undefined,
           "stop": 4,
         },
         {

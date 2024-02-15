@@ -1,10 +1,6 @@
-import type {
-  AllureTestCaseMetadata,
-  Status,
-  StatusDetails,
-} from 'jest-allure2-reporter';
+import type { Status, StatusDetails } from 'jest-allure2-reporter';
 
-import { isPromiseLike } from '../../utils';
+import { getStatusDetails, isPromiseLike } from '../../utils';
 import type { AllureTestItemMetadataProxy } from '../../metadata';
 import type { AllureRuntimeContext } from '../AllureRuntimeContext';
 
@@ -40,8 +36,7 @@ export class StepsModule {
 
         result.then(
           () => end('passed'),
-          (error) =>
-            end('failed', { message: error.message, trace: error.stack }),
+          (error: unknown) => end('failed', getStatusDetails(error)),
         );
       } else {
         end('passed');
@@ -49,10 +44,7 @@ export class StepsModule {
 
       return result;
     } catch (error: unknown) {
-      end('failed', {
-        message: (error as Error).message,
-        trace: (error as Error).stack,
-      });
+      end('failed', getStatusDetails(error));
       throw error;
     }
   }
@@ -66,18 +58,14 @@ export class StepsModule {
   };
 
   #stopStep = (status: Status, statusDetails?: StatusDetails) => {
-    const metadata = this.context.metadata;
-    const existing = metadata.get<Partial<AllureTestCaseMetadata>>(
-      undefined,
-      {},
-    );
-
-    metadata
+    this.context.metadata
       .assign({
         stage: 'finished',
-        status: existing.status ?? status,
-        statusDetails: existing.statusDetails ?? statusDetails,
         stop: this.context.now,
+      })
+      .defaults({
+        status,
+        statusDetails,
       })
       .$stopStep();
   };

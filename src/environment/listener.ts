@@ -1,10 +1,5 @@
 import type { Circus } from '@jest/types';
 import type {
-  AllureTestCaseMetadata,
-  AllureTestStepMetadata,
-  Status,
-} from 'jest-allure2-reporter';
-import type {
   EnvironmentListenerFn,
   TestEnvironmentCircusEvent,
   TestEnvironmentSetupEvent,
@@ -13,6 +8,7 @@ import * as StackTrace from 'stacktrace-js';
 
 import * as api from '../api';
 import realm from '../realms';
+import { getStatusDetails, isJestAssertionError } from '../utils';
 
 const listener: EnvironmentListenerFn = (context) => {
   context.testEvents
@@ -33,7 +29,7 @@ const listener: EnvironmentListenerFn = (context) => {
     .on('add_hook', addSourceLocation)
     .on('add_hook', addHookType)
     .on('add_test', addSourceLocation)
-    .on('test_start', executableStart)
+    .on('test_start', testStart)
     .on('test_todo', testSkip)
     .on('test_skip', testSkip)
     .on('test_done', testDone)
@@ -111,80 +107,76 @@ function addSourceCode({ event }: TestEnvironmentCircusEvent) {
 }
 
 // eslint-disable-next-line no-empty-pattern
-function executableStart({}: TestEnvironmentCircusEvent) {
-  const metadata: AllureTestStepMetadata = {
-    start: Date.now(),
+function executableStart(
+  _event: TestEnvironmentCircusEvent<
+    Circus.Event & { name: 'hook_start' | 'test_fn_start' }
+  >,
+) {
+  realm.runtimeContext.getCurrentMetadata().assign({
     stage: 'running',
-  };
-
-  realm.runtimeContext.getCurrentMetadata().assign(metadata);
+    start: Date.now(),
+  });
 }
 
 function executableFailure({
-  event,
+  event: { error },
 }: TestEnvironmentCircusEvent<
   Circus.Event & { name: 'test_fn_failure' | 'hook_failure' }
 >) {
-  const metadata: AllureTestStepMetadata = {
-    stop: Date.now(),
+  realm.runtimeContext.getCurrentMetadata().assign({
+    status: isJestAssertionError(error) ? 'failed' : 'broken',
+    statusDetails: getStatusDetails(error),
     stage: 'interrupted',
-    status: 'failed',
-  };
-
-  if (event.error) {
-    const message = event.error.message ?? `${event.error}`;
-    const trace = event.error.stack;
-
-    metadata.statusDetails = { message, trace };
-  }
-
-  realm.runtimeContext.getCurrentMetadata().assign(metadata);
+    stop: Date.now(),
+  });
 }
 
-// eslint-disable-next-line no-empty-pattern
-function executableSuccess({}: TestEnvironmentCircusEvent) {
-  const metadata: AllureTestStepMetadata = {
-    stop: Date.now(),
-    stage: 'finished',
-    status: 'passed',
-  };
-
-  realm.runtimeContext.getCurrentMetadata().assign(metadata);
+function executableSuccess(
+  _event: TestEnvironmentCircusEvent<
+    Circus.Event & { name: 'test_fn_success' | 'hook_success' }
+  >,
+) {
+  realm.runtimeContext
+    .getCurrentMetadata()
+    .defaults({
+      status: 'passed',
+    })
+    .assign({
+      stage: 'finished',
+      stop: Date.now(),
+    });
 }
 
-function testSkip() {
-  const metadata: AllureTestCaseMetadata = {
-    stop: Date.now(),
-    stage: 'pending',
-    status: 'skipped',
-  };
+function testStart(
+  _event: TestEnvironmentCircusEvent<Circus.Event & { name: 'test_start' }>,
+) {
+  realm.runtimeContext.getCurrentMetadata().set('start', Date.now());
+}
 
-  realm.runtimeContext.getCurrentMetadata().assign(metadata);
+function testSkip(
+  _event: TestEnvironmentCircusEvent<
+    Circus.Event & { name: 'test_skip' | 'test_todo' }
+  >,
+) {
+  realm.runtimeContext.getCurrentMetadata().set('stop', Date.now());
 }
 
 function testDone({
   event,
 }: TestEnvironmentCircusEvent<Circus.Event & { name: 'test_done' }>) {
+  const current = realm.runtimeContext.getCurrentMetadata();
   const hasErrors = event.test.errors.length > 0;
-  const errorStatus: Status = event.test.errors.some((errors) => {
-    return Array.isArray(errors)
-      ? errors.some(isMatcherError)
-      : isMatcherError(errors);
-  })
-    ? 'failed'
-    : 'broken';
+  if (hasErrors) {
+    const hasMatcherErrors = event.test.errors.some((errors) => {
+      return Array.isArray(errors)
+        ? errors.some(isJestAssertionError)
+        : isJestAssertionError(errors);
+    });
 
-  const metadata: AllureTestCaseMetadata = {
-    stop: Date.now(),
-    stage: hasErrors ? 'interrupted' : 'finished',
-    status: hasErrors ? errorStatus : 'passed',
-  };
+    current.set('status', hasMatcherErrors ? 'failed' : 'broken');
+  }
 
-  realm.runtimeContext.getCurrentMetadata().assign(metadata);
-}
-
-function isMatcherError(error: any) {
-  return Boolean(error?.matcherResult);
+  current.set('stop', Date.now());
 }
 
 export default listener;
