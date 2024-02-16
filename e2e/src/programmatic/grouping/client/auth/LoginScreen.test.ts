@@ -7,7 +7,7 @@
  */
 
 import LoginHelper from '../../../../utils/LoginHelper';
-import {allure} from "../../../../../../src/api";
+import {$Tag, $Epic, $Feature, $Story, allure} from 'jest-allure2-reporter/api';
 
 $Tag('client');
 $Epic('Authentication');
@@ -38,6 +38,7 @@ describe('Login screen', () => {
     });
 
     it('should show error on short or invalid password format', () => {
+      allure.status('failed', { message: 'The password is too short' });
       // ...
     });
   });

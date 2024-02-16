@@ -57,22 +57,30 @@ export class AllureRuntime implements IAllureRuntime {
   flush = () => this.#context.flush();
 
   description: IAllureRuntime['description'] = (value) => {
+    // TODO: assert is a string
     this.#coreModule.description(value);
   };
 
   descriptionHtml: IAllureRuntime['descriptionHtml'] = (value) => {
+    // TODO: assert is a string
     this.#coreModule.descriptionHtml(value);
   };
 
   label: IAllureRuntime['label'] = (name, value) => {
+    // TODO: assert name is a string
+    // TODO: assert value is a string
     this.#coreModule.label(name, value);
   };
 
   link: IAllureRuntime['link'] = (url, name, type) => {
+    // TODO: url is a string
+    // TODO: name is a string or nullish
+    // TODO: type is a string or nullish
     this.#coreModule.link({ name, url, type });
   };
 
   parameter: IAllureRuntime['parameter'] = (name, value, options) => {
+    // TODO: assert name is a string
     this.#coreModule.parameter({
       name,
       value: String(value),
@@ -92,6 +100,7 @@ export class AllureRuntime implements IAllureRuntime {
   };
 
   status: IAllureRuntime['status'] = (status, statusDetails) => {
+    // TODO: assert string literal
     this.#coreModule.status(status);
     if (isObject(statusDetails)) {
       this.#coreModule.statusDetails(statusDetails);
@@ -99,10 +108,13 @@ export class AllureRuntime implements IAllureRuntime {
   };
 
   statusDetails: IAllureRuntime['statusDetails'] = (statusDetails) => {
-    this.#coreModule.statusDetails(statusDetails || {});
+    // TODO: assert is not nullish
+    this.#coreModule.statusDetails(statusDetails);
   };
 
   step: IAllureRuntime['step'] = (name, function_) =>
+    // TODO: assert name is a string
+    // TODO: assert function_ is a function
     this.#basicStepsModule.step(name, function_);
 
   // @ts-expect-error TS2322: too few arguments
@@ -111,6 +123,7 @@ export class AllureRuntime implements IAllureRuntime {
     maybeParameters,
     maybeFunction,
   ) => {
+    // TODO: assert nameFormat is a string
     const function_: any = maybeFunction ?? maybeParameters;
     if (typeof function_ !== 'function') {
       throw new TypeError(
@@ -130,6 +143,7 @@ export class AllureRuntime implements IAllureRuntime {
   };
 
   attachment: IAllureRuntime['attachment'] = (name, content, mimeType) =>
+    // TODO: assert name is a string
     this.#contentAttachmentsModule.attachment(content, {
       name,
       mimeType,
@@ -140,6 +154,7 @@ export class AllureRuntime implements IAllureRuntime {
     filePath,
     nameOrOptions,
   ) => {
+    // TODO: assert filePath is a string
     const options =
       typeof nameOrOptions === 'string'
         ? { name: nameOrOptions }
@@ -152,6 +167,8 @@ export class AllureRuntime implements IAllureRuntime {
     function_,
     nameOrOptions,
   ) => {
+    // TODO: assert function_ is a function
+    // TODO: assert nameOrOptions is a string or an object
     const options =
       typeof nameOrOptions === 'string'
         ? { name: nameOrOptions }
@@ -164,6 +181,8 @@ export class AllureRuntime implements IAllureRuntime {
     function_,
     nameOrOptions,
   ) => {
+    // TODO: assert function_ is a function
+    // TODO: assert nameOrOptions is a string or an object
     const options =
       typeof nameOrOptions === 'string'
         ? { name: nameOrOptions }

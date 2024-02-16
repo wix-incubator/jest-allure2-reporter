@@ -2,17 +2,14 @@ import path from 'node:path';
 
 import type { TestCaseResult } from '@jest/reporters';
 import type {
+  AllureTestStepMetadata,
   ExtractorContext,
-  ResolvedTestCaseCustomizer,
-  TestCaseCustomizer,
-  TestCaseExtractorContext,
-} from 'jest-allure2-reporter';
-import type {
   Label,
+  ResolvedTestCaseCustomizer,
   Stage,
   Status,
-  StatusDetails,
-  AllureTestStepMetadata,
+  TestCaseCustomizer,
+  TestCaseExtractorContext,
 } from 'jest-allure2-reporter';
 
 import {
@@ -20,6 +17,7 @@ import {
   composeExtractors,
   stripStatusDetails,
 } from '../utils';
+import { getStatusDetails } from '../../utils';
 
 const identity = <T>(context: ExtractorContext<T>) => context.value;
 const last = <T>(context: ExtractorContext<T[]>) => context.value?.at(-1);
@@ -64,12 +62,16 @@ export const testCase: ResolvedTestCaseCustomizer = {
     testCaseMetadata.start ??
     (testCaseMetadata.stop ?? Date.now()) - (testCase.duration ?? 0),
   stop: ({ testCaseMetadata }) => testCaseMetadata.stop ?? Date.now(),
-  stage: ({ testCase }) => getTestCaseStage(testCase),
+  stage: ({ testCase, testCaseMetadata }) =>
+    testCaseMetadata.stage ?? getTestCaseStage(testCase),
   status: ({ testCase, testCaseMetadata }) =>
     testCaseMetadata.status ?? getTestCaseStatus(testCase),
   statusDetails: ({ testCase, testCaseMetadata }) =>
     stripStatusDetails(
-      testCaseMetadata.statusDetails ?? getTestCaseStatusDetails(testCase),
+      testCaseMetadata.statusDetails ??
+        stripStatusDetails(
+          getStatusDetails((testCase.failureMessages ?? []).join('\n')),
+        ),
     ),
   attachments: ({ testCaseMetadata }) => testCaseMetadata.attachments ?? [],
   parameters: ({ testCaseMetadata }) => testCaseMetadata.parameters ?? [],
@@ -97,12 +99,15 @@ export const testCase: ResolvedTestCaseCustomizer = {
 
 function getTestCaseStatus(testCase: TestCaseResult): Status {
   const hasErrors = testCase.failureMessages?.length > 0;
+  const hasBuiltinErrors =
+    hasErrors && testCase.failureMessages.some(looksLikeBroken);
+
   switch (testCase.status) {
     case 'passed': {
       return 'passed';
     }
     case 'failed': {
-      return 'failed';
+      return hasBuiltinErrors ? 'broken' : 'failed';
     }
     case 'skipped': {
       return 'skipped';
@@ -121,11 +126,23 @@ function getTestCaseStatus(testCase: TestCaseResult): Status {
   }
 }
 
+// TODO: include JestAllure2Error as well
+function looksLikeBroken(errorMessage: string): boolean {
+  return errorMessage
+    ? errorMessage.startsWith('Error: \n') ||
+        errorMessage.startsWith('EvalError:') ||
+        errorMessage.startsWith('RangeError:') ||
+        errorMessage.startsWith('ReferenceError:') ||
+        errorMessage.startsWith('SyntaxError:') ||
+        errorMessage.startsWith('TypeError:') ||
+        errorMessage.startsWith('URIError:')
+    : true;
+}
+
 function getTestCaseStage(testCase: TestCaseResult): Stage {
   switch (testCase.status) {
     case 'passed':
-    case 'focused':
-    case 'failed': {
+    case 'focused': {
       return 'finished';
     }
     case 'todo':
@@ -138,16 +155,4 @@ function getTestCaseStage(testCase: TestCaseResult): Stage {
       return 'interrupted';
     }
   }
-}
-
-function getTestCaseStatusDetails(
-  testCase: TestCaseResult,
-): StatusDetails | undefined {
-  const message = (testCase.failureMessages ?? []).join('\n');
-  return message
-    ? stripStatusDetails({
-        message: message.split('\n', 1)[0],
-        trace: message,
-      })
-    : undefined;
 }

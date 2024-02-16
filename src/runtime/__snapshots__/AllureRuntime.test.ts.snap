@@ -30,7 +30,6 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
       "stage": "finished",
       "start": 0,
       "status": "passed",
-      "statusDetails": undefined,
       "steps": [
         {
           "attachments": [
@@ -43,12 +42,11 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
           "description": [
             "inner step 1",
           ],
-          "stage": "finished",
+          "stage": "interrupted",
           "start": 1,
           "status": "failed",
           "statusDetails": {
-            "message": "Sync error",
-            "trace": "Test stack",
+            "message": "Error: Sync error",
           },
           "stop": 2,
         },
@@ -59,7 +57,6 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
           "stage": "finished",
           "start": 3,
           "status": "passed",
-          "statusDetails": undefined,
           "stop": 4,
         },
         {
@@ -79,12 +76,11 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
               "value": "fourth",
             },
           ],
-          "stage": "finished",
+          "stage": "interrupted",
           "start": 5,
-          "status": "failed",
+          "status": "broken",
           "statusDetails": {
-            "message": "Async error",
-            "trace": "Test stack",
+            "message": "Error: Async error",
           },
           "stop": 6,
         },

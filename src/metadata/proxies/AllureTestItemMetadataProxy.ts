@@ -39,7 +39,7 @@ export class AllureTestItemMetadataProxy<
   }
 
   $stopStep(): this {
-    const currentStep = this.$metadata.get(CURRENT_STEP, []) as string[];
+    const currentStep = this.$metadata.get(CURRENT_STEP, [] as string[]);
     this.$metadata.set(CURRENT_STEP, currentStep.slice(0, -2));
     return this;
   }

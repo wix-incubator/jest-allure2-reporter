@@ -35,6 +35,11 @@ export class AllureMetadataProxy<T = unknown> {
     return this;
   }
 
+  defaults(values: Partial<T>): this {
+    this.$metadata.defaults(this.$localPath(), values);
+    return this;
+  }
+
   protected $localPath(key?: keyof T, ...innerKeys: string[]): string[] {
     const allKeys = key ? [key as string, ...innerKeys] : innerKeys;
     return [PREFIX, ...allKeys];
