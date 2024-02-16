@@ -2,17 +2,14 @@ import path from 'node:path';
 
 import type { TestCaseResult } from '@jest/reporters';
 import type {
+  AllureTestStepMetadata,
   ExtractorContext,
-  ResolvedTestCaseCustomizer,
-  TestCaseCustomizer,
-  TestCaseExtractorContext,
-} from 'jest-allure2-reporter';
-import type {
   Label,
+  ResolvedTestCaseCustomizer,
   Stage,
   Status,
-  StatusDetails,
-  AllureTestStepMetadata,
+  TestCaseCustomizer,
+  TestCaseExtractorContext,
 } from 'jest-allure2-reporter';
 
 import {
@@ -20,6 +17,7 @@ import {
   composeExtractors,
   stripStatusDetails,
 } from '../utils';
+import { getStatusDetails } from '../../utils';
 
 const identity = <T>(context: ExtractorContext<T>) => context.value;
 const last = <T>(context: ExtractorContext<T[]>) => context.value?.at(-1);
@@ -70,7 +68,10 @@ export const testCase: ResolvedTestCaseCustomizer = {
     testCaseMetadata.status ?? getTestCaseStatus(testCase),
   statusDetails: ({ testCase, testCaseMetadata }) =>
     stripStatusDetails(
-      testCaseMetadata.statusDetails ?? getTestCaseStatusDetails(testCase),
+      testCaseMetadata.statusDetails ??
+        stripStatusDetails(
+          getStatusDetails((testCase.failureMessages ?? []).join('\n')),
+        ),
     ),
   attachments: ({ testCaseMetadata }) => testCaseMetadata.attachments ?? [],
   parameters: ({ testCaseMetadata }) => testCaseMetadata.parameters ?? [],
@@ -154,16 +155,4 @@ function getTestCaseStage(testCase: TestCaseResult): Stage {
       return 'interrupted';
     }
   }
-}
-
-function getTestCaseStatusDetails(
-  testCase: TestCaseResult,
-): StatusDetails | undefined {
-  const message = (testCase.failureMessages ?? []).join('\n');
-  return message
-    ? stripStatusDetails({
-        message: message.split('\n', 1)[0],
-        trace: message,
-      })
-    : undefined;
 }

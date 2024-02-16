@@ -1,20 +1,20 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import type { TestResult } from '@jest/reporters';
 import type {
   ExtractorContext,
   TestFileExtractorContext,
   ResolvedTestFileCustomizer,
   TestCaseCustomizer,
 } from 'jest-allure2-reporter';
-import type { Label, Link, StatusDetails } from 'jest-allure2-reporter';
+import type { Label, Link } from 'jest-allure2-reporter';
 
 import {
   aggregateLabelCustomizers,
   composeExtractors,
   stripStatusDetails,
 } from '../utils';
+import { getStatusDetails } from '../../utils';
 
 const identity = <T>(context: ExtractorContext<T>) => context.value;
 const last = <T>(context: ExtractorContext<T[]>) => context.value?.at(-1);
@@ -42,7 +42,7 @@ export const testFile: ResolvedTestFileCustomizer = {
   status: ({ testFile }) =>
     testFile.testExecError == null ? 'passed' : 'broken',
   statusDetails: ({ testFile }) =>
-    stripStatusDetails(getTestFileStatusDetails(testFile)),
+    stripStatusDetails(getStatusDetails(testFile.testExecError)),
   attachments: ({ testFileMetadata }) => testFileMetadata.attachments ?? [],
   parameters: ({ testFileMetadata }) => testFileMetadata.parameters ?? [],
   labels: composeExtractors<Label[], TestFileExtractorContext<Label[]>>(
@@ -66,17 +66,3 @@ export const testFile: ResolvedTestFileCustomizer = {
   links: ({ testFileMetadata }: TestFileExtractorContext<Link[]>) =>
     testFileMetadata.links ?? [],
 };
-
-function getTestFileStatusDetails(
-  testFile: TestResult,
-): StatusDetails | undefined {
-  const message =
-    testFile.testExecError?.stack || `${testFile.testExecError || ''}`;
-
-  return message
-    ? stripStatusDetails({
-        message: message.split('\n', 2).join('\n'),
-        trace: message,
-      })
-    : undefined;
-}
