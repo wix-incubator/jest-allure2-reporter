@@ -124,9 +124,9 @@ function executableFailure({
   Circus.Event & { name: 'test_fn_failure' | 'hook_failure' }
 >) {
   realm.runtimeContext.getCurrentMetadata().assign({
+    stage: 'interrupted',
     status: isJestAssertionError(error) ? 'failed' : 'broken',
     statusDetails: getStatusDetails(error),
-    stage: 'interrupted',
     stop: Date.now(),
   });
 }
@@ -136,21 +136,18 @@ function executableSuccess(
     Circus.Event & { name: 'test_fn_success' | 'hook_success' }
   >,
 ) {
-  realm.runtimeContext
-    .getCurrentMetadata()
-    .defaults({
-      status: 'passed',
-    })
-    .assign({
-      stage: 'finished',
-      stop: Date.now(),
-    });
+  realm.runtimeContext.getCurrentMetadata().assign({
+    stage: 'finished',
+    stop: Date.now(),
+  });
 }
 
 function testStart(
   _event: TestEnvironmentCircusEvent<Circus.Event & { name: 'test_start' }>,
 ) {
-  realm.runtimeContext.getCurrentMetadata().set('start', Date.now());
+  realm.runtimeContext.getCurrentMetadata().assign({
+    start: Date.now(),
+  });
 }
 
 function testSkip(
@@ -158,25 +155,31 @@ function testSkip(
     Circus.Event & { name: 'test_skip' | 'test_todo' }
   >,
 ) {
-  realm.runtimeContext.getCurrentMetadata().set('stop', Date.now());
+  realm.runtimeContext.getCurrentMetadata().assign({
+    stop: Date.now(),
+  });
 }
 
 function testDone({
   event,
 }: TestEnvironmentCircusEvent<Circus.Event & { name: 'test_done' }>) {
   const current = realm.runtimeContext.getCurrentMetadata();
-  const hasErrors = event.test.errors.length > 0;
-  if (hasErrors) {
-    const hasMatcherErrors = event.test.errors.some((errors) => {
+
+  if (event.test.errors.length > 0) {
+    const hasFailedAssertions = event.test.errors.some((errors) => {
       return Array.isArray(errors)
         ? errors.some(isJestAssertionError)
         : isJestAssertionError(errors);
     });
 
-    current.set('status', hasMatcherErrors ? 'failed' : 'broken');
+    current.assign({
+      status: hasFailedAssertions ? 'failed' : 'broken',
+    });
   }
 
-  current.set('stop', Date.now());
+  realm.runtimeContext.getCurrentMetadata().assign({
+    stop: Date.now(),
+  });
 }
 
 export default listener;

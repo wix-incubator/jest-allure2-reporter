@@ -1,6 +1,8 @@
-import type { Status, StatusDetails } from 'jest-allure2-reporter';
-
-import { getStatusDetails, isPromiseLike } from '../../utils';
+import {
+  isPromiseLike,
+  isJestAssertionError,
+  getStatusDetails,
+} from '../../utils';
 import type { AllureTestItemMetadataProxy } from '../../metadata';
 import type { AllureRuntimeContext } from '../AllureRuntimeContext';
 
@@ -35,16 +37,16 @@ export class StepsModule {
         this.context.metadata.set('stage', 'running');
 
         result.then(
-          () => end('passed'),
-          (error: unknown) => end('failed', getStatusDetails(error)),
+          () => end(),
+          (error: unknown) => end(error),
         );
       } else {
-        end('passed');
+        end();
       }
 
       return result;
     } catch (error: unknown) {
-      end('failed', getStatusDetails(error));
+      end(error);
       throw error;
     }
   }
@@ -57,16 +59,19 @@ export class StepsModule {
     });
   };
 
-  #stopStep = (status: Status, statusDetails?: StatusDetails) => {
-    this.context.metadata
-      .assign({
-        stage: 'finished',
+  #stopStep = (error?: unknown) => {
+    if (error === undefined) {
+      this.context.metadata
+        .defaults({ status: 'passed' })
+        .assign({ stage: 'finished', stop: this.context.now });
+    } else {
+      this.context.metadata.assign({
+        stage: 'interrupted',
+        status: isJestAssertionError(error) ? 'failed' : 'broken',
+        statusDetails: getStatusDetails(error),
         stop: this.context.now,
-      })
-      .defaults({
-        status,
-        statusDetails,
-      })
-      .$stopStep();
+      });
+    }
+    this.context.metadata.$stopStep();
   };
 }

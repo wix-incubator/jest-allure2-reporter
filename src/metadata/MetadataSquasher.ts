@@ -6,7 +6,7 @@ import type {
   AllureTestStepMetadata,
 } from 'jest-allure2-reporter';
 
-import { getStage, getStart, getStatus, getStop } from './utils';
+import { getStage, getStart, getStatusAndDetails, getStop } from './utils';
 import { PREFIX } from './constants';
 import {
   mergeTestCaseMetadata,
@@ -42,11 +42,12 @@ export class MetadataSquasher {
       resolveTestStep,
     );
     const steps = result.steps ?? [];
+    const stage = getStage(metadata);
 
     return {
       ...result,
-      ...getStatus(metadata),
-      stage: getStage(metadata),
+      ...getStatusAndDetails(metadata),
+      stage,
       start: getStart(metadata),
       stop: getStop(metadata),
       steps: [...befores, ...steps, ...afters],

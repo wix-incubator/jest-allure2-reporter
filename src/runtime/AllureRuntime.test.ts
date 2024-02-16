@@ -55,6 +55,8 @@ describe('AllureRuntime', () => {
           runtime.attachment('attachment2', 'second', 'text/plain');
           const error = new Error('Sync error');
           error.stack = 'Test stack';
+          // Simulating Jest assertion error
+          Object.assign(error, { matcherResult: undefined });
           throw error;
         });
       } catch {

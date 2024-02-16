@@ -1,14 +1,20 @@
 import type { TestInvocationMetadata } from 'jest-metadata';
-import type { Stage } from 'jest-allure2-reporter';
 
 import { STAGE } from '../constants';
 
 export const getStage = (testInvocation: TestInvocationMetadata) => {
+  let finished: boolean | undefined;
   for (const invocation of testInvocation.allInvocations()) {
-    if (invocation.get(STAGE) === 'interrupted') {
+    finished ??= true;
+
+    const stage = invocation.get(STAGE);
+    if (stage === 'interrupted') {
       return 'interrupted';
+    }
+    if (stage !== 'finished') {
+      finished = false;
     }
   }
 
-  return testInvocation.get(STAGE) as Stage | undefined;
+  return finished ? 'finished' : undefined;
 };

@@ -477,14 +477,6 @@ declare module 'jest-allure2-reporter' {
      */
     currentStep?: AllureTestStepPath;
     /**
-     * Source code of the test case, test step or a hook.
-     */
-    sourceCode?: string;
-    /**
-     * Location (file, line, column) of the test case, test step or a hook.
-     */
-    sourceLocation?: AllureTestItemSourceLocation;
-    /**
      * Markdown description of the test case or test file, or plain text description of a test step.
      */
     description?: string[];
@@ -492,6 +484,14 @@ declare module 'jest-allure2-reporter' {
      * Key-value pairs to disambiguate test cases or to provide additional information.
      */
     parameters?: Parameter[];
+    /**
+     * Source code of the test case, test step or a hook.
+     */
+    sourceCode?: string;
+    /**
+     * Location (file, line, column) of the test case, test step or a hook.
+     */
+    sourceLocation?: AllureTestItemSourceLocation;
     /**
      * Indicates test item execution progress.
      */

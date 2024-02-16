@@ -42,7 +42,7 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
           "description": [
             "inner step 1",
           ],
-          "stage": "finished",
+          "stage": "interrupted",
           "start": 1,
           "status": "failed",
           "statusDetails": {
@@ -77,9 +77,9 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
               "value": "fourth",
             },
           ],
-          "stage": "finished",
+          "stage": "interrupted",
           "start": 5,
-          "status": "failed",
+          "status": "broken",
           "statusDetails": {
             "message": "Async error",
             "trace": "Test stack",
