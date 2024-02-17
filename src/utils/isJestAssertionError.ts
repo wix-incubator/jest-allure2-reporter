@@ -1,7 +1,9 @@
 import type { JestAssertionError } from 'expect';
 
+import { isError } from './isError';
+
 export function isJestAssertionError(
   error: unknown,
 ): error is JestAssertionError {
-  return error ? 'matcherResult' in (error as JestAssertionError) : false;
+  return isError(error) && 'matcherResult' in (error as JestAssertionError);
 }
