@@ -10,6 +10,9 @@ import * as api from '../api';
 import realm from '../realms';
 import { getStatusDetails, isJestAssertionError } from '../utils';
 
+const JEST_RESET_LINE =
+  "during setup, this cannot be null (and it's fine to explode if it is)";
+
 const listener: EnvironmentListenerFn = (context) => {
   context.testEvents
     .on(
@@ -27,13 +30,16 @@ const listener: EnvironmentListenerFn = (context) => {
       },
     )
     .on('add_hook', addSourceLocation)
+    .on('add_hook', addSourceCode)
     .on('add_hook', addHookType)
     .on('add_test', addSourceLocation)
+    .on('add_test', addSourceCode)
     .on('test_start', testStart)
     .on('test_todo', testSkip)
     .on('test_skip', testSkip)
     .on('test_done', testDone)
     .on('hook_start', addSourceCode)
+    .on('hook_start', markJestReset)
     .on('hook_start', executableStart)
     .on('hook_failure', executableFailure)
     .on('hook_failure', flush)
@@ -78,32 +84,68 @@ function addHookType({
   metadata.set('hookType', event.hookType);
 }
 
-function addSourceCode({ event }: TestEnvironmentCircusEvent) {
-  let code = '';
-  if (event.name === 'hook_start') {
-    const { type, fn } = event.hook;
-    code = `${type}(${fn});`;
-
-    if (
-      code.includes(
-        "during setup, this cannot be null (and it's fine to explode if it is)",
-      )
-    ) {
-      code = '';
-      realm.runtimeContext
-        .getCurrentMetadata()
-        .push('description', ['Reset mocks, modules and timers (Jest)']);
-    }
+function addSourceCode({
+  event,
+}: TestEnvironmentCircusEvent<
+  Circus.Event & {
+    name: 'hook_start' | 'test_fn_start' | 'add_test' | 'add_hook';
   }
+>) {
+  let code = '';
+  switch (event.name) {
+    case 'hook_start': {
+      if (!isJestReset(event)) {
+        const { type, fn } = event.hook;
+        code = `${type}(${fn});`;
+      }
 
-  if (event.name === 'test_fn_start') {
-    const { name, fn } = event.test;
-    code = `test(${JSON.stringify(name)}, ${fn});`;
+      break;
+    }
+    case 'add_hook': {
+      if (!isJestReset(event)) {
+        const { hookType, fn } = event;
+        code = `${hookType}(${fn});`;
+      }
+
+      break;
+    }
+    case 'test_fn_start': {
+      const { name, fn } = event.test;
+      code = `test(${JSON.stringify(name)}, ${fn});`;
+
+      break;
+    }
+    case 'add_test': {
+      const { testName, fn } = event;
+      code = `test(${JSON.stringify(testName)}, ${fn});`;
+
+      break;
+    }
   }
 
   if (code) {
     realm.runtimeContext.getCurrentMetadata().set('sourceCode', code);
   }
+}
+
+function markJestReset({
+  event,
+}: TestEnvironmentCircusEvent<Circus.Event & { name: 'hook_start' }>) {
+  if (isJestReset(event)) {
+    realm.runtimeContext
+      .getCurrentMetadata()
+      .push('description', ['Reset mocks, modules and timers (Jest)']);
+  }
+}
+
+function isJestReset(
+  event: Circus.Event & { name: 'hook_start' | 'add_hook' },
+) {
+  return event.name === 'hook_start'
+    ? event.hook.type === 'beforeEach' &&
+        `${event.hook.fn}`.includes(JEST_RESET_LINE)
+    : event.hookType === 'beforeEach' &&
+        `${event.fn}`.includes(JEST_RESET_LINE);
 }
 
 // eslint-disable-next-line no-empty-pattern
