@@ -69,9 +69,7 @@ export const testCase: ResolvedTestCaseCustomizer = {
   statusDetails: ({ testCase, testCaseMetadata }) =>
     stripStatusDetails(
       testCaseMetadata.statusDetails ??
-        stripStatusDetails(
-          getStatusDetails((testCase.failureMessages ?? []).join('\n')),
-        ),
+        getStatusDetails((testCase.failureMessages ?? []).join('\n')),
     ),
   attachments: ({ testCaseMetadata }) => testCaseMetadata.attachments ?? [],
   parameters: ({ testCaseMetadata }) => testCaseMetadata.parameters ?? [],
