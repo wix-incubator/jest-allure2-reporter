@@ -1,3 +1,6 @@
+import path from 'node:path';
+import os from 'node:os';
+
 import { state } from 'jest-metadata';
 import type { AllureGlobalMetadata } from 'jest-allure2-reporter';
 
@@ -12,14 +15,25 @@ export class AllureRealm {
     getGlobalMetadata: () => state,
     getNow: () => Date.now(),
     getReporterConfig() {
-      const config = new AllureMetadataProxy<AllureGlobalMetadata>(state).get(
+      let config = new AllureMetadataProxy<AllureGlobalMetadata>(state).get(
         'config',
       );
       if (!config) {
-        throw new Error(
+        console.warn(
           "Cannot receive jest-allure2-reporter's config from the parent process. Have you set up Jest test environment correctly?",
         );
       }
+
+      config ??= {
+        resultsDir: path.join(os.tmpdir(), 'allure-results'),
+        overwrite: true,
+        injectGlobals: true,
+        attachments: {
+          subDir: 'attachments',
+          contentHandler: 'write',
+          fileHandler: 'ref',
+        },
+      };
 
       return config as SharedReporterConfig;
     },
