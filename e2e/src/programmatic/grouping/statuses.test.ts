@@ -1,6 +1,9 @@
 import { allure } from 'jest-allure2-reporter/api';
 
 const dummyTest = () => expect(true).toBe(true);
+const timeoutTest = (_done: Fn) => {
+  expect({ seed: Math.random() }).toMatchSnapshot();
+};
 const passingAssertion = () => expect(2 + 2).toBe(4);
 const failingAssertion = () => expect(2 + 2).toBe(5);
 const failingSnapshot = () => expect({ seed: Math.random() }).toMatchSnapshot();
@@ -13,6 +16,7 @@ describe('Status tests', () => {
     test('passed', passingAssertion);
     test('failed assertion', failingAssertion);
     test('failed snapshot', failingSnapshot);
+    test('failed timeout', timeoutTest, 100);
     test('broken', brokenAssertion);
     test.skip('skipped', passingAssertion);
     test.todo('todo');
@@ -36,6 +40,25 @@ describe('Status tests', () => {
         allure.status('unknown', { message: 'Custom message', trace: 'Custom trace' });
         callback();
       });
+    });
+  });
+
+  describe('Status override in a timed out', () => {
+    test('test', (_done) => {
+      allure.status('unknown', {message: 'Custom message', trace: 'Custom trace'});
+    }, 100);
+
+    describe.each([
+      ['beforeAll hook', beforeAll],
+      ['beforeEach hook', beforeEach],
+      ['afterEach hook', afterEach],
+      ['afterAll hook', afterAll],
+    ])('%s', (_suite, hook) => {
+      hook(function (_done) {
+        allure.status('unknown', {message: 'Custom message', trace: 'Custom trace'});
+      }, 100);
+
+      test('dummy', dummyTest);
     });
   });
 });

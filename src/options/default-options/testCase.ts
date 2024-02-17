@@ -8,6 +8,7 @@ import type {
   ResolvedTestCaseCustomizer,
   Stage,
   Status,
+  StatusDetails,
   TestCaseCustomizer,
   TestCaseExtractorContext,
 } from 'jest-allure2-reporter';
@@ -68,8 +69,7 @@ export const testCase: ResolvedTestCaseCustomizer = {
     testCaseMetadata.status ?? getTestCaseStatus(testCase),
   statusDetails: ({ testCase, testCaseMetadata }) =>
     stripStatusDetails(
-      testCaseMetadata.statusDetails ??
-        getStatusDetails((testCase.failureMessages ?? []).join('\n')),
+      testCaseMetadata.statusDetails ?? extractStatusDetails(testCase),
     ),
   attachments: ({ testCaseMetadata }) => testCaseMetadata.attachments ?? [],
   parameters: ({ testCaseMetadata }) => testCaseMetadata.parameters ?? [],
@@ -153,4 +153,28 @@ function getTestCaseStage(testCase: TestCaseResult): Stage {
       return 'interrupted';
     }
   }
+}
+
+function extractStatusDetails(
+  testCase: TestCaseResult,
+): StatusDetails | undefined {
+  const allMessages = testCase.failureMessages.map(
+    (message: string, index: number) => {
+      // Special case for Jest timeout errors
+      if (message.startsWith('Error: \n')) {
+        const failureDetails = testCase.failureDetails?.[index] as any;
+        const extraMessage: unknown = failureDetails?.message;
+        if (typeof extraMessage === 'string') {
+          return message.replace('\n', trimThrown(extraMessage) + '\n');
+        }
+      }
+      return message;
+    },
+  );
+
+  return getStatusDetails(allMessages.join('\n\n'));
+}
+
+function trimThrown(message: string): string {
+  return message.startsWith('thrown: "') ? message.slice(9, -1) : message;
 }
