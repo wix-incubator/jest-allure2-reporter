@@ -14,6 +14,6 @@ export const getStart = (testInvocation: TestInvocationMetadata) => {
   if (typeof start1 === 'number') {
     return typeof start2 === 'number' ? Math.min(start1, start2) : start1;
   } else {
-    return typeof start2 === 'number' ? start2 : Number.NaN;
+    return typeof start2 === 'number' ? start2 : undefined;
   }
 };
