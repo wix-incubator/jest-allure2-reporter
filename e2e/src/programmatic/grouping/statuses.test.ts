@@ -26,6 +26,7 @@ describe('Status tests', () => {
   ])('Status override in a %s', (_parentSuite, callback) => {
     describe.each([
       ['test', (callback: Fn) => (test('', callback), void 0)],
+      ['test step', (callback: Fn) => (test('', () => allure.step('a step', callback)), void 0)],
       ['beforeAll hook', (callback: Fn) => (beforeAll(callback), test('', dummyTest), void 0)],
       ['beforeEach hook', (callback: Fn) => (beforeEach(callback), test('', dummyTest), void 0)],
       ['afterEach hook', (callback: Fn) => (afterEach(callback), test('', dummyTest), void 0)],

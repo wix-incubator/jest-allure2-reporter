@@ -42,12 +42,11 @@ export class MetadataSquasher {
       resolveTestStep,
     );
     const steps = result.steps ?? [];
-    const stage = getStage(metadata);
 
     return {
       ...result,
       ...getStatusAndDetails(metadata),
-      stage,
+      stage: getStage(metadata),
       start: getStart(metadata),
       stop: getStop(metadata),
       steps: [...befores, ...steps, ...afters],
