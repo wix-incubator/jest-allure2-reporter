@@ -15,6 +15,6 @@ export const getStop = (testInvocation: TestInvocationMetadata) => {
   if (typeof stop1 === 'number') {
     return typeof stop2 === 'number' ? Math.max(stop1, stop2) : stop1;
   } else {
-    return typeof stop2 === 'number' ? stop2 : Number.NaN;
+    return typeof stop2 === 'number' ? stop2 : undefined;
   }
 };
