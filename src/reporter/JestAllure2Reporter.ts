@@ -358,8 +358,10 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     context: GlobalExtractorContext,
     test: AllurePayloadTest,
   ) {
-    if (test.description && !test.descriptionHtml && context.processMarkdown) {
-      test.descriptionHtml = await context.processMarkdown(test.description);
+    if (test.description && context.processMarkdown) {
+      test.descriptionHtml =
+        (test.descriptionHtml ? test.descriptionHtml + '\n' : '') +
+        (await context.processMarkdown(test.description));
     }
   }
 
