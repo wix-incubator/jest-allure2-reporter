@@ -481,6 +481,10 @@ declare module 'jest-allure2-reporter' {
      */
     description?: string[];
     /**
+     * Custom history ID to distinguish between tests and their retry attempts.
+     */
+    historyId?: string;
+    /**
      * Key-value pairs to disambiguate test cases or to provide additional information.
      */
     parameters?: Parameter[];

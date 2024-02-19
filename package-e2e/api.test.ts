@@ -56,6 +56,7 @@ test('typings of jest-allure2-reporter/api', async () => {
   assertType<IAllureRuntime>(allure.$bind({ metadata: false, time: true }));
   allure.description('This is a _description_ generated in runtime');
   allure.descriptionHtml('This is a <i>description</i> generated in runtime');
+  allure.historyId('00-11-22-33-44-55');
   allure.status('failed');
   allure.status('passed');
   allure.status('broken');

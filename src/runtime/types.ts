@@ -28,6 +28,8 @@ export interface IAllureRuntime {
 
   descriptionHtml(value: string): void;
 
+  historyId(value: string): void;
+
   status(status: Status, statusDetails?: StatusDetails): void;
 
   statusDetails(statusDetails: StatusDetails): void;

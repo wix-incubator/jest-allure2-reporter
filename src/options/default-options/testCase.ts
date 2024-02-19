@@ -37,7 +37,8 @@ function joinCode(
 
 export const testCase: ResolvedTestCaseCustomizer = {
   hidden: () => false,
-  historyId: ({ testCase }) => testCase.fullName,
+  historyId: ({ testCase, testCaseMetadata }) =>
+    testCaseMetadata.historyId ?? testCase.fullName,
   name: ({ testCase }) => testCase.title,
   fullName: ({ testCase }) => testCase.fullName,
   description: ({ testCaseMetadata }) => {
