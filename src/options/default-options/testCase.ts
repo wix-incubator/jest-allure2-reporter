@@ -58,7 +58,8 @@ export const testCase: ResolvedTestCaseCustomizer = {
     const snippet = code ? '```javascript\n' + code + '\n```' : '';
     return [text, snippet].filter(Boolean).join('\n\n');
   },
-  descriptionHtml: () => void 0,
+  descriptionHtml: ({ testCaseMetadata }) =>
+    testCaseMetadata.descriptionHtml?.join('\n'),
   start: ({ testCase, testCaseMetadata }) =>
     testCaseMetadata.start ??
     (testCaseMetadata.stop ?? Date.now()) - (testCase.duration ?? 0),
