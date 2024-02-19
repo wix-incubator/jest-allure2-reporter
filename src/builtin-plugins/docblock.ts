@@ -34,7 +34,6 @@ export const docblockPlugin: PluginConstructor = () => {
     async testCaseContext(context) {
       if (parse && context.testCaseMetadata.sourceCode) {
         context.testCaseDocblock = parse(context.testCaseMetadata.sourceCode);
-        mergeIntoTestCase(context.testCaseMetadata, context.testFileDocblock);
         mergeIntoTestCase(context.testCaseMetadata, context.testCaseDocblock);
       }
     },
