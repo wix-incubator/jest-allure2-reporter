@@ -7,16 +7,23 @@ export const remarkPlugin: PluginConstructor = () => {
     name: 'jest-allure2-reporter/plugins/remark',
     async globalContext(context) {
       const remark = await import('remark');
-      const [remarkRehype, rehypeSanitize, rehypeStringify, rehypeHighlight] =
-        await Promise.all([
-          import('remark-rehype'),
-          import('rehype-sanitize'),
-          import('rehype-stringify'),
-          import('rehype-highlight'),
-        ]);
+      const [
+        remarkGfm,
+        remarkRehype,
+        rehypeSanitize,
+        rehypeStringify,
+        rehypeHighlight,
+      ] = await Promise.all([
+        import('remark-gfm'),
+        import('remark-rehype'),
+        import('rehype-sanitize'),
+        import('rehype-stringify'),
+        import('rehype-highlight'),
+      ]);
 
       const processor = remark
         .remark()
+        .use(remarkGfm.default)
         .use(remarkRehype.default)
         .use(rehypeSanitize.default)
         .use(rehypeHighlight.default)

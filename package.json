@@ -125,6 +125,7 @@
     "rehype-sanitize": "^6.0.0",
     "rehype-stringify": "^10.0.0",
     "remark": "^15.0.1",
+    "remark-gfm": "^4.0.0",
     "remark-rehype": "^11.0.0",
     "rimraf": "^4.3.1",
     "stacktrace-js": "^2.0.2",
