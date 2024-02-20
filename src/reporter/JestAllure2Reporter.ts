@@ -213,8 +213,10 @@ export class JestAllure2Reporter extends JestMetadataReporter {
 
         for (const testInvocationMetadata of allInvocations) {
           const testCaseMetadata = squasher.testInvocation(
+            testFileContext.testFileMetadata,
             testInvocationMetadata,
           );
+
           const testCaseContext: TestCaseExtractorContext = {
             ...testFileContext,
             testCase: testCaseResult,
