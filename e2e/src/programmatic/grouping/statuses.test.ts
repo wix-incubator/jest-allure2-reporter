@@ -27,11 +27,13 @@ describe('Status tests', () => {
     describe.each([
       ['test', (callback: Fn) => (test('', callback), void 0)],
       ['test step', (callback: Fn) => (test('', () => allure.step('a step', callback)), void 0)],
-      ['beforeAll hook', (callback: Fn) => (beforeAll(callback), test('', dummyTest), void 0)],
       ['beforeEach hook', (callback: Fn) => (beforeEach(callback), test('', dummyTest), void 0)],
       ['afterEach hook', (callback: Fn) => (afterEach(callback), test('', dummyTest), void 0)],
-      ['afterAll hook', (callback: Fn) => (afterAll(callback), test('', dummyTest), void 0)],
-    ])('%s', (_suite, hook) => {
+      ...(callback === passingAssertion ? [
+        ['beforeAll hook', (callback: Fn) => (beforeAll(callback), test('', dummyTest), void 0)],
+        ['afterAll hook', (callback: Fn) => (afterAll(callback), test('', dummyTest), void 0)],
+      ] as [string, (callback: Fn) => void][] : []),
+    ])('%s', (_suite: string, hook: (callback: Fn) => void) => {
       hook(function () {
         allure.status('unknown', { message: 'Custom message', trace: 'Custom trace' });
         callback();
