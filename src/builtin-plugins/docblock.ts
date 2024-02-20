@@ -69,7 +69,7 @@ function mergeIntoTestItem(
     const [left, right, ...rest] = metadata.sourceCode.split(rawDocblock);
     const leftTrimmed = left.trimEnd();
     const replacement = shouldLeaveComments
-      ? `/* ${comments.trimStart()} */\n`
+      ? `/** ${comments.trimStart()} */\n`
       : '\n';
     const joined = right ? [leftTrimmed, right].join(replacement) : leftTrimmed;
     metadata.sourceCode = [joined, ...rest].join('\n');
