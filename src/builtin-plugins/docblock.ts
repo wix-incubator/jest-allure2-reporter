@@ -120,6 +120,10 @@ function mergeIntoTestCase(
     metadata.descriptionHtml ??= [];
     metadata.descriptionHtml.push(...pragmas.descriptionHtml);
   }
+
+  if (pragmas.fullName) {
+    metadata.fullName = pragmas.fullName[0];
+  }
 }
 
 function createLabelMapper(name: LabelName) {
