@@ -55,21 +55,20 @@ function mergeIntoTestItem(
   rawDocblock: string,
   shouldLeaveComments: boolean,
 ) {
-  if (comments) {
-    metadata.description ??= [];
-    metadata.description.push(comments);
-  }
-
   if (pragmas.description) {
     metadata.description ??= [];
     metadata.description.push(...pragmas.description);
+  }
+
+  if (pragmas.name) {
+    metadata.name = pragmas.name[0];
   }
 
   if (metadata.sourceCode && rawDocblock) {
     const [left, right, ...rest] = metadata.sourceCode.split(rawDocblock);
     const leftTrimmed = left.trimEnd();
     const replacement = shouldLeaveComments
-      ? `/* ${comments.trimStart()} */\n`
+      ? `/** ${comments.trimStart()} */\n`
       : '\n';
     const joined = right ? [leftTrimmed, right].join(replacement) : leftTrimmed;
     metadata.sourceCode = [joined, ...rest].join('\n');
