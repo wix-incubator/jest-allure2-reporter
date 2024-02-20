@@ -522,6 +522,7 @@ declare module 'jest-allure2-reporter' {
     stop?: number;
   }
 
+  /** @inheritDoc */
   export interface AllureTestStepMetadata extends AllureTestItemMetadata {
     /**
      * Steps produced by Jest hooks will have this property set.
@@ -530,6 +531,7 @@ declare module 'jest-allure2-reporter' {
     hookType?: 'beforeAll' | 'beforeEach' | 'afterEach' | 'afterAll';
   }
 
+  /** @inheritDoc */
   export interface AllureTestCaseMetadata extends AllureTestItemMetadata {
     descriptionHtml?: string[];
     labels?: Label[];
@@ -537,6 +539,7 @@ declare module 'jest-allure2-reporter' {
     workerId?: string;
   }
 
+  /** @inheritDoc */
   export interface AllureTestFileMetadata extends AllureTestCaseMetadata {
     code?: never;
     steps?: never;
