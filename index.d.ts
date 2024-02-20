@@ -534,12 +534,12 @@ declare module 'jest-allure2-reporter' {
     descriptionHtml?: string[];
     labels?: Label[];
     links?: Link[];
+    workerId?: string;
   }
 
   export interface AllureTestFileMetadata extends AllureTestCaseMetadata {
     code?: never;
     steps?: never;
-    workerId?: string;
   }
 
   export interface AllureGlobalMetadata {

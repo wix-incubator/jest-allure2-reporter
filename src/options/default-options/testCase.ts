@@ -87,7 +87,7 @@ export const testCase: ResolvedTestCaseCustomizer = {
       epic: all,
       feature: all,
       story: all,
-      thread: ({ testFileMetadata }) => testFileMetadata.workerId,
+      thread: ({ testCaseMetadata }) => testCaseMetadata.workerId,
       severity: last,
       tag: all,
       owner: last,

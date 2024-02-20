@@ -30,6 +30,7 @@ export function mergeTestCaseMetadata(
         historyId: b.historyId ?? a.historyId,
         labels: mergeArrays(a.labels, b.labels),
         links: mergeArrays(a.links, b.links),
+        workerId: b.workerId ?? a.workerId,
       }
     : a;
 }
