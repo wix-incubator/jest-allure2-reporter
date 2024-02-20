@@ -92,7 +92,7 @@ function addSourceCode({ event }: TestEnvironmentCircusEvent) {
       code = '';
       realm.runtimeContext
         .getCurrentMetadata()
-        .push('description', ['Reset mocks, modules and timers (Jest)']);
+        .set('title', 'Reset mocks, modules and timers (Jest)');
     }
   }
 

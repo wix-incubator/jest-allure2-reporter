@@ -520,6 +520,10 @@ declare module 'jest-allure2-reporter' {
      * Stop timestamp in milliseconds.
      */
     stop?: number;
+    /**
+     * Title of the test case or test step.
+     */
+    title?: string;
   }
 
   /** @inheritDoc */

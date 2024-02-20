@@ -61,14 +61,13 @@ function mergeIntoTestItem(
   rawDocblock: string,
   shouldLeaveComments: boolean,
 ) {
-  if (comments) {
-    metadata.description ??= [];
-    metadata.description.push(comments);
-  }
-
   if (pragmas.description) {
     metadata.description ??= [];
     metadata.description.push(...pragmas.description);
+  }
+
+  if (pragmas.title) {
+    metadata.title = pragmas.title[0];
   }
 
   if (metadata.sourceCode && rawDocblock) {
@@ -94,6 +93,11 @@ function mergeIntoTestCase(
   docblock: DocblockContext | undefined,
 ) {
   const { raw = '', comments = '', pragmas = {} } = docblock ?? {};
+  if (comments) {
+    metadata.description ??= [];
+    metadata.description.push(comments);
+  }
+
   mergeIntoTestItem(metadata, comments, pragmas, raw, false);
 
   const epic = pragmas.epic?.map(createLabelMapper('epic')) ?? [];
@@ -144,6 +148,9 @@ function mergeIntoTestStep(
 ) {
   const { raw = '', comments = '', pragmas = {} } = docblock ?? {};
   mergeIntoTestItem(metadata, comments, pragmas, raw, true);
+  if (comments) {
+    metadata.title = comments;
+  }
 }
 
 type DocblockParser = (raw: string) => DocblockContext | undefined;
