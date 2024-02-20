@@ -124,6 +124,10 @@ function mergeIntoTestCase(
   if (pragmas.fullName) {
     metadata.fullName = pragmas.fullName[0];
   }
+
+  if (pragmas.historyId) {
+    metadata.historyId = pragmas.historyId[0];
+  }
 }
 
 function createLabelMapper(name: LabelName) {
