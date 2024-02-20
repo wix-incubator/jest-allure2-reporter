@@ -40,7 +40,8 @@ export const testCase: ResolvedTestCaseCustomizer = {
   historyId: ({ testCase, testCaseMetadata }) =>
     testCaseMetadata.historyId ?? testCase.fullName,
   name: ({ testCase }) => testCase.title,
-  fullName: ({ testCase }) => testCase.fullName,
+  fullName: ({ testCase, testCaseMetadata }) =>
+    testCaseMetadata.fullName ?? testCase.fullName,
   description: ({ testCaseMetadata }) => {
     const text = testCaseMetadata.description?.join('\n\n') ?? '';
     const before = extractCode(

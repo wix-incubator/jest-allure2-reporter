@@ -32,6 +32,10 @@ export class CoreModule {
     this.context.metadata.push('descriptionHtml', [value]);
   }
 
+  fullName(value: string) {
+    this.context.metadata.set('fullName', value);
+  }
+
   historyId(value: string) {
     this.context.metadata.set('historyId', value);
   }
