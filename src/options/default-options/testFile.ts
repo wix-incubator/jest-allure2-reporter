@@ -34,7 +34,8 @@ export const testFile: ResolvedTestFileCustomizer = {
     const code = `${fence}${lang}\n${contents}\n${fence}`;
     return [text, code].filter(Boolean).join('\n\n');
   },
-  descriptionHtml: () => void 0,
+  descriptionHtml: ({ testFileMetadata }) =>
+    testFileMetadata.descriptionHtml?.join('\n'),
   start: ({ testFileMetadata }) => testFileMetadata.start,
   stop: ({ testFileMetadata }) => testFileMetadata.stop,
   stage: ({ testFile }) =>
