@@ -48,6 +48,10 @@ export class CoreModule {
     this.context.metadata.push('links', [link]);
   }
 
+  title(value: string) {
+    this.context.metadata.set('title', value);
+  }
+
   parameter(parameter: Parameter) {
     this.context.metadata.push('parameters', [parameter]);
   }

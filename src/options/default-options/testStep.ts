@@ -10,7 +10,7 @@ import { stripStatusDetails } from '../utils';
 export const testStep: ResolvedTestStepCustomizer = {
   hidden: () => false,
   name: ({ testStepMetadata }) =>
-    testStepMetadata.description?.at(-1) ?? testStepMetadata.hookType,
+    testStepMetadata.title ?? testStepMetadata.hookType,
   start: ({ testStepMetadata }) => testStepMetadata.start,
   stop: ({ testStepMetadata }) => testStepMetadata.stop,
   stage: ({ testStepMetadata }) => testStepMetadata.stage,

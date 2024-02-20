@@ -57,6 +57,7 @@ test('typings of jest-allure2-reporter/api', async () => {
   allure.description('This is a _description_ generated in runtime');
   allure.descriptionHtml('This is a <i>description</i> generated in runtime');
   allure.historyId('00-11-22-33-44-55');
+  allure.title('Custom test case name');
   allure.fullName('Custom full name');
   allure.status('failed');
   allure.status('passed');

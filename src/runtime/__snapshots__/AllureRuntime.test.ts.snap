@@ -24,9 +24,6 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
           "type": "text/plain",
         },
       ],
-      "description": [
-        "outer step",
-      ],
       "stage": "finished",
       "start": 0,
       "status": "passed",
@@ -39,9 +36,6 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
               "type": "text/plain",
             },
           ],
-          "description": [
-            "inner step 1",
-          ],
           "stage": "interrupted",
           "start": 1,
           "status": "failed",
@@ -49,15 +43,14 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
             "message": "Error: Sync error",
           },
           "stop": 2,
+          "title": "inner step 1",
         },
         {
-          "description": [
-            "inner step 2",
-          ],
           "stage": "finished",
           "start": 3,
           "status": "passed",
           "stop": 4,
+          "title": "inner step 2",
         },
         {
           "attachments": [
@@ -66,9 +59,6 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
               "source": "/attachments/fourth",
               "type": "text/plain",
             },
-          ],
-          "description": [
-            "inner step 3",
           ],
           "parameters": [
             {
@@ -83,9 +73,11 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
             "message": "Error: Async error",
           },
           "stop": 6,
+          "title": "inner step 3",
         },
       ],
       "stop": 7,
+      "title": "outer step",
     },
   ],
 }

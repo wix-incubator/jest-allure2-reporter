@@ -36,6 +36,8 @@ export interface IAllureRuntime {
 
   link(url: string, name?: string, type?: LinkType | string): void;
 
+  title(value: string): void;
+
   parameter(name: string, value: unknown, options?: ParameterOptions): void;
 
   parameters(parameters: Record<string, unknown>): void;

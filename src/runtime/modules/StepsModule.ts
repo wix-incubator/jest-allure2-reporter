@@ -55,7 +55,7 @@ export class StepsModule {
     this.context.metadata.$startStep().assign({
       stage: 'scheduled',
       start: this.context.now,
-      description: [name],
+      title: name,
     });
   };
 
