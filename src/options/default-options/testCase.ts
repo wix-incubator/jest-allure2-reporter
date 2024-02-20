@@ -42,7 +42,7 @@ export const testCase: ResolvedTestCaseCustomizer = {
   name: ({ testCase }) => testCase.title,
   fullName: ({ testCase }) => testCase.fullName,
   description: ({ testCaseMetadata }) => {
-    const text = testCaseMetadata.description?.join('\n') ?? '';
+    const text = testCaseMetadata.description?.join('\n\n') ?? '';
     const before = extractCode(
       testCaseMetadata.steps?.filter(
         (step) =>
