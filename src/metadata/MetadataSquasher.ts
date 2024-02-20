@@ -23,17 +23,22 @@ export class MetadataSquasher {
     );
   }
 
-  testInvocation(metadata: TestInvocationMetadata): AllureTestCaseMetadata {
+  testInvocation(
+    fileMetadata: AllureTestFileMetadata,
+    metadata: TestInvocationMetadata,
+  ): AllureTestCaseMetadata {
     const ancestors = [
-      metadata.file.globalMetadata,
-      metadata.file,
       ...metadata.definition.ancestors(),
       metadata.definition,
       metadata,
       metadata.fn,
-    ].map((item) =>
-      item ? (item.get(PREFIX) as AllureTestCaseMetadata) : undefined,
-    );
+    ]
+      .map((item) =>
+        item ? (item.get(PREFIX) as AllureTestCaseMetadata) : undefined,
+      )
+      .filter(Boolean) as AllureTestCaseMetadata[];
+    ancestors.unshift(fileMetadata);
+
     const result = ancestors.reduce(mergeTestCaseMetadata, {});
     const befores = [...metadata.beforeAll, ...metadata.beforeEach].map(
       resolveTestStep,
