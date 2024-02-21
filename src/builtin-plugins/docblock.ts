@@ -51,7 +51,7 @@ export const docblockPlugin: PluginConstructor = () => {
 };
 
 function hasDocblockAtStart(string_: string) {
-  return /^\s*\/\*\*/m.test(string_);
+  return /^\s*\/\*\*/.test(string_);
 }
 
 function mergeIntoTestItem(
