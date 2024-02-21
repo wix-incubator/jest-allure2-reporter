@@ -1,43 +1,13 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { parseExpression } from '@babel/parser';
+/* eslint-disable unicorn/prevent-abbreviations */
 
-const DOCBLOCK_REGEXP = /^\/\*\*[\S\s]*?\*\//m;
+const DOCBLOCK_REGEXP = /\s*\/\*\*[\S\s]*?\*\//m;
 
-export function splitDocblock(
-  rawCode: string,
-  mode: 'file' | 'function',
-): [string, string] {
-  const trimmedCode = (
-    mode === 'file' ? rawCode : getFunctionBody(rawCode)
-  ).trimStart();
-
-  const docblock = trimmedCode.match(DOCBLOCK_REGEXP)?.[0] ?? '';
-  return docblock
-    ? [docblock, rawCode.replace(docblock, '').trimStart()]
-    : ['', rawCode];
-}
-
-function getFunctionBody(raw: string) {
-  if (!raw.includes('/**')) {
-    return raw;
-  }
-
-  try {
-    const node = parseExpression(raw) as any; // CallExpression
-    const {
-      body: { start, end },
-    } = node.arguments.find(
-      (expression: any) =>
-        expression.body &&
-        (expression.type === 'FunctionExpression' ||
-          expression.type === 'ArrowFunctionExpression'),
-    );
-    if (typeof start === 'number' && typeof end === 'number') {
-      return raw.slice(start + 1, end - 1);
-    }
+export function splitDocblock(rawCode: string): [string, string] {
+  let docblock = '';
+  const code = rawCode.replace(DOCBLOCK_REGEXP, (match) => {
+    docblock = match.trim();
     return '';
-  } catch {
-    // TODO: log parsing error
-    return '';
-  }
+  });
+
+  return [docblock, code];
 }
