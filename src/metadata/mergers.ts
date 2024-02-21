@@ -12,7 +12,7 @@ export function mergeTestFileMetadata(
   return b
     ? {
         ...mergeTestItemMetadata(a, b),
-        code: undefined,
+        sourceCode: undefined,
         steps: undefined,
         workerId: b.workerId ?? a.workerId,
       }
