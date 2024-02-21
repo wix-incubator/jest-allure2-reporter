@@ -13,5 +13,6 @@ export * from './md5';
 export * from './processMaybePromise';
 export * from './shallowEqualArrays';
 export * from './splitDocblock';
+export * from './weakMemoize';
 export * from './wrapFunction';
 export * from './types';

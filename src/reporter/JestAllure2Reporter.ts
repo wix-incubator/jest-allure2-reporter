@@ -161,7 +161,11 @@ export class JestAllure2Reporter extends JestMetadataReporter {
       this._allure.writeCategoriesDefinitions(categories as Category[]);
     }
 
-    const squasher = new MetadataSquasher();
+    const docblockParser: any = { find: () => void 0 }; // TODO: await initParser();
+    const squasher = new MetadataSquasher({
+      getDocblockMetadata: (metadata) =>
+        metadata && docblockParser.find(metadata),
+    });
 
     for (const testResult of results.testResults) {
       const testFileContext: TestFileExtractorContext = {
@@ -213,7 +217,6 @@ export class JestAllure2Reporter extends JestMetadataReporter {
 
         for (const testInvocationMetadata of allInvocations) {
           const testCaseMetadata = squasher.testInvocation(
-            testFileContext.testFileMetadata,
             testInvocationMetadata,
           );
 

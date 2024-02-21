@@ -1,0 +1,1849 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`mergeTestCaseMetadata belowTestInvocation 1`] = `
+{
+  "attachments": [
+    {
+      "name": "hook_invocation.txt",
+      "source": "/tmp/hook_invocation.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "hook_invocation.txt",
+      "source": "/tmp/hook_invocation.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "test_fn_invocation.txt",
+      "source": "/tmp/test_fn_invocation.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "hook_invocation.txt",
+      "source": "/tmp/hook_invocation.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "hook_invocation.txt",
+      "source": "/tmp/hook_invocation.txt",
+      "type": "text/plain",
+    },
+  ],
+  "currentStep": undefined,
+  "description": [
+    "description:hook_invocation",
+    "description:hook_invocation",
+    "description:test_fn_invocation",
+    "description:hook_invocation",
+    "description:hook_invocation",
+  ],
+  "descriptionHtml": [
+    "descriptionHtml:hook_invocation",
+    "descriptionHtml:hook_invocation",
+    "descriptionHtml:test_fn_invocation",
+    "descriptionHtml:hook_invocation",
+    "descriptionHtml:hook_invocation",
+  ],
+  "displayName": "displayName:hook_invocation",
+  "fullName": "fullName:hook_invocation",
+  "historyId": "historyId:hook_invocation",
+  "labels": [
+    {
+      "name": "tag",
+      "value": "hook_invocation",
+    },
+    {
+      "name": "tag",
+      "value": "hook_invocation",
+    },
+    {
+      "name": "tag",
+      "value": "test_fn_invocation",
+    },
+    {
+      "name": "tag",
+      "value": "hook_invocation",
+    },
+    {
+      "name": "tag",
+      "value": "hook_invocation",
+    },
+  ],
+  "links": [
+    {
+      "name": "link",
+      "type": "hook_invocation",
+      "url": "https://example.com/hook_invocation",
+    },
+    {
+      "name": "link",
+      "type": "hook_invocation",
+      "url": "https://example.com/hook_invocation",
+    },
+    {
+      "name": "link",
+      "type": "test_fn_invocation",
+      "url": "https://example.com/test_fn_invocation",
+    },
+    {
+      "name": "link",
+      "type": "hook_invocation",
+      "url": "https://example.com/hook_invocation",
+    },
+    {
+      "name": "link",
+      "type": "hook_invocation",
+      "url": "https://example.com/hook_invocation",
+    },
+  ],
+  "parameters": [
+    {
+      "name": "parameter:hook_invocation",
+      "value": "value:hook_invocation",
+    },
+    {
+      "name": "parameter:hook_invocation",
+      "value": "value:hook_invocation",
+    },
+    {
+      "name": "parameter:test_fn_invocation",
+      "value": "value:test_fn_invocation",
+    },
+    {
+      "name": "parameter:hook_invocation",
+      "value": "value:hook_invocation",
+    },
+    {
+      "name": "parameter:hook_invocation",
+      "value": "value:hook_invocation",
+    },
+  ],
+  "sourceCode": "sourceCode:hook_invocation",
+  "sourceLocation": {
+    "columnNumber": 2,
+    "fileName": "fileName:hook_invocation",
+    "lineNumber": 1,
+  },
+  "stage": "interrupted",
+  "start": 8,
+  "status": "broken",
+  "statusDetails": {
+    "message": "message:hook_invocation",
+    "trace": "trace:hook_invocation",
+  },
+  "stop": 109,
+  "workerId": "9",
+}
+`;
+
+exports[`mergeTestCaseMetadata globalAndTestFile 1`] = `
+{
+  "attachments": [
+    {
+      "name": "global.txt",
+      "source": "/tmp/global.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "file_docblock.txt",
+      "source": "/tmp/file_docblock.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "file.txt",
+      "source": "/tmp/file.txt",
+      "type": "text/plain",
+    },
+  ],
+  "currentStep": undefined,
+  "description": [
+    "description:global",
+    "description:file_docblock",
+    "description:file",
+  ],
+  "descriptionHtml": [
+    "descriptionHtml:global",
+    "descriptionHtml:file_docblock",
+    "descriptionHtml:file",
+  ],
+  "displayName": "displayName:file",
+  "fullName": "fullName:file",
+  "historyId": "historyId:file",
+  "labels": [
+    {
+      "name": "tag",
+      "value": "global",
+    },
+    {
+      "name": "tag",
+      "value": "file_docblock",
+    },
+    {
+      "name": "tag",
+      "value": "file",
+    },
+  ],
+  "links": [
+    {
+      "name": "link",
+      "type": "global",
+      "url": "https://example.com/global",
+    },
+    {
+      "name": "link",
+      "type": "file_docblock",
+      "url": "https://example.com/file_docblock",
+    },
+    {
+      "name": "link",
+      "type": "file",
+      "url": "https://example.com/file",
+    },
+  ],
+  "parameters": [
+    {
+      "name": "parameter:global",
+      "value": "value:global",
+    },
+    {
+      "name": "parameter:file_docblock",
+      "value": "value:file_docblock",
+    },
+    {
+      "name": "parameter:file",
+      "value": "value:file",
+    },
+  ],
+  "sourceCode": "sourceCode:file",
+  "sourceLocation": {
+    "columnNumber": 2,
+    "fileName": "fileName:file",
+    "lineNumber": 1,
+  },
+  "stage": "scheduled",
+  "start": 0,
+  "status": "unknown",
+  "statusDetails": {
+    "message": "message:file",
+    "trace": "trace:file",
+  },
+  "stop": 102,
+  "workerId": "2",
+}
+`;
+
+exports[`mergeTestCaseMetadata globalAndTestFileAndTestInvocation 1`] = `
+{
+  "attachments": [
+    {
+      "name": "global.txt",
+      "source": "/tmp/global.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "file_docblock.txt",
+      "source": "/tmp/file_docblock.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "file.txt",
+      "source": "/tmp/file.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "test_invocation.txt",
+      "source": "/tmp/test_invocation.txt",
+      "type": "text/plain",
+    },
+  ],
+  "currentStep": undefined,
+  "description": [
+    "description:global",
+    "description:file_docblock",
+    "description:file",
+    "description:test_invocation",
+  ],
+  "descriptionHtml": [
+    "descriptionHtml:global",
+    "descriptionHtml:file_docblock",
+    "descriptionHtml:file",
+    "descriptionHtml:test_invocation",
+  ],
+  "displayName": "displayName:test_invocation",
+  "fullName": "fullName:test_invocation",
+  "historyId": "historyId:test_invocation",
+  "labels": [
+    {
+      "name": "tag",
+      "value": "global",
+    },
+    {
+      "name": "tag",
+      "value": "file_docblock",
+    },
+    {
+      "name": "tag",
+      "value": "file",
+    },
+    {
+      "name": "tag",
+      "value": "test_invocation",
+    },
+  ],
+  "links": [
+    {
+      "name": "link",
+      "type": "global",
+      "url": "https://example.com/global",
+    },
+    {
+      "name": "link",
+      "type": "file_docblock",
+      "url": "https://example.com/file_docblock",
+    },
+    {
+      "name": "link",
+      "type": "file",
+      "url": "https://example.com/file",
+    },
+    {
+      "name": "link",
+      "type": "test_invocation",
+      "url": "https://example.com/test_invocation",
+    },
+  ],
+  "parameters": [
+    {
+      "name": "parameter:global",
+      "value": "value:global",
+    },
+    {
+      "name": "parameter:file_docblock",
+      "value": "value:file_docblock",
+    },
+    {
+      "name": "parameter:file",
+      "value": "value:file",
+    },
+    {
+      "name": "parameter:test_invocation",
+      "value": "value:test_invocation",
+    },
+  ],
+  "sourceCode": "sourceCode:test_invocation",
+  "sourceLocation": {
+    "columnNumber": 2,
+    "fileName": "fileName:test_invocation",
+    "lineNumber": 1,
+  },
+  "stage": "scheduled",
+  "start": 0,
+  "status": "unknown",
+  "statusDetails": {
+    "message": "message:test_invocation",
+    "trace": "trace:test_invocation",
+  },
+  "stop": 107,
+  "workerId": "7",
+}
+`;
+
+exports[`mergeTestCaseMetadata merge 1`] = `{}`;
+
+exports[`mergeTestCaseMetadata steps (no overrides in invocations) 1`] = `
+[
+  {
+    "attachments": [
+      {
+        "name": "hook_definition.txt",
+        "source": "/tmp/hook_definition.txt",
+        "type": "text/plain",
+      },
+    ],
+    "currentStep": undefined,
+    "displayName": "displayName:hook_definition",
+    "hookType": "beforeAll",
+    "parameters": [
+      {
+        "name": "parameter:hook_definition",
+        "value": "value:hook_definition",
+      },
+    ],
+    "sourceCode": "sourceCode:hook_definition",
+    "sourceLocation": {
+      "columnNumber": 2,
+      "fileName": "fileName:hook_definition",
+      "lineNumber": 1,
+    },
+    "stage": "interrupted",
+    "start": 4,
+    "status": "broken",
+    "statusDetails": {
+      "message": "message:hook_definition",
+      "trace": "trace:hook_definition",
+    },
+    "steps": undefined,
+    "stop": 104,
+  },
+  {
+    "attachments": [
+      {
+        "name": "hook_definition.txt",
+        "source": "/tmp/hook_definition.txt",
+        "type": "text/plain",
+      },
+    ],
+    "currentStep": undefined,
+    "displayName": "displayName:hook_definition",
+    "hookType": "beforeEach",
+    "parameters": [
+      {
+        "name": "parameter:hook_definition",
+        "value": "value:hook_definition",
+      },
+    ],
+    "sourceCode": "sourceCode:hook_definition",
+    "sourceLocation": {
+      "columnNumber": 2,
+      "fileName": "fileName:hook_definition",
+      "lineNumber": 1,
+    },
+    "stage": "interrupted",
+    "start": 4,
+    "status": "broken",
+    "statusDetails": {
+      "message": "message:hook_definition",
+      "trace": "trace:hook_definition",
+    },
+    "steps": undefined,
+    "stop": 104,
+  },
+  {
+    "attachments": [
+      {
+        "name": "hook_definition.txt",
+        "source": "/tmp/hook_definition.txt",
+        "type": "text/plain",
+      },
+    ],
+    "currentStep": undefined,
+    "displayName": "displayName:hook_definition",
+    "hookType": "afterEach",
+    "parameters": [
+      {
+        "name": "parameter:hook_definition",
+        "value": "value:hook_definition",
+      },
+    ],
+    "sourceCode": "sourceCode:hook_definition",
+    "sourceLocation": {
+      "columnNumber": 2,
+      "fileName": "fileName:hook_definition",
+      "lineNumber": 1,
+    },
+    "stage": "interrupted",
+    "start": 4,
+    "status": "broken",
+    "statusDetails": {
+      "message": "message:hook_definition",
+      "trace": "trace:hook_definition",
+    },
+    "steps": undefined,
+    "stop": 104,
+  },
+  {
+    "attachments": [
+      {
+        "name": "hook_definition.txt",
+        "source": "/tmp/hook_definition.txt",
+        "type": "text/plain",
+      },
+    ],
+    "currentStep": undefined,
+    "displayName": "displayName:hook_definition",
+    "hookType": "afterAll",
+    "parameters": [
+      {
+        "name": "parameter:hook_definition",
+        "value": "value:hook_definition",
+      },
+    ],
+    "sourceCode": "sourceCode:hook_definition",
+    "sourceLocation": {
+      "columnNumber": 2,
+      "fileName": "fileName:hook_definition",
+      "lineNumber": 1,
+    },
+    "stage": "interrupted",
+    "start": 4,
+    "status": "broken",
+    "statusDetails": {
+      "message": "message:hook_definition",
+      "trace": "trace:hook_definition",
+    },
+    "steps": undefined,
+    "stop": 104,
+  },
+]
+`;
+
+exports[`mergeTestCaseMetadata steps 1`] = `
+[
+  {
+    "attachments": [
+      {
+        "name": "hook_definition.txt",
+        "source": "/tmp/hook_definition.txt",
+        "type": "text/plain",
+      },
+      {
+        "name": "hook_invocation.txt",
+        "source": "/tmp/hook_invocation.txt",
+        "type": "text/plain",
+      },
+    ],
+    "currentStep": undefined,
+    "displayName": "displayName:hook_invocation",
+    "hookType": "beforeAll",
+    "parameters": [
+      {
+        "name": "parameter:hook_definition",
+        "value": "value:hook_definition",
+      },
+      {
+        "name": "parameter:hook_invocation",
+        "value": "value:hook_invocation",
+      },
+    ],
+    "sourceCode": "sourceCode:hook_invocation",
+    "sourceLocation": {
+      "columnNumber": 2,
+      "fileName": "fileName:hook_invocation",
+      "lineNumber": 1,
+    },
+    "stage": "interrupted",
+    "start": 4,
+    "status": "broken",
+    "statusDetails": {
+      "message": "message:hook_definition",
+      "trace": "trace:hook_definition",
+    },
+    "steps": undefined,
+    "stop": 109,
+  },
+  {
+    "attachments": [
+      {
+        "name": "hook_definition.txt",
+        "source": "/tmp/hook_definition.txt",
+        "type": "text/plain",
+      },
+      {
+        "name": "hook_invocation.txt",
+        "source": "/tmp/hook_invocation.txt",
+        "type": "text/plain",
+      },
+    ],
+    "currentStep": undefined,
+    "displayName": "displayName:hook_invocation",
+    "hookType": "beforeEach",
+    "parameters": [
+      {
+        "name": "parameter:hook_definition",
+        "value": "value:hook_definition",
+      },
+      {
+        "name": "parameter:hook_invocation",
+        "value": "value:hook_invocation",
+      },
+    ],
+    "sourceCode": "sourceCode:hook_invocation",
+    "sourceLocation": {
+      "columnNumber": 2,
+      "fileName": "fileName:hook_invocation",
+      "lineNumber": 1,
+    },
+    "stage": "interrupted",
+    "start": 4,
+    "status": "broken",
+    "statusDetails": {
+      "message": "message:hook_definition",
+      "trace": "trace:hook_definition",
+    },
+    "steps": undefined,
+    "stop": 109,
+  },
+  {
+    "attachments": [
+      {
+        "name": "hook_definition.txt",
+        "source": "/tmp/hook_definition.txt",
+        "type": "text/plain",
+      },
+      {
+        "name": "hook_invocation.txt",
+        "source": "/tmp/hook_invocation.txt",
+        "type": "text/plain",
+      },
+    ],
+    "currentStep": undefined,
+    "displayName": "displayName:hook_invocation",
+    "hookType": "afterEach",
+    "parameters": [
+      {
+        "name": "parameter:hook_definition",
+        "value": "value:hook_definition",
+      },
+      {
+        "name": "parameter:hook_invocation",
+        "value": "value:hook_invocation",
+      },
+    ],
+    "sourceCode": "sourceCode:hook_invocation",
+    "sourceLocation": {
+      "columnNumber": 2,
+      "fileName": "fileName:hook_invocation",
+      "lineNumber": 1,
+    },
+    "stage": "interrupted",
+    "start": 4,
+    "status": "broken",
+    "statusDetails": {
+      "message": "message:hook_definition",
+      "trace": "trace:hook_definition",
+    },
+    "steps": undefined,
+    "stop": 109,
+  },
+  {
+    "attachments": [
+      {
+        "name": "hook_definition.txt",
+        "source": "/tmp/hook_definition.txt",
+        "type": "text/plain",
+      },
+      {
+        "name": "hook_invocation.txt",
+        "source": "/tmp/hook_invocation.txt",
+        "type": "text/plain",
+      },
+    ],
+    "currentStep": undefined,
+    "displayName": "displayName:hook_invocation",
+    "hookType": "afterAll",
+    "parameters": [
+      {
+        "name": "parameter:hook_definition",
+        "value": "value:hook_definition",
+      },
+      {
+        "name": "parameter:hook_invocation",
+        "value": "value:hook_invocation",
+      },
+    ],
+    "sourceCode": "sourceCode:hook_invocation",
+    "sourceLocation": {
+      "columnNumber": 2,
+      "fileName": "fileName:hook_invocation",
+      "lineNumber": 1,
+    },
+    "stage": "interrupted",
+    "start": 4,
+    "status": "broken",
+    "statusDetails": {
+      "message": "message:hook_definition",
+      "trace": "trace:hook_definition",
+    },
+    "steps": undefined,
+    "stop": 109,
+  },
+]
+`;
+
+exports[`mergeTestCaseMetadata stepsSelector merge 1`] = `{}`;
+
+exports[`mergeTestCaseMetadata stepsSelector merge 2`] = `
+{
+  "attachments": undefined,
+  "currentStep": undefined,
+  "displayName": undefined,
+  "hookType": undefined,
+  "parameters": undefined,
+  "sourceCode": undefined,
+  "sourceLocation": undefined,
+  "stage": undefined,
+  "start": undefined,
+  "status": undefined,
+  "statusDetails": undefined,
+  "steps": undefined,
+  "stop": undefined,
+}
+`;
+
+exports[`mergeTestCaseMetadata testDefinition 1`] = `
+{
+  "attachments": [
+    {
+      "name": "test_definition_docblock.txt",
+      "source": "/tmp/test_definition_docblock.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "test_definition.txt",
+      "source": "/tmp/test_definition.txt",
+      "type": "text/plain",
+    },
+  ],
+  "currentStep": undefined,
+  "description": [
+    "description:test_definition_docblock",
+    "description:test_definition",
+  ],
+  "descriptionHtml": [
+    "descriptionHtml:test_definition_docblock",
+    "descriptionHtml:test_definition",
+  ],
+  "displayName": "displayName:test_definition",
+  "fullName": "fullName:test_definition",
+  "historyId": "historyId:test_definition",
+  "labels": [
+    {
+      "name": "tag",
+      "value": "test_definition_docblock",
+    },
+    {
+      "name": "tag",
+      "value": "test_definition",
+    },
+  ],
+  "links": [
+    {
+      "name": "link",
+      "type": "test_definition_docblock",
+      "url": "https://example.com/test_definition_docblock",
+    },
+    {
+      "name": "link",
+      "type": "test_definition",
+      "url": "https://example.com/test_definition",
+    },
+  ],
+  "parameters": [
+    {
+      "name": "parameter:test_definition_docblock",
+      "value": "value:test_definition_docblock",
+    },
+    {
+      "name": "parameter:test_definition",
+      "value": "value:test_definition",
+    },
+  ],
+  "sourceCode": "sourceCode:test_definition",
+  "sourceLocation": {
+    "columnNumber": 2,
+    "fileName": "fileName:test_definition",
+    "lineNumber": 1,
+  },
+  "stage": "scheduled",
+  "start": 5,
+  "status": "skipped",
+  "statusDetails": {
+    "message": "message:test_definition",
+    "trace": "trace:test_definition",
+  },
+  "stop": 106,
+  "workerId": "6",
+}
+`;
+
+exports[`mergeTestCaseMetadata testDefinitionAndBelow 1`] = `
+{
+  "attachments": [
+    {
+      "name": "test_definition_docblock.txt",
+      "source": "/tmp/test_definition_docblock.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "test_definition.txt",
+      "source": "/tmp/test_definition.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "test_invocation.txt",
+      "source": "/tmp/test_invocation.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "hook_invocation.txt",
+      "source": "/tmp/hook_invocation.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "hook_invocation.txt",
+      "source": "/tmp/hook_invocation.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "test_fn_invocation.txt",
+      "source": "/tmp/test_fn_invocation.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "hook_invocation.txt",
+      "source": "/tmp/hook_invocation.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "hook_invocation.txt",
+      "source": "/tmp/hook_invocation.txt",
+      "type": "text/plain",
+    },
+  ],
+  "currentStep": undefined,
+  "description": [
+    "description:test_definition_docblock",
+    "description:test_definition",
+    "description:test_invocation",
+    "description:hook_invocation",
+    "description:hook_invocation",
+    "description:test_fn_invocation",
+    "description:hook_invocation",
+    "description:hook_invocation",
+  ],
+  "descriptionHtml": [
+    "descriptionHtml:test_definition_docblock",
+    "descriptionHtml:test_definition",
+    "descriptionHtml:test_invocation",
+    "descriptionHtml:hook_invocation",
+    "descriptionHtml:hook_invocation",
+    "descriptionHtml:test_fn_invocation",
+    "descriptionHtml:hook_invocation",
+    "descriptionHtml:hook_invocation",
+  ],
+  "displayName": "displayName:hook_invocation",
+  "fullName": "fullName:hook_invocation",
+  "historyId": "historyId:hook_invocation",
+  "labels": [
+    {
+      "name": "tag",
+      "value": "test_definition_docblock",
+    },
+    {
+      "name": "tag",
+      "value": "test_definition",
+    },
+    {
+      "name": "tag",
+      "value": "test_invocation",
+    },
+    {
+      "name": "tag",
+      "value": "hook_invocation",
+    },
+    {
+      "name": "tag",
+      "value": "hook_invocation",
+    },
+    {
+      "name": "tag",
+      "value": "test_fn_invocation",
+    },
+    {
+      "name": "tag",
+      "value": "hook_invocation",
+    },
+    {
+      "name": "tag",
+      "value": "hook_invocation",
+    },
+  ],
+  "links": [
+    {
+      "name": "link",
+      "type": "test_definition_docblock",
+      "url": "https://example.com/test_definition_docblock",
+    },
+    {
+      "name": "link",
+      "type": "test_definition",
+      "url": "https://example.com/test_definition",
+    },
+    {
+      "name": "link",
+      "type": "test_invocation",
+      "url": "https://example.com/test_invocation",
+    },
+    {
+      "name": "link",
+      "type": "hook_invocation",
+      "url": "https://example.com/hook_invocation",
+    },
+    {
+      "name": "link",
+      "type": "hook_invocation",
+      "url": "https://example.com/hook_invocation",
+    },
+    {
+      "name": "link",
+      "type": "test_fn_invocation",
+      "url": "https://example.com/test_fn_invocation",
+    },
+    {
+      "name": "link",
+      "type": "hook_invocation",
+      "url": "https://example.com/hook_invocation",
+    },
+    {
+      "name": "link",
+      "type": "hook_invocation",
+      "url": "https://example.com/hook_invocation",
+    },
+  ],
+  "parameters": [
+    {
+      "name": "parameter:test_definition_docblock",
+      "value": "value:test_definition_docblock",
+    },
+    {
+      "name": "parameter:test_definition",
+      "value": "value:test_definition",
+    },
+    {
+      "name": "parameter:test_invocation",
+      "value": "value:test_invocation",
+    },
+    {
+      "name": "parameter:hook_invocation",
+      "value": "value:hook_invocation",
+    },
+    {
+      "name": "parameter:hook_invocation",
+      "value": "value:hook_invocation",
+    },
+    {
+      "name": "parameter:test_fn_invocation",
+      "value": "value:test_fn_invocation",
+    },
+    {
+      "name": "parameter:hook_invocation",
+      "value": "value:hook_invocation",
+    },
+    {
+      "name": "parameter:hook_invocation",
+      "value": "value:hook_invocation",
+    },
+  ],
+  "sourceCode": "sourceCode:hook_invocation",
+  "sourceLocation": {
+    "columnNumber": 2,
+    "fileName": "fileName:hook_invocation",
+    "lineNumber": 1,
+  },
+  "stage": "interrupted",
+  "start": 5,
+  "status": "broken",
+  "statusDetails": {
+    "message": "message:hook_invocation",
+    "trace": "trace:hook_invocation",
+  },
+  "stop": 109,
+  "workerId": "9",
+}
+`;
+
+exports[`mergeTestCaseMetadata testDefinitionAndBelowDirect 1`] = `
+{
+  "attachments": [
+    {
+      "name": "test_definition_docblock.txt",
+      "source": "/tmp/test_definition_docblock.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "test_definition.txt",
+      "source": "/tmp/test_definition.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "test_invocation.txt",
+      "source": "/tmp/test_invocation.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "test_fn_invocation.txt",
+      "source": "/tmp/test_fn_invocation.txt",
+      "type": "text/plain",
+    },
+  ],
+  "currentStep": undefined,
+  "description": [
+    "description:test_definition_docblock",
+    "description:test_definition",
+    "description:test_invocation",
+    "description:test_fn_invocation",
+  ],
+  "descriptionHtml": [
+    "descriptionHtml:test_definition_docblock",
+    "descriptionHtml:test_definition",
+    "descriptionHtml:test_invocation",
+    "descriptionHtml:test_fn_invocation",
+  ],
+  "displayName": "displayName:test_fn_invocation",
+  "fullName": "fullName:test_fn_invocation",
+  "historyId": "historyId:test_fn_invocation",
+  "labels": [
+    {
+      "name": "tag",
+      "value": "test_definition_docblock",
+    },
+    {
+      "name": "tag",
+      "value": "test_definition",
+    },
+    {
+      "name": "tag",
+      "value": "test_invocation",
+    },
+    {
+      "name": "tag",
+      "value": "test_fn_invocation",
+    },
+  ],
+  "links": [
+    {
+      "name": "link",
+      "type": "test_definition_docblock",
+      "url": "https://example.com/test_definition_docblock",
+    },
+    {
+      "name": "link",
+      "type": "test_definition",
+      "url": "https://example.com/test_definition",
+    },
+    {
+      "name": "link",
+      "type": "test_invocation",
+      "url": "https://example.com/test_invocation",
+    },
+    {
+      "name": "link",
+      "type": "test_fn_invocation",
+      "url": "https://example.com/test_fn_invocation",
+    },
+  ],
+  "parameters": [
+    {
+      "name": "parameter:test_definition_docblock",
+      "value": "value:test_definition_docblock",
+    },
+    {
+      "name": "parameter:test_definition",
+      "value": "value:test_definition",
+    },
+    {
+      "name": "parameter:test_invocation",
+      "value": "value:test_invocation",
+    },
+    {
+      "name": "parameter:test_fn_invocation",
+      "value": "value:test_fn_invocation",
+    },
+  ],
+  "sourceCode": "sourceCode:test_fn_invocation",
+  "sourceLocation": {
+    "columnNumber": 2,
+    "fileName": "fileName:test_fn_invocation",
+    "lineNumber": 1,
+  },
+  "stage": "scheduled",
+  "start": 5,
+  "status": "failed",
+  "statusDetails": {
+    "message": "message:test_fn_invocation",
+    "trace": "trace:test_fn_invocation",
+  },
+  "stop": 108,
+  "workerId": "8",
+}
+`;
+
+exports[`mergeTestCaseMetadata testInvocation 1`] = `
+{
+  "attachments": [
+    {
+      "name": "test_invocation.txt",
+      "source": "/tmp/test_invocation.txt",
+      "type": "text/plain",
+    },
+  ],
+  "currentStep": undefined,
+  "description": [
+    "description:test_invocation",
+  ],
+  "descriptionHtml": [
+    "descriptionHtml:test_invocation",
+  ],
+  "displayName": "displayName:test_invocation",
+  "fullName": "fullName:test_invocation",
+  "historyId": "historyId:test_invocation",
+  "labels": [
+    {
+      "name": "tag",
+      "value": "test_invocation",
+    },
+  ],
+  "links": [
+    {
+      "name": "link",
+      "type": "test_invocation",
+      "url": "https://example.com/test_invocation",
+    },
+  ],
+  "parameters": [
+    {
+      "name": "parameter:test_invocation",
+      "value": "value:test_invocation",
+    },
+  ],
+  "sourceCode": "sourceCode:test_invocation",
+  "sourceLocation": {
+    "columnNumber": 2,
+    "fileName": "fileName:test_invocation",
+    "lineNumber": 1,
+  },
+  "stage": "finished",
+  "start": 7,
+  "status": "unknown",
+  "statusDetails": {
+    "message": "message:test_invocation",
+    "trace": "trace:test_invocation",
+  },
+  "stop": 107,
+  "workerId": "7",
+}
+`;
+
+exports[`mergeTestCaseMetadata testInvocationAndBelow 1`] = `
+{
+  "attachments": [
+    {
+      "name": "test_invocation.txt",
+      "source": "/tmp/test_invocation.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "hook_invocation.txt",
+      "source": "/tmp/hook_invocation.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "hook_invocation.txt",
+      "source": "/tmp/hook_invocation.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "test_fn_invocation.txt",
+      "source": "/tmp/test_fn_invocation.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "hook_invocation.txt",
+      "source": "/tmp/hook_invocation.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "hook_invocation.txt",
+      "source": "/tmp/hook_invocation.txt",
+      "type": "text/plain",
+    },
+  ],
+  "currentStep": undefined,
+  "description": [
+    "description:test_invocation",
+    "description:hook_invocation",
+    "description:hook_invocation",
+    "description:test_fn_invocation",
+    "description:hook_invocation",
+    "description:hook_invocation",
+  ],
+  "descriptionHtml": [
+    "descriptionHtml:test_invocation",
+    "descriptionHtml:hook_invocation",
+    "descriptionHtml:hook_invocation",
+    "descriptionHtml:test_fn_invocation",
+    "descriptionHtml:hook_invocation",
+    "descriptionHtml:hook_invocation",
+  ],
+  "displayName": "displayName:hook_invocation",
+  "fullName": "fullName:hook_invocation",
+  "historyId": "historyId:hook_invocation",
+  "labels": [
+    {
+      "name": "tag",
+      "value": "test_invocation",
+    },
+    {
+      "name": "tag",
+      "value": "hook_invocation",
+    },
+    {
+      "name": "tag",
+      "value": "hook_invocation",
+    },
+    {
+      "name": "tag",
+      "value": "test_fn_invocation",
+    },
+    {
+      "name": "tag",
+      "value": "hook_invocation",
+    },
+    {
+      "name": "tag",
+      "value": "hook_invocation",
+    },
+  ],
+  "links": [
+    {
+      "name": "link",
+      "type": "test_invocation",
+      "url": "https://example.com/test_invocation",
+    },
+    {
+      "name": "link",
+      "type": "hook_invocation",
+      "url": "https://example.com/hook_invocation",
+    },
+    {
+      "name": "link",
+      "type": "hook_invocation",
+      "url": "https://example.com/hook_invocation",
+    },
+    {
+      "name": "link",
+      "type": "test_fn_invocation",
+      "url": "https://example.com/test_fn_invocation",
+    },
+    {
+      "name": "link",
+      "type": "hook_invocation",
+      "url": "https://example.com/hook_invocation",
+    },
+    {
+      "name": "link",
+      "type": "hook_invocation",
+      "url": "https://example.com/hook_invocation",
+    },
+  ],
+  "parameters": [
+    {
+      "name": "parameter:test_invocation",
+      "value": "value:test_invocation",
+    },
+    {
+      "name": "parameter:hook_invocation",
+      "value": "value:hook_invocation",
+    },
+    {
+      "name": "parameter:hook_invocation",
+      "value": "value:hook_invocation",
+    },
+    {
+      "name": "parameter:test_fn_invocation",
+      "value": "value:test_fn_invocation",
+    },
+    {
+      "name": "parameter:hook_invocation",
+      "value": "value:hook_invocation",
+    },
+    {
+      "name": "parameter:hook_invocation",
+      "value": "value:hook_invocation",
+    },
+  ],
+  "sourceCode": "sourceCode:hook_invocation",
+  "sourceLocation": {
+    "columnNumber": 2,
+    "fileName": "fileName:hook_invocation",
+    "lineNumber": 1,
+  },
+  "stage": "interrupted",
+  "start": 7,
+  "status": "broken",
+  "statusDetails": {
+    "message": "message:hook_invocation",
+    "trace": "trace:hook_invocation",
+  },
+  "stop": 109,
+  "workerId": "9",
+}
+`;
+
+exports[`mergeTestCaseMetadata testInvocationAndBelowDirect 1`] = `
+{
+  "attachments": [
+    {
+      "name": "test_invocation.txt",
+      "source": "/tmp/test_invocation.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "test_fn_invocation.txt",
+      "source": "/tmp/test_fn_invocation.txt",
+      "type": "text/plain",
+    },
+  ],
+  "currentStep": undefined,
+  "description": [
+    "description:test_invocation",
+    "description:test_fn_invocation",
+  ],
+  "descriptionHtml": [
+    "descriptionHtml:test_invocation",
+    "descriptionHtml:test_fn_invocation",
+  ],
+  "displayName": "displayName:test_fn_invocation",
+  "fullName": "fullName:test_fn_invocation",
+  "historyId": "historyId:test_fn_invocation",
+  "labels": [
+    {
+      "name": "tag",
+      "value": "test_invocation",
+    },
+    {
+      "name": "tag",
+      "value": "test_fn_invocation",
+    },
+  ],
+  "links": [
+    {
+      "name": "link",
+      "type": "test_invocation",
+      "url": "https://example.com/test_invocation",
+    },
+    {
+      "name": "link",
+      "type": "test_fn_invocation",
+      "url": "https://example.com/test_fn_invocation",
+    },
+  ],
+  "parameters": [
+    {
+      "name": "parameter:test_invocation",
+      "value": "value:test_invocation",
+    },
+    {
+      "name": "parameter:test_fn_invocation",
+      "value": "value:test_fn_invocation",
+    },
+  ],
+  "sourceCode": "sourceCode:test_fn_invocation",
+  "sourceLocation": {
+    "columnNumber": 2,
+    "fileName": "fileName:test_fn_invocation",
+    "lineNumber": 1,
+  },
+  "stage": "finished",
+  "start": 7,
+  "status": "failed",
+  "statusDetails": {
+    "message": "message:test_fn_invocation",
+    "trace": "trace:test_fn_invocation",
+  },
+  "stop": 108,
+  "workerId": "8",
+}
+`;
+
+exports[`mergeTestCaseMetadata testVertical (no overrides in step invocations) 1`] = `
+{
+  "attachments": [
+    {
+      "name": "global.txt",
+      "source": "/tmp/global.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "file_docblock.txt",
+      "source": "/tmp/file_docblock.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "file.txt",
+      "source": "/tmp/file.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "describe_block.txt",
+      "source": "/tmp/describe_block.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "describe_block.txt",
+      "source": "/tmp/describe_block.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "test_definition_docblock.txt",
+      "source": "/tmp/test_definition_docblock.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "test_definition.txt",
+      "source": "/tmp/test_definition.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "test_invocation.txt",
+      "source": "/tmp/test_invocation.txt",
+      "type": "text/plain",
+    },
+  ],
+  "currentStep": undefined,
+  "description": [
+    "description:global",
+    "description:file_docblock",
+    "description:file",
+    "description:describe_block",
+    "description:describe_block",
+    "description:test_definition_docblock",
+    "description:test_definition",
+    "description:test_invocation",
+  ],
+  "descriptionHtml": [
+    "descriptionHtml:global",
+    "descriptionHtml:file_docblock",
+    "descriptionHtml:file",
+    "descriptionHtml:describe_block",
+    "descriptionHtml:describe_block",
+    "descriptionHtml:test_definition_docblock",
+    "descriptionHtml:test_definition",
+    "descriptionHtml:test_invocation",
+  ],
+  "displayName": "displayName:test_invocation",
+  "fullName": "fullName:test_invocation",
+  "historyId": "historyId:test_invocation",
+  "labels": [
+    {
+      "name": "tag",
+      "value": "global",
+    },
+    {
+      "name": "tag",
+      "value": "file_docblock",
+    },
+    {
+      "name": "tag",
+      "value": "file",
+    },
+    {
+      "name": "tag",
+      "value": "describe_block",
+    },
+    {
+      "name": "tag",
+      "value": "describe_block",
+    },
+    {
+      "name": "tag",
+      "value": "test_definition_docblock",
+    },
+    {
+      "name": "tag",
+      "value": "test_definition",
+    },
+    {
+      "name": "tag",
+      "value": "test_invocation",
+    },
+  ],
+  "links": [
+    {
+      "name": "link",
+      "type": "global",
+      "url": "https://example.com/global",
+    },
+    {
+      "name": "link",
+      "type": "file_docblock",
+      "url": "https://example.com/file_docblock",
+    },
+    {
+      "name": "link",
+      "type": "file",
+      "url": "https://example.com/file",
+    },
+    {
+      "name": "link",
+      "type": "describe_block",
+      "url": "https://example.com/describe_block",
+    },
+    {
+      "name": "link",
+      "type": "describe_block",
+      "url": "https://example.com/describe_block",
+    },
+    {
+      "name": "link",
+      "type": "test_definition_docblock",
+      "url": "https://example.com/test_definition_docblock",
+    },
+    {
+      "name": "link",
+      "type": "test_definition",
+      "url": "https://example.com/test_definition",
+    },
+    {
+      "name": "link",
+      "type": "test_invocation",
+      "url": "https://example.com/test_invocation",
+    },
+  ],
+  "parameters": [
+    {
+      "name": "parameter:global",
+      "value": "value:global",
+    },
+    {
+      "name": "parameter:file_docblock",
+      "value": "value:file_docblock",
+    },
+    {
+      "name": "parameter:file",
+      "value": "value:file",
+    },
+    {
+      "name": "parameter:describe_block",
+      "value": "value:describe_block",
+    },
+    {
+      "name": "parameter:describe_block",
+      "value": "value:describe_block",
+    },
+    {
+      "name": "parameter:test_definition_docblock",
+      "value": "value:test_definition_docblock",
+    },
+    {
+      "name": "parameter:test_definition",
+      "value": "value:test_definition",
+    },
+    {
+      "name": "parameter:test_invocation",
+      "value": "value:test_invocation",
+    },
+  ],
+  "sourceCode": "sourceCode:test_invocation",
+  "sourceLocation": {
+    "columnNumber": 2,
+    "fileName": "fileName:test_invocation",
+    "lineNumber": 1,
+  },
+  "stage": "scheduled",
+  "start": 0,
+  "status": "failed",
+  "statusDetails": {
+    "message": "message:describe_block",
+    "trace": "trace:describe_block",
+  },
+  "stop": 107,
+  "workerId": "7",
+}
+`;
+
+exports[`mergeTestCaseMetadata testVertical 1`] = `
+{
+  "attachments": [
+    {
+      "name": "global.txt",
+      "source": "/tmp/global.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "file_docblock.txt",
+      "source": "/tmp/file_docblock.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "file.txt",
+      "source": "/tmp/file.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "describe_block.txt",
+      "source": "/tmp/describe_block.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "describe_block.txt",
+      "source": "/tmp/describe_block.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "test_definition_docblock.txt",
+      "source": "/tmp/test_definition_docblock.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "test_definition.txt",
+      "source": "/tmp/test_definition.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "test_invocation.txt",
+      "source": "/tmp/test_invocation.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "hook_invocation.txt",
+      "source": "/tmp/hook_invocation.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "hook_invocation.txt",
+      "source": "/tmp/hook_invocation.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "test_fn_invocation.txt",
+      "source": "/tmp/test_fn_invocation.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "hook_invocation.txt",
+      "source": "/tmp/hook_invocation.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "hook_invocation.txt",
+      "source": "/tmp/hook_invocation.txt",
+      "type": "text/plain",
+    },
+  ],
+  "currentStep": undefined,
+  "description": [
+    "description:global",
+    "description:file_docblock",
+    "description:file",
+    "description:describe_block",
+    "description:describe_block",
+    "description:test_definition_docblock",
+    "description:test_definition",
+    "description:test_invocation",
+    "description:hook_invocation",
+    "description:hook_invocation",
+    "description:test_fn_invocation",
+    "description:hook_invocation",
+    "description:hook_invocation",
+  ],
+  "descriptionHtml": [
+    "descriptionHtml:global",
+    "descriptionHtml:file_docblock",
+    "descriptionHtml:file",
+    "descriptionHtml:describe_block",
+    "descriptionHtml:describe_block",
+    "descriptionHtml:test_definition_docblock",
+    "descriptionHtml:test_definition",
+    "descriptionHtml:test_invocation",
+    "descriptionHtml:hook_invocation",
+    "descriptionHtml:hook_invocation",
+    "descriptionHtml:test_fn_invocation",
+    "descriptionHtml:hook_invocation",
+    "descriptionHtml:hook_invocation",
+  ],
+  "displayName": "displayName:hook_invocation",
+  "fullName": "fullName:hook_invocation",
+  "historyId": "historyId:hook_invocation",
+  "labels": [
+    {
+      "name": "tag",
+      "value": "global",
+    },
+    {
+      "name": "tag",
+      "value": "file_docblock",
+    },
+    {
+      "name": "tag",
+      "value": "file",
+    },
+    {
+      "name": "tag",
+      "value": "describe_block",
+    },
+    {
+      "name": "tag",
+      "value": "describe_block",
+    },
+    {
+      "name": "tag",
+      "value": "test_definition_docblock",
+    },
+    {
+      "name": "tag",
+      "value": "test_definition",
+    },
+    {
+      "name": "tag",
+      "value": "test_invocation",
+    },
+    {
+      "name": "tag",
+      "value": "hook_invocation",
+    },
+    {
+      "name": "tag",
+      "value": "hook_invocation",
+    },
+    {
+      "name": "tag",
+      "value": "test_fn_invocation",
+    },
+    {
+      "name": "tag",
+      "value": "hook_invocation",
+    },
+    {
+      "name": "tag",
+      "value": "hook_invocation",
+    },
+  ],
+  "links": [
+    {
+      "name": "link",
+      "type": "global",
+      "url": "https://example.com/global",
+    },
+    {
+      "name": "link",
+      "type": "file_docblock",
+      "url": "https://example.com/file_docblock",
+    },
+    {
+      "name": "link",
+      "type": "file",
+      "url": "https://example.com/file",
+    },
+    {
+      "name": "link",
+      "type": "describe_block",
+      "url": "https://example.com/describe_block",
+    },
+    {
+      "name": "link",
+      "type": "describe_block",
+      "url": "https://example.com/describe_block",
+    },
+    {
+      "name": "link",
+      "type": "test_definition_docblock",
+      "url": "https://example.com/test_definition_docblock",
+    },
+    {
+      "name": "link",
+      "type": "test_definition",
+      "url": "https://example.com/test_definition",
+    },
+    {
+      "name": "link",
+      "type": "test_invocation",
+      "url": "https://example.com/test_invocation",
+    },
+    {
+      "name": "link",
+      "type": "hook_invocation",
+      "url": "https://example.com/hook_invocation",
+    },
+    {
+      "name": "link",
+      "type": "hook_invocation",
+      "url": "https://example.com/hook_invocation",
+    },
+    {
+      "name": "link",
+      "type": "test_fn_invocation",
+      "url": "https://example.com/test_fn_invocation",
+    },
+    {
+      "name": "link",
+      "type": "hook_invocation",
+      "url": "https://example.com/hook_invocation",
+    },
+    {
+      "name": "link",
+      "type": "hook_invocation",
+      "url": "https://example.com/hook_invocation",
+    },
+  ],
+  "parameters": [
+    {
+      "name": "parameter:global",
+      "value": "value:global",
+    },
+    {
+      "name": "parameter:file_docblock",
+      "value": "value:file_docblock",
+    },
+    {
+      "name": "parameter:file",
+      "value": "value:file",
+    },
+    {
+      "name": "parameter:describe_block",
+      "value": "value:describe_block",
+    },
+    {
+      "name": "parameter:describe_block",
+      "value": "value:describe_block",
+    },
+    {
+      "name": "parameter:test_definition_docblock",
+      "value": "value:test_definition_docblock",
+    },
+    {
+      "name": "parameter:test_definition",
+      "value": "value:test_definition",
+    },
+    {
+      "name": "parameter:test_invocation",
+      "value": "value:test_invocation",
+    },
+    {
+      "name": "parameter:hook_invocation",
+      "value": "value:hook_invocation",
+    },
+    {
+      "name": "parameter:hook_invocation",
+      "value": "value:hook_invocation",
+    },
+    {
+      "name": "parameter:test_fn_invocation",
+      "value": "value:test_fn_invocation",
+    },
+    {
+      "name": "parameter:hook_invocation",
+      "value": "value:hook_invocation",
+    },
+    {
+      "name": "parameter:hook_invocation",
+      "value": "value:hook_invocation",
+    },
+  ],
+  "sourceCode": "sourceCode:hook_invocation",
+  "sourceLocation": {
+    "columnNumber": 2,
+    "fileName": "fileName:hook_invocation",
+    "lineNumber": 1,
+  },
+  "stage": "interrupted",
+  "start": 0,
+  "status": "broken",
+  "statusDetails": {
+    "message": "message:hook_invocation",
+    "trace": "trace:hook_invocation",
+  },
+  "stop": 109,
+  "workerId": "9",
+}
+`;

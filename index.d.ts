@@ -173,12 +173,12 @@ declare module 'jest-allure2-reporter' {
     stop: TestCaseExtractor<number>;
     /**
      * Extractor for the test case description.
-     * @example ({ testCaseMetadata }) => '```js\n' + testCaseMetadata.code + '\n```'
+     * @example ({ testCaseMetadata }) => '```js\n' + testCaseMetadata.sourceCode + '\n```'
      */
     description: TestCaseExtractor<string>;
     /**
      * Extractor for the test case description in HTML format.
-     * @example ({ testCaseMetadata }) => '<pre><code>' + testCaseMetadata.code + '</code></pre>'
+     * @example ({ testCaseMetadata }) => '<pre><code>' + testCaseMetadata.sourceCode + '</code></pre>'
      */
     descriptionHtml: TestCaseExtractor<string>;
     /**
@@ -515,12 +515,14 @@ declare module 'jest-allure2-reporter' {
     /**
      * Recursive data structure to represent test steps for more granular reporting.
      */
-    steps?: Omit<AllureTestStepMetadata, 'currentStep'>[];
+    steps?: AllureNestedTestStepMetadata[];
     /**
      * Stop timestamp in milliseconds.
      */
     stop?: number;
   }
+
+  export type AllureNestedTestStepMetadata = Omit<AllureTestStepMetadata, 'currentStep'>;
 
   /** @inheritDoc */
   export interface AllureTestStepMetadata extends AllureTestItemMetadata {
@@ -540,10 +542,7 @@ declare module 'jest-allure2-reporter' {
   }
 
   /** @inheritDoc */
-  export interface AllureTestFileMetadata extends AllureTestCaseMetadata {
-    code?: never;
-    steps?: never;
-  }
+  export interface AllureTestFileMetadata extends AllureTestCaseMetadata {}
 
   export interface AllureGlobalMetadata {
     config: Pick<ReporterConfig, 'resultsDir' | 'overwrite' | 'attachments' | 'injectGlobals'>;

@@ -1,0 +1,248 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`mergeTestFileMetadata getMetadataWithDocblock 1`] = `
+{
+  "attachments": [
+    {
+      "name": "file_docblock.txt",
+      "source": "/tmp/file_docblock.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "file.txt",
+      "source": "/tmp/file.txt",
+      "type": "text/plain",
+    },
+  ],
+  "currentStep": undefined,
+  "description": [
+    "description:file_docblock",
+    "description:file",
+  ],
+  "descriptionHtml": [
+    "descriptionHtml:file_docblock",
+    "descriptionHtml:file",
+  ],
+  "historyId": "historyId:file",
+  "labels": [
+    {
+      "name": "tag",
+      "value": "file_docblock",
+    },
+    {
+      "name": "tag",
+      "value": "file",
+    },
+  ],
+  "links": [
+    {
+      "name": "link",
+      "type": "file_docblock",
+      "url": "https://example.com/file_docblock",
+    },
+    {
+      "name": "link",
+      "type": "file",
+      "url": "https://example.com/file",
+    },
+  ],
+  "parameters": [
+    {
+      "name": "parameter:file_docblock",
+      "value": "value:file_docblock",
+    },
+    {
+      "name": "parameter:file",
+      "value": "value:file",
+    },
+  ],
+  "sourceCode": "sourceCode:file",
+  "sourceLocation": {
+    "columnNumber": 2,
+    "fileName": "fileName:file",
+    "lineNumber": 1,
+  },
+  "stage": "running",
+  "start": 1,
+  "status": "unknown",
+  "statusDetails": {
+    "message": "message:file",
+    "trace": "trace:file",
+  },
+  "stop": 102,
+  "workerId": "2",
+}
+`;
+
+exports[`mergeTestFileMetadata globalAndTestFile 1`] = `
+{
+  "attachments": [
+    {
+      "name": "global.txt",
+      "source": "/tmp/global.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "file_docblock.txt",
+      "source": "/tmp/file_docblock.txt",
+      "type": "text/plain",
+    },
+    {
+      "name": "file.txt",
+      "source": "/tmp/file.txt",
+      "type": "text/plain",
+    },
+  ],
+  "currentStep": undefined,
+  "description": [
+    "description:global",
+    "description:file_docblock",
+    "description:file",
+  ],
+  "descriptionHtml": [
+    "descriptionHtml:global",
+    "descriptionHtml:file_docblock",
+    "descriptionHtml:file",
+  ],
+  "historyId": "historyId:file",
+  "labels": [
+    {
+      "name": "tag",
+      "value": "global",
+    },
+    {
+      "name": "tag",
+      "value": "file_docblock",
+    },
+    {
+      "name": "tag",
+      "value": "file",
+    },
+  ],
+  "links": [
+    {
+      "name": "link",
+      "type": "global",
+      "url": "https://example.com/global",
+    },
+    {
+      "name": "link",
+      "type": "file_docblock",
+      "url": "https://example.com/file_docblock",
+    },
+    {
+      "name": "link",
+      "type": "file",
+      "url": "https://example.com/file",
+    },
+  ],
+  "parameters": [
+    {
+      "name": "parameter:global",
+      "value": "value:global",
+    },
+    {
+      "name": "parameter:file_docblock",
+      "value": "value:file_docblock",
+    },
+    {
+      "name": "parameter:file",
+      "value": "value:file",
+    },
+  ],
+  "sourceCode": "sourceCode:file",
+  "sourceLocation": {
+    "columnNumber": 2,
+    "fileName": "fileName:file",
+    "lineNumber": 1,
+  },
+  "stage": "scheduled",
+  "start": 0,
+  "status": "unknown",
+  "statusDetails": {
+    "message": "message:file",
+    "trace": "trace:file",
+  },
+  "stop": 102,
+  "workerId": "2",
+}
+`;
+
+exports[`mergeTestFileMetadata merge 1`] = `{}`;
+
+exports[`mergeTestFileMetadata merge 2`] = `
+{
+  "attachments": undefined,
+  "currentStep": undefined,
+  "description": undefined,
+  "descriptionHtml": undefined,
+  "displayName": undefined,
+  "fullName": undefined,
+  "historyId": undefined,
+  "labels": undefined,
+  "links": undefined,
+  "parameters": undefined,
+  "sourceCode": undefined,
+  "sourceLocation": undefined,
+  "stage": undefined,
+  "start": undefined,
+  "status": undefined,
+  "statusDetails": undefined,
+  "stop": undefined,
+  "workerId": undefined,
+}
+`;
+
+exports[`mergeTestFileMetadata steps 1`] = `
+[
+  {
+    "attachments": [
+      {
+        "name": "step_invocation.txt",
+        "source": "/tmp/step_invocation.txt",
+        "type": "text/plain",
+      },
+    ],
+    "currentStep": undefined,
+    "displayName": "displayName:step_invocation",
+    "hookType": undefined,
+    "parameters": [
+      {
+        "name": "parameter:step_invocation",
+        "value": "value:step_invocation",
+      },
+    ],
+    "sourceCode": "sourceCode:step_invocation",
+    "sourceLocation": {
+      "columnNumber": 2,
+      "fileName": "fileName:step_invocation",
+      "lineNumber": 1,
+    },
+    "stage": "scheduled",
+    "start": 10,
+    "status": "passed",
+    "statusDetails": {
+      "message": "message:step_invocation",
+      "trace": "trace:step_invocation",
+    },
+    "steps": [
+      {
+        "attachments": undefined,
+        "currentStep": undefined,
+        "displayName": undefined,
+        "hookType": undefined,
+        "parameters": undefined,
+        "sourceCode": undefined,
+        "sourceLocation": undefined,
+        "stage": undefined,
+        "start": undefined,
+        "status": undefined,
+        "statusDetails": undefined,
+        "steps": undefined,
+        "stop": undefined,
+      },
+    ],
+    "stop": 110,
+  },
+]
+`;

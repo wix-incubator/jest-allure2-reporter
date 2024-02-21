@@ -25,15 +25,15 @@ export class CoreModule {
   }
 
   description(value: string) {
-    this.context.metadata.push('description', [value]);
+    this.context.metadata.$bind(null).push('description', [value]);
   }
 
   descriptionHtml(value: string) {
-    this.context.metadata.push('descriptionHtml', [value]);
+    this.context.metadata.$bind(null).push('descriptionHtml', [value]);
   }
 
   historyId(value: string) {
-    this.context.metadata.set('historyId', value);
+    this.context.metadata.$bind(null).set('historyId', value);
   }
 
   label(name: LabelName | string, value: string) {

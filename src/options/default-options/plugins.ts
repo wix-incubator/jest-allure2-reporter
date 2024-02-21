@@ -5,7 +5,6 @@ import * as plugins from '../../builtin-plugins';
 export async function defaultPlugins(context: PluginContext) {
   return [
     plugins.detect({}, context),
-    plugins.docblock({}, context),
     plugins.github({}, context),
     plugins.manifest({}, context),
     plugins.prettier({}, context),
