@@ -24,9 +24,12 @@ const last = <T>(context: ExtractorContext<T[]>) => context.value?.at(-1);
 const all = identity;
 
 function extractCode(
+  prefix: string,
   steps: AllureTestStepMetadata[] | undefined,
 ): string | undefined {
-  return joinCode(steps?.map((step) => step.sourceCode));
+  return joinCode(
+    steps?.map((step) => step.sourceCode && prefix + step.sourceCode + ');'),
+  );
 }
 
 function joinCode(
@@ -43,20 +46,34 @@ export const testCase: ResolvedTestCaseCustomizer = {
     testCaseMetadata.title ?? testCase.title,
   fullName: ({ testCase, testCaseMetadata }) =>
     testCaseMetadata.fullName ?? testCase.fullName,
-  description: ({ testCaseMetadata }) => {
+  description: ({ testCase, testCaseMetadata }) => {
     const text = testCaseMetadata.description?.join('\n\n') ?? '';
-    const before = extractCode(
-      testCaseMetadata.steps?.filter(
-        (step) =>
-          step.hookType === 'beforeAll' || step.hookType === 'beforeEach',
-      ),
+    const beforeAll = extractCode(
+      'beforeAll(',
+      testCaseMetadata.steps?.filter((step) => step.hookType === 'beforeAll'),
     );
-    const after = extractCode(
-      testCaseMetadata.steps?.filter(
-        (step) => step.hookType === 'afterAll' || step.hookType === 'afterEach',
-      ),
+    const beforeEach = extractCode(
+      'beforeEach(',
+      testCaseMetadata.steps?.filter((step) => step.hookType === 'beforeEach'),
     );
-    const code = joinCode([before, testCaseMetadata.sourceCode, after]);
+    const theTest = extractCode(`test(${JSON.stringify(testCase.title)}, `, [
+      testCaseMetadata,
+    ]);
+    const afterEach = extractCode(
+      'afterEach(',
+      testCaseMetadata.steps?.filter((step) => step.hookType === 'afterEach'),
+    );
+    const afterAll = extractCode(
+      'afterAll(',
+      testCaseMetadata.steps?.filter((step) => step.hookType === 'afterAll'),
+    );
+    const code = joinCode([
+      beforeAll,
+      beforeEach,
+      theTest,
+      afterEach,
+      afterAll,
+    ]);
     const snippet = code ? '```javascript\n' + code + '\n```' : '';
     return [text, snippet].filter(Boolean).join('\n\n');
   },

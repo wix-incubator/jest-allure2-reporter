@@ -26,20 +26,21 @@ const listener: EnvironmentListenerFn = (context) => {
           .set('workerId', process.env.JEST_WORKER_ID);
       },
     )
-    .on('add_hook', addSourceLocation)
     .on('add_hook', addHookType)
+    .on('add_hook', addSourceLocation)
+    .on('add_hook', addSourceCode)
+    .on('add_hook', markJestReset)
     .on('add_test', addSourceLocation)
+    .on('add_test', addSourceCode)
     .on('test_start', testStart)
     .on('test_todo', testSkip)
     .on('test_skip', testSkip)
     .on('test_done', testDone)
-    .on('hook_start', addSourceCode)
     .on('hook_start', executableStart)
     .on('hook_failure', executableFailure)
     .on('hook_failure', flush)
     .on('hook_success', executableSuccess)
     .on('hook_success', flush)
-    .on('test_fn_start', addSourceCode)
     .on('test_fn_start', executableStart)
     .on('test_fn_success', executableSuccess)
     .on('test_fn_success', flush)
@@ -50,6 +51,13 @@ const listener: EnvironmentListenerFn = (context) => {
 
 async function flush() {
   await realm.runtime.flush();
+}
+
+function addHookType({
+  event,
+}: TestEnvironmentCircusEvent<Circus.Event & { name: 'add_hook' }>) {
+  const metadata = realm.runtimeContext.getCurrentMetadata();
+  metadata.set('hookType', event.hookType);
 }
 
 function addSourceLocation({
@@ -71,38 +79,51 @@ function addSourceLocation({
   realm.runtimeContext.enqueueTask(task);
 }
 
-function addHookType({
+function addSourceCode({
   event,
-}: TestEnvironmentCircusEvent<Circus.Event & { name: 'add_hook' }>) {
-  const metadata = realm.runtimeContext.getCurrentMetadata();
-  metadata.set('hookType', event.hookType);
-}
-
-function addSourceCode({ event }: TestEnvironmentCircusEvent) {
-  let code = '';
-  if (event.name === 'hook_start') {
-    const { type, fn } = event.hook;
-    code = `${type}(${fn});`;
-
-    if (
-      code.includes(
-        "during setup, this cannot be null (and it's fine to explode if it is)",
-      )
-    ) {
-      code = '';
-      realm.runtimeContext
-        .getCurrentMetadata()
-        .set('title', 'Reset mocks, modules and timers (Jest)');
-    }
+}: TestEnvironmentCircusEvent<
+  Circus.Event & {
+    name: 'hook_start' | 'test_fn_start' | 'add_test' | 'add_hook';
   }
-
-  if (event.name === 'test_fn_start') {
-    const { name, fn } = event.test;
-    code = `test(${JSON.stringify(name)}, ${fn});`;
-  }
-
+>) {
+  const code = `${getFunction(event) ?? ''}`;
   if (code) {
     realm.runtimeContext.getCurrentMetadata().set('sourceCode', code);
+  }
+}
+
+function getFunction(
+  event: Circus.Event & {
+    name: 'hook_start' | 'test_fn_start' | 'add_test' | 'add_hook';
+  },
+) {
+  switch (event.name) {
+    case 'hook_start': {
+      return event.hook.fn;
+    }
+    case 'test_fn_start': {
+      return event.test.fn;
+    }
+    default: {
+      return event.fn;
+    }
+  }
+}
+
+const JEST_RESET_LINE =
+  "during setup, this cannot be null (and it's fine to explode if it is)";
+
+function markJestReset({
+  event,
+}: TestEnvironmentCircusEvent<Circus.Event & { name: 'add_hook' }>) {
+  if (
+    event.name === 'add_hook' &&
+    `${getFunction(event)}`.includes(JEST_RESET_LINE)
+  ) {
+    realm.runtimeContext.getCurrentMetadata().assign({
+      sourceCode: '',
+      title: 'Reset mocks, modules and timers (Jest)',
+    });
   }
 }
 

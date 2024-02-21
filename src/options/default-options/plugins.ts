@@ -8,7 +8,7 @@ export async function defaultPlugins(context: PluginContext) {
     plugins.docblock({}, context),
     plugins.github({}, context),
     plugins.manifest({}, context),
-    plugins.prettier({}, context),
+    // plugins.prettier({}, context),
     plugins.remark({}, context),
   ];
 }
