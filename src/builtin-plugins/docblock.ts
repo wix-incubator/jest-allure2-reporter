@@ -153,6 +153,7 @@ async function initParser(): Promise<DocblockParser> {
       };
     };
   } catch (error: any) {
+    // TODO: log warning
     if (error?.code === 'MODULE_NOT_FOUND') {
       return () => void 0;
     }
