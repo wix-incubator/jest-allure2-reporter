@@ -28,8 +28,10 @@ export const docblockPlugin: PluginConstructor = () => {
     async testFileContext(context) {
       const testFilePath = context.testFile.testFilePath;
       const fileContents = await fs.readFile(testFilePath, 'utf8');
-      context.testFileDocblock = parse?.(fileContents);
-      mergeIntoTestFile(context.testFileMetadata, context.testFileDocblock);
+      if (parse && hasDocblockAtStart(fileContents)) {
+        context.testFileDocblock = parse(fileContents);
+        mergeIntoTestFile(context.testFileMetadata, context.testFileDocblock);
+      }
     },
     async testCaseContext(context) {
       if (parse && context.testCaseMetadata.sourceCode) {
@@ -47,6 +49,10 @@ export const docblockPlugin: PluginConstructor = () => {
 
   return plugin;
 };
+
+function hasDocblockAtStart(string_: string) {
+  return /^\s*\/\*\*/m.test(string_);
+}
 
 function mergeIntoTestItem(
   metadata: AllureTestItemMetadata,
