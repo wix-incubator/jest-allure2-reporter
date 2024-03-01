@@ -51,11 +51,11 @@ export class StepsModule {
     }
   }
 
-  #startStep = (name: string) => {
+  #startStep = (displayName: string) => {
     this.context.metadata.$startStep().assign({
       stage: 'scheduled',
       start: this.context.now,
-      description: [name],
+      displayName,
     });
   };
 

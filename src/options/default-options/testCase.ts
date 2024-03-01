@@ -39,7 +39,8 @@ export const testCase: ResolvedTestCaseCustomizer = {
   hidden: () => false,
   historyId: ({ testCase, testCaseMetadata }) =>
     testCaseMetadata.historyId ?? testCase.fullName,
-  name: ({ testCase }) => testCase.title,
+  name: ({ testCase, testCaseMetadata }) =>
+    testCaseMetadata.displayName ?? testCase.title,
   fullName: ({ testCase, testCaseMetadata }) =>
     testCaseMetadata.fullName ?? testCase.fullName,
   description: ({ testCaseMetadata }) => {

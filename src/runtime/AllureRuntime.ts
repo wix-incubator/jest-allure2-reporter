@@ -89,6 +89,11 @@ export class AllureRuntime implements IAllureRuntime {
     this.#coreModule.link({ name, url, type });
   };
 
+  displayName: IAllureRuntime['displayName'] = (value) => {
+    // TODO: assert is a string
+    this.#coreModule.displayName(value);
+  };
+
   parameter: IAllureRuntime['parameter'] = (name, value, options) => {
     // TODO: assert name is a string
     this.#coreModule.parameter({

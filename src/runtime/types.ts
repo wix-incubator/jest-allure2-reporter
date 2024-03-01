@@ -28,6 +28,8 @@ export interface IAllureRuntime {
 
   descriptionHtml(value: string): void;
 
+  displayName(value: string): void;
+
   fullName(value: string): void;
 
   historyId(value: string): void;

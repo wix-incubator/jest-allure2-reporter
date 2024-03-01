@@ -42,6 +42,7 @@ export function createTestItemMetadata(
         source: `/tmp/${scope}.txt`,
       },
     ],
+    displayName: `displayName:${scope}`,
     historyId: `historyId:${scope}`,
     parameters: [
       {

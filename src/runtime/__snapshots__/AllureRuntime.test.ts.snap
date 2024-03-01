@@ -24,9 +24,7 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
           "type": "text/plain",
         },
       ],
-      "description": [
-        "outer step",
-      ],
+      "displayName": "outer step",
       "stage": "finished",
       "start": 0,
       "status": "passed",
@@ -39,9 +37,7 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
               "type": "text/plain",
             },
           ],
-          "description": [
-            "inner step 1",
-          ],
+          "displayName": "inner step 1",
           "stage": "interrupted",
           "start": 1,
           "status": "failed",
@@ -51,9 +47,7 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
           "stop": 2,
         },
         {
-          "description": [
-            "inner step 2",
-          ],
+          "displayName": "inner step 2",
           "stage": "finished",
           "start": 3,
           "status": "passed",
@@ -67,9 +61,7 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
               "type": "text/plain",
             },
           ],
-          "description": [
-            "inner step 3",
-          ],
+          "displayName": "inner step 3",
           "parameters": [
             {
               "name": "0",

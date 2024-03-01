@@ -32,6 +32,10 @@ export class CoreModule {
     this.context.metadata.$bind(null).push('descriptionHtml', [value]);
   }
 
+  displayName(value: string) {
+    this.context.metadata.set('displayName', value);
+  }
+
   fullName(value: string) {
     this.context.metadata.set('fullName', value);
   }
