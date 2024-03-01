@@ -28,11 +28,9 @@ export interface IAllureRuntime {
 
   descriptionHtml(value: string): void;
 
+  fullName(value: string): void;
+
   historyId(value: string): void;
-
-  status(status: Status, statusDetails?: StatusDetails): void;
-
-  statusDetails(statusDetails: StatusDetails): void;
 
   label(name: LabelName, value: string): void;
 
@@ -41,6 +39,10 @@ export interface IAllureRuntime {
   parameter(name: string, value: unknown, options?: ParameterOptions): void;
 
   parameters(parameters: Record<string, unknown>): void;
+
+  status(status: Status, statusDetails?: StatusDetails): void;
+
+  statusDetails(statusDetails: StatusDetails): void;
 
   attachment<T extends AttachmentContent>(
     name: string,

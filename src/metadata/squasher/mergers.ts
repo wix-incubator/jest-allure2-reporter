@@ -26,6 +26,7 @@ export function mergeTestCaseMetadata(
         description: mergeArrays(a.description, b.description),
         descriptionHtml: mergeArrays(a.descriptionHtml, b.descriptionHtml),
         historyId: b.historyId ?? a.historyId,
+        fullName: b.fullName ?? a.fullName,
         labels: mergeArrays(a.labels, b.labels),
         links: mergeArrays(a.links, b.links),
         workerId: b.workerId ?? a.workerId,

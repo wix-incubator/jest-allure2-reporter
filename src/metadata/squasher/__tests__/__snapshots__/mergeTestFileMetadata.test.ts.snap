@@ -23,6 +23,7 @@ exports[`mergeTestFileMetadata getMetadataWithDocblock 1`] = `
     "descriptionHtml:file_docblock",
     "descriptionHtml:file",
   ],
+  "fullName": "fullName:file",
   "historyId": "historyId:file",
   "labels": [
     {
@@ -104,6 +105,7 @@ exports[`mergeTestFileMetadata globalAndTestFile 1`] = `
     "descriptionHtml:file_docblock",
     "descriptionHtml:file",
   ],
+  "fullName": "fullName:file",
   "historyId": "historyId:file",
   "labels": [
     {

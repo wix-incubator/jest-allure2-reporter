@@ -66,6 +66,11 @@ export class AllureRuntime implements IAllureRuntime {
     this.#coreModule.descriptionHtml(value);
   };
 
+  fullName: IAllureRuntime['fullName'] = (value) => {
+    // TODO: assert is a string
+    this.#coreModule.fullName(value);
+  };
+
   historyId(value: string) {
     // TODO: assert is a string
     this.#coreModule.historyId(value);

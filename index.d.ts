@@ -536,6 +536,7 @@ declare module 'jest-allure2-reporter' {
   /** @inheritDoc */
   export interface AllureTestCaseMetadata extends AllureTestItemMetadata {
     descriptionHtml?: string[];
+    fullName?: string;
     labels?: Label[];
     links?: Link[];
     workerId?: string;

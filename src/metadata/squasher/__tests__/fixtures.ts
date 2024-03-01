@@ -42,7 +42,6 @@ export function createTestItemMetadata(
         source: `/tmp/${scope}.txt`,
       },
     ],
-    description: [`description:${scope}`],
     historyId: `historyId:${scope}`,
     parameters: [
       {
@@ -84,6 +83,8 @@ export function createTestFileMetadata(
 ): AllureTestFileMetadata {
   return {
     ...createTestItemMetadata(scope, extra),
+    fullName: `fullName:${scope}`,
+    description: [`description:${scope}`],
     descriptionHtml: [`descriptionHtml:${scope}`],
     labels: [
       {
