@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
-import type { Config, TestCaseResult, TestResult } from '@jest/reporters';
+import type { AggregatedResult, Config, Test, TestCaseResult, TestContext, TestResult } from '@jest/reporters';
 import JestMetadataReporter from 'jest-metadata/reporter';
 
 declare module 'jest-allure2-reporter' {
@@ -113,6 +113,7 @@ declare module 'jest-allure2-reporter' {
   export type AttachmentsOptions = {
     /**
      * Defines a subdirectory within the {@link ReporterOptions#resultsDir} where attachments will be stored.
+     * Use absolute path if you want to store attachments outside the {@link ReporterOptions#resultsDir} directory.
      * @default 'attachments'
      */
     subDir?: string;
@@ -128,6 +129,8 @@ declare module 'jest-allure2-reporter' {
     /**
      * Specifies default strategy for attaching dynamic content to the report.
      * Uses simple file writing by default.
+     * @default 'write'
+     * @see {@link AllureRuntime#createContentAttachment}
      */
     contentHandler?: BuiltinContentAttachmentHandler | string;
   };
@@ -137,6 +140,31 @@ declare module 'jest-allure2-reporter' {
 
   /** @see {@link AttachmentsOptions#contentHandler} */
   export type BuiltinContentAttachmentHandler = 'write';
+
+  /** @see {@link ReporterOptions#docblock} */
+  export type DocblockOptions = {
+    /**
+     * Specifies where to look for docblocks: inside functions or outside (on top).
+     * @default 'outside'
+     */
+    location?: 'inside' | 'outside' | 'both';
+  };
+
+  /** @see {@link ReporterOptions#sourceCode} */
+  export type SourceCodeOptions = {
+    /**
+     * Specifies where to take the source code from:
+     * - `file` - read the file from the file system
+     * - `function` - extract the source code from the test function
+     * @default 'file'
+     */
+    location?: 'file' | 'function';
+    /**
+     * Whether to prettify the source code before attaching it to the report.
+     * @default false
+     */
+    prettify?: boolean;
+  };
 
   /**
    * Global customizations for how test cases are reported
@@ -477,9 +505,9 @@ declare module 'jest-allure2-reporter' {
      */
     currentStep?: AllureTestStepPath;
     /**
-     * Markdown description of the test case or test file, or plain text description of a test step.
+     * Parsed docblock: comments, pragmas, and raw content.
      */
-    description?: string[];
+    docblock?: DocblockContext;
     /**
      * Title of the test case or test step.
      */
@@ -539,6 +567,13 @@ declare module 'jest-allure2-reporter' {
 
   /** @inheritDoc */
   export interface AllureTestCaseMetadata extends AllureTestItemMetadata {
+    /**
+     * Markdown description of the test case or test file.
+     */
+    description?: string[];
+    /**
+     * Raw HTML description of the test case or test file.
+     */
     descriptionHtml?: string[];
     fullName?: string;
     labels?: Label[];
@@ -555,8 +590,7 @@ declare module 'jest-allure2-reporter' {
 
   export interface DocblockContext {
     comments: string;
-    pragmas: Record<string, string[]>;
-    raw: string;
+    pragmas: Record<string, string | string[]>;
   }
 
   export interface GlobalExtractorContextAugmentation {
@@ -590,7 +624,7 @@ declare module 'jest-allure2-reporter' {
   ) => Plugin;
 
   export type PluginContext = Readonly<{
-    globalConfig: Config.GlobalConfig;
+    globalConfig: Readonly<Config.GlobalConfig>;
   }>;
 
   export interface Plugin {
@@ -600,24 +634,70 @@ declare module 'jest-allure2-reporter' {
     /** Optional method for deduplicating plugins. Return the instance which you want to keep. */
     extend?(previous: Plugin): Plugin;
 
+    /** Attach to the reporter lifecycle hook `onRunStart`. */
+    onRunStart?(context: PluginHookContexts['onRunStart']): void | Promise<void>;
+
+    /** Attach to the reporter lifecycle hook `onTestFileStart`. */
+    onTestFileStart?(context: PluginHookContexts['onTestFileStart']): void | Promise<void>;
+
+    /** Attach to the reporter lifecycle hook `onTestCaseResult`. */
+    onTestCaseResult?(context: PluginHookContexts['onTestCaseResult']): void | Promise<void>;
+
+    /** Attach to the reporter lifecycle hook `onTestFileResult`. */
+    onTestFileResult?(context: PluginHookContexts['onTestFileResult']): void | Promise<void>;
+
+    /** Attach to the reporter lifecycle hook `onRunComplete`. */
+    onRunComplete?(context: PluginHookContexts['onRunComplete']): void | Promise<void>;
+
     /** Method to extend global context. */
-    globalContext?(context: GlobalExtractorContext): void | Promise<void>;
+    globalContext?(context: PluginHookContexts['globalContext']): void | Promise<void>;
 
     /** Method to extend test file context. */
-    testFileContext?(context: TestFileExtractorContext): void | Promise<void>;
+    testFileContext?(context: PluginHookContexts['testFileContext']): void | Promise<void>;
 
     /** Method to extend test entry context. */
-    testCaseContext?(context: TestCaseExtractorContext): void | Promise<void>;
+    testCaseContext?(context: PluginHookContexts['testCaseContext']): void | Promise<void>;
 
     /** Method to extend test step context. */
-    testStepContext?(context: TestStepExtractorContext): void | Promise<void>;
+    testStepContext?(context: PluginHookContexts['testStepContext']): void | Promise<void>;
   }
 
-  export type PluginHookName =
-    | 'globalContext'
-    | 'testFileContext'
-    | 'testCaseContext'
-    | 'testStepContext';
+  export type PluginHookContexts = {
+    onRunStart: {
+      aggregatedResult: AggregatedResult;
+      reporterConfig: ReporterConfig;
+    };
+    onTestFileStart: {
+      reporterConfig: ReporterConfig;
+      test: Test;
+      testFileMetadata: AllureTestFileMetadata;
+    };
+    onTestCaseResult: {
+      reporterConfig: ReporterConfig;
+      test: Test;
+      testFileMetadata: AllureTestFileMetadata;
+      testCaseMetadata: AllureTestCaseMetadata;
+      testCaseResult: TestCaseResult;
+    };
+    onTestFileResult: {
+      aggregatedResult: AggregatedResult;
+      reporterConfig: ReporterConfig;
+      test: Test;
+      testResult: TestResult;
+      testFileMetadata: AllureTestFileMetadata;
+    };
+    onRunComplete: {
+      reporterConfig: ReporterConfig;
+      testContexts: Set<TestContext>;
+      results: AggregatedResult;
+    };
+    globalContext: GlobalExtractorContext;
+    testFileContext: TestFileExtractorContext;
+    testCaseContext: TestCaseExtractorContext;
+    testStepContext: TestStepExtractorContext;
+  };
+
+  export type PluginHookName = keyof PluginHookContexts;
 
   //region Allure types
 

@@ -6,6 +6,7 @@ export * from './hijackFunction';
 export * from './isObject';
 export * from './isError';
 export * from './isJestAssertionError';
+export * from './isLibraryPath';
 export * from './isPromiseLike';
 export * from './last';
 export * from './once';

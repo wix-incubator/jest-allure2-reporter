@@ -1,3 +1,4 @@
+import type { AllureTestItemSourceLocation } from 'jest-allure2-reporter';
 import type { Circus } from '@jest/types';
 import type {
   EnvironmentListenerFn,
@@ -8,37 +9,30 @@ import * as StackTrace from 'stacktrace-js';
 
 import * as api from '../api';
 import realm from '../realms';
-import { getStatusDetails, isJestAssertionError } from '../utils';
+import {
+  getStatusDetails,
+  isJestAssertionError,
+  isLibraryPath,
+} from '../utils';
 
 const listener: EnvironmentListenerFn = (context) => {
   context.testEvents
-    .on(
-      'test_environment_setup',
-      function ({ env }: TestEnvironmentSetupEvent) {
-        env.global.__ALLURE__ = realm;
-        const { injectGlobals } = realm.runtimeContext.getReporterConfig();
-        if (injectGlobals) {
-          Object.assign(env.global, api);
-        }
-
-        realm.runtimeContext
-          .getFileMetadata()
-          .set('workerId', process.env.JEST_WORKER_ID);
-      },
-    )
-    .on('add_hook', addSourceLocation)
+    .on('test_environment_setup', injectGlobals)
+    .on('test_environment_setup', setWorkerId)
     .on('add_hook', addHookType)
+    .on('add_hook', addSourceLocation)
     .on('add_test', addSourceLocation)
-    .on('test_start', testStart)
-    .on('test_todo', testSkip)
-    .on('test_skip', testSkip)
-    .on('test_done', testDone)
+    .on('run_start', flush)
     .on('hook_start', addSourceCode)
     .on('hook_start', executableStart)
     .on('hook_failure', executableFailure)
     .on('hook_failure', flush)
     .on('hook_success', executableSuccess)
     .on('hook_success', flush)
+    .on('test_start', testStart)
+    .on('test_todo', testSkip)
+    .on('test_skip', testSkip)
+    .on('test_done', testDone)
     .on('test_fn_start', addSourceCode)
     .on('test_fn_start', executableStart)
     .on('test_fn_success', executableSuccess)
@@ -58,17 +52,37 @@ function addSourceLocation({
   Circus.Event & { name: 'add_hook' | 'add_test' }
 >) {
   const metadata = realm.runtimeContext.getCurrentMetadata();
-  const task = StackTrace.fromError(event.asyncError).then(([frame]) => {
-    if (frame) {
-      metadata.set('sourceLocation', {
-        fileName: frame.fileName,
-        lineNumber: frame.lineNumber,
-        columnNumber: frame.columnNumber,
-      });
+  const task = StackTrace.fromError(event.asyncError).then((stackFrames) => {
+    const first = stackFrames.find((s) => !isLibraryPath(s.fileName));
+    if (!first) {
+      return;
     }
+
+    const sourceLocation: AllureTestItemSourceLocation = {
+      fileName: first.fileName,
+      lineNumber: first.lineNumber,
+      columnNumber: first.columnNumber,
+    };
+
+    metadata.set('sourceLocation', sourceLocation);
   });
 
   realm.runtimeContext.enqueueTask(task);
+}
+
+function injectGlobals({ env }: TestEnvironmentSetupEvent) {
+  env.global.__ALLURE__ = realm;
+
+  const { injectGlobals } = realm.runtimeContext.getReporterConfig();
+  if (injectGlobals) {
+    Object.assign(env.global, api);
+  }
+}
+
+function setWorkerId() {
+  realm.runtimeContext
+    .getFileMetadata()
+    .set('workerId', process.env.JEST_WORKER_ID);
 }
 
 function addHookType({

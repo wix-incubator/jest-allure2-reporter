@@ -9,33 +9,34 @@
 import { allure } from 'jest-allure2-reporter/api';
 
 describe('Names', () => {
+  /* Regular beforeAll */
   beforeAll(() => {
-    /* Regular beforeAll */
   });
+  /** Docblock beforeAll */
   beforeAll(() => {
-    /** Docblock beforeAll */
   });
+
   beforeAll(() => {
     allure.displayName('Programmatic beforeAll');
   });
 
+  /* Regular afterEach */
   afterEach(() => {
-    /* Regular afterEach */
   });
+  /** Docblock afterEach */
   afterEach(() => {
-    /** Docblock afterEach */
   });
   afterEach(() => {
     allure.displayName('Programmatic afterEach');
   });
 
+  /**
+   * Extra description (docblock)
+   * @displayName Docblock test (custom)
+   * @fullName Names - Docblock test (custom)
+   * @description Even more description (docblock)
+   */
   test('Docblock test', () => {
-    /**
-     * Extra description (docblock)
-     * @displayName Docblock test (custom)
-     * @fullName Names - Docblock test (custom)
-     * @description Even more description (docblock)
-     */
   });
 
   test('Programmatic test', () => {

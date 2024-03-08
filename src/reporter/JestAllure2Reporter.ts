@@ -28,11 +28,13 @@ import type {
 import { AllureRuntime } from '@noomorph/allure-js-commons';
 import type {
   AllureGlobalMetadata,
+  AllureTestCaseMetadata,
   AllureTestFileMetadata,
   AllureTestStepMetadata,
   GlobalExtractorContext,
   Plugin,
   PluginHookName,
+  PluginHookContexts,
   ReporterConfig,
   ReporterOptions,
   TestCaseExtractorContext,
@@ -44,14 +46,11 @@ import { resolveOptions } from '../options';
 import { AllureMetadataProxy, MetadataSquasher } from '../metadata';
 import { md5 } from '../utils';
 
-import { ThreadService } from './ThreadService';
-
 export class JestAllure2Reporter extends JestMetadataReporter {
   private _plugins: readonly Plugin[] = [];
   private readonly _allure: AllureRuntime;
   private readonly _config: ReporterConfig;
   private readonly _globalConfig: Config.GlobalConfig;
-  private readonly _threadService = new ThreadService();
 
   constructor(globalConfig: Config.GlobalConfig, options: ReporterOptions) {
     super(globalConfig);
@@ -73,59 +72,77 @@ export class JestAllure2Reporter extends JestMetadataReporter {
   }
 
   async onRunStart(
-    results: AggregatedResult,
+    aggregatedResult: AggregatedResult,
     options: ReporterOnStartOptions,
   ): Promise<void> {
     this._plugins = await this._config.plugins;
 
-    await super.onRunStart(results, options);
+    await super.onRunStart(aggregatedResult, options);
 
     if (this._config.overwrite) {
       await rimraf(this._config.resultsDir);
       await fs.mkdir(this._config.resultsDir, { recursive: true });
     }
-  }
 
-  onTestFileStart(test: Test) {
-    super.onTestFileStart(test);
-
-    const testFileMetadata = JestAllure2Reporter.query.test(test);
-    const threadId = this._threadService.allocateThread(test.path);
-    const metadataProxy = new AllureMetadataProxy<AllureTestFileMetadata>(
-      testFileMetadata,
-    );
-    metadataProxy.assign({
-      workerId: String(1 + threadId),
-      start: Date.now(),
+    await this._callPlugins('onRunStart', {
+      aggregatedResult,
+      reporterConfig: this._config,
     });
   }
 
-  onTestCaseResult(test: Test, testCaseResult: TestCaseResult) {
-    const now = Date.now();
-    super.onTestCaseResult(test, testCaseResult);
-    const metadata =
-      JestAllure2Reporter.query.testCaseResult(testCaseResult).lastInvocation!;
-    const metadataProxy = new AllureMetadataProxy<AllureTestStepMetadata>(
-      metadata,
+  async onTestFileStart(test: Test) {
+    super.onTestFileStart(test);
+
+    const testFileMetadata = JestAllure2Reporter.query.test(test);
+    const testFileProxy = new AllureMetadataProxy<AllureTestFileMetadata>(
+      testFileMetadata,
     );
-    const stop = metadataProxy.get('stop', Number.NaN);
-    if (Number.isNaN(stop)) {
-      metadataProxy.set('stop', now);
-    }
+    await this._callPlugins('onTestFileStart', {
+      reporterConfig: this._config,
+      test,
+      testFileMetadata: testFileProxy.defaults({}).get(),
+    });
   }
 
-  onTestFileResult(
+  async onTestCaseResult(test: Test, testCaseResult: TestCaseResult) {
+    super.onTestCaseResult(test, testCaseResult);
+
+    const testFileMetadata = JestAllure2Reporter.query.test(test);
+    const testCaseMetadata =
+      JestAllure2Reporter.query.testCaseResult(testCaseResult).lastInvocation!;
+    const testFileProxy = new AllureMetadataProxy<AllureTestFileMetadata>(
+      testFileMetadata,
+    );
+    const testCaseProxy = new AllureMetadataProxy<AllureTestCaseMetadata>(
+      testCaseMetadata,
+    );
+
+    await this._callPlugins('onTestCaseResult', {
+      reporterConfig: this._config,
+      test,
+      testCaseResult,
+      testCaseMetadata: testCaseProxy.defaults({}).get(),
+      testFileMetadata: testFileProxy.defaults({}).get(),
+    });
+  }
+
+  async onTestFileResult(
     test: Test,
     testResult: TestResult,
     aggregatedResult: AggregatedResult,
   ) {
-    this._threadService.freeThread(test.path);
-
     const testFileMetadata = JestAllure2Reporter.query.test(test);
-    const metadataProxy = new AllureMetadataProxy<AllureTestFileMetadata>(
+    const testFileProxy = new AllureMetadataProxy<AllureTestFileMetadata>(
       testFileMetadata,
     );
-    metadataProxy.set('stop', Date.now());
+
+    await this._callPlugins('onTestFileResult', {
+      reporterConfig: this._config,
+      test,
+      testResult,
+      aggregatedResult,
+      testFileMetadata: testFileProxy.defaults({}).get(),
+    });
 
     return super.onTestFileResult(test, testResult, aggregatedResult);
   }
@@ -135,6 +152,12 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     results: AggregatedResult,
   ): Promise<void> {
     await super.onRunComplete(testContexts, results);
+
+    await this._callPlugins('onRunComplete', {
+      reporterConfig: this._config,
+      testContexts,
+      results,
+    });
 
     const config = this._config;
 
@@ -427,10 +450,13 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     }
   }
 
-  async _callPlugins(method: PluginHookName, context: any) {
+  async _callPlugins<K extends PluginHookName>(
+    methodName: K,
+    context: PluginHookContexts[K],
+  ) {
     await Promise.all(
       this._plugins.map((p) => {
-        return p[method]?.(context);
+        return p[methodName]?.(context as any);
       }),
     );
   }

@@ -1,4 +1,7 @@
-import type { AllureTestItemMetadata, AllureTestStepMetadata } from 'jest-allure2-reporter';
+import type {
+  AllureTestItemMetadata,
+  AllureTestStepMetadata,
+} from 'jest-allure2-reporter';
 
 import { weakMemoize } from '../../utils';
 
