@@ -45,4 +45,21 @@ describe('Names', () => {
     allure.description('Extra description (programmatic)');
     allure.description('Even more description (programmatic)');
   });
+
+  test.each([
+    ['First'],
+    ['Second'],
+    ['Third'],
+  ])('Parametrized test: %s', (name) => {
+    allure.displayName(`Parametrized test: ${name}`);
+  });
+
+  test.each`
+    name
+    ${'First'}
+    ${'Second'}
+    ${'Third'}
+  `('Parametrized test 2: $name', ({ name }) => {
+    allure.displayName(`Parametrized test: ${name}`);
+  });
 });
