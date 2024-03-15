@@ -13,7 +13,6 @@ export * from './once';
 export * from './md5';
 export * from './processMaybePromise';
 export * from './shallowEqualArrays';
-export * from './splitDocblock';
 export * from './TaskQueue';
 export * from './types';
 export * from './weakMemoize';
