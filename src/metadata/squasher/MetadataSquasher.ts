@@ -98,7 +98,6 @@ export class MetadataSquasher {
       labels: test_vertical.labels,
       links: test_vertical.links,
       parameters: test_definition_and_below_direct.parameters,
-      sourceCode: test_definition_and_below_direct.sourceCode,
       sourceLocation: test_definition_and_below_direct.sourceLocation,
       stage: test_invocation_and_below.stage,
       start: test_invocation_and_below.start,
@@ -106,6 +105,7 @@ export class MetadataSquasher {
       statusDetails: test_invocation_and_below.statusDetails,
       steps: this._stepSelector.steps(invocation),
       stop: test_invocation_and_below.stop,
+      transformedCode: test_definition_and_below_direct.transformedCode,
       workerId: global_file_and_test_invocation.workerId,
     };
 

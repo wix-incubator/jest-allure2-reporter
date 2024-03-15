@@ -23,4 +23,6 @@ export class FileNavigatorCache {
   clear() {
     this.#cache.clear();
   }
+
+  static readonly instance = new FileNavigatorCache();
 }

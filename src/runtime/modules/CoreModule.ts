@@ -24,32 +24,10 @@ export class CoreModule {
     });
   }
 
-  description(value: string) {
-    this.context.metadata.$bind(null).push('description', [value]);
-  }
-
-  descriptionHtml(value: string) {
-    this.context.metadata.$bind(null).push('descriptionHtml', [value]);
-  }
+  // region Universal (test, hook, step) metadata
 
   displayName(value: string) {
     this.context.metadata.set('displayName', value);
-  }
-
-  fullName(value: string) {
-    this.context.metadata.set('fullName', value);
-  }
-
-  historyId(value: string) {
-    this.context.metadata.$bind(null).set('historyId', value);
-  }
-
-  label(name: LabelName | string, value: string) {
-    this.context.metadata.push('labels', [{ name, value }]);
-  }
-
-  link(link: Link) {
-    this.context.metadata.push('links', [link]);
   }
 
   parameter(parameter: Parameter) {
@@ -63,4 +41,34 @@ export class CoreModule {
   statusDetails(statusDetails: StatusDetails) {
     this.context.metadata.set('statusDetails', statusDetails);
   }
+
+  // endregion
+
+  // region Test-only metadata
+
+  description(value: string) {
+    this.context.metadata.$bind(null).push('description', [value]);
+  }
+
+  descriptionHtml(value: string) {
+    this.context.metadata.$bind(null).push('descriptionHtml', [value]);
+  }
+
+  fullName(value: string) {
+    this.context.metadata.$bind(null).set('fullName', value);
+  }
+
+  historyId(value: string) {
+    this.context.metadata.$bind(null).set('historyId', value);
+  }
+
+  label(name: LabelName | string, value: string) {
+    this.context.metadata.$bind(null).push('labels', [{ name, value }]);
+  }
+
+  link(link: Link) {
+    this.context.metadata.$bind(null).push('links', [link]);
+  }
+
+  // endregion
 }

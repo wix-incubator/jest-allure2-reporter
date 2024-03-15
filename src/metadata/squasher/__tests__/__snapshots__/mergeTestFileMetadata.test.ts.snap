@@ -58,7 +58,6 @@ exports[`mergeTestFileMetadata getMetadataWithDocblock 1`] = `
       "value": "value:file",
     },
   ],
-  "sourceCode": "sourceCode:file",
   "sourceLocation": {
     "columnNumber": 2,
     "fileName": "fileName:file",
@@ -72,6 +71,7 @@ exports[`mergeTestFileMetadata getMetadataWithDocblock 1`] = `
     "trace": "trace:file",
   },
   "stop": 102,
+  "transformedCode": "transformedCode:file",
   "workerId": "2",
 }
 `;
@@ -154,7 +154,6 @@ exports[`mergeTestFileMetadata globalAndTestFile 1`] = `
       "value": "value:file",
     },
   ],
-  "sourceCode": "sourceCode:file",
   "sourceLocation": {
     "columnNumber": 2,
     "fileName": "fileName:file",
@@ -168,6 +167,7 @@ exports[`mergeTestFileMetadata globalAndTestFile 1`] = `
     "trace": "trace:file",
   },
   "stop": 102,
+  "transformedCode": "transformedCode:file",
   "workerId": "2",
 }
 `;
@@ -186,13 +186,13 @@ exports[`mergeTestFileMetadata merge 2`] = `
   "labels": undefined,
   "links": undefined,
   "parameters": undefined,
-  "sourceCode": undefined,
   "sourceLocation": undefined,
   "stage": undefined,
   "start": undefined,
   "status": undefined,
   "statusDetails": undefined,
   "stop": undefined,
+  "transformedCode": undefined,
   "workerId": undefined,
 }
 `;
@@ -216,7 +216,6 @@ exports[`mergeTestFileMetadata steps 1`] = `
         "value": "value:step_invocation",
       },
     ],
-    "sourceCode": "sourceCode:step_invocation",
     "sourceLocation": {
       "columnNumber": 2,
       "fileName": "fileName:step_invocation",
@@ -236,7 +235,6 @@ exports[`mergeTestFileMetadata steps 1`] = `
         "displayName": undefined,
         "hookType": undefined,
         "parameters": undefined,
-        "sourceCode": undefined,
         "sourceLocation": undefined,
         "stage": undefined,
         "start": undefined,
@@ -244,9 +242,11 @@ exports[`mergeTestFileMetadata steps 1`] = `
         "statusDetails": undefined,
         "steps": undefined,
         "stop": undefined,
+        "transformedCode": undefined,
       },
     ],
     "stop": 110,
+    "transformedCode": "transformedCode:step_invocation",
   },
 ]
 `;

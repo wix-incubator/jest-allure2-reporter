@@ -1,4 +1,4 @@
-import { LineNavigator } from '../../runtime/utils';
+import { LineNavigator } from '../utils';
 
 import { extractJsdocAbove as extractJsDocument_ } from './extractJsdocAbove';
 

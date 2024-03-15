@@ -50,12 +50,12 @@ export function createTestItemMetadata(
         value: `value:${scope}`,
       },
     ],
-    sourceCode: `sourceCode:${scope}`,
     sourceLocation: {
       fileName: `fileName:${scope}`,
       lineNumber: 1,
       columnNumber: 2,
     },
+    transformedCode: `transformedCode:${scope}`,
     stage: castStage(scope),
     start: castStart(scope),
     status: castStatus(scope),

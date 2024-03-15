@@ -116,7 +116,7 @@ function addSourceCode({ event }: TestEnvironmentCircusEvent) {
   }
 
   if (code) {
-    realm.runtimeContext.getCurrentMetadata().set('sourceCode', code);
+    realm.runtimeContext.getCurrentMetadata().set('transformedCode', code);
   }
 }
 

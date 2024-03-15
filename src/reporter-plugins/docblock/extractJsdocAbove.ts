@@ -1,5 +1,4 @@
-/* eslint-disable unicorn/prevent-abbreviations */
-import type { LineNavigator } from '../../runtime/utils';
+import type { LineNavigator } from '../utils';
 
 export function extractJsdocAbove(
   navigator: LineNavigator,

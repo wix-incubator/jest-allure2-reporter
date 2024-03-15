@@ -11,8 +11,9 @@ export const fallbackPlugin: PluginConstructor = () => {
 
     onTestFileStart({ test, testFileMetadata }) {
       const threadId = threadService.allocateThread(test.path);
-      testFileMetadata.workerId = String(1 + threadId);
+      testFileMetadata.sourceLocation = { fileName: test.path };
       testFileMetadata.start = Date.now();
+      testFileMetadata.workerId = String(1 + threadId);
     },
 
     onTestCaseResult({ testCaseMetadata }) {

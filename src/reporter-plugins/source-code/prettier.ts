@@ -1,4 +1,4 @@
-/// <reference path="augs.d.ts" />
+/// <reference path="../augs.d.ts" />
 
 import type { Plugin, PluginConstructor } from 'jest-allure2-reporter';
 import type { Options } from 'prettier';
@@ -21,18 +21,18 @@ export const prettierPlugin: PluginConstructor = (
       };
     },
     async testCaseContext(context) {
-      const code = context.testCaseMetadata.sourceCode;
+      const code = context.testCaseMetadata.transformedCode;
       if (code) {
-        context.testCaseMetadata.sourceCode = await prettier.format(
+        context.testCaseMetadata.transformedCode = await prettier.format(
           code.trim(),
           prettierConfig,
         );
       }
     },
     async testStepContext(context) {
-      const code = context.testStepMetadata.sourceCode;
+      const code = context.testStepMetadata.transformedCode;
       if (code) {
-        context.testStepMetadata.sourceCode = await prettier.format(
+        context.testStepMetadata.transformedCode = await prettier.format(
           code.trim(),
           prettierConfig,
         );

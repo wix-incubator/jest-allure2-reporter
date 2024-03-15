@@ -2,7 +2,6 @@ import path from 'node:path';
 
 import type { TestCaseResult } from '@jest/reporters';
 import type {
-  AllureTestStepMetadata,
   ExtractorContext,
   Label,
   ResolvedTestCaseCustomizer,
@@ -23,18 +22,6 @@ const identity = <T>(context: ExtractorContext<T>) => context.value;
 const last = <T>(context: ExtractorContext<T[]>) => context.value?.at(-1);
 const all = identity;
 
-function extractCode(
-  steps: AllureTestStepMetadata[] | undefined,
-): string | undefined {
-  return joinCode(steps?.map((step) => step.sourceCode));
-}
-
-function joinCode(
-  code: undefined | (string | undefined)[],
-): string | undefined {
-  return code?.filter(Boolean).join('\n\n') || undefined;
-}
-
 export const testCase: ResolvedTestCaseCustomizer = {
   hidden: () => false,
   historyId: ({ testCase, testCaseMetadata }) =>
@@ -43,22 +30,11 @@ export const testCase: ResolvedTestCaseCustomizer = {
     testCaseMetadata.displayName ?? testCase.title,
   fullName: ({ testCase, testCaseMetadata }) =>
     testCaseMetadata.fullName ?? testCase.fullName,
-  description: ({ testCaseMetadata }) => {
+  description: ({ $, testCaseMetadata }) => {
     const text = testCaseMetadata.description?.join('\n\n') ?? '';
-    const before = extractCode(
-      testCaseMetadata.steps?.filter(
-        (step) =>
-          step.hookType === 'beforeAll' || step.hookType === 'beforeEach',
-      ),
-    );
-    const after = extractCode(
-      testCaseMetadata.steps?.filter(
-        (step) => step.hookType === 'afterAll' || step.hookType === 'afterEach',
-      ),
-    );
-    const code = joinCode([before, testCaseMetadata.sourceCode, after]);
-    const snippet = code ? '```javascript\n' + code + '\n```' : '';
-    return [text, snippet].filter(Boolean).join('\n\n');
+    const codes = $.extractSourceCodeWithSteps(testCaseMetadata);
+    const snippets = codes.map($.sourceCode2Markdown);
+    return [text, ...snippets].filter(Boolean).join('\n\n');
   },
   descriptionHtml: ({ testCaseMetadata }) =>
     testCaseMetadata.descriptionHtml?.join('\n'),

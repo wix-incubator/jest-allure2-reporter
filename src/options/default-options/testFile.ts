@@ -1,20 +1,20 @@
-import fs from 'node:fs';
 import path from 'node:path';
 
 import type {
   ExtractorContext,
-  TestFileExtractorContext,
+  Label,
+  Link,
   ResolvedTestFileCustomizer,
   TestCaseCustomizer,
+  TestFileExtractorContext,
 } from 'jest-allure2-reporter';
-import type { Label, Link } from 'jest-allure2-reporter';
 
+import { getStatusDetails } from '../../utils';
 import {
   aggregateLabelCustomizers,
   composeExtractors,
   stripStatusDetails,
 } from '../utils';
-import { getStatusDetails } from '../../utils';
 
 const identity = <T>(context: ExtractorContext<T>) => context.value;
 const last = <T>(context: ExtractorContext<T[]>) => context.value?.at(-1);
@@ -26,13 +26,10 @@ export const testFile: ResolvedTestFileCustomizer = {
   name: ({ filePath }) => filePath.join(path.sep),
   fullName: ({ globalConfig, testFile }) =>
     path.relative(globalConfig.rootDir, testFile.testFilePath),
-  description: ({ detectLanguage, testFile, testFileMetadata }) => {
+  description: ({ $, testFileMetadata }) => {
     const text = testFileMetadata.description?.join('\n') ?? '';
-    const contents = fs.readFileSync(testFile.testFilePath, 'utf8');
-    const lang = detectLanguage?.(testFile.testFilePath, contents) ?? '';
-    const fence = '```';
-    const code = `${fence}${lang}\n${contents}\n${fence}`;
-    return [text, code].filter(Boolean).join('\n\n');
+    const code = $.extractSourceCode(testFileMetadata);
+    return [text, $.sourceCode2Markdown(code)].filter(Boolean).join('\n\n');
   },
   descriptionHtml: ({ testFileMetadata }) =>
     testFileMetadata.descriptionHtml?.join('\n'),

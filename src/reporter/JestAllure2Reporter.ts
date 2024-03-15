@@ -10,7 +10,9 @@ import type {
   TestContext,
   TestResult,
 } from '@jest/reporters';
+import type { Metadata } from 'jest-metadata';
 import { state } from 'jest-metadata';
+import { metadataRegistryEvents } from 'jest-metadata/debug';
 import JestMetadataReporter from 'jest-metadata/reporter';
 import rimraf from 'rimraf';
 import type {
@@ -31,6 +33,7 @@ import type {
   AllureTestCaseMetadata,
   AllureTestFileMetadata,
   AllureTestStepMetadata,
+  ExtractorHelpers,
   GlobalExtractorContext,
   Plugin,
   PluginHookName,
@@ -48,9 +51,11 @@ import { md5 } from '../utils';
 
 export class JestAllure2Reporter extends JestMetadataReporter {
   private _plugins: readonly Plugin[] = [];
+  private readonly _$: Partial<ExtractorHelpers> = {};
   private readonly _allure: AllureRuntime;
   private readonly _config: ReporterConfig;
   private readonly _globalConfig: Config.GlobalConfig;
+  private readonly _newMetadata: Metadata[] = [];
 
   constructor(globalConfig: Config.GlobalConfig, options: ReporterOptions) {
     super(globalConfig);
@@ -61,6 +66,8 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     this._allure = new AllureRuntime({
       resultsDir: this._config.resultsDir,
     });
+
+    metadataRegistryEvents.on('register_metadata', this._registerMetadata);
 
     const globalMetadata = new AllureMetadataProxy<AllureGlobalMetadata>(state);
     globalMetadata.set('config', {
@@ -83,6 +90,8 @@ export class JestAllure2Reporter extends JestMetadataReporter {
       await rimraf(this._config.resultsDir);
       await fs.mkdir(this._config.resultsDir, { recursive: true });
     }
+
+    await this._callPlugins('helpers', this._$);
 
     await this._callPlugins('onRunStart', {
       aggregatedResult,
@@ -153,6 +162,8 @@ export class JestAllure2Reporter extends JestMetadataReporter {
   ): Promise<void> {
     await super.onRunComplete(testContexts, results);
 
+    metadataRegistryEvents.off('register_metadata', this._registerMetadata);
+
     await this._callPlugins('onRunComplete', {
       reporterConfig: this._config,
       testContexts,
@@ -165,6 +176,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
       globalConfig: this._globalConfig,
       config,
       value: undefined,
+      $: this._$ as ExtractorHelpers,
     };
 
     await this._callPlugins('globalContext', globalContext);
@@ -183,6 +195,8 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     if (categories) {
       this._allure.writeCategoriesDefinitions(categories as Category[]);
     }
+
+    await this._postProcessMetadata(); // Run before squashing
 
     const docblockParser: any = { find: () => void 0 }; // TODO: await initParser();
     const squasher = new MetadataSquasher({
@@ -386,10 +400,10 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     context: GlobalExtractorContext,
     test: AllurePayloadTest,
   ) {
-    if (test.description && context.processMarkdown) {
+    if (test.description) {
       test.descriptionHtml =
         (test.descriptionHtml ? test.descriptionHtml + '\n' : '') +
-        (await context.processMarkdown(test.description));
+        (await context.$.markdown2html(test.description));
     }
   }
 
@@ -450,7 +464,21 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     }
   }
 
-  async _callPlugins<K extends PluginHookName>(
+  private async _postProcessMetadata() {
+    const newBatch = this._newMetadata.splice(0, this._newMetadata.length);
+
+    await Promise.all(
+      newBatch.map(async (metadata) => {
+        const allureProxy = new AllureMetadataProxy(metadata);
+        await this._callPlugins('rawMetadata', {
+          $: this._$ as ExtractorHelpers,
+          metadata: allureProxy.assign({}).get(),
+        });
+      }),
+    );
+  }
+
+  private async _callPlugins<K extends PluginHookName>(
     methodName: K,
     context: PluginHookContexts[K],
   ) {
@@ -461,7 +489,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     );
   }
 
-  _relativizeAttachment = (attachment: Attachment) => {
+  private _relativizeAttachment = (attachment: Attachment) => {
     const source = path.relative(this._config.resultsDir, attachment.source);
     if (source.startsWith('..')) {
       return attachment;
@@ -471,6 +499,10 @@ export class JestAllure2Reporter extends JestMetadataReporter {
       ...attachment,
       source,
     };
+  };
+
+  private readonly _registerMetadata = (event: { metadata: Metadata }) => {
+    this._newMetadata.push(event.metadata);
   };
 }
 

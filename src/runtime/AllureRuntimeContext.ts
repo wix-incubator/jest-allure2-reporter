@@ -3,7 +3,7 @@ import type {
   AllureTestFileMetadata,
 } from 'jest-allure2-reporter';
 
-import { type MaybeFunction, once } from '../utils';
+import { type MaybeFunction, once, TaskQueue } from '../utils';
 import { AllureMetadataProxy, AllureTestItemMetadataProxy } from '../metadata';
 
 import type { AllureRuntimeConfig } from './AllureRuntimeConfig';
@@ -48,12 +48,15 @@ export class AllureRuntimeContext {
     this.getGlobalMetadata = () =>
       new AllureMetadataProxy(config.getGlobalMetadata());
 
-    let idle: Promise<unknown> = Promise.resolve();
-    this.flush = () => idle;
-    this.enqueueTask = (task) => {
-      idle =
-        typeof task === 'function' ? idle.then(task) : idle.then(() => task);
-    };
+    const taskQueue = new TaskQueue({
+      logError(error) {
+        // TODO: print Bunyamin warning
+        throw error;
+      },
+    });
+
+    this.flush = taskQueue.flush;
+    this.enqueueTask = taskQueue.enqueueTask;
 
     Object.defineProperty(this.contentAttachmentHandlers, 'default', {
       get: () => {

@@ -1,7 +1,7 @@
 import type {
   AllureTestStepMetadata,
   AllureTestCaseMetadata,
-  DocblockContext,
+  DocblockExtractorResult,
   Label,
   LabelName,
   Link,
@@ -10,7 +10,7 @@ import type {
 
 export function mapTestStepDocblock({
   comments,
-}: DocblockContext): AllureTestStepMetadata {
+}: DocblockExtractorResult): AllureTestStepMetadata {
   const metadata: AllureTestStepMetadata = {};
   if (comments) {
     metadata.displayName = comments;
@@ -20,7 +20,7 @@ export function mapTestStepDocblock({
 }
 
 export function mapTestCaseDocblock(
-  context: DocblockContext,
+  context: DocblockExtractorResult,
 ): AllureTestCaseMetadata {
   const metadata: AllureTestCaseMetadata = {};
   const { comments, pragmas = {} } = context;

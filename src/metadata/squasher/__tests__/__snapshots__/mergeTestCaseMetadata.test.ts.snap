@@ -118,7 +118,6 @@ exports[`mergeTestCaseMetadata belowTestInvocation 1`] = `
       "value": "value:hook_invocation",
     },
   ],
-  "sourceCode": "sourceCode:hook_invocation",
   "sourceLocation": {
     "columnNumber": 2,
     "fileName": "fileName:hook_invocation",
@@ -132,6 +131,7 @@ exports[`mergeTestCaseMetadata belowTestInvocation 1`] = `
     "trace": "trace:hook_invocation",
   },
   "stop": 109,
+  "transformedCode": "transformedCode:hook_invocation",
   "workerId": "9",
 }
 `;
@@ -214,7 +214,6 @@ exports[`mergeTestCaseMetadata globalAndTestFile 1`] = `
       "value": "value:file",
     },
   ],
-  "sourceCode": "sourceCode:file",
   "sourceLocation": {
     "columnNumber": 2,
     "fileName": "fileName:file",
@@ -228,6 +227,7 @@ exports[`mergeTestCaseMetadata globalAndTestFile 1`] = `
     "trace": "trace:file",
   },
   "stop": 102,
+  "transformedCode": "transformedCode:file",
   "workerId": "2",
 }
 `;
@@ -330,7 +330,6 @@ exports[`mergeTestCaseMetadata globalAndTestFileAndTestInvocation 1`] = `
       "value": "value:test_invocation",
     },
   ],
-  "sourceCode": "sourceCode:test_invocation",
   "sourceLocation": {
     "columnNumber": 2,
     "fileName": "fileName:test_invocation",
@@ -344,6 +343,7 @@ exports[`mergeTestCaseMetadata globalAndTestFileAndTestInvocation 1`] = `
     "trace": "trace:test_invocation",
   },
   "stop": 107,
+  "transformedCode": "transformedCode:test_invocation",
   "workerId": "7",
 }
 `;
@@ -369,7 +369,6 @@ exports[`mergeTestCaseMetadata steps (no overrides in invocations) 1`] = `
         "value": "value:hook_definition",
       },
     ],
-    "sourceCode": "sourceCode:hook_definition",
     "sourceLocation": {
       "columnNumber": 2,
       "fileName": "fileName:hook_definition",
@@ -384,6 +383,7 @@ exports[`mergeTestCaseMetadata steps (no overrides in invocations) 1`] = `
     },
     "steps": undefined,
     "stop": 104,
+    "transformedCode": "transformedCode:hook_definition",
   },
   {
     "attachments": [
@@ -402,7 +402,6 @@ exports[`mergeTestCaseMetadata steps (no overrides in invocations) 1`] = `
         "value": "value:hook_definition",
       },
     ],
-    "sourceCode": "sourceCode:hook_definition",
     "sourceLocation": {
       "columnNumber": 2,
       "fileName": "fileName:hook_definition",
@@ -417,6 +416,7 @@ exports[`mergeTestCaseMetadata steps (no overrides in invocations) 1`] = `
     },
     "steps": undefined,
     "stop": 104,
+    "transformedCode": "transformedCode:hook_definition",
   },
   {
     "attachments": [
@@ -435,7 +435,6 @@ exports[`mergeTestCaseMetadata steps (no overrides in invocations) 1`] = `
         "value": "value:hook_definition",
       },
     ],
-    "sourceCode": "sourceCode:hook_definition",
     "sourceLocation": {
       "columnNumber": 2,
       "fileName": "fileName:hook_definition",
@@ -450,6 +449,7 @@ exports[`mergeTestCaseMetadata steps (no overrides in invocations) 1`] = `
     },
     "steps": undefined,
     "stop": 104,
+    "transformedCode": "transformedCode:hook_definition",
   },
   {
     "attachments": [
@@ -468,7 +468,6 @@ exports[`mergeTestCaseMetadata steps (no overrides in invocations) 1`] = `
         "value": "value:hook_definition",
       },
     ],
-    "sourceCode": "sourceCode:hook_definition",
     "sourceLocation": {
       "columnNumber": 2,
       "fileName": "fileName:hook_definition",
@@ -483,6 +482,7 @@ exports[`mergeTestCaseMetadata steps (no overrides in invocations) 1`] = `
     },
     "steps": undefined,
     "stop": 104,
+    "transformedCode": "transformedCode:hook_definition",
   },
 ]
 `;
@@ -515,7 +515,6 @@ exports[`mergeTestCaseMetadata steps 1`] = `
         "value": "value:hook_invocation",
       },
     ],
-    "sourceCode": "sourceCode:hook_invocation",
     "sourceLocation": {
       "columnNumber": 2,
       "fileName": "fileName:hook_invocation",
@@ -530,6 +529,7 @@ exports[`mergeTestCaseMetadata steps 1`] = `
     },
     "steps": undefined,
     "stop": 109,
+    "transformedCode": "transformedCode:hook_invocation",
   },
   {
     "attachments": [
@@ -557,7 +557,6 @@ exports[`mergeTestCaseMetadata steps 1`] = `
         "value": "value:hook_invocation",
       },
     ],
-    "sourceCode": "sourceCode:hook_invocation",
     "sourceLocation": {
       "columnNumber": 2,
       "fileName": "fileName:hook_invocation",
@@ -572,6 +571,7 @@ exports[`mergeTestCaseMetadata steps 1`] = `
     },
     "steps": undefined,
     "stop": 109,
+    "transformedCode": "transformedCode:hook_invocation",
   },
   {
     "attachments": [
@@ -599,7 +599,6 @@ exports[`mergeTestCaseMetadata steps 1`] = `
         "value": "value:hook_invocation",
       },
     ],
-    "sourceCode": "sourceCode:hook_invocation",
     "sourceLocation": {
       "columnNumber": 2,
       "fileName": "fileName:hook_invocation",
@@ -614,6 +613,7 @@ exports[`mergeTestCaseMetadata steps 1`] = `
     },
     "steps": undefined,
     "stop": 109,
+    "transformedCode": "transformedCode:hook_invocation",
   },
   {
     "attachments": [
@@ -641,7 +641,6 @@ exports[`mergeTestCaseMetadata steps 1`] = `
         "value": "value:hook_invocation",
       },
     ],
-    "sourceCode": "sourceCode:hook_invocation",
     "sourceLocation": {
       "columnNumber": 2,
       "fileName": "fileName:hook_invocation",
@@ -656,6 +655,7 @@ exports[`mergeTestCaseMetadata steps 1`] = `
     },
     "steps": undefined,
     "stop": 109,
+    "transformedCode": "transformedCode:hook_invocation",
   },
 ]
 `;
@@ -669,7 +669,6 @@ exports[`mergeTestCaseMetadata stepsSelector merge 2`] = `
   "displayName": undefined,
   "hookType": undefined,
   "parameters": undefined,
-  "sourceCode": undefined,
   "sourceLocation": undefined,
   "stage": undefined,
   "start": undefined,
@@ -677,6 +676,7 @@ exports[`mergeTestCaseMetadata stepsSelector merge 2`] = `
   "statusDetails": undefined,
   "steps": undefined,
   "stop": undefined,
+  "transformedCode": undefined,
 }
 `;
 
@@ -738,7 +738,6 @@ exports[`mergeTestCaseMetadata testDefinition 1`] = `
       "value": "value:test_definition",
     },
   ],
-  "sourceCode": "sourceCode:test_definition",
   "sourceLocation": {
     "columnNumber": 2,
     "fileName": "fileName:test_definition",
@@ -752,6 +751,7 @@ exports[`mergeTestCaseMetadata testDefinition 1`] = `
     "trace": "trace:test_definition",
   },
   "stop": 106,
+  "transformedCode": "transformedCode:test_definition",
   "workerId": "6",
 }
 `;
@@ -934,7 +934,6 @@ exports[`mergeTestCaseMetadata testDefinitionAndBelow 1`] = `
       "value": "value:hook_invocation",
     },
   ],
-  "sourceCode": "sourceCode:hook_invocation",
   "sourceLocation": {
     "columnNumber": 2,
     "fileName": "fileName:hook_invocation",
@@ -948,6 +947,7 @@ exports[`mergeTestCaseMetadata testDefinitionAndBelow 1`] = `
     "trace": "trace:hook_invocation",
   },
   "stop": 109,
+  "transformedCode": "transformedCode:hook_invocation",
   "workerId": "9",
 }
 `;
@@ -1050,7 +1050,6 @@ exports[`mergeTestCaseMetadata testDefinitionAndBelowDirect 1`] = `
       "value": "value:test_fn_invocation",
     },
   ],
-  "sourceCode": "sourceCode:test_fn_invocation",
   "sourceLocation": {
     "columnNumber": 2,
     "fileName": "fileName:test_fn_invocation",
@@ -1064,6 +1063,7 @@ exports[`mergeTestCaseMetadata testDefinitionAndBelowDirect 1`] = `
     "trace": "trace:test_fn_invocation",
   },
   "stop": 108,
+  "transformedCode": "transformedCode:test_fn_invocation",
   "workerId": "8",
 }
 `;
@@ -1106,7 +1106,6 @@ exports[`mergeTestCaseMetadata testInvocation 1`] = `
       "value": "value:test_invocation",
     },
   ],
-  "sourceCode": "sourceCode:test_invocation",
   "sourceLocation": {
     "columnNumber": 2,
     "fileName": "fileName:test_invocation",
@@ -1120,6 +1119,7 @@ exports[`mergeTestCaseMetadata testInvocation 1`] = `
     "trace": "trace:test_invocation",
   },
   "stop": 107,
+  "transformedCode": "transformedCode:test_invocation",
   "workerId": "7",
 }
 `;
@@ -1262,7 +1262,6 @@ exports[`mergeTestCaseMetadata testInvocationAndBelow 1`] = `
       "value": "value:hook_invocation",
     },
   ],
-  "sourceCode": "sourceCode:hook_invocation",
   "sourceLocation": {
     "columnNumber": 2,
     "fileName": "fileName:hook_invocation",
@@ -1276,6 +1275,7 @@ exports[`mergeTestCaseMetadata testInvocationAndBelow 1`] = `
     "trace": "trace:hook_invocation",
   },
   "stop": 109,
+  "transformedCode": "transformedCode:hook_invocation",
   "workerId": "9",
 }
 `;
@@ -1338,7 +1338,6 @@ exports[`mergeTestCaseMetadata testInvocationAndBelowDirect 1`] = `
       "value": "value:test_fn_invocation",
     },
   ],
-  "sourceCode": "sourceCode:test_fn_invocation",
   "sourceLocation": {
     "columnNumber": 2,
     "fileName": "fileName:test_fn_invocation",
@@ -1352,6 +1351,7 @@ exports[`mergeTestCaseMetadata testInvocationAndBelowDirect 1`] = `
     "trace": "trace:test_fn_invocation",
   },
   "stop": 108,
+  "transformedCode": "transformedCode:test_fn_invocation",
   "workerId": "8",
 }
 `;
@@ -1534,7 +1534,6 @@ exports[`mergeTestCaseMetadata testVertical (no overrides in step invocations) 1
       "value": "value:test_invocation",
     },
   ],
-  "sourceCode": "sourceCode:test_invocation",
   "sourceLocation": {
     "columnNumber": 2,
     "fileName": "fileName:test_invocation",
@@ -1548,6 +1547,7 @@ exports[`mergeTestCaseMetadata testVertical (no overrides in step invocations) 1
     "trace": "trace:describe_block",
   },
   "stop": 107,
+  "transformedCode": "transformedCode:test_invocation",
   "workerId": "7",
 }
 `;
@@ -1830,7 +1830,6 @@ exports[`mergeTestCaseMetadata testVertical 1`] = `
       "value": "value:hook_invocation",
     },
   ],
-  "sourceCode": "sourceCode:hook_invocation",
   "sourceLocation": {
     "columnNumber": 2,
     "fileName": "fileName:hook_invocation",
@@ -1844,6 +1843,7 @@ exports[`mergeTestCaseMetadata testVertical 1`] = `
     "trace": "trace:hook_invocation",
   },
   "stop": 109,
+  "transformedCode": "transformedCode:hook_invocation",
   "workerId": "9",
 }
 `;

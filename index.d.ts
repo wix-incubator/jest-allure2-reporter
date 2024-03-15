@@ -141,31 +141,6 @@ declare module 'jest-allure2-reporter' {
   /** @see {@link AttachmentsOptions#contentHandler} */
   export type BuiltinContentAttachmentHandler = 'write';
 
-  /** @see {@link ReporterOptions#docblock} */
-  export type DocblockOptions = {
-    /**
-     * Specifies where to look for docblocks: inside functions or outside (on top).
-     * @default 'outside'
-     */
-    location?: 'inside' | 'outside' | 'both';
-  };
-
-  /** @see {@link ReporterOptions#sourceCode} */
-  export type SourceCodeOptions = {
-    /**
-     * Specifies where to take the source code from:
-     * - `file` - read the file from the file system
-     * - `function` - extract the source code from the test function
-     * @default 'file'
-     */
-    location?: 'file' | 'function';
-    /**
-     * Whether to prettify the source code before attaching it to the report.
-     * @default false
-     */
-    prettify?: boolean;
-  };
-
   /**
    * Global customizations for how test cases are reported
    */
@@ -457,6 +432,7 @@ declare module 'jest-allure2-reporter' {
   export interface GlobalExtractorContext<T = any>
     extends ExtractorContext<T>,
       GlobalExtractorContextAugmentation {
+    $: ExtractorHelpers;
     globalConfig: Config.GlobalConfig;
     config: ReporterConfig;
   }
@@ -466,7 +442,6 @@ declare module 'jest-allure2-reporter' {
       TestFileExtractorContextAugmentation {
     filePath: string[];
     testFile: TestResult;
-    testFileDocblock?: DocblockContext;
     testFileMetadata: AllureTestFileMetadata;
   }
 
@@ -474,14 +449,12 @@ declare module 'jest-allure2-reporter' {
     extends TestFileExtractorContext<T>,
       TestCaseExtractorContextAugmentation {
     testCase: TestCaseResult;
-    testCaseDocblock?: DocblockContext;
     testCaseMetadata: AllureTestCaseMetadata;
   }
 
   export interface TestStepExtractorContext<T = any>
     extends TestCaseExtractorContext<T>,
       TestStepExtractorContextAugmentation {
-    testStepDocblock?: DocblockContext;
     testStepMetadata: AllureTestStepMetadata;
   }
 
@@ -505,9 +478,9 @@ declare module 'jest-allure2-reporter' {
      */
     currentStep?: AllureTestStepPath;
     /**
-     * Parsed docblock: comments, pragmas, and raw content.
+     * Parsed docblock: comments and pragmas.
      */
-    docblock?: DocblockContext;
+    docblock?: DocblockExtractorResult;
     /**
      * Title of the test case or test step.
      */
@@ -520,10 +493,6 @@ declare module 'jest-allure2-reporter' {
      * Key-value pairs to disambiguate test cases or to provide additional information.
      */
     parameters?: Parameter[];
-    /**
-     * Source code of the test case, test step or a hook.
-     */
-    sourceCode?: string;
     /**
      * Location (file, line, column) of the test case, test step or a hook.
      */
@@ -552,6 +521,10 @@ declare module 'jest-allure2-reporter' {
      * Stop timestamp in milliseconds.
      */
     stop?: number;
+    /**
+     * Transformed code of the test case, test step or a hook.
+     */
+    transformedCode?: string;
   }
 
   export type AllureNestedTestStepMetadata = Omit<AllureTestStepMetadata, 'currentStep'>;
@@ -588,15 +561,30 @@ declare module 'jest-allure2-reporter' {
     config: Pick<ReporterConfig, 'resultsDir' | 'overwrite' | 'attachments' | 'injectGlobals'>;
   }
 
-  export interface DocblockContext {
+  export interface DocblockExtractorResult {
     comments: string;
     pragmas: Record<string, string | string[]>;
   }
 
-  export interface GlobalExtractorContextAugmentation {
-    detectLanguage?(contents: string, filePath?: string): string | undefined;
-    processMarkdown?(markdown: string): Promise<string>;
+  export type CodeExtractorResult = {
+    ast?: unknown;
+    code: string;
+    language: string;
+  };
 
+  export interface ExtractorHelpers extends ExtractorHelpersAugmentation {
+    extractSourceCode(metadata: AllureTestItemMetadata): CodeExtractorResult | undefined;
+    extractSourceCodeAsync(metadata: AllureTestItemMetadata): Promise<CodeExtractorResult | undefined>;
+    extractSourceCodeWithSteps(metadata: AllureTestItemMetadata): CodeExtractorResult[];
+    sourceCode2Markdown(sourceCode: Partial<CodeExtractorResult> | undefined): string;
+    markdown2html(markdown: string): Promise<string>;
+  }
+
+  export interface ExtractorHelpersAugmentation {
+    // This may be extended by plugins
+  }
+
+  export interface GlobalExtractorContextAugmentation {
     // This may be extended by plugins
   }
 
@@ -621,7 +609,7 @@ declare module 'jest-allure2-reporter' {
   export type PluginConstructor = (
     options: Record<string, unknown>,
     context: PluginContext,
-  ) => Plugin;
+  ) => Plugin | Promise<Plugin>;
 
   export type PluginContext = Readonly<{
     globalConfig: Readonly<Config.GlobalConfig>;
@@ -633,6 +621,11 @@ declare module 'jest-allure2-reporter' {
 
     /** Optional method for deduplicating plugins. Return the instance which you want to keep. */
     extend?(previous: Plugin): Plugin;
+
+    helpers?(helpers: Partial<ExtractorHelpers>): void | Promise<void>;
+
+    /** Allows to modify the raw metadata before it's processed by the reporter. [UNSTABLE!] */
+    rawMetadata?(context: PluginHookContexts['rawMetadata']): void | Promise<void>;
 
     /** Attach to the reporter lifecycle hook `onRunStart`. */
     onRunStart?(context: PluginHookContexts['onRunStart']): void | Promise<void>;
@@ -663,6 +656,11 @@ declare module 'jest-allure2-reporter' {
   }
 
   export type PluginHookContexts = {
+    helpers: Partial<ExtractorHelpers>;
+    rawMetadata: {
+      $: Readonly<ExtractorHelpers>;
+      metadata: AllureTestItemMetadata;
+    };
     onRunStart: {
       aggregatedResult: AggregatedResult;
       reporterConfig: ReporterConfig;
