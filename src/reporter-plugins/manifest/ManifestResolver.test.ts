@@ -1,4 +1,4 @@
-import { ManifestResolver } from './manifest';
+import { ManifestResolver } from './ManifestResolver';
 
 describe('manifest', () => {
   const manifestResolver = new ManifestResolver(

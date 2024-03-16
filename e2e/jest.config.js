@@ -19,12 +19,12 @@ const jestAllure2ReporterOptions = {
       messageRegex: /.*Exceeded timeout of.*/,
     },
   ],
-  environment: (context) => {
+  environment: async ({ $ }) => {
     return ({
       'version.node': process.version,
-      'version.jest': require('jest/package.json').version,
-      'package.name': context.manifest.name,
-      'package.version': context.manifest.version,
+      'version.jest': await $.manifest('jest', jest => jest.version),
+      'package.name': await $.manifest(pkg => pkg.name),
+      'package.version': await $.manifest(pkg => pkg.version),
     });
   },
   testCase: {

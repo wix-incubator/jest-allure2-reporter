@@ -3,9 +3,12 @@
 import type { Plugin, PluginConstructor } from 'jest-allure2-reporter';
 import importFrom from 'import-from';
 
-import { ManifestResolver } from './manifest';
+import { ManifestResolver } from './ManifestResolver';
 
-export type { ManifestExtractorCallback, ManifestHelper } from './manifest';
+export type {
+  ManifestExtractorCallback,
+  ManifestHelper,
+} from './ManifestResolver';
 
 export const manifestPlugin: PluginConstructor = (_1, { globalConfig }) => {
   const cwd = globalConfig.rootDir;

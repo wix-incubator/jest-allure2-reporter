@@ -149,7 +149,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
       this._allure.writeExecutorInfo(executor);
     }
 
-    const categories = config.categories(globalContext);
+    const categories = await config.categories(globalContext);
     if (categories) {
       this._allure.writeCategoriesDefinitions(categories as Category[]);
     }
