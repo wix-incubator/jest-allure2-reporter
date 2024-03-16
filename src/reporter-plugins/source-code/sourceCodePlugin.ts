@@ -2,8 +2,8 @@
 
 import type { ExtractorHelperSourceCode } from 'jest-allure2-reporter';
 import type {
-  AllureTestItemSourceLocation,
   AllureNestedTestStepMetadata,
+  AllureTestItemSourceLocation,
   Plugin,
   PluginConstructor,
 } from 'jest-allure2-reporter';
@@ -65,18 +65,29 @@ export const sourceCodePlugin: PluginConstructor = async () => {
     name: 'jest-allure2-reporter/plugins/source-code',
 
     async helpers($) {
-      const extractSourceCode = weakMemoize(async (metadata) => {
-        return doExtract(metadata.sourceLocation);
-      });
+      const extractSourceCode = weakMemoize(
+        async (
+          metadata: AllureNestedTestStepMetadata,
+        ): Promise<ExtractorHelperSourceCode | undefined> => {
+          return doExtract(metadata.sourceLocation);
+        },
+      );
 
-      const extractSourceCodeWithSteps = weakMemoize(async (metadata) => {
-        const test = await doExtract(metadata);
-        const before =
-          metadata.steps?.filter(isBeforeHook)?.map(doExtract) ?? [];
-        const after = metadata.steps?.filter(isAfterHook)?.map(doExtract) ?? [];
+      const extractSourceCodeWithSteps = weakMemoize(
+        async (
+          metadata: AllureNestedTestStepMetadata,
+        ): Promise<ExtractorHelperSourceCode[]> => {
+          const test = await extractSourceCode(metadata);
+          const before = await Promise.all(
+            metadata.steps?.filter(isBeforeHook)?.map(extractSourceCode) ?? [],
+          );
+          const after = await Promise.all(
+            metadata.steps?.filter(isAfterHook)?.map(extractSourceCode) ?? [],
+          );
 
-        return [...before, test, ...after].filter(isDefined);
-      });
+          return [...before, test, ...after].filter(isDefined);
+        },
+      );
 
       Object.assign($, {
         extractSourceCode,

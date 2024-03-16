@@ -619,8 +619,8 @@ declare module 'jest-allure2-reporter' {
   }
 
   export interface AllureTestItemDocblock {
-    comments: string;
-    pragmas: Record<string, string | string[]>;
+    comments?: string;
+    pragmas?: Record<string, string | string[]>;
   }
 
   // endregion
