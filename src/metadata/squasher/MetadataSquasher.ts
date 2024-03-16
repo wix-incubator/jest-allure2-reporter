@@ -4,13 +4,14 @@ import type {
   TestInvocationMetadata,
 } from 'jest-metadata';
 import type {
+  AllureTestItemDocblock,
   AllureNestedTestStepMetadata,
   AllureTestCaseMetadata,
   AllureTestFileMetadata,
-  AllureTestItemMetadata,
 } from 'jest-allure2-reporter';
 
-import { PREFIX } from '../constants';
+import { DOCBLOCK, PREFIX } from '../constants';
+import * as docblock from '../docblockMapping';
 
 import { MetadataSelector } from './MetadataSelector';
 import {
@@ -18,12 +19,6 @@ import {
   mergeTestFileMetadata,
   mergeTestStepMetadata,
 } from './mergers';
-
-export type MetadataSquasherConfig = {
-  getDocblockMetadata: <T extends AllureTestItemMetadata>(
-    metadata: Metadata | undefined,
-  ) => T | undefined;
-};
 
 export class MetadataSquasher {
   protected readonly _fileSelector: MetadataSelector<
@@ -41,24 +36,33 @@ export class MetadataSquasher {
     AllureNestedTestStepMetadata
   >;
 
-  constructor(config: MetadataSquasherConfig) {
+  constructor() {
     this._fileSelector = new MetadataSelector({
       empty: () => ({}),
-      getDocblock: config.getDocblockMetadata,
+      getDocblock: (metadata) =>
+        docblock.mapTestFileDocblock(
+          metadata.get<AllureTestItemDocblock>(DOCBLOCK, {}),
+        ),
       getMetadata: (metadata) => metadata.get<AllureTestFileMetadata>(PREFIX),
       mergeUnsafe: mergeTestFileMetadata,
     });
 
     this._testSelector = new MetadataSelector({
       empty: () => ({}),
-      getDocblock: config.getDocblockMetadata,
+      getDocblock: (metadata) =>
+        docblock.mapTestCaseDocblock(
+          metadata.get<AllureTestItemDocblock>(DOCBLOCK, {}),
+        ),
       getMetadata: (metadata) => metadata.get<AllureTestCaseMetadata>(PREFIX),
       mergeUnsafe: mergeTestCaseMetadata,
     });
 
     this._stepSelector = new MetadataSelector({
       empty: () => ({}),
-      getDocblock: config.getDocblockMetadata,
+      getDocblock: (metadata) =>
+        docblock.mapTestStepDocblock(
+          metadata.get<AllureTestItemDocblock>(DOCBLOCK, {}),
+        ),
       getMetadata: (metadata) =>
         metadata.get<AllureNestedTestStepMetadata>(PREFIX),
       mergeUnsafe: mergeTestStepMetadata,

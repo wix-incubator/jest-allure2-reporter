@@ -8,6 +8,33 @@ import type {
   LinkType,
 } from 'jest-allure2-reporter';
 
+import { asArray } from '../utils';
+
+const ALL_LABELS = Object.keys(
+  assertType<Record<LabelName, 0>>({
+    epic: 0,
+    feature: 0,
+    owner: 0,
+    package: 0,
+    parentSuite: 0,
+    severity: 0,
+    story: 0,
+    subSuite: 0,
+    suite: 0,
+    tag: 0,
+    testClass: 0,
+    testMethod: 0,
+    thread: 0,
+  }),
+) as LabelName[];
+
+const ALL_LINKS = Object.keys(
+  assertType<Record<LinkType, 0>>({
+    issue: 0,
+    tms: 0,
+  }),
+) as LinkType[];
+
 export function mapTestStepDocblock({
   comments,
 }: AllureTestItemDocblock): AllureTestStepMetadata {
@@ -25,44 +52,29 @@ export function mapTestCaseDocblock(
   const metadata: AllureTestCaseMetadata = {};
   const { comments, pragmas = {} } = context;
 
-  const labels = (
-    ['epic', 'feature', 'owner', 'severity', 'story', 'tag'] as const
-  ).flatMap((name) => mapMaybeArray(pragmas[name], createLabelMapper(name)));
+  const labels = ALL_LABELS.flatMap((name) =>
+    asArray(pragmas[name]).map(createLabelMapper(name)),
+  );
 
   if (labels.length > 0) metadata.labels = labels;
 
-  const links = (['issue', 'tms'] as const)
-    .flatMap((name) => mapMaybeArray(pragmas[name], createLinkMapper(name)))
-    .filter(Boolean);
+  const links = ALL_LINKS.flatMap((name) =>
+    asArray(pragmas[name]).map(createLinkMapper(name)),
+  ).filter(Boolean);
 
   if (links.length > 0) metadata.links = links;
 
   if (comments || pragmas.description)
     metadata.description = [
-      ...(comments ? [comments] : []),
-      ...(pragmas.description || []),
+      ...asArray(comments),
+      ...asArray(pragmas.description),
     ];
 
   if (pragmas.descriptionHtml) {
-    metadata.descriptionHtml = mapMaybeArray(pragmas.descriptionHtml, (x) => x);
+    metadata.descriptionHtml = asArray(pragmas.descriptionHtml);
   }
 
   return metadata;
-}
-
-function mapMaybeArray<T, R>(
-  value: T | T[] | undefined,
-  mapper: (value: T) => R,
-): R[] {
-  if (value == null) {
-    return [];
-  }
-
-  if (Array.isArray(value)) {
-    return value.map(mapper);
-  }
-
-  return [mapper(value)];
 }
 
 export const mapTestFileDocblock = mapTestCaseDocblock;
@@ -73,4 +85,8 @@ function createLabelMapper(name: LabelName) {
 
 function createLinkMapper(type?: LinkType) {
   return (url: string): Link => ({ type, url, name: url });
+}
+
+function assertType<T>(value: T) {
+  return value;
 }

@@ -1,3 +1,4 @@
+export * from './asArray';
 export * from './attempt';
 export * from './autoIndent';
 export * from './constant';

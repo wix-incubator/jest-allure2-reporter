@@ -156,11 +156,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
 
     await this._postProcessMetadata(); // Run before squashing
 
-    const docblockParser: any = { find: () => void 0 }; // TODO: await initParser();
-    const squasher = new MetadataSquasher({
-      getDocblockMetadata: (metadata) =>
-        metadata && docblockParser.find(metadata),
-    });
+    const squasher = new MetadataSquasher();
 
     for (const testResult of results.testResults) {
       const testFileContext: TestFileExtractorContext = {
@@ -427,11 +423,19 @@ export class JestAllure2Reporter extends JestMetadataReporter {
   }
 
   private async _postProcessMetadata() {
-    const batch = state.testFiles.flatMap((testFile) => [
-      testFile,
-      ...testFile.allDescribeBlocks(),
-      ...testFile.allTestEntries(),
-    ]);
+    const batch = state.testFiles.flatMap((testFile) => {
+      const allDescribeBlocks = [...testFile.allDescribeBlocks()];
+      const allHooks = allDescribeBlocks.flatMap((describeBlock) => [
+        ...describeBlock.hookDefinitions(),
+      ]);
+
+      return [
+        testFile,
+        ...allDescribeBlocks,
+        ...allHooks,
+        ...testFile.allTestEntries(),
+      ];
+    });
 
     await Promise.all(
       batch.map(async (metadata) => {

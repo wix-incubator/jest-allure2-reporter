@@ -38,9 +38,13 @@ export const docblockPlugin: PluginConstructor = () => {
         }
       }
 
-      if (!extracted && fileName && lineNumber != null) {
+      if (!extracted && fileName) {
         const navigator = await FileNavigatorCache.instance.resolve(fileName);
-        extracted = extractJsdocAbove(navigator, lineNumber);
+
+        extracted =
+          lineNumber == null
+            ? extract(navigator.sourceCode)
+            : extractJsdocAbove(navigator, lineNumber);
       }
 
       if (extracted) {

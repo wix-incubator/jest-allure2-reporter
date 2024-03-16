@@ -9,7 +9,7 @@
 import { allure } from 'jest-allure2-reporter/api';
 
 describe('Names', () => {
-  /* Regular beforeAll */
+  // Regular beforeAll
   beforeAll(() => {
   });
   /** Docblock beforeAll */
@@ -20,7 +20,7 @@ describe('Names', () => {
     allure.displayName('Programmatic beforeAll');
   });
 
-  /* Regular afterEach */
+  // Regular afterEach
   afterEach(() => {
   });
   /** Docblock afterEach */

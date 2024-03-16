@@ -8,6 +8,7 @@ import type {
 import type { Label } from 'jest-allure2-reporter';
 
 import { flatMapAsync } from '../../utils/flatMapAsync';
+import { asArray } from '../../utils';
 
 import { asExtractor } from './asExtractor';
 
@@ -62,7 +63,9 @@ export function aggregateLabelCustomizers<C extends Customizer>(
         };
         const extracted = await extractor(aContext);
         const value = asArray(extracted);
-        return value ? value.map((value) => ({ name, value }) as Label) : [];
+        return value.length > 0
+          ? value.map((value) => ({ name, value }) as Label)
+          : [];
       })),
     ];
 
@@ -70,14 +73,4 @@ export function aggregateLabelCustomizers<C extends Customizer>(
   };
 
   return combined;
-}
-
-function asArray<T extends string>(
-  value: T | T[] | undefined,
-): T[] | undefined {
-  if (Array.isArray(value)) {
-    return value.length > 0 ? value : undefined;
-  } else {
-    return value ? [value] : [];
-  }
 }
