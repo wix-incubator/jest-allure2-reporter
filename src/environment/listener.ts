@@ -10,6 +10,7 @@ import * as StackTrace from 'stacktrace-js';
 import * as api from '../api';
 import realm from '../realms';
 import {
+  autoIndent,
   getStatusDetails,
   isJestAssertionError,
   isLibraryPath,
@@ -116,7 +117,9 @@ function addSourceCode({ event }: TestEnvironmentCircusEvent) {
   }
 
   if (code) {
-    realm.runtimeContext.getCurrentMetadata().set('transformedCode', code);
+    realm.runtimeContext
+      .getCurrentMetadata()
+      .set('transformedCode', autoIndent(code));
   }
 }
 

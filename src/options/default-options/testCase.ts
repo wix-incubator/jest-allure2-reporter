@@ -30,9 +30,9 @@ export const testCase: ResolvedTestCaseCustomizer = {
     testCaseMetadata.displayName ?? testCase.title,
   fullName: ({ testCase, testCaseMetadata }) =>
     testCaseMetadata.fullName ?? testCase.fullName,
-  description: ({ $, testCaseMetadata }) => {
+  description: async ({ $, testCaseMetadata }) => {
     const text = testCaseMetadata.description?.join('\n\n') ?? '';
-    const codes = $.extractSourceCodeWithSteps(testCaseMetadata);
+    const codes = await $.extractSourceCodeWithSteps(testCaseMetadata);
     const snippets = codes.map($.sourceCode2Markdown);
     return [text, ...snippets].filter(Boolean).join('\n\n');
   },

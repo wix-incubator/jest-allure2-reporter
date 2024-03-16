@@ -8,7 +8,7 @@ const sourceFileMap = new Map<
   Promise<TypeScript.SourceFile | undefined>
 >();
 
-export function ensureTypeScriptAST(
+export function extractTypescriptAST(
   ts: typeof TypeScript,
   filePath: string,
 ): Promise<TypeScript.SourceFile | undefined> {

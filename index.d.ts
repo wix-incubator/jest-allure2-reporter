@@ -4,6 +4,8 @@ import type { AggregatedResult, Config, Test, TestCaseResult, TestContext, TestR
 import JestMetadataReporter from 'jest-metadata/reporter';
 
 declare module 'jest-allure2-reporter' {
+  // region Config
+
   /**
    * Configuration options for the `jest-allure2-reporter` package.
    * These options are used in your Jest config.
@@ -140,6 +142,44 @@ declare module 'jest-allure2-reporter' {
 
   /** @see {@link AttachmentsOptions#contentHandler} */
   export type BuiltinContentAttachmentHandler = 'write';
+
+  // endregion
+
+  // region Allure Test Data
+
+  export interface AllureTestCaseResult {
+    hidden: boolean;
+    historyId: string;
+    name: string;
+    fullName: string;
+    start: number;
+    stop: number;
+    description: string;
+    descriptionHtml: string;
+    stage: Stage;
+    status: Status;
+    statusDetails: StatusDetails;
+    labels: Label[];
+    links: Link[];
+    attachments: Attachment[];
+    parameters: Parameter[];
+  }
+
+  export interface AllureTestStepResult {
+    name: string;
+    start: number;
+    stop: number;
+    stage: Stage;
+    status: Status;
+    statusDetails: StatusDetails;
+    steps: AllureTestStepResult[];
+    attachments: Attachment[];
+    parameters: Parameter[];
+  }
+
+  // endregion
+
+  // region Customizers
 
   /**
    * Global customizations for how test cases are reported
@@ -399,7 +439,7 @@ declare module 'jest-allure2-reporter' {
     T = unknown,
     C extends ExtractorContext<T> = ExtractorContext<T>,
     R = T,
-  > = (context: Readonly<C>) => R | undefined;
+  > = (context: Readonly<C>) => R | undefined | Promise<R | undefined>;
 
   export type GlobalExtractor<T, R = T> = Extractor<
     T,
@@ -458,13 +498,26 @@ declare module 'jest-allure2-reporter' {
     testStepMetadata: AllureTestStepMetadata;
   }
 
-  export interface AllureTestItemSourceLocation {
-    fileName?: string;
-    lineNumber?: number;
-    columnNumber?: number;
+  export interface ExtractorHelpers extends ExtractorHelpersAugmentation {
+    extractSourceCode(metadata: AllureTestItemMetadata): Promise<ExtractorHelperSourceCode | undefined>;
+    extractSourceCodeWithSteps(metadata: AllureTestItemMetadata): Promise<ExtractorHelperSourceCode[]>;
+    sourceCode2Markdown(sourceCode: Partial<ExtractorHelperSourceCode> | undefined): string;
+    markdown2html(markdown: string): Promise<string>;
   }
 
-  export type AllureTestStepPath = string[];
+  export type ExtractorHelperSourceCode = {
+    fileName: string;
+    code: string;
+    language: string;
+  };
+
+  // endregion
+
+  // region Custom Metadata
+
+  export interface AllureGlobalMetadata {
+    config: Pick<ReporterConfig, 'resultsDir' | 'overwrite' | 'attachments' | 'injectGlobals'>;
+  }
 
   export interface AllureTestItemMetadata {
     /**
@@ -480,7 +533,7 @@ declare module 'jest-allure2-reporter' {
     /**
      * Parsed docblock: comments and pragmas.
      */
-    docblock?: DocblockExtractorResult;
+    docblock?: AllureTestItemDocblock;
     /**
      * Title of the test case or test step.
      */
@@ -527,6 +580,8 @@ declare module 'jest-allure2-reporter' {
     transformedCode?: string;
   }
 
+  export type AllureTestStepPath = string[];
+
   export type AllureNestedTestStepMetadata = Omit<AllureTestStepMetadata, 'currentStep'>;
 
   /** @inheritDoc */
@@ -557,28 +612,20 @@ declare module 'jest-allure2-reporter' {
   /** @inheritDoc */
   export interface AllureTestFileMetadata extends AllureTestCaseMetadata {}
 
-  export interface AllureGlobalMetadata {
-    config: Pick<ReporterConfig, 'resultsDir' | 'overwrite' | 'attachments' | 'injectGlobals'>;
+  export interface AllureTestItemSourceLocation {
+    fileName?: string;
+    lineNumber?: number;
+    columnNumber?: number;
   }
 
-  export interface DocblockExtractorResult {
+  export interface AllureTestItemDocblock {
     comments: string;
     pragmas: Record<string, string | string[]>;
   }
 
-  export type CodeExtractorResult = {
-    ast?: unknown;
-    code: string;
-    language: string;
-  };
+  // endregion
 
-  export interface ExtractorHelpers extends ExtractorHelpersAugmentation {
-    extractSourceCode(metadata: AllureTestItemMetadata): CodeExtractorResult | undefined;
-    extractSourceCodeAsync(metadata: AllureTestItemMetadata): Promise<CodeExtractorResult | undefined>;
-    extractSourceCodeWithSteps(metadata: AllureTestItemMetadata): CodeExtractorResult[];
-    sourceCode2Markdown(sourceCode: Partial<CodeExtractorResult> | undefined): string;
-    markdown2html(markdown: string): Promise<string>;
-  }
+  // region Plugins
 
   export interface ExtractorHelpersAugmentation {
     // This may be extended by plugins
@@ -625,77 +672,20 @@ declare module 'jest-allure2-reporter' {
     helpers?(helpers: Partial<ExtractorHelpers>): void | Promise<void>;
 
     /** Allows to modify the raw metadata before it's processed by the reporter. [UNSTABLE!] */
-    rawMetadata?(context: PluginHookContexts['rawMetadata']): void | Promise<void>;
-
-    /** Attach to the reporter lifecycle hook `onRunStart`. */
-    onRunStart?(context: PluginHookContexts['onRunStart']): void | Promise<void>;
-
-    /** Attach to the reporter lifecycle hook `onTestFileStart`. */
-    onTestFileStart?(context: PluginHookContexts['onTestFileStart']): void | Promise<void>;
-
-    /** Attach to the reporter lifecycle hook `onTestCaseResult`. */
-    onTestCaseResult?(context: PluginHookContexts['onTestCaseResult']): void | Promise<void>;
-
-    /** Attach to the reporter lifecycle hook `onTestFileResult`. */
-    onTestFileResult?(context: PluginHookContexts['onTestFileResult']): void | Promise<void>;
-
-    /** Attach to the reporter lifecycle hook `onRunComplete`. */
-    onRunComplete?(context: PluginHookContexts['onRunComplete']): void | Promise<void>;
-
-    /** Method to extend global context. */
-    globalContext?(context: PluginHookContexts['globalContext']): void | Promise<void>;
-
-    /** Method to extend test file context. */
-    testFileContext?(context: PluginHookContexts['testFileContext']): void | Promise<void>;
-
-    /** Method to extend test entry context. */
-    testCaseContext?(context: PluginHookContexts['testCaseContext']): void | Promise<void>;
-
-    /** Method to extend test step context. */
-    testStepContext?(context: PluginHookContexts['testStepContext']): void | Promise<void>;
+    postProcessMetadata?(context: PluginHookContexts['postProcessMetadata']): void | Promise<void>;
   }
 
   export type PluginHookContexts = {
     helpers: Partial<ExtractorHelpers>;
-    rawMetadata: {
+    postProcessMetadata: {
       $: Readonly<ExtractorHelpers>;
       metadata: AllureTestItemMetadata;
     };
-    onRunStart: {
-      aggregatedResult: AggregatedResult;
-      reporterConfig: ReporterConfig;
-    };
-    onTestFileStart: {
-      reporterConfig: ReporterConfig;
-      test: Test;
-      testFileMetadata: AllureTestFileMetadata;
-    };
-    onTestCaseResult: {
-      reporterConfig: ReporterConfig;
-      test: Test;
-      testFileMetadata: AllureTestFileMetadata;
-      testCaseMetadata: AllureTestCaseMetadata;
-      testCaseResult: TestCaseResult;
-    };
-    onTestFileResult: {
-      aggregatedResult: AggregatedResult;
-      reporterConfig: ReporterConfig;
-      test: Test;
-      testResult: TestResult;
-      testFileMetadata: AllureTestFileMetadata;
-    };
-    onRunComplete: {
-      reporterConfig: ReporterConfig;
-      testContexts: Set<TestContext>;
-      results: AggregatedResult;
-    };
-    globalContext: GlobalExtractorContext;
-    testFileContext: TestFileExtractorContext;
-    testCaseContext: TestCaseExtractorContext;
-    testStepContext: TestStepExtractorContext;
   };
 
   export type PluginHookName = keyof PluginHookContexts;
+
+  // endregion
 
   //region Allure types
 

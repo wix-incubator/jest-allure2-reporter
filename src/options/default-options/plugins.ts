@@ -4,8 +4,7 @@ import * as plugins from '../../reporter-plugins';
 
 export async function defaultPlugins(context: PluginContext) {
   return await Promise.all([
-    plugins.fallback({}, context),
-    plugins.github({}, context),
+    plugins.ci({}, context),
     plugins.manifest({}, context),
     plugins.remark({}, context),
     plugins.sourceCode({}, context),

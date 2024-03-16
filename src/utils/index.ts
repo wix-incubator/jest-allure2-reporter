@@ -1,4 +1,5 @@
 export * from './attempt';
+export * from './autoIndent';
 export * from './constant';
 export * from './formatString';
 export * from './getStatusDetails';

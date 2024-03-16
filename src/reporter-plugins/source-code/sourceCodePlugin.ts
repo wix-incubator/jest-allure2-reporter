@@ -1,20 +1,21 @@
 /// <reference path="../augs.d.ts" />
 
+import type { ExtractorHelperSourceCode } from 'jest-allure2-reporter';
 import type {
   AllureTestItemSourceLocation,
   AllureNestedTestStepMetadata,
-  CodeExtractorResult,
   Plugin,
   PluginConstructor,
 } from 'jest-allure2-reporter';
 
+import { weakMemoize } from '../../utils';
+
 import {
-  ensureTypeScriptAST,
+  extractTypescriptAST,
   extractTypeScriptCode,
   FileNavigatorCache,
   importTypeScript,
-} from '../utils';
-
+} from './utils';
 import { detectSourceLanguage } from './detectSourceLanguage';
 
 function isBeforeHook({ hookType }: AllureNestedTestStepMetadata) {
@@ -32,17 +33,9 @@ function isDefined<T>(value: T | undefined): value is T {
 export const sourceCodePlugin: PluginConstructor = async () => {
   const ts = await importTypeScript();
 
-  const promiseCache = new WeakMap<
-    AllureTestItemSourceLocation,
-    Promise<CodeExtractorResult | undefined>
-  >();
-  const cache = new WeakMap<
-    AllureTestItemSourceLocation,
-    CodeExtractorResult
-  >();
-  const extractAndCache = async (
+  async function doExtract(
     sourceLocation: AllureTestItemSourceLocation | undefined,
-  ) => {
+  ): Promise<ExtractorHelperSourceCode | undefined> {
     if (!sourceLocation?.fileName) {
       return;
     }
@@ -50,66 +43,49 @@ export const sourceCodePlugin: PluginConstructor = async () => {
     await FileNavigatorCache.instance.resolve(sourceLocation.fileName);
     const language = detectSourceLanguage(sourceLocation.fileName);
     if ((language === 'typescript' || language === 'javascript') && ts) {
-      const ast = await ensureTypeScriptAST(ts, sourceLocation.fileName);
+      const ast = await extractTypescriptAST(ts, sourceLocation.fileName);
       const location = [
         sourceLocation.lineNumber,
         sourceLocation.columnNumber,
       ] as const;
       const code = await extractTypeScriptCode(ts, ast, location);
       if (code) {
-        cache.set(sourceLocation, {
+        return {
           code,
           language,
-          ast,
-        });
+          fileName: sourceLocation.fileName,
+        };
       }
     }
 
-    return cache.get(sourceLocation);
-  };
+    return;
+  }
 
   const plugin: Plugin = {
     name: 'jest-allure2-reporter/plugins/source-code',
 
     async helpers($) {
-      const extractSourceCode = (metadata: {
-        sourceLocation?: AllureTestItemSourceLocation;
-      }) => {
-        return metadata.sourceLocation
-          ? cache.get(metadata.sourceLocation)
-          : undefined;
-      };
+      const extractSourceCode = weakMemoize(async (metadata) => {
+        return doExtract(metadata.sourceLocation);
+      });
 
-      $.extractSourceCode = extractSourceCode;
-
-      $.extractSourceCodeAsync = async (metadata) => {
-        if (!metadata.sourceLocation) {
-          return;
-        }
-
-        if (!promiseCache.has(metadata.sourceLocation)) {
-          promiseCache.set(
-            metadata.sourceLocation,
-            extractAndCache(metadata.sourceLocation),
-          );
-        }
-
-        return promiseCache.get(metadata.sourceLocation);
-      };
-
-      $.extractSourceCodeWithSteps = (metadata) => {
-        const test = extractSourceCode(metadata);
+      const extractSourceCodeWithSteps = weakMemoize(async (metadata) => {
+        const test = await doExtract(metadata);
         const before =
-          metadata.steps?.filter(isBeforeHook)?.map(extractSourceCode) ?? [];
-        const after =
-          metadata.steps?.filter(isAfterHook)?.map(extractSourceCode) ?? [];
+          metadata.steps?.filter(isBeforeHook)?.map(doExtract) ?? [];
+        const after = metadata.steps?.filter(isAfterHook)?.map(doExtract) ?? [];
 
         return [...before, test, ...after].filter(isDefined);
-      };
+      });
+
+      Object.assign($, {
+        extractSourceCode,
+        extractSourceCodeWithSteps,
+      });
     },
 
-    async rawMetadata(context) {
-      await context.$.extractSourceCodeAsync(context.metadata);
+    async postProcessMetadata(context) {
+      await context.$.extractSourceCode(context.metadata);
     },
   };
 

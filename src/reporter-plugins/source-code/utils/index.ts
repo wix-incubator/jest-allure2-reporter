@@ -1,4 +1,4 @@
-export * from './ensureTypeScriptAST';
+export * from './extractTypescriptAST';
 export * from './extractTypeScriptCode';
 export * from './importTypeScript';
 export * from './FileNavigatorCache';

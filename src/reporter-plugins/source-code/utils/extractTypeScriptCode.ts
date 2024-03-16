@@ -1,7 +1,7 @@
 // eslint-disable-next-line node/no-unpublished-import
 import type TypeScript from 'typescript';
 
-import { autoIndent } from './autoIndent';
+import { autoIndent } from '../../../utils';
 
 export async function extractTypeScriptCode(
   ts: typeof TypeScript,

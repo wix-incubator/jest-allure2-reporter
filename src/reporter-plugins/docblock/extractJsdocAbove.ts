@@ -1,4 +1,4 @@
-import type { LineNavigator } from '../utils';
+import type { LineNavigator } from '../source-code';
 
 export function extractJsdocAbove(
   navigator: LineNavigator,

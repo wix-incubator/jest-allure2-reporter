@@ -1,14 +1,14 @@
-import type { DocblockExtractorResult } from 'jest-allure2-reporter';
+import type { AllureTestItemDocblock } from 'jest-allure2-reporter';
 import { extract, parseWithComments } from 'jest-docblock';
 
-import type { LineNavigator } from '../utils';
+import type { LineNavigator } from '../source-code';
 
 import { extractJsdocAbove } from './extractJsdocAbove';
 
 export function parseJsdoc(
   navigator: LineNavigator,
   lineNumber: number,
-): DocblockExtractorResult {
+): AllureTestItemDocblock {
   const contents = extractJsdocAbove(navigator, lineNumber);
   const extracted = extract(contents);
 

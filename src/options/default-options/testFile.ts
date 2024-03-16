@@ -26,9 +26,9 @@ export const testFile: ResolvedTestFileCustomizer = {
   name: ({ filePath }) => filePath.join(path.sep),
   fullName: ({ globalConfig, testFile }) =>
     path.relative(globalConfig.rootDir, testFile.testFilePath),
-  description: ({ $, testFileMetadata }) => {
+  description: async ({ $, testFileMetadata }) => {
     const text = testFileMetadata.description?.join('\n') ?? '';
-    const code = $.extractSourceCode(testFileMetadata);
+    const code = await $.extractSourceCode(testFileMetadata);
     return [text, $.sourceCode2Markdown(code)].filter(Boolean).join('\n\n');
   },
   descriptionHtml: ({ testFileMetadata }) =>

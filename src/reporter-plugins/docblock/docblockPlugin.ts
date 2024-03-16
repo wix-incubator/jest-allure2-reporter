@@ -1,13 +1,13 @@
 // eslint-disable-next-line node/no-unpublished-import
-import type TypeScript from 'typescript';
 import type { Plugin, PluginConstructor } from 'jest-allure2-reporter';
 import { extract, parseWithComments } from 'jest-docblock';
 
 import {
+  extractTypescriptAST,
   extractTypeScriptCode,
   FileNavigatorCache,
   importTypeScript,
-} from '../utils';
+} from '../source-code';
 
 import { extractJsdocAbove } from './extractJsdocAbove';
 
@@ -15,16 +15,21 @@ export const docblockPlugin: PluginConstructor = () => {
   const plugin: Plugin = {
     name: 'jest-allure2-reporter/plugins/docblock',
 
-    async rawMetadata({ $, metadata }) {
+    async postProcessMetadata({ metadata }) {
       const { fileName, lineNumber, columnNumber } =
         metadata.sourceLocation || {};
-      const code = await $.extractSourceCodeAsync(metadata);
       let extracted: string | undefined;
       const ts = await importTypeScript();
-      if (ts && code?.ast && lineNumber != null && columnNumber != null) {
+      if (
+        ts &&
+        fileName != null &&
+        lineNumber != null &&
+        columnNumber != null
+      ) {
+        const ast = await extractTypescriptAST(ts, fileName);
         const fullCode = await extractTypeScriptCode(
           ts,
-          code.ast as TypeScript.SourceFile,
+          ast,
           [lineNumber, columnNumber],
           true,
         );
