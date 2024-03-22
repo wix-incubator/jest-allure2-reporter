@@ -14,13 +14,13 @@ export class TaskQueue {
 
   readonly flush = () => this.#idle;
 
-  readonly enqueueTask = (task: MaybeFunction<Promise<unknown>>) => {
-    this.#idle =
+  readonly enqueueTask = <T>(task: MaybeFunction<Promise<T>>): Promise<T> => {
+    const result = (this.#idle =
       typeof task === 'function'
-        ? this.#idle.then(task)
-        : this.#idle.then(() => task);
+        ? this.#idle.then<T>(task)
+        : this.#idle.then<T>(() => task));
 
     this.#idle = this.#idle.catch(this.#logError);
-    return this.#idle;
+    return result;
   };
 }

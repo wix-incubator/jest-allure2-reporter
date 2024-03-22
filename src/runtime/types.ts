@@ -11,12 +11,12 @@ import type {
 
 import type { Function_, MaybePromise } from '../utils';
 
-export interface IAllureRuntime {
+export interface AllureRuntime {
   /**
    * Advanced API for attaching metadata to the same step or test.
    * Useful when your artifacts are delayed and are created asynchronously.
    */
-  $bind(options?: AllureRuntimeBindOptions): IAllureRuntime;
+  $bind(options?: AllureRuntimeBindOptions): AllureRuntime;
 
   /**
    * Attach a runtime plugin using a callback.
@@ -50,7 +50,7 @@ export interface IAllureRuntime {
     name: string,
     content: MaybePromise<T>,
     mimeType?: string,
-  ): typeof content;
+  ): Promise<string | undefined>;
 
   createAttachment<
     T extends AttachmentContent,
@@ -67,16 +67,14 @@ export interface IAllureRuntime {
     options: ContentAttachmentOptions,
   ): typeof function_;
 
-  fileAttachment(filePath: string, name?: string): string;
-  fileAttachment(filePath: string, options?: FileAttachmentOptions): string;
   fileAttachment(
-    filePathPromise: Promise<string>,
+    filePath: string | Promise<string>,
     name?: string,
-  ): Promise<string>;
+  ): Promise<string | undefined>;
   fileAttachment(
-    filePathPromise: Promise<string>,
+    filePath: string | Promise<string>,
     options?: FileAttachmentOptions,
-  ): Promise<string>;
+  ): Promise<string | undefined>;
 
   createFileAttachment<F extends Function_<MaybePromise<string>>>(
     function_: F,
@@ -104,7 +102,7 @@ export type AllureRuntimePluginCallback = (
 ) => void;
 
 export interface AllureRuntimePluginContext {
-  readonly runtime: IAllureRuntime;
+  readonly runtime: AllureRuntime;
   readonly contentAttachmentHandlers: Record<
     BuiltinContentAttachmentHandler | 'default' | string,
     ContentAttachmentHandler

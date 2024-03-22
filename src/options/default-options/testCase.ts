@@ -4,26 +4,27 @@ import type { TestCaseResult } from '@jest/reporters';
 import type {
   ExtractorContext,
   Label,
-  ResolvedTestCaseCustomizer,
+  ReporterConfig,
   Stage,
   Status,
   TestCaseCustomizer,
   TestCaseExtractorContext,
 } from 'jest-allure2-reporter';
 
-import {
-  aggregateLabelCustomizers,
-  composeExtractors,
-  stripStatusDetails,
-} from '../utils';
+import { composeExtractors } from '../extractors';
 import { getStatusDetails } from '../../utils';
+import { aggregateLabelCustomizers } from '../compose-options';
 
 const identity = <T>(context: ExtractorContext<T>) => context.value;
-const last = <T>(context: ExtractorContext<T[]>) => context.value?.at(-1);
+const last = async <T>(context: ExtractorContext<T[]>) => {
+  const value = await context.value;
+  return value?.at(-1);
+};
 const all = identity;
 
-export const testCase: ResolvedTestCaseCustomizer = {
+export const testCase: ReporterConfig['testCase'] = {
   hidden: () => false,
+  $: ({ $ }) => $,
   historyId: ({ testCase, testCaseMetadata }) =>
     testCaseMetadata.historyId ?? testCase.fullName,
   name: ({ testCase, testCaseMetadata }) =>
@@ -32,7 +33,7 @@ export const testCase: ResolvedTestCaseCustomizer = {
     testCaseMetadata.fullName ?? testCase.fullName,
   description: async ({ $, testCaseMetadata }) => {
     const text = testCaseMetadata.description?.join('\n\n') ?? '';
-    const codes = await $.extractSourceCodeWithSteps(testCaseMetadata);
+    const codes = await $.extractSourceCode(testCaseMetadata, true);
     const snippets = codes.map($.sourceCode2Markdown);
     return [text, ...snippets].filter(Boolean).join('\n\n');
   },
@@ -46,8 +47,8 @@ export const testCase: ResolvedTestCaseCustomizer = {
     testCaseMetadata.stage ?? getTestCaseStage(testCase),
   status: ({ testCase, testCaseMetadata }) =>
     testCaseMetadata.status ?? getTestCaseStatus(testCase),
-  statusDetails: ({ testCase, testCaseMetadata }) =>
-    stripStatusDetails(
+  statusDetails: ({ $, testCase, testCaseMetadata }) =>
+    $.stripAnsi(
       testCaseMetadata.statusDetails ??
         getStatusDetails((testCase.failureMessages ?? []).join('\n')),
     ),

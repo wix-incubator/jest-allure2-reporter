@@ -30,15 +30,12 @@ import type {
   AllureTestStepMetadata,
   AllureTestStepResult,
   ExtractorHelpers,
-  GlobalExtractorContext,
-  Plugin,
-  PluginHookContexts,
-  PluginHookName,
   ReporterConfig,
   ReporterOptions,
   TestCaseExtractorContext,
   TestFileExtractorContext,
   TestStepExtractorContext,
+  TestRunExtractorContext,
 } from 'jest-allure2-reporter';
 
 import { resolveOptions } from '../options';
@@ -48,7 +45,6 @@ import { md5 } from '../utils';
 import * as fallbackHooks from './fallback';
 
 export class JestAllure2Reporter extends JestMetadataReporter {
-  private _plugins: readonly Plugin[] = [];
   private readonly _$: Partial<ExtractorHelpers> = {};
   private readonly _allure: AllureRuntime;
   private readonly _config: ReporterConfig;
@@ -77,16 +73,12 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     aggregatedResult: AggregatedResult,
     options: ReporterOnStartOptions,
   ): Promise<void> {
-    this._plugins = await this._config.plugins;
-
     await super.onRunStart(aggregatedResult, options);
 
     if (this._config.overwrite) {
       await rimraf(this._config.resultsDir);
       await fs.mkdir(this._config.resultsDir, { recursive: true });
     }
-
-    await this._callPlugins('helpers', this._$);
   }
 
   async onTestFileStart(test: Test) {
@@ -132,10 +124,10 @@ export class JestAllure2Reporter extends JestMetadataReporter {
 
     const config = this._config;
 
-    const globalContext: GlobalExtractorContext = {
+    const globalContext: TestRunExtractorContext = {
       globalConfig: this._globalConfig,
       config,
-      value: undefined,
+      default: () => void 0,
       $: this._$ as ExtractorHelpers,
     };
 
@@ -355,7 +347,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
   }
 
   private async _renderHtmlDescription(
-    context: GlobalExtractorContext,
+    context: TestRunExtractorContext,
     test: AllurePayloadTest,
   ) {
     if (test.description) {
@@ -440,21 +432,11 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     await Promise.all(
       batch.map(async (metadata) => {
         const allureProxy = new AllureMetadataProxy(metadata);
-        await this._callPlugins('postProcessMetadata', {
-          $: this._$ as ExtractorHelpers,
-          metadata: allureProxy.assign({}).get(),
-        });
-      }),
-    );
-  }
-
-  private async _callPlugins<K extends PluginHookName>(
-    methodName: K,
-    context: PluginHookContexts[K],
-  ) {
-    await Promise.all(
-      this._plugins.map((p) => {
-        return p[methodName]?.(context as any);
+        allureProxy.get(); // TODO: remove this line
+        // await this._callPlugins('postProcessMetadata', {
+        //   $: this._$ as ExtractorHelpers,
+        //   metadata: allureProxy.assign({}).get(),
+        // });
       }),
     );
   }

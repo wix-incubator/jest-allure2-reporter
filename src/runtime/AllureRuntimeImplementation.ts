@@ -7,12 +7,12 @@ import { constant, isObject } from '../utils';
 import type {
   AllureRuntimeBindOptions,
   AllureRuntimePluginCallback,
-  IAllureRuntime,
+  AllureRuntime,
 } from './types';
 import * as runtimeModules from './modules';
 import type { AllureRuntimeContext } from './AllureRuntimeContext';
 
-export class AllureRuntime implements IAllureRuntime {
+export class AllureRuntimeImplementation implements AllureRuntime {
   readonly #context: AllureRuntimeContext;
   readonly #coreModule: runtimeModules.CoreModule;
   readonly #basicStepsModule: runtimeModules.StepsModule;
@@ -31,10 +31,10 @@ export class AllureRuntime implements IAllureRuntime {
     this.#stepsDecorator = new runtimeModules.StepsDecorator({ runtime: this });
   }
 
-  $bind = (options?: AllureRuntimeBindOptions): AllureRuntime => {
+  $bind = (options?: AllureRuntimeBindOptions): AllureRuntimeImplementation => {
     const { metadata = true, time = false } = options ?? {};
 
-    return new AllureRuntime({
+    return new AllureRuntimeImplementation({
       ...this.#context,
       getCurrentMetadata: metadata
         ? constant(this.#context.getCurrentMetadata())
@@ -56,17 +56,17 @@ export class AllureRuntime implements IAllureRuntime {
 
   flush = () => this.#context.flush();
 
-  description: IAllureRuntime['description'] = (value) => {
+  description: AllureRuntime['description'] = (value) => {
     // TODO: assert is a string
     this.#coreModule.description(value);
   };
 
-  descriptionHtml: IAllureRuntime['descriptionHtml'] = (value) => {
+  descriptionHtml: AllureRuntime['descriptionHtml'] = (value) => {
     // TODO: assert is a string
     this.#coreModule.descriptionHtml(value);
   };
 
-  fullName: IAllureRuntime['fullName'] = (value) => {
+  fullName: AllureRuntime['fullName'] = (value) => {
     // TODO: assert is a string
     this.#coreModule.fullName(value);
   };
@@ -76,25 +76,25 @@ export class AllureRuntime implements IAllureRuntime {
     this.#coreModule.historyId(value);
   }
 
-  label: IAllureRuntime['label'] = (name, value) => {
+  label: AllureRuntime['label'] = (name, value) => {
     // TODO: assert name is a string
     // TODO: assert value is a string
     this.#coreModule.label(name, value);
   };
 
-  link: IAllureRuntime['link'] = (url, name, type) => {
+  link: AllureRuntime['link'] = (url, name, type) => {
     // TODO: url is a string
     // TODO: name is a string or nullish
     // TODO: type is a string or nullish
     this.#coreModule.link({ name, url, type });
   };
 
-  displayName: IAllureRuntime['displayName'] = (value) => {
+  displayName: AllureRuntime['displayName'] = (value) => {
     // TODO: assert is a string
     this.#coreModule.displayName(value);
   };
 
-  parameter: IAllureRuntime['parameter'] = (name, value, options) => {
+  parameter: AllureRuntime['parameter'] = (name, value, options) => {
     // TODO: assert name is a string
     this.#coreModule.parameter({
       name,
@@ -103,7 +103,7 @@ export class AllureRuntime implements IAllureRuntime {
     });
   };
 
-  parameters: IAllureRuntime['parameters'] = (parameters) => {
+  parameters: AllureRuntime['parameters'] = (parameters) => {
     for (const [name, value] of Object.entries(parameters)) {
       if (value && typeof value === 'object') {
         const raw = value as Parameter;
@@ -114,7 +114,7 @@ export class AllureRuntime implements IAllureRuntime {
     }
   };
 
-  status: IAllureRuntime['status'] = (status, statusDetails) => {
+  status: AllureRuntime['status'] = (status, statusDetails) => {
     // TODO: assert string literal
     this.#coreModule.status(status);
     if (isObject(statusDetails)) {
@@ -122,18 +122,18 @@ export class AllureRuntime implements IAllureRuntime {
     }
   };
 
-  statusDetails: IAllureRuntime['statusDetails'] = (statusDetails) => {
+  statusDetails: AllureRuntime['statusDetails'] = (statusDetails) => {
     // TODO: assert is not nullish
     this.#coreModule.statusDetails(statusDetails);
   };
 
-  step: IAllureRuntime['step'] = (name, function_) =>
+  step: AllureRuntime['step'] = (name, function_) =>
     // TODO: assert name is a string
     // TODO: assert function_ is a function
     this.#basicStepsModule.step(name, function_);
 
   // @ts-expect-error TS2322: too few arguments
-  createStep: IAllureRuntime['createStep'] = (
+  createStep: AllureRuntime['createStep'] = (
     nameFormat,
     maybeParameters,
     maybeFunction,
@@ -157,15 +157,14 @@ export class AllureRuntime implements IAllureRuntime {
     );
   };
 
-  attachment: IAllureRuntime['attachment'] = (name, content, mimeType) =>
+  attachment: AllureRuntime['attachment'] = (name, content, mimeType) =>
     // TODO: assert name is a string
     this.#contentAttachmentsModule.attachment(content, {
       name,
       mimeType,
     });
 
-  // @ts-expect-error TS2322: is not assignable to type 'string'
-  fileAttachment: IAllureRuntime['fileAttachment'] = (
+  fileAttachment: AllureRuntime['fileAttachment'] = (
     filePath,
     nameOrOptions,
   ) => {
@@ -178,7 +177,7 @@ export class AllureRuntime implements IAllureRuntime {
     return this.#fileAttachmentsModule.attachment(filePath, options);
   };
 
-  createAttachment: IAllureRuntime['createAttachment'] = (
+  createAttachment: AllureRuntime['createAttachment'] = (
     function_,
     nameOrOptions,
   ) => {
@@ -192,7 +191,7 @@ export class AllureRuntime implements IAllureRuntime {
     return this.#contentAttachmentsModule.createAttachment(function_, options);
   };
 
-  createFileAttachment: IAllureRuntime['createFileAttachment'] = (
+  createFileAttachment: AllureRuntime['createFileAttachment'] = (
     function_,
     nameOrOptions,
   ) => {

@@ -1,17 +1,18 @@
-import type { TestStepCustomizer } from 'jest-allure2-reporter';
+import type { ReporterConfig, TestStepCustomizer } from 'jest-allure2-reporter';
 
-import { composeExtractors } from '../utils';
+import { composeExtractors } from '../extractors';
 
 export function composeTestStepCustomizers(
-  base: TestStepCustomizer,
+  base: ReporterConfig['testStep'],
   custom: Partial<TestStepCustomizer> | undefined,
-): TestStepCustomizer {
+): typeof base {
   if (!custom) {
     return base;
   }
 
   return {
     hidden: composeExtractors(custom.hidden, base.hidden),
+    $: composeExtractors(custom.$, base.$),
     name: composeExtractors(custom.name, base.name),
     stage: composeExtractors(custom.stage, base.stage),
     start: composeExtractors(custom.start, base.start),

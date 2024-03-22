@@ -1,9 +1,9 @@
 import type { Function_ } from '../../utils';
 import { formatString, wrapFunction } from '../../utils';
-import type { IAllureRuntime, ParameterOrString } from '../types';
+import type { AllureRuntime, ParameterOrString } from '../types';
 
 export type FunctionalStepsModuleContext = {
-  runtime: Pick<IAllureRuntime, 'step' | 'parameter'>;
+  runtime: Pick<AllureRuntime, 'step' | 'parameter'>;
 };
 
 export class StepsDecorator {

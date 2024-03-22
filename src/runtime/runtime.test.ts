@@ -4,7 +4,7 @@ import { state } from 'jest-metadata';
 
 import { AllureMetadataProxy } from '../metadata';
 
-import { AllureRuntime } from './AllureRuntime';
+import { AllureRuntimeImplementation } from './AllureRuntimeImplementation';
 import type { SharedReporterConfig } from './types';
 import { AllureRuntimeContext } from './AllureRuntimeContext';
 
@@ -35,8 +35,14 @@ describe('AllureRuntime', () => {
       },
     });
 
-    const runtime = new AllureRuntime(context);
-    runtime.attachment('attachment1', Buffer.from('first'), 'text/plain');
+    const runtime = new AllureRuntimeImplementation(context);
+    const resultingPath = await runtime.attachment(
+      'attachment1',
+      Buffer.from('first'),
+      'text/plain',
+    );
+
+    expect(resultingPath).toBe('/attachments/first');
 
     const innerStep3 = runtime.createStep(
       'inner step 3',

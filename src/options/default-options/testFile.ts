@@ -4,24 +4,22 @@ import type {
   ExtractorContext,
   Label,
   Link,
-  ResolvedTestFileCustomizer,
+  ReporterConfig,
   TestCaseCustomizer,
   TestFileExtractorContext,
 } from 'jest-allure2-reporter';
 
 import { getStatusDetails } from '../../utils';
-import {
-  aggregateLabelCustomizers,
-  composeExtractors,
-  stripStatusDetails,
-} from '../utils';
+import { aggregateLabelCustomizers } from '../compose-options';
+import { composeExtractors } from '../extractors';
 
 const identity = <T>(context: ExtractorContext<T>) => context.value;
 const last = <T>(context: ExtractorContext<T[]>) => context.value?.at(-1);
 const all = identity;
 
-export const testFile: ResolvedTestFileCustomizer = {
+export const testFile: ReporterConfig['testFile'] = {
   hidden: ({ testFile }) => !testFile.testExecError,
+  $: ({ $ }) => $,
   historyId: ({ filePath }) => filePath.join('/'),
   name: ({ filePath }) => filePath.join(path.sep),
   fullName: ({ globalConfig, testFile }) =>
@@ -39,8 +37,8 @@ export const testFile: ResolvedTestFileCustomizer = {
     testFile.testExecError == null ? 'finished' : 'interrupted',
   status: ({ testFile }) =>
     testFile.testExecError == null ? 'passed' : 'broken',
-  statusDetails: ({ testFile }) =>
-    stripStatusDetails(getStatusDetails(testFile.testExecError)),
+  statusDetails: ({ $, testFile }) =>
+    $.stripAnsi(getStatusDetails(testFile.testExecError)),
   attachments: ({ testFileMetadata }) => testFileMetadata.attachments ?? [],
   parameters: ({ testFileMetadata }) => testFileMetadata.parameters ?? [],
   labels: composeExtractors<Label[], TestFileExtractorContext<Label[]>>(

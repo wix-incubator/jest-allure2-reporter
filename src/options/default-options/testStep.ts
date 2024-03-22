@@ -1,14 +1,13 @@
 import type {
   AllureTestStepMetadata,
+  ReporterConfig,
   Stage,
   Status,
-  ResolvedTestStepCustomizer,
 } from 'jest-allure2-reporter';
 
-import { stripStatusDetails } from '../utils';
-
-export const testStep: ResolvedTestStepCustomizer = {
+export const testStep: ReporterConfig['testStep'] = {
   hidden: () => false,
+  $: ({ $ }) => $,
   name: ({ testStepMetadata }) =>
     testStepMetadata.displayName ||
     testStepMetadata.hookType ||
@@ -18,8 +17,8 @@ export const testStep: ResolvedTestStepCustomizer = {
   stage: ({ testStepMetadata }) => testStepMetadata.stage,
   status: ({ testStepMetadata }) =>
     testStepMetadata.status ?? inferStatus(testStepMetadata),
-  statusDetails: ({ testStepMetadata }) =>
-    stripStatusDetails(testStepMetadata.statusDetails),
+  statusDetails: ({ $, testStepMetadata }) =>
+    $.stripAnsi(testStepMetadata.statusDetails),
   attachments: ({ testStepMetadata }) => testStepMetadata.attachments ?? [],
   parameters: ({ testStepMetadata }) => testStepMetadata.parameters ?? [],
 };

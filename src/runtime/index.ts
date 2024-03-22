@@ -1,3 +1,3 @@
 export * from './types';
-export * from './AllureRuntime';
+export * from './AllureRuntimeImplementation';
 export * from './AllureRuntimeContext';

@@ -1,24 +1,33 @@
-import type {
-  ResolvedTestCaseCustomizer,
-  TestCaseCustomizer,
-} from 'jest-allure2-reporter';
+import type { ReporterConfig, TestCaseCustomizer } from 'jest-allure2-reporter';
 
-import {
-  aggregateLabelCustomizers,
-  aggregateLinkCustomizers,
-  composeExtractors,
-} from '../utils';
+import { composeExtractors } from '../extractors';
+
+import { aggregateLabelCustomizers } from './aggregateLabelCustomizers';
+import { aggregateLinkCustomizers } from './aggregateLinkCustomizers';
 
 export function composeTestCaseCustomizers(
-  base: ResolvedTestCaseCustomizer,
+  base: ReporterConfig['testRun'],
   custom: Partial<TestCaseCustomizer> | undefined,
-): ResolvedTestCaseCustomizer {
+): typeof base;
+export function composeTestCaseCustomizers(
+  base: ReporterConfig['testFile'],
+  custom: Partial<TestCaseCustomizer> | undefined,
+): typeof base;
+export function composeTestCaseCustomizers(
+  base: ReporterConfig['testCase'],
+  custom: Partial<TestCaseCustomizer> | undefined,
+): typeof base;
+export function composeTestCaseCustomizers(
+  base: ReporterConfig['testRun' | 'testFile' | 'testCase'],
+  custom: Partial<TestCaseCustomizer> | undefined,
+): typeof base {
   if (!custom) {
     return base;
   }
 
   return {
     hidden: composeExtractors(custom.hidden, base.hidden),
+    $: composeExtractors(custom.$, base.$),
     historyId: composeExtractors(custom.historyId, base.historyId),
     fullName: composeExtractors(custom.fullName, base.fullName),
     name: composeExtractors(custom.name, base.name),

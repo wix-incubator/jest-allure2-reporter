@@ -26,7 +26,7 @@ export class AllureRuntimeContext {
   readonly getNow: () => number;
 
   readonly flush: () => Promise<unknown>;
-  readonly enqueueTask: (task: MaybeFunction<Promise<unknown>>) => void;
+  readonly enqueueTask: <T>(task: MaybeFunction<Promise<T>>) => Promise<T>;
 
   constructor(config: AllureRuntimeConfig) {
     this.contentAttachmentHandlers = config.contentAttachmentHandlers ?? {

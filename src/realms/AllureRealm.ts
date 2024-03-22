@@ -5,7 +5,7 @@ import { state } from 'jest-metadata';
 import type { AllureGlobalMetadata } from 'jest-allure2-reporter';
 
 import type { SharedReporterConfig } from '../runtime';
-import { AllureRuntime, AllureRuntimeContext } from '../runtime';
+import { AllureRuntimeImplementation, AllureRuntimeContext } from '../runtime';
 import { AllureMetadataProxy } from '../metadata';
 
 export class AllureRealm {
@@ -39,5 +39,5 @@ export class AllureRealm {
     },
   });
 
-  runtime = new AllureRuntime(this.runtimeContext);
+  runtime = new AllureRuntimeImplementation(this.runtimeContext);
 }

@@ -5,15 +5,15 @@ import type {
 } from 'jest-allure2-reporter';
 
 import { categories } from './categories';
-import { defaultPlugins } from './plugins';
-import { testCase } from './testCase';
+import { helpers } from './helpers';
+import { testRun } from './testRun';
 import { testFile } from './testFile';
+import { testCase } from './testCase';
 import { testStep } from './testStep';
-import { executor } from './executor';
 
 const identity = <T>(context: ExtractorContext<T>) => context.value;
 
-export function defaultOptions(context: PluginContext): ReporterConfig {
+export function defaultOptions(): ReporterConfig {
   return {
     overwrite: true,
     resultsDir: 'allure-results',
@@ -23,12 +23,13 @@ export function defaultOptions(context: PluginContext): ReporterConfig {
       contentHandler: 'write',
       fileHandler: 'ref',
     },
+    helpers,
+    testRun,
     testFile,
     testCase,
     testStep,
     categories,
     environment: identity,
-    executor: executor(),
-    plugins: defaultPlugins(context),
+    executor: ({ $ }) => $.getExecutorInfo(true),
   };
 }
