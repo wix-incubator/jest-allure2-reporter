@@ -4,16 +4,16 @@ import type { TestCaseResult } from '@jest/reporters';
 import type {
   ExtractorContext,
   Label,
-  ReporterConfig,
+  TestCaseCustomizer,
   Stage,
   Status,
-  TestCaseCustomizer,
+  TestCasePropertyCustomizer,
   TestCaseExtractorContext,
 } from 'jest-allure2-reporter';
 
 import { composeExtractors } from '../extractors';
-import { getStatusDetails } from '../../utils';
-import { aggregateLabelCustomizers } from '../compose-options';
+import { getStatusDetails, isDefined } from '../../utils';
+import { labels } from '../compose-options';
 
 const identity = <T>(context: ExtractorContext<T>) => context.value;
 const last = async <T>(context: ExtractorContext<T[]>) => {
@@ -22,7 +22,7 @@ const last = async <T>(context: ExtractorContext<T[]>) => {
 };
 const all = identity;
 
-export const testCase: ReporterConfig['testCase'] = {
+export const testCase: Required<TestCaseCustomizer> = {
   hidden: () => false,
   $: ({ $ }) => $,
   historyId: ({ testCase, testCaseMetadata }) =>
@@ -35,7 +35,7 @@ export const testCase: ReporterConfig['testCase'] = {
     const text = testCaseMetadata.description?.join('\n\n') ?? '';
     const codes = await $.extractSourceCode(testCaseMetadata, true);
     const snippets = codes.map($.sourceCode2Markdown);
-    return [text, ...snippets].filter(Boolean).join('\n\n');
+    return [text, ...snippets].filter(isDefined).join('\n\n');
   },
   descriptionHtml: ({ testCaseMetadata }) =>
     testCaseMetadata.descriptionHtml?.join('\n'),
@@ -55,7 +55,7 @@ export const testCase: ReporterConfig['testCase'] = {
   attachments: ({ testCaseMetadata }) => testCaseMetadata.attachments ?? [],
   parameters: ({ testCaseMetadata }) => testCaseMetadata.parameters ?? [],
   labels: composeExtractors<Label[], TestCaseExtractorContext<Label[]>>(
-    aggregateLabelCustomizers({
+    labels({
       package: last,
       testClass: last,
       testMethod: last,
@@ -70,7 +70,7 @@ export const testCase: ReporterConfig['testCase'] = {
       severity: last,
       tag: all,
       owner: last,
-    } as TestCaseCustomizer['labels']),
+    } as TestCasePropertyCustomizer['labels']),
     ({ testCaseMetadata }) => testCaseMetadata.labels ?? [],
   ),
   links: ({ testCaseMetadata }) => testCaseMetadata.links ?? [],

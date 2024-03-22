@@ -5,17 +5,15 @@ import type {
   Label,
   Link,
   ReporterConfig,
-  TestCaseCustomizer,
+  TestCasePropertyCustomizer,
   TestFileExtractorContext,
 } from 'jest-allure2-reporter';
 
-import { getStatusDetails } from '../../utils';
-import { aggregateLabelCustomizers } from '../compose-options';
-import { composeExtractors } from '../extractors';
+import {getStatusDetails, isDefined} from '../../utils';
+import { labels } from '../compose-options';
+import { composeExtractors, last } from '../extractors';
 
-const identity = <T>(context: ExtractorContext<T>) => context.value;
-const last = <T>(context: ExtractorContext<T[]>) => context.value?.at(-1);
-const all = identity;
+const all = <T>(context: ExtractorContext<T>) => context.value;
 
 export const testFile: ReporterConfig['testFile'] = {
   hidden: ({ testFile }) => !testFile.testExecError,
@@ -27,7 +25,7 @@ export const testFile: ReporterConfig['testFile'] = {
   description: async ({ $, testFileMetadata }) => {
     const text = testFileMetadata.description?.join('\n') ?? '';
     const code = await $.extractSourceCode(testFileMetadata);
-    return [text, $.sourceCode2Markdown(code)].filter(Boolean).join('\n\n');
+    return [text, $.sourceCode2Markdown(code)].filter(isDefined).join('\n\n');
   },
   descriptionHtml: ({ testFileMetadata }) =>
     testFileMetadata.descriptionHtml?.join('\n'),
@@ -41,24 +39,17 @@ export const testFile: ReporterConfig['testFile'] = {
     $.stripAnsi(getStatusDetails(testFile.testExecError)),
   attachments: ({ testFileMetadata }) => testFileMetadata.attachments ?? [],
   parameters: ({ testFileMetadata }) => testFileMetadata.parameters ?? [],
-  labels: composeExtractors<Label[], TestFileExtractorContext<Label[]>>(
-    aggregateLabelCustomizers({
-      package: last,
-      testClass: last,
-      testMethod: last,
-      parentSuite: last,
-      subSuite: last,
-      suite: () => '(test file execution)',
-      epic: all,
-      feature: all,
-      story: all,
-      thread: ({ testFileMetadata }) => testFileMetadata.workerId,
-      severity: last,
-      tag: all,
-      owner: last,
-    } as TestCaseCustomizer['labels']),
-    ({ testFileMetadata }) => testFileMetadata.labels ?? [],
-  ),
+  labels: labels({
+    package: last,
+    testClass: last,
+    testMethod: last,
+    parentSuite: last,
+    subSuite: last,
+    suite: () => '(test file execution)',
+    thread: ({ testFileMetadata }) => testFileMetadata.workerId,
+    severity: last,
+    owner: last,
+  } as TestCasePropertyCustomizer['labels']),
   links: ({ testFileMetadata }: TestFileExtractorContext<Link[]>) =>
     testFileMetadata.links ?? [],
 };

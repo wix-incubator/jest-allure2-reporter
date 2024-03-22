@@ -1,25 +1,25 @@
-import type { ReporterConfig, TestCaseCustomizer } from 'jest-allure2-reporter';
+import type { ReporterConfig, TestCasePropertyCustomizer } from 'jest-allure2-reporter';
 
 import { composeExtractors } from '../extractors';
 
-import { aggregateLabelCustomizers } from './aggregateLabelCustomizers';
-import { aggregateLinkCustomizers } from './aggregateLinkCustomizers';
+import { labels } from './labels';
+import { links } from './links';
 
-export function composeTestCaseCustomizers(
+export function composeTestCasePropertyCustomizers(
   base: ReporterConfig['testRun'],
-  custom: Partial<TestCaseCustomizer> | undefined,
+  custom: Partial<TestCasePropertyCustomizer> | undefined,
 ): typeof base;
-export function composeTestCaseCustomizers(
+export function composeTestCasePropertyCustomizers(
   base: ReporterConfig['testFile'],
-  custom: Partial<TestCaseCustomizer> | undefined,
+  custom: Partial<TestCasePropertyCustomizer> | undefined,
 ): typeof base;
-export function composeTestCaseCustomizers(
+export function composeTestCasePropertyCustomizers(
   base: ReporterConfig['testCase'],
-  custom: Partial<TestCaseCustomizer> | undefined,
+  custom: Partial<TestCasePropertyCustomizer> | undefined,
 ): typeof base;
-export function composeTestCaseCustomizers(
+export function composeTestCasePropertyCustomizers(
   base: ReporterConfig['testRun' | 'testFile' | 'testCase'],
-  custom: Partial<TestCaseCustomizer> | undefined,
+  custom: Partial<TestCasePropertyCustomizer> | undefined,
 ): typeof base {
   if (!custom) {
     return base;
@@ -44,11 +44,11 @@ export function composeTestCaseCustomizers(
     attachments: composeExtractors(custom.attachments, base.attachments),
     parameters: composeExtractors(custom.parameters, base.parameters),
     labels: composeExtractors(
-      aggregateLabelCustomizers(custom.labels),
+      labels(custom.labels),
       base.labels,
     ),
     links: composeExtractors(
-      aggregateLinkCustomizers(custom.links),
+      links(custom.links),
       base.links,
     ),
   };

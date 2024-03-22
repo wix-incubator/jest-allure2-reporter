@@ -1,10 +1,10 @@
-import type { ReporterConfig, TestStepCustomizer } from 'jest-allure2-reporter';
+import type { ReporterConfig, TestStepPropertyCustomizer } from 'jest-allure2-reporter';
 
 import { composeExtractors } from '../extractors';
 
-export function composeTestStepCustomizers(
+export function composeTestStepPropertyCustomizers(
   base: ReporterConfig['testStep'],
-  custom: Partial<TestStepCustomizer> | undefined,
+  custom: Partial<TestStepPropertyCustomizer> | undefined,
 ): typeof base {
   if (!custom) {
     return base;

@@ -4,7 +4,7 @@ import type {
   AllureTestFileMetadata,
 } from 'jest-allure2-reporter';
 
-import type { AllureMetadataProxy } from '../../metadata';
+import type { AllureMetadataProxy } from '../metadata';
 
 import { ThreadService } from './ThreadService';
 

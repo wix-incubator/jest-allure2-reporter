@@ -1,19 +1,22 @@
-import type {
-  ReporterConfig,
-} from 'jest-allure2-reporter';
+import type { ReporterConfig } from 'jest-allure2-reporter';
+
+const fullName: ReporterConfig['testRun']['fullName'] = async ({ $ }) =>
+  (await $.manifest((x) => x.name)) ?? '';
 
 export const testRun: ReporterConfig['testRun'] = {
   hidden: ({ aggregatedResult }) => aggregatedResult.numFailedTestSuites > 0,
   $: ({ $ }) => $,
-  historyId: async ({ $ }) => (await $.manifest((x) => x.name)) ?? '',
+  historyId: fullName,
+  fullName,
   name: () => '(test run)',
-  fullName: async ({ $ }) => (await $.manifest((x) => x.name)) ?? '',
-  description: () => '',
-  descriptionHtml: () => '',
+  description: () => void 0,
+  descriptionHtml: () => void 0,
   start: ({ aggregatedResult }) => aggregatedResult.startTime,
   stop: () => Date.now(),
-  stage: ({ aggregatedResult }) => aggregatedResult.wasInterrupted ? 'interrupted' : 'finished',
-  status: ({ aggregatedResult }) => aggregatedResult.numFailedTestSuites > 0 ? 'failed' : 'passed',
+  stage: ({ aggregatedResult }) =>
+    aggregatedResult.wasInterrupted ? 'interrupted' : 'finished',
+  status: ({ aggregatedResult }) =>
+    aggregatedResult.numFailedTestSuites > 0 ? 'failed' : 'passed',
   statusDetails: () => void 0,
   attachments: () => void 0,
   parameters: ({ aggregatedResult }) => [
@@ -34,6 +37,6 @@ export const testRun: ReporterConfig['testRun'] = {
       value: `${aggregatedResult.numPendingTestSuites}`,
     },
   ],
-  labels: () => [],
+  labels: () => [{ name: 'suite', value: '(test file execution)' }],
   links: () => [],
 };

@@ -1,5 +1,5 @@
-export { aggregateLabelCustomizers } from './aggregateLabelCustomizers';
+export { labels } from './labels';
 
-export { aggregateLinkCustomizers } from './aggregateLinkCustomizers';
+export { links } from './links';
 
 export { reporterOptions } from './reporterOptions';

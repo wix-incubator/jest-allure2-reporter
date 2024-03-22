@@ -1,14 +1,14 @@
 import type {
   ReporterOptions,
   ReporterConfig,
-  TestStepCustomizer,
+  TestStepPropertyCustomizer,
 } from 'jest-allure2-reporter';
 
 import { asExtractor, composeExtractors } from '../extractors';
 
 import { composeAttachments } from './attachments';
-import { composeTestCaseCustomizers } from './testCase';
-import { composeTestStepCustomizers } from './testStep';
+import { composeTestCasePropertyCustomizers } from './testCase';
+import { composeTestStepPropertyCustomizers } from './testStep';
 import { aggregateHelpersCustomizers } from './aggregateHelpersCustomizers';
 
 export function reporterOptions(
@@ -39,11 +39,11 @@ export function reporterOptions(
       aggregateHelpersCustomizers(custom.helpers),
       base.helpers,
     ),
-    testRun: composeTestCaseCustomizers(base.testRun, custom.testRun),
-    testCase: composeTestCaseCustomizers(base.testCase, custom.testCase),
-    testFile: composeTestCaseCustomizers(base.testFile, custom.testFile),
-    testStep: composeTestStepCustomizers(
-      base.testStep as TestStepCustomizer,
+    testRun: composeTestCasePropertyCustomizers(base.testRun, custom.testRun),
+    testCase: composeTestCasePropertyCustomizers(base.testCase, custom.testCase),
+    testFile: composeTestCasePropertyCustomizers(base.testFile, custom.testFile),
+    testStep: composeTestStepPropertyCustomizers(
+      base.testStep as TestStepPropertyCustomizer,
       custom.testStep,
     ),
   };

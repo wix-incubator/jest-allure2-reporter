@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { Extractor, ExtractorContext } from 'jest-allure2-reporter';
+import type { Extractor } from 'jest-allure2-reporter';
 
 import { isPromiseLike } from '../../utils';
+
+import { isExtractor } from './isExtractor';
 
 /**
  * Resolves the unknown value either as an extractor or it
@@ -15,19 +17,10 @@ import { isPromiseLike } from '../../utils';
  * defaulting the values. The former is useful for tags, the latter
  * for the rest of the labels which don't support multiple occurrences.
  */
-export function asExtractor<
-  R,
-  E extends Extractor<any, ExtractorContext<any>, R> = Extractor<
-    any,
-    ExtractorContext<any>,
-    R
-  >,
->(maybeExtractor: R | E | undefined): E | undefined {
-  if (maybeExtractor == null) {
-    return undefined;
-  }
-
-  if (isExtractor<E>(maybeExtractor)) {
+export function asExtractor<T, Ta = never>(
+  maybeExtractor: T | Ta | Extractor<T, Ta>,
+): Extractor<T, Ta> {
+  if (isExtractor<T, Ta>(maybeExtractor)) {
     return maybeExtractor;
   }
 
@@ -44,11 +37,7 @@ export function asExtractor<
     }
 
     return value ?? baseValue;
-  }) as E;
+  }) as Extractor<T, Ta>;
 
   return extractor;
-}
-
-function isExtractor<E>(value: unknown): value is E {
-  return typeof value === 'function';
 }

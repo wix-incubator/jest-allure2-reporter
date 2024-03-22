@@ -1,17 +1,17 @@
 import type {
   Extractor,
   ExtractorContext,
-  TestRunCustomizer,
-  TestFileCustomizer,
-  TestCaseCustomizer,
+  TestRunPropertyCustomizer,
+  TestFilePropertyCustomizer,
+  TestCasePropertyCustomizer,
 } from 'jest-allure2-reporter';
 import type { Link } from 'jest-allure2-reporter';
 
 import { isPromiseLike } from '../../utils';
 
-type Customizer = TestFileCustomizer | TestCaseCustomizer | TestRunCustomizer;
+type Customizer = TestFilePropertyCustomizer | TestCasePropertyCustomizer | TestRunPropertyCustomizer;
 
-export function aggregateLinkCustomizers<C extends Customizer>(
+export function links<C extends Customizer>(
   links: C['links'] | undefined,
 ): Extractor<Link[]> | undefined {
   if (!links || typeof links === 'function') {

@@ -1,6 +1,5 @@
 import type {
   ExtractorContext,
-  PluginContext,
   ReporterConfig,
 } from 'jest-allure2-reporter';
 

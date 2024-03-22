@@ -2,29 +2,31 @@
 import type {
   Extractor,
   ExtractorContext,
-  TestFileCustomizer,
-  TestCaseCustomizer,
+  TestFilePropertyCustomizer,
+  TestCasePropertyCustomizer,
 } from 'jest-allure2-reporter';
 import type { Label } from 'jest-allure2-reporter';
 
 import { flatMapAsync } from '../../utils/flatMapAsync';
-import { asArray } from '../../utils';
+import { asArray, constant } from '../../utils';
 import { asExtractor } from '../extractors';
 
-type Customizer = TestFileCustomizer | TestCaseCustomizer;
+type Customizer = TestFilePropertyCustomizer | TestCasePropertyCustomizer;
 
-const constant = <T>(value: T) => () => value;
+function isExtractor<T>(value: unknown): value is Extractor<T> {
+  return typeof value === 'function';
+}
 
-export function aggregateLabelCustomizers<C extends Customizer>(
-  labels: C['labels'] | undefined,
-): Extractor<Label[]> | undefined {
-  if (!labels || typeof labels === 'function') {
-    return labels as Extractor<Label[]> | undefined;
+export function labels<C extends Customizer>(
+  labels: C['labels'],
+): Extractor<Label[]> {
+  if (isExtractor<Label[]>(labels)) {
+    return labels;
   }
 
   const extractors = Object.keys(labels).reduce(
     (accumulator, key) => {
-      const extractor = asExtractor<string>(labels[key]);
+      const extractor = asExtractor<string | string[]>(labels[key]);
       if (extractor) {
         accumulator[key] = extractor;
       }
