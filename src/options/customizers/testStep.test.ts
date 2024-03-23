@@ -1,17 +1,24 @@
 import type {
   AllureTestStepResult,
+  PropertyExtractorContext,
   TestStepExtractorContext,
 } from 'jest-allure2-reporter';
 
 import type { TestStepCompositeExtractor } from '../types/compositeExtractors';
+import { novalue } from '../extractors';
 
 import { testStepCustomizer } from './testStep';
 
 describe('testStepCustomizer', () => {
-  const createContext = (): TestStepExtractorContext => ({
-    value: {},
+  const createContext = (): PropertyExtractorContext<
+    TestStepExtractorContext,
+    never
+  > => ({
+    value: novalue(),
     result: {},
-    testStepMetadata: {} as any,
+    aggregatedResult: {} as any,
+    testRunMetadata: {} as any,
+    testStepMetadata: { hookType: 'beforeEach' } as any,
     testCase: {} as any,
     testCaseMetadata: {} as any,
     filePath: [],
@@ -22,24 +29,22 @@ describe('testStepCustomizer', () => {
     config: {} as any,
   });
 
-  const defaultCompositeExtractor: TestStepCompositeExtractor = {
-    attachments: ({ value }) => value,
-    displayName: ({ value }) => value,
-    hidden: ({ value }) => value,
-    hookType: ({ value }) => value,
-    parameters: ({ value }) => value,
-    stage: ({ value }) => value,
-    start: ({ value }) => value,
-    status: ({ value }) => value,
-    statusDetails: ({ value }) => value,
-    steps: ({ value }) => value,
-    stop: ({ value }) => value,
-  };
+  const defaultCompositeExtractor: TestStepCompositeExtractor<TestStepExtractorContext> =
+    {
+      attachments: ({ value }) => value,
+      displayName: ({ value }) => value,
+      hidden: ({ value }) => value,
+      parameters: ({ value }) => value,
+      stage: ({ value }) => value,
+      start: ({ value }) => value,
+      status: ({ value }) => value,
+      statusDetails: ({ value }) => value,
+      stop: ({ value }) => value,
+    };
 
   test.each`
     property           | defaultValue   | extractedValue
     ${'hidden'}        | ${false}       | ${false}
-    ${'hookType'}      | ${undefined}   | ${'beforeEach'}
     ${'displayName'}   | ${''}          | ${'Custom Step'}
     ${'start'}         | ${Number.NaN}  | ${1_234_567_890}
     ${'stop'}          | ${Number.NaN}  | ${1_234_567_899}
@@ -91,6 +96,13 @@ describe('testStepCustomizer', () => {
       expect.objectContaining({ value: false, result: { hidden: true } }),
     );
     expect(result).toBeUndefined();
+  });
+
+  it('should extract hookType directly from testStepMetadata', async () => {
+    const testStep = testStepCustomizer(defaultCompositeExtractor);
+    const context = createContext();
+    const result = await testStep(context);
+    expect(result?.hookType).toBe('beforeEach');
   });
 
   it('should extract nested steps', async () => {

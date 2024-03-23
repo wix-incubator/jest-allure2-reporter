@@ -3,7 +3,10 @@ import type { TestFileMetadata } from 'jest-metadata';
 
 import { AllureMetadataProxy } from '../metadata';
 
-export async function postProcessMetadata($: Helpers, testFile: TestFileMetadata) {
+export async function postProcessMetadata(
+  $: Helpers,
+  testFile: TestFileMetadata,
+) {
   const allDescribeBlocks = [...testFile.allDescribeBlocks()];
   const allHooks = allDescribeBlocks.flatMap((describeBlock) => [
     ...describeBlock.hookDefinitions(),

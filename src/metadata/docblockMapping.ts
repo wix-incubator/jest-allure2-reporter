@@ -8,7 +8,7 @@ import type {
   LinkType,
 } from 'jest-allure2-reporter';
 
-import {asArray, isDefined} from '../utils';
+import { asArray, isDefined } from '../utils';
 
 const ALL_LABELS = Object.keys(
   assertType<Record<LabelName, 0>>({

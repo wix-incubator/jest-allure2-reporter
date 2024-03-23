@@ -1,15 +1,17 @@
 import type {
   AllureTestStepResult,
   TestStepExtractor,
+  TestStepExtractorContext,
 } from 'jest-allure2-reporter';
 
 import type { TestStepCompositeExtractor } from '../types/compositeExtractors';
 import { isDefined } from '../../utils';
+import { novalue } from '../extractors';
 
 export function testStepCustomizer(
-  testStep: TestStepCompositeExtractor,
-): TestStepExtractor {
-  const extractor: TestStepExtractor = async (context) => {
+  testStep: TestStepCompositeExtractor<TestStepExtractorContext>,
+): TestStepExtractor<TestStepExtractorContext> {
+  return async function testStepExtractor(context) {
     const result: Partial<AllureTestStepResult> = {};
     result.hidden = await testStep.hidden({
       ...context,
@@ -21,11 +23,7 @@ export function testStepCustomizer(
       return;
     }
 
-    result.hookType = await testStep.hookType({
-      ...context,
-      value: undefined,
-      result,
-    });
+    result.hookType = context.testStepMetadata.hookType;
 
     result.displayName = await testStep.displayName({
       ...context,
@@ -79,10 +77,10 @@ export function testStepCustomizer(
     if (steps && steps.length > 0) {
       const allSteps = await Promise.all(
         steps.map(async (testStepMetadata) => {
-          const stepResult = await extractor({
+          const stepResult = await testStepExtractor({
             ...context,
             testStepMetadata,
-            value: {},
+            value: novalue(),
             result,
           });
 
@@ -95,6 +93,4 @@ export function testStepCustomizer(
 
     return result as AllureTestStepResult;
   };
-
-  return extractor;
 }

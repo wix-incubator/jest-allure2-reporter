@@ -68,8 +68,8 @@ function fillStep(
   executable: ExecutableItemWrapper,
   step: AllureTestCaseResult | AllureTestStepResult,
 ) {
-  if (step.name !== undefined) {
-    executable.name = step.name;
+  if (step.displayName !== undefined) {
+    executable.name = step.displayName;
   }
   if (step.start !== undefined) {
     executable.wrappedItem.start = step.start;
@@ -95,7 +95,7 @@ function fillStep(
   if (step.steps) {
     for (const innerStep of step.steps) {
       fillStep(
-        executable.startStep(innerStep.name ?? '', innerStep.start),
+        executable.startStep(innerStep.displayName ?? '', innerStep.start),
         innerStep,
       );
     }

@@ -1,8 +1,4 @@
-import type {
-  GlobalExtractorContext,
-  ExtractorContext,
-  Helpers,
-} from 'jest-allure2-reporter';
+import type { Helpers } from 'jest-allure2-reporter';
 
 import { helpersCustomizer } from './helpers';
 
@@ -32,15 +28,14 @@ describe('helpersCustomizer', () => {
       stripAnsi: jest.fn(),
     };
 
-    const context: ExtractorContext<Helpers> = {
-      value: defaultHelpers as Helpers,
-    };
-
     const extractor = helpersCustomizer(customHelpers)!;
 
-    const result = await extractor(
-      context as unknown as GlobalExtractorContext<Helpers>,
-    );
+    const result = await extractor({
+      $: defaultHelpers as Helpers,
+      globalConfig: {} as any,
+      config: {} as any,
+      value: Promise.resolve(defaultHelpers as Helpers),
+    });
 
     expect(result).toEqual(customHelpers);
   });

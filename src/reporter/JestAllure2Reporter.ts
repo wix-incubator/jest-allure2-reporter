@@ -18,6 +18,7 @@ import type {
   AllureTestCaseMetadata,
   AllureTestFileMetadata,
   Helpers,
+  PropertyExtractorContext,
   ReporterConfig,
   ReporterOptions,
   TestCaseExtractorContext,
@@ -27,6 +28,7 @@ import type {
 
 import { resolveOptions } from '../options';
 import { AllureMetadataProxy, MetadataSquasher } from '../metadata';
+import { novalue } from '../options/extractors';
 
 import * as fallbacks from './fallbacks';
 import { overwriteDirectory } from './overwriteDirectory';
@@ -113,14 +115,22 @@ export class JestAllure2Reporter extends JestMetadataReporter {
 
     const config = this._config;
 
-    const globalContext: TestRunExtractorContext = {
+    const globalMetadata = JestAllure2Reporter.query.globalMetadata();
+    const globalMetadataProxy = new AllureMetadataProxy<AllureGlobalMetadata>(
+      globalMetadata,
+    );
+
+    const globalContext: PropertyExtractorContext<
+      TestRunExtractorContext,
+      never
+    > = {
       $: this._$ as Helpers,
       aggregatedResult,
       config,
       globalConfig: this._globalConfig,
-      get value() {
-        return void 0;
-      },
+      testRunMetadata: globalMetadataProxy.get(),
+      result: {},
+      value: novalue(),
     };
 
     const environment = await config.environment(globalContext);
@@ -150,7 +160,10 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     }
 
     for (const testResult of aggregatedResult.testResults) {
-      const testFileContext: TestFileExtractorContext = {
+      const testFileContext: PropertyExtractorContext<
+        TestFileExtractorContext,
+        never
+      > = {
         ...globalContext,
         filePath: path
           .relative(globalContext.globalConfig.rootDir, testResult.testFilePath)
@@ -180,7 +193,10 @@ export class JestAllure2Reporter extends JestMetadataReporter {
             testInvocationMetadata,
           );
 
-          const testCaseContext: TestCaseExtractorContext = {
+          const testCaseContext: PropertyExtractorContext<
+            TestCaseExtractorContext,
+            never
+          > = {
             ...testFileContext,
             testCase: testCaseResult,
             testCaseMetadata,

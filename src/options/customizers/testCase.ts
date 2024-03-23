@@ -1,24 +1,26 @@
 import type {
   AllureTestCaseResult,
+  PropertyExtractorContext,
   TestCaseExtractor,
-  TestFileExtractor,
-  TestRunExtractor,
+  TestCaseExtractorContext,
+  TestFileExtractorContext,
+  TestRunExtractorContext,
+  TestStepExtractorContext,
   TestStepExtractor,
 } from 'jest-allure2-reporter';
 
-import type {
-  TestCaseCompositeExtractor,
-  TestFileCompositeExtractor,
-  TestRunCompositeExtractor,
-} from '../types/compositeExtractors';
+import type { TestCaseCompositeExtractor } from '../types/compositeExtractors';
 import { isDefined } from '../../utils';
+import { novalue } from '../extractors';
 
-export function testItemCustomizer(
-  testCase: TestCaseCompositeExtractor,
-  testStep: TestStepExtractor,
-  metadataKey?: 'testCaseMetadata' | 'testFileMetadata',
-): TestCaseExtractor {
-  const extractor: TestCaseExtractor = async (context) => {
+export function testItemCustomizer<
+  Context extends Partial<TestCaseExtractorContext>,
+>(
+  testCase: TestCaseCompositeExtractor<Context>,
+  testStep: TestStepExtractor<TestStepExtractorContext>,
+  metadataKey?: 'testCaseMetadata' | 'testFileMetadata' | 'testRunMetadata',
+): TestCaseExtractor<Context> {
+  return async (context) => {
     const result: Partial<AllureTestCaseResult> = {};
     result.hidden = await testCase.hidden({
       ...context,
@@ -114,19 +116,17 @@ export function testItemCustomizer(
       result,
     });
 
-    const steps = metadataKey ? context[metadataKey].steps : undefined;
+    const steps = metadataKey ? context[metadataKey]?.steps : undefined;
     if (steps && steps.length > 0) {
       const allSteps = await Promise.all(
-        steps.map(async (testStepMetadata) => {
-          const stepResult = await testStep({
+        steps.map(async (testStepMetadata) =>
+          testStep({
             ...context,
             testStepMetadata,
-            value: {},
-            result,
-          });
-
-          return stepResult;
-        }),
+            value: novalue(),
+            result: {},
+          } as PropertyExtractorContext<TestStepExtractorContext, never>),
+        ),
       );
 
       result.steps = allSteps.filter(isDefined);
@@ -134,34 +134,25 @@ export function testItemCustomizer(
 
     return result as AllureTestCaseResult;
   };
-
-  return extractor;
 }
 
 export function testCaseCustomizer(
-  testCase: TestCaseCompositeExtractor,
-  testStep: TestStepExtractor,
-): TestCaseExtractor {
+  testCase: TestCaseCompositeExtractor<TestCaseExtractorContext>,
+  testStep: TestStepExtractor<TestStepExtractorContext>,
+): TestCaseExtractor<TestCaseExtractorContext> {
   return testItemCustomizer(testCase, testStep, 'testCaseMetadata');
 }
 
 export function testFileCustomizer(
-  testFile: TestFileCompositeExtractor,
-  testStep: TestStepExtractor,
-): TestFileExtractor {
-  return testItemCustomizer(
-    testFile as unknown as TestCaseCompositeExtractor,
-    testStep,
-    'testFileMetadata',
-  ) as unknown as TestFileExtractor;
+  testFile: TestCaseCompositeExtractor<TestFileExtractorContext>,
+  testStep: TestStepExtractor<TestStepExtractorContext>,
+): TestCaseExtractor<TestFileExtractorContext> {
+  return testItemCustomizer(testFile, testStep, 'testFileMetadata');
 }
 
 export function testRunCustomizer(
-  testRun: TestRunCompositeExtractor,
-  testStep: TestStepExtractor,
-): TestRunExtractor {
-  return testItemCustomizer(
-    testRun as unknown as TestCaseCompositeExtractor,
-    testStep,
-  ) as unknown as TestRunExtractor;
+  testRun: TestCaseCompositeExtractor<TestRunExtractorContext>,
+  testStep: TestStepExtractor<TestStepExtractorContext>,
+): TestCaseExtractor<TestRunExtractorContext> {
+  return testItemCustomizer(testRun, testStep, 'testRunMetadata');
 }

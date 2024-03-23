@@ -1,9 +1,11 @@
-import { composeExtractors, last } from '.';
+import type { PropertyExtractor } from 'jest-allure2-reporter';
+
+import { composeExtractors, last, novalue } from '.';
 
 describe('extractors', () => {
   describe('composeExtractors', () => {
     it('should compose extractors correctly in a complex scenario', async () => {
-      const one = () => 1;
+      const one: PropertyExtractor<number, never, {}, never> = () => 1;
       const two = composeExtractors(({ value }) => {
         assertEq(value, 1);
         return value * 2;
@@ -19,7 +21,7 @@ describe('extractors', () => {
         await expect(value).resolves.toBe(6);
         return value;
       }, three);
-      const result = await threeAlso({ value: void 0 });
+      const result = await threeAlso({ value: novalue() });
       expect(result).toBe(6);
     });
   });
@@ -36,7 +38,7 @@ describe('extractors', () => {
     });
 
     it('should return undefined for a non-existent value', async () => {
-      const result = await last({ value: void 0 });
+      const result = await last({ value: undefined });
       expect(result).toBe(undefined);
     });
   });
