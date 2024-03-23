@@ -1,4 +1,4 @@
-import type { AllureGlobalMetadata } from 'jest-allure2-reporter';
+import type { AllureTestRunMetadata } from 'jest-allure2-reporter';
 import type {
   BuiltinFileAttachmentHandler,
   BuiltinContentAttachmentHandler,
@@ -95,7 +95,7 @@ export interface AllureRuntime {
   step<T>(name: string, function_: () => T): T;
 }
 
-export type SharedReporterConfig = AllureGlobalMetadata['config'];
+export type SharedReporterConfig = AllureTestRunMetadata['config'];
 
 export type AllureRuntimePluginCallback = (
   context: AllureRuntimePluginContext,

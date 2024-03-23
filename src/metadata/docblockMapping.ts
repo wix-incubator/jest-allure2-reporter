@@ -8,7 +8,7 @@ import type {
   LinkType,
 } from 'jest-allure2-reporter';
 
-import { asArray, isDefined } from '../utils';
+import { asArray, isNonNullish } from '../utils';
 
 const ALL_LABELS = Object.keys(
   assertType<Record<LabelName, 0>>({
@@ -60,7 +60,7 @@ export function mapTestCaseDocblock(
 
   const links = ALL_LINKS.flatMap((name) =>
     asArray(pragmas[name]).map(createLinkMapper(name)),
-  ).filter(isDefined);
+  ).filter(isNonNullish);
 
   if (links.length > 0) metadata.links = links;
 

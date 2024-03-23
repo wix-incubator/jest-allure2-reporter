@@ -9,9 +9,9 @@ import type {
   TestFileExtractorContext,
 } from 'jest-allure2-reporter';
 
-import {getStatusDetails, isDefined} from '../../utils';
+import {getStatusDetails, isNonNullish} from '../../utils';
 import { labels } from '../compose-options';
-import { composeExtractors, last } from '../extractors';
+import { composeExtractors2, last } from '../extractors';
 
 const all = <T>(context: ExtractorContext<T>) => context.value;
 
@@ -25,7 +25,7 @@ export const testFile: ReporterConfig['testFile'] = {
   description: async ({ $, testFileMetadata }) => {
     const text = testFileMetadata.description?.join('\n') ?? '';
     const code = await $.extractSourceCode(testFileMetadata);
-    return [text, $.sourceCode2Markdown(code)].filter(isDefined).join('\n\n');
+    return [text, $.sourceCode2Markdown(code)].filter(isNonNullish).join('\n\n');
   },
   descriptionHtml: ({ testFileMetadata }) =>
     testFileMetadata.descriptionHtml?.join('\n'),

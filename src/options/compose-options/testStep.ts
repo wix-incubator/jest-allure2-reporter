@@ -1,25 +1,44 @@
-import type { ReporterConfig, TestStepPropertyCustomizer } from 'jest-allure2-reporter';
+import type { TestStepCustomizer } from 'jest-allure2-reporter';
 
-import { composeExtractors } from '../extractors';
+import * as customExtractors from '../custom-extractors';
+import * as extractors from '../extractors';
+import type { TestStepCompositeExtractor } from '../types';
 
-export function composeTestStepPropertyCustomizers(
-  base: ReporterConfig['testStep'],
-  custom: Partial<TestStepPropertyCustomizer> | undefined,
+export function composeTestStepPropertyCustomizers<Context>(
+  custom: TestStepCustomizer<Context> | undefined,
+  base: TestStepCompositeExtractor<Context>,
 ): typeof base {
   if (!custom) {
     return base;
   }
 
   return {
-    hidden: composeExtractors(custom.hidden, base.hidden),
-    $: composeExtractors(custom.$, base.$),
-    name: composeExtractors(custom.name, base.name),
-    stage: composeExtractors(custom.stage, base.stage),
-    start: composeExtractors(custom.start, base.start),
-    stop: composeExtractors(custom.stop, base.stop),
-    status: composeExtractors(custom.status, base.status),
-    statusDetails: composeExtractors(custom.statusDetails, base.statusDetails),
-    attachments: composeExtractors(custom.attachments, base.attachments),
-    parameters: composeExtractors(custom.parameters, base.parameters),
+    hidden: extractors.compose2(
+      extractors.constant(custom.hidden),
+      base.hidden,
+    ),
+    displayName: extractors.compose2(
+      extractors.constant(custom.displayName),
+      base.displayName,
+    ),
+    stage: extractors.compose2(extractors.constant(custom.stage), base.stage),
+    start: extractors.compose2(extractors.constant(custom.start), base.start),
+    stop: extractors.compose2(extractors.constant(custom.stop), base.stop),
+    status: extractors.compose2(
+      extractors.constant(custom.status),
+      base.status,
+    ),
+    statusDetails: extractors.compose2(
+      extractors.merger(custom.statusDetails),
+      base.statusDetails,
+    ),
+    attachments: extractors.compose2(
+      extractors.appender(custom.attachments),
+      base.attachments,
+    ),
+    parameters: extractors.compose2(
+      customExtractors.parameters(custom.parameters),
+      base.parameters,
+    ),
   };
 }

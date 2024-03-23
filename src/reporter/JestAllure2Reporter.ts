@@ -14,21 +14,21 @@ import JestMetadataReporter from 'jest-metadata/reporter';
 import type { Category } from '@noomorph/allure-js-commons';
 import { AllureRuntime } from '@noomorph/allure-js-commons';
 import type {
-  AllureGlobalMetadata,
+  AllureTestRunMetadata,
   AllureTestCaseMetadata,
   AllureTestFileMetadata,
   Helpers,
   PropertyExtractorContext,
-  ReporterConfig,
   ReporterOptions,
   TestCaseExtractorContext,
   TestFileExtractorContext,
   TestRunExtractorContext,
 } from 'jest-allure2-reporter';
 
-import { resolveOptions } from '../options';
+import { type ReporterConfig, resolveOptions } from '../options';
 import { AllureMetadataProxy, MetadataSquasher } from '../metadata';
 import { novalue } from '../options/extractors';
+import { stringifyValues } from '../utils';
 
 import * as fallbacks from './fallbacks';
 import { overwriteDirectory } from './overwriteDirectory';
@@ -39,19 +39,23 @@ export class JestAllure2Reporter extends JestMetadataReporter {
   private readonly _$: Partial<Helpers> = {};
   private readonly _allure: AllureRuntime;
   private readonly _config: ReporterConfig;
+  private readonly _options: ReporterOptions;
   private readonly _globalConfig: Config.GlobalConfig;
 
   constructor(globalConfig: Config.GlobalConfig, options: ReporterOptions) {
     super(globalConfig);
 
     this._globalConfig = globalConfig;
+    this._options = options;
     this._config = resolveOptions(options);
     this._allure = new AllureRuntime({
       resultsDir: this._config.resultsDir,
     });
 
-    const globalMetadata = new AllureMetadataProxy<AllureGlobalMetadata>(state);
-    globalMetadata.set('config', {
+    const testRunMetadata = new AllureMetadataProxy<AllureTestRunMetadata>(
+      state,
+    );
+    testRunMetadata.set('config', {
       resultsDir: this._config.resultsDir,
       overwrite: this._config.overwrite,
       attachments: this._config.attachments,
@@ -115,9 +119,9 @@ export class JestAllure2Reporter extends JestMetadataReporter {
 
     const config = this._config;
 
-    const globalMetadata = JestAllure2Reporter.query.globalMetadata();
-    const globalMetadataProxy = new AllureMetadataProxy<AllureGlobalMetadata>(
-      globalMetadata,
+    const testRunMetadata = JestAllure2Reporter.query.globalMetadata();
+    const globalMetadataProxy = new AllureMetadataProxy<AllureTestRunMetadata>(
+      testRunMetadata,
     );
 
     const globalContext: PropertyExtractorContext<
@@ -126,8 +130,8 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     > = {
       $: this._$ as Helpers,
       aggregatedResult,
-      config,
       globalConfig: this._globalConfig,
+      reporterOptions: this._options,
       testRunMetadata: globalMetadataProxy.get(),
       result: {},
       value: novalue(),
@@ -135,7 +139,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
 
     const environment = await config.environment(globalContext);
     if (environment) {
-      this._allure.writeEnvironmentInfo(environment);
+      this._allure.writeEnvironmentInfo(stringifyValues(environment));
     }
 
     const executor = await config.executor(globalContext);

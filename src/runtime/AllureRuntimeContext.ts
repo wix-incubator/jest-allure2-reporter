@@ -1,5 +1,5 @@
 import type {
-  AllureGlobalMetadata,
+  AllureTestRunMetadata,
   AllureTestFileMetadata,
 } from 'jest-allure2-reporter';
 
@@ -21,7 +21,7 @@ export class AllureRuntimeContext {
   readonly inferMimeType: MIMEInferer;
   readonly getReporterConfig: () => SharedReporterConfig;
   readonly getFileMetadata: () => AllureMetadataProxy<AllureTestFileMetadata>;
-  readonly getGlobalMetadata: () => AllureMetadataProxy<AllureGlobalMetadata>;
+  readonly getGlobalMetadata: () => AllureMetadataProxy<AllureTestRunMetadata>;
   readonly getCurrentMetadata: () => AllureTestItemMetadataProxy;
   readonly getNow: () => number;
 

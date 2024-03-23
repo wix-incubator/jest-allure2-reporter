@@ -9,7 +9,7 @@ import type { Label } from 'jest-allure2-reporter';
 
 import { flatMapAsync } from '../../utils/flatMapAsync';
 import { asArray, constant } from '../../utils';
-import { asExtractor } from '../extractors';
+import { constantExtractor } from '../extractors';
 
 type Customizer = TestFilePropertyCustomizer | TestCasePropertyCustomizer;
 
@@ -26,7 +26,7 @@ export function labels<C extends Customizer>(
 
   const extractors = Object.keys(labels).reduce(
     (accumulator, key) => {
-      const extractor = asExtractor<string | string[]>(labels[key]);
+      const extractor = constantExtractor<string | string[]>(labels[key]);
       if (extractor) {
         accumulator[key] = extractor;
       }

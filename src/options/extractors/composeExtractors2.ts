@@ -5,9 +5,15 @@ import type {
 
 import { once } from '../../utils';
 
-export function composeExtractors<R, Ra = never, Context = {}, V = R>(
-  a: PropertyExtractor<R, Ra, Context, R> | undefined,
-  b: PropertyExtractor<R, never, Context, V>,
+export function composeExtractors2<
+  R,
+  Ra = never,
+  Rb = never,
+  Context = {},
+  V = R,
+>(
+  a: PropertyExtractor<R, Ra, Context, R | Rb> | undefined,
+  b: PropertyExtractor<R, Rb, Context, V>,
 ): PropertyExtractor<R, Ra, Context, V> {
   if (!a) {
     return b as PropertyExtractor<R, Ra, Context, V>;

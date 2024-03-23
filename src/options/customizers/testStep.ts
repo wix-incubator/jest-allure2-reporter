@@ -1,18 +1,23 @@
 import type {
   AllureTestStepResult,
-  TestStepExtractor,
+  PropertyExtractorContext,
   TestStepExtractorContext,
 } from 'jest-allure2-reporter';
 
-import type { TestStepCompositeExtractor } from '../types/compositeExtractors';
-import { isDefined } from '../../utils';
+import { isNonNullish } from '../../utils';
 import { novalue } from '../extractors';
+import type { TestStepCompositeExtractor, TestStepExtractor } from '../types';
 
 export function testStepCustomizer(
   testStep: TestStepCompositeExtractor<TestStepExtractorContext>,
 ): TestStepExtractor<TestStepExtractorContext> {
-  return async function testStepExtractor(context) {
-    const result: Partial<AllureTestStepResult> = {};
+  return async function testStepExtractor(
+    context: PropertyExtractorContext<TestStepExtractorContext, never>,
+  ): Promise<AllureTestStepResult | undefined> {
+    const result: Partial<AllureTestStepResult> = {
+      hookType: context.testStepMetadata.hookType,
+    };
+
     result.hidden = await testStep.hidden({
       ...context,
       value: false,
@@ -22,8 +27,6 @@ export function testStepCustomizer(
     if (result.hidden) {
       return;
     }
-
-    result.hookType = context.testStepMetadata.hookType;
 
     result.displayName = await testStep.displayName({
       ...context,
@@ -76,19 +79,17 @@ export function testStepCustomizer(
     const steps = context.testStepMetadata?.steps;
     if (steps && steps.length > 0) {
       const allSteps = await Promise.all(
-        steps.map(async (testStepMetadata) => {
-          const stepResult = await testStepExtractor({
+        steps.map((testStepMetadata) =>
+          testStepExtractor({
             ...context,
             testStepMetadata,
             value: novalue(),
             result,
-          });
-
-          return stepResult;
-        }),
+          }),
+        ),
       );
 
-      result.steps = allSteps.filter(isDefined);
+      result.steps = allSteps.filter(isNonNullish);
     }
 
     return result as AllureTestStepResult;

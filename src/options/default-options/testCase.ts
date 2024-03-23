@@ -11,8 +11,8 @@ import type {
   TestCaseExtractorContext,
 } from 'jest-allure2-reporter';
 
-import { composeExtractors } from '../extractors';
-import { getStatusDetails, isDefined } from '../../utils';
+import { composeExtractors2 } from '../extractors';
+import { getStatusDetails, isNonNullish } from '../../utils';
 import { labels } from '../compose-options';
 
 const identity = <T>(context: ExtractorContext<T>) => context.value;
@@ -35,7 +35,7 @@ export const testCase: Required<TestCaseCustomizer> = {
     const text = testCaseMetadata.description?.join('\n\n') ?? '';
     const codes = await $.extractSourceCode(testCaseMetadata, true);
     const snippets = codes.map($.sourceCode2Markdown);
-    return [text, ...snippets].filter(isDefined).join('\n\n');
+    return [text, ...snippets].filter(isNonNullish).join('\n\n');
   },
   descriptionHtml: ({ testCaseMetadata }) =>
     testCaseMetadata.descriptionHtml?.join('\n'),
@@ -54,7 +54,7 @@ export const testCase: Required<TestCaseCustomizer> = {
     ),
   attachments: ({ testCaseMetadata }) => testCaseMetadata.attachments ?? [],
   parameters: ({ testCaseMetadata }) => testCaseMetadata.parameters ?? [],
-  labels: composeExtractors<Label[], TestCaseExtractorContext<Label[]>>(
+  labels: composeExtractors2<Label[], TestCaseExtractorContext<Label[]>>(
     labels({
       package: last,
       testClass: last,

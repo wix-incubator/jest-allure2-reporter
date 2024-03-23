@@ -2,12 +2,11 @@ import type {
   AllureTestCaseResult,
   PropertyExtractorContext,
   TestCaseExtractorContext,
-  TestStepExtractor,
   TestStepExtractorContext,
 } from 'jest-allure2-reporter';
 
-import type { TestCaseCompositeExtractor } from '../types/compositeExtractors';
 import { novalue } from '../extractors';
+import type { TestCaseCompositeExtractor, TestStepExtractor } from '../types';
 
 import { testCaseCustomizer } from './testCase';
 
@@ -27,7 +26,7 @@ describe('testCaseCustomizer', () => {
     testFileMetadata: {} as any,
     $: {} as any,
     globalConfig: {} as any,
-    config: {} as any,
+    reporterOptions: {} as any,
   });
 
   const defaultTestCaseExtractor: TestCaseCompositeExtractor<TestCaseExtractorContext> =
@@ -61,7 +60,7 @@ describe('testCaseCustomizer', () => {
     ${'status'}          | ${'unknown'}   | ${'passed'}
     ${'statusDetails'}   | ${{}}          | ${{ message: 'Test case passed' }}
     ${'labels'}          | ${[]}          | ${[{ name: 'label1', value: 'value1' }, { name: 'label2', value: 'value2' }]}
-    ${'links'}           | ${[]}          | ${[{ url: 'http://example.com', type: 'issue' }]}
+    ${'links'}           | ${[]}          | ${[{ url: 'https://example.com', type: 'issue' }]}
     ${'attachments'}     | ${[]}          | ${[{ name: 'attachment1' }, { name: 'attachment2' }]}
     ${'parameters'}      | ${[]}          | ${[{ name: 'param1', value: 'value1' }, { name: 'param2', value: 'value2' }]}
     ${'description'}     | ${''}          | ${'Custom description'}

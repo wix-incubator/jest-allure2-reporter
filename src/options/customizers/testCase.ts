@@ -1,17 +1,20 @@
 import type {
   AllureTestCaseResult,
   PropertyExtractorContext,
-  TestCaseExtractor,
   TestCaseExtractorContext,
   TestFileExtractorContext,
   TestRunExtractorContext,
   TestStepExtractorContext,
-  TestStepExtractor,
+  AllureNestedTestStepMetadata,
 } from 'jest-allure2-reporter';
 
-import type { TestCaseCompositeExtractor } from '../types/compositeExtractors';
-import { isDefined } from '../../utils';
+import { isNonNullish } from '../../utils';
 import { novalue } from '../extractors';
+import type {
+  TestCaseCompositeExtractor,
+  TestCaseExtractor,
+  TestStepExtractor,
+} from '../types';
 
 export function testItemCustomizer<
   Context extends Partial<TestCaseExtractorContext>,
@@ -116,7 +119,10 @@ export function testItemCustomizer<
       result,
     });
 
-    const steps = metadataKey ? context[metadataKey]?.steps : undefined;
+    const steps: AllureNestedTestStepMetadata[] | undefined = metadataKey
+      ? context[metadataKey]?.steps
+      : undefined;
+
     if (steps && steps.length > 0) {
       const allSteps = await Promise.all(
         steps.map(async (testStepMetadata) =>
@@ -129,7 +135,7 @@ export function testItemCustomizer<
         ),
       );
 
-      result.steps = allSteps.filter(isDefined);
+      result.steps = allSteps.filter(isNonNullish);
     }
 
     return result as AllureTestCaseResult;

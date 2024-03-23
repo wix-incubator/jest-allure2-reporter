@@ -27,7 +27,7 @@ export type LikeStepInvocation<Metadata> = Metadata & {
 };
 
 export type LikeTestFile<Metadata> = Metadata & {
-  readonly globalMetadata: Metadata;
+  readonly testRunMetadata: Metadata;
 };
 
 export type LikeTestInvocation<Metadata> = Metadata & {
@@ -172,7 +172,7 @@ export class MetadataSelector<Metadata, T extends AllureTestItemMetadata> {
 
   globalAndTestFile(metadata: LikeTestFile<Metadata>): T {
     return this.merge(
-      this._getMetadataUnsafe(metadata.globalMetadata),
+      this._getMetadataUnsafe(metadata.testRunMetadata),
       this.getMetadataWithDocblock(metadata),
     );
   }

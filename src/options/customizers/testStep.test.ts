@@ -4,8 +4,8 @@ import type {
   TestStepExtractorContext,
 } from 'jest-allure2-reporter';
 
-import type { TestStepCompositeExtractor } from '../types/compositeExtractors';
 import { novalue } from '../extractors';
+import type { TestStepCompositeExtractor } from '../types';
 
 import { testStepCustomizer } from './testStep';
 
@@ -26,7 +26,7 @@ describe('testStepCustomizer', () => {
     testFileMetadata: {} as any,
     $: {} as any,
     globalConfig: {} as any,
-    config: {} as any,
+    reporterOptions: {} as any,
   });
 
   const defaultCompositeExtractor: TestStepCompositeExtractor<TestStepExtractorContext> =
@@ -35,7 +35,9 @@ describe('testStepCustomizer', () => {
       displayName: ({ value }) => value,
       hidden: ({ value }) => value,
       parameters: ({ value }) => value,
-      stage: ({ value }) => value,
+      stage: ({ value }) => {
+        return value;
+      },
       start: ({ value }) => value,
       status: ({ value }) => value,
       statusDetails: ({ value }) => value,
@@ -93,7 +95,10 @@ describe('testStepCustomizer', () => {
     const result = await testStep(context);
 
     expect(hiddenExtractor).toHaveBeenCalledWith(
-      expect.objectContaining({ value: false, result: { hidden: true } }),
+      expect.objectContaining({
+        value: false,
+        result: { hookType: 'beforeEach', hidden: true },
+      }),
     );
     expect(result).toBeUndefined();
   });

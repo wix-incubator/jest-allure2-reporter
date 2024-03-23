@@ -139,7 +139,7 @@ function createHookMetadata(
 
 export function getFullBlownTestCase(): LikeTestInvocation<StubTestCaseMetadata> {
   const testFile: LikeTestFile<StubTestFileMetadata> = {
-    globalMetadata: { data: createTestFileMetadata('global') },
+    testRunMetadata: { data: createTestFileMetadata('global') },
     data: createTestFileMetadata('file'),
   };
 

@@ -1,12 +1,11 @@
 import type { JestAssertionError } from 'expect';
-
-import { isObject } from './isObject';
+import _ from 'lodash';
 
 export function isJestAssertionError(
   error: unknown,
 ): error is JestAssertionError {
   return (
-    isObject(error) &&
+    _.isObject(error) &&
     'matcherResult' in (error as unknown as JestAssertionError)
   );
 }

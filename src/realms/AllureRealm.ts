@@ -2,7 +2,7 @@ import path from 'node:path';
 import os from 'node:os';
 
 import { state } from 'jest-metadata';
-import type { AllureGlobalMetadata } from 'jest-allure2-reporter';
+import type { AllureTestRunMetadata } from 'jest-allure2-reporter';
 
 import type { SharedReporterConfig } from '../runtime';
 import { AllureRuntimeImplementation, AllureRuntimeContext } from '../runtime';
@@ -15,7 +15,7 @@ export class AllureRealm {
     getGlobalMetadata: () => state,
     getNow: () => Date.now(),
     getReporterConfig() {
-      let config = new AllureMetadataProxy<AllureGlobalMetadata>(state).get(
+      let config = new AllureMetadataProxy<AllureTestRunMetadata>(state).get(
         'config',
       );
       if (!config) {

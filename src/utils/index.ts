@@ -1,22 +1,29 @@
+import _ from 'lodash';
+
+export const attempt = _.attempt;
+export const compactArray = _.compact;
+export const constant = _.constant;
+export const groupBy = _.groupBy;
+export const isObject = _.isObject;
+export const mapValues = _.mapValues;
+export const once = _.once;
+export const last = _.last;
+export const uniq = _.uniq;
+
 export * from './asArray';
-export * from './attempt';
 export * from './autoIndent';
 export * from './compactObject';
-export * from './constant';
 export * from './formatString';
 export * from './getStatusDetails';
 export * from './hijackFunction';
-export * from './isDefined';
-export * from './isObject';
-export * from './isError';
+export * from './isNonNullish';
 export * from './isJestAssertionError';
 export * from './isLibraryPath';
 export * from './isPromiseLike';
-export * from './last';
-export * from './once';
 export * from './md5';
 export * from './processMaybePromise';
 export * from './shallowEqualArrays';
+export * from './stringifyValues';
 export * from './TaskQueue';
 export * from './types';
 export * from './weakMemoize';
