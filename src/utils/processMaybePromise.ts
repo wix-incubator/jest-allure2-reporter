@@ -2,16 +2,19 @@ import { isPromiseLike } from './isPromiseLike';
 import type { MaybePromise } from './types';
 
 interface MaybePromiseProcessor {
-  <T>(value: T, callback: (resolvedValue: T) => void): T;
-  <T>(value: Promise<T>, callback: (resolvedValue: T) => void): Promise<T>;
-  <T>(
+  <T, R>(value: T, callback: (resolvedValue: T) => Promise<R>): Promise<R>;
+  <T, R>(
+    value: Promise<T>,
+    callback: (resolvedValue: T) => Promise<R>,
+  ): Promise<R>;
+  <T, R>(
     value: MaybePromise<T>,
-    callback: (resolvedValue: T) => void,
-  ): MaybePromise<T>;
+    callback: (resolvedValue: T) => Promise<R>,
+  ): Promise<R>;
 }
 
 export const processMaybePromise: MaybePromiseProcessor = (input, callback) => {
   return isPromiseLike(input)
-    ? input.then((resolvedValue) => (callback(resolvedValue), resolvedValue))
-    : (callback(input), input);
+    ? input.then((resolvedValue) => callback(resolvedValue))
+    : callback(input);
 };

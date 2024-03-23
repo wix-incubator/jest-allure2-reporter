@@ -25,10 +25,11 @@ export class AllureTestItemMetadataProxy<
     return localPath ? `${this.$metadata.id}:${localPath}` : this.$metadata.id;
   }
 
-  $bind(): AllureTestItemMetadataProxy<T> {
-    return new AllureTestItemMetadataProxy(this.$metadata, [
-      ...this.$metadata.get(CURRENT_STEP, []),
-    ]);
+  $bind(step?: null): AllureTestItemMetadataProxy<T> {
+    return new AllureTestItemMetadataProxy(
+      this.$metadata,
+      step === null ? [] : [...this.$metadata.get(CURRENT_STEP, [])],
+    );
   }
 
   $startStep(): this {

@@ -1,46 +1,36 @@
-import type {
-  ResolvedTestCaseCustomizer,
-  TestCaseCustomizer,
-} from 'jest-allure2-reporter';
+import type { TestCaseCustomizer } from 'jest-allure2-reporter';
 
-import {
-  aggregateLabelCustomizers,
-  aggregateLinkCustomizers,
-  composeExtractors,
-} from '../utils';
+import type { TestCaseCompositeExtractor } from '../types';
 
-export function composeTestCaseCustomizers(
-  base: ResolvedTestCaseCustomizer,
-  custom: Partial<TestCaseCustomizer> | undefined,
-): ResolvedTestCaseCustomizer {
+import { labels } from './labels';
+import { links } from './links';
+
+export function composeTestCasePropertyCustomizers<Context>(
+  custom: TestCaseCustomizer<Context> | undefined,
+  base: TestCaseCompositeExtractor<Context>,
+): TestCaseCompositeExtractor<Context> {
   if (!custom) {
     return base;
   }
 
   return {
-    hidden: composeExtractors(custom.hidden, base.hidden),
-    historyId: composeExtractors(custom.historyId, base.historyId),
-    fullName: composeExtractors(custom.fullName, base.fullName),
-    name: composeExtractors(custom.name, base.name),
-    description: composeExtractors(custom.description, base.description),
-    descriptionHtml: composeExtractors(
+    hidden: composeExtractors2(custom.hidden, base.hidden),
+    historyId: composeExtractors2(custom.historyId, base.historyId),
+    fullName: composeExtractors2(custom.fullName, base.fullName),
+    displayName: composeExtractors2(custom.displayName, base.displayName),
+    description: composeExtractors2(custom.description, base.description),
+    descriptionHtml: composeExtractors2(
       custom.descriptionHtml,
       base.descriptionHtml,
     ),
-    start: composeExtractors(custom.start, base.start),
-    stop: composeExtractors(custom.stop, base.stop),
-    stage: composeExtractors(custom.stage, base.stage),
-    status: composeExtractors(custom.status, base.status),
-    statusDetails: composeExtractors(custom.statusDetails, base.statusDetails),
-    attachments: composeExtractors(custom.attachments, base.attachments),
-    parameters: composeExtractors(custom.parameters, base.parameters),
-    labels: composeExtractors(
-      aggregateLabelCustomizers(custom.labels),
-      base.labels,
-    ),
-    links: composeExtractors(
-      aggregateLinkCustomizers(custom.links),
-      base.links,
-    ),
+    start: composeExtractors2(custom.start, base.start),
+    stop: composeExtractors2(custom.stop, base.stop),
+    stage: composeExtractors2(custom.stage, base.stage),
+    status: composeExtractors2(custom.status, base.status),
+    statusDetails: composeExtractors2(custom.statusDetails, base.statusDetails),
+    attachments: composeExtractors2(custom.attachments, base.attachments),
+    parameters: composeExtractors2(custom.parameters, base.parameters),
+    labels: composeExtractors2(labels(custom.labels), base.labels),
+    links: composeExtractors2(links(custom.links), base.links),
   };
 }

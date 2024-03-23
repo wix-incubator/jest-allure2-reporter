@@ -1,14 +1,13 @@
 import type { PluginContext } from 'jest-allure2-reporter';
 
-import * as plugins from '../../builtin-plugins';
+import * as plugins from '../../reporter-plugins';
 
 export async function defaultPlugins(context: PluginContext) {
-  return [
-    plugins.detect({}, context),
-    plugins.docblock({}, context),
-    plugins.github({}, context),
+  return await Promise.all([
+    plugins.ci({}, context),
     plugins.manifest({}, context),
-    plugins.prettier({}, context),
     plugins.remark({}, context),
-  ];
+    plugins.sourceCode({}, context),
+    plugins.docblock({}, context),
+  ]);
 }

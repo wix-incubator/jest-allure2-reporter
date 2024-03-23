@@ -2,61 +2,40 @@ import path from 'node:path';
 
 import type { TestCaseResult } from '@jest/reporters';
 import type {
-  AllureTestStepMetadata,
   ExtractorContext,
   Label,
-  ResolvedTestCaseCustomizer,
+  TestCaseCustomizer,
   Stage,
   Status,
-  TestCaseCustomizer,
+  TestCasePropertyCustomizer,
   TestCaseExtractorContext,
 } from 'jest-allure2-reporter';
 
-import {
-  aggregateLabelCustomizers,
-  composeExtractors,
-  stripStatusDetails,
-} from '../utils';
-import { getStatusDetails } from '../../utils';
+import { composeExtractors2 } from '../extractors';
+import { getStatusDetails, isNonNullish } from '../../utils';
+import { labels } from '../compose-options';
 
 const identity = <T>(context: ExtractorContext<T>) => context.value;
-const last = <T>(context: ExtractorContext<T[]>) => context.value?.at(-1);
+const last = async <T>(context: ExtractorContext<T[]>) => {
+  const value = await context.value;
+  return value?.at(-1);
+};
 const all = identity;
 
-function extractCode(
-  steps: AllureTestStepMetadata[] | undefined,
-): string | undefined {
-  return joinCode(steps?.map((step) => step.sourceCode));
-}
-
-function joinCode(
-  code: undefined | (string | undefined)[],
-): string | undefined {
-  return code?.filter(Boolean).join('\n\n') || undefined;
-}
-
-export const testCase: ResolvedTestCaseCustomizer = {
+export const testCase: Required<TestCaseCustomizer> = {
   hidden: () => false,
+  $: ({ $ }) => $,
   historyId: ({ testCase, testCaseMetadata }) =>
     testCaseMetadata.historyId ?? testCase.fullName,
-  name: ({ testCase }) => testCase.title,
-  fullName: ({ testCase }) => testCase.fullName,
-  description: ({ testCaseMetadata }) => {
+  name: ({ testCase, testCaseMetadata }) =>
+    testCaseMetadata.displayName ?? testCase.title,
+  fullName: ({ testCase, testCaseMetadata }) =>
+    testCaseMetadata.fullName ?? testCase.fullName,
+  description: async ({ $, testCaseMetadata }) => {
     const text = testCaseMetadata.description?.join('\n\n') ?? '';
-    const before = extractCode(
-      testCaseMetadata.steps?.filter(
-        (step) =>
-          step.hookType === 'beforeAll' || step.hookType === 'beforeEach',
-      ),
-    );
-    const after = extractCode(
-      testCaseMetadata.steps?.filter(
-        (step) => step.hookType === 'afterAll' || step.hookType === 'afterEach',
-      ),
-    );
-    const code = joinCode([before, testCaseMetadata.sourceCode, after]);
-    const snippet = code ? '```javascript\n' + code + '\n```' : '';
-    return [text, snippet].filter(Boolean).join('\n\n');
+    const codes = await $.extractSourceCode(testCaseMetadata, true);
+    const snippets = codes.map($.sourceCode2Markdown);
+    return [text, ...snippets].filter(isNonNullish).join('\n\n');
   },
   descriptionHtml: ({ testCaseMetadata }) =>
     testCaseMetadata.descriptionHtml?.join('\n'),
@@ -68,15 +47,15 @@ export const testCase: ResolvedTestCaseCustomizer = {
     testCaseMetadata.stage ?? getTestCaseStage(testCase),
   status: ({ testCase, testCaseMetadata }) =>
     testCaseMetadata.status ?? getTestCaseStatus(testCase),
-  statusDetails: ({ testCase, testCaseMetadata }) =>
-    stripStatusDetails(
+  statusDetails: ({ $, testCase, testCaseMetadata }) =>
+    $.stripAnsi(
       testCaseMetadata.statusDetails ??
         getStatusDetails((testCase.failureMessages ?? []).join('\n')),
     ),
   attachments: ({ testCaseMetadata }) => testCaseMetadata.attachments ?? [],
   parameters: ({ testCaseMetadata }) => testCaseMetadata.parameters ?? [],
-  labels: composeExtractors<Label[], TestCaseExtractorContext<Label[]>>(
-    aggregateLabelCustomizers({
+  labels: composeExtractors2<Label[], TestCaseExtractorContext<Label[]>>(
+    labels({
       package: last,
       testClass: last,
       testMethod: last,
@@ -91,7 +70,7 @@ export const testCase: ResolvedTestCaseCustomizer = {
       severity: last,
       tag: all,
       owner: last,
-    } as TestCaseCustomizer['labels']),
+    } as TestCasePropertyCustomizer['labels']),
     ({ testCaseMetadata }) => testCaseMetadata.labels ?? [],
   ),
   links: ({ testCaseMetadata }) => testCaseMetadata.links ?? [],

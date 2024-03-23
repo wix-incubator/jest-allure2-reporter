@@ -1,6 +1,5 @@
 import type { StatusDetails } from 'jest-allure2-reporter';
-
-import { isError } from './isError';
+import _ from 'lodash';
 
 export function getStatusDetails(
   maybeError: unknown,
@@ -8,7 +7,7 @@ export function getStatusDetails(
   if (maybeError) {
     const error = maybeError as Error;
     const trace =
-      isError(maybeError) || typeof error === 'string'
+      _.isError(maybeError) || typeof error === 'string'
         ? String(error)
         : error.stack || error.message || JSON.stringify(error);
 

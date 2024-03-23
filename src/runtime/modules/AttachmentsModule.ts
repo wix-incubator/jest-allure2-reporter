@@ -1,7 +1,11 @@
 import path from 'node:path';
 
-import { formatString, hijackFunction, processMaybePromise } from '../../utils';
-import type { Function_, MaybePromise } from '../../utils';
+import {
+  type Function_,
+  type MaybePromise,
+  processMaybePromise,
+} from '../../utils';
+import { formatString, hijackFunction } from '../../utils';
 import type {
   AttachmentContent,
   AttachmentContext,
@@ -18,7 +22,7 @@ import type {
 import type { AllureTestItemMetadataProxy } from '../../metadata';
 import type { AllureRuntimeContext } from '../AllureRuntimeContext';
 
-export type AttachmentsModuleContext<
+type AttachmentsModuleContext<
   Context extends AttachmentContext,
   Handler extends AttachmentHandler<Context>,
 > = {
@@ -26,7 +30,7 @@ export type AttachmentsModuleContext<
   readonly inferMimeType: (context: MIMEInfererContext) => string | undefined;
   readonly metadata: AllureTestItemMetadataProxy;
   readonly outDir: string;
-  readonly waitFor: (promise: Promise<unknown>) => void;
+  readonly waitFor: <T>(promise: Promise<T>) => Promise<T>;
 };
 
 abstract class AttachmentsModule<
@@ -42,11 +46,12 @@ abstract class AttachmentsModule<
   attachment<T extends Content>(
     content: MaybePromise<T>,
     options: Options,
-  ): typeof content {
+  ): Promise<string | undefined> {
     if (
       typeof options.handler === 'string' &&
       !this.context.handlers[options.handler]
     ) {
+      // TODO: throw a more specific error
       throw new Error(`Unknown attachment handler: ${options.handler}`);
     }
 
@@ -70,7 +75,10 @@ abstract class AttachmentsModule<
   ): Context;
 
   #handleAttachment(userOptions: Options) {
-    return (userContent: Content, arguments_?: unknown[]) => {
+    return (
+      userContent: Content,
+      arguments_?: unknown[],
+    ): Promise<string | undefined> => {
       const handler = this.#resolveHandler(userOptions);
       const name = this.#formatName(userOptions.name, arguments_);
       const mimeContext = this._createMimeContext(name, userContent);
@@ -78,6 +86,7 @@ abstract class AttachmentsModule<
         userOptions.mimeType ??
         this.context.inferMimeType(mimeContext) ??
         'application/octet-stream';
+
       const context = this._createAttachmentContext({
         name,
         mimeType,
@@ -85,8 +94,9 @@ abstract class AttachmentsModule<
         sourcePath: mimeContext.sourcePath,
         content: mimeContext.content,
       });
+
       const pushAttachment = this.#schedulePushAttachment(context);
-      this.context.waitFor(
+      return this.context.waitFor(
         Promise.resolve()
           .then(() => handler(context))
           .then(pushAttachment),
@@ -101,9 +111,11 @@ abstract class AttachmentsModule<
       : this.context.handlers[handler];
   }
 
-  #schedulePushAttachment(context: Context) {
+  #schedulePushAttachment(
+    context: Context,
+  ): (destinationPath: string | undefined) => typeof destinationPath {
     const metadata = this.context.metadata.$bind();
-    return (destinationPath: string | undefined) => {
+    return (destinationPath) => {
       if (destinationPath) {
         metadata.push('attachments', [
           {
@@ -113,6 +125,8 @@ abstract class AttachmentsModule<
           },
         ]);
       }
+
+      return destinationPath;
     };
   }
 

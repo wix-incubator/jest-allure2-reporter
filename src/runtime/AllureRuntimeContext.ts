@@ -1,9 +1,9 @@
 import type {
-  AllureGlobalMetadata,
+  AllureTestRunMetadata,
   AllureTestFileMetadata,
 } from 'jest-allure2-reporter';
 
-import { type MaybeFunction, once } from '../utils';
+import { type MaybeFunction, once, TaskQueue } from '../utils';
 import { AllureMetadataProxy, AllureTestItemMetadataProxy } from '../metadata';
 
 import type { AllureRuntimeConfig } from './AllureRuntimeConfig';
@@ -21,12 +21,12 @@ export class AllureRuntimeContext {
   readonly inferMimeType: MIMEInferer;
   readonly getReporterConfig: () => SharedReporterConfig;
   readonly getFileMetadata: () => AllureMetadataProxy<AllureTestFileMetadata>;
-  readonly getGlobalMetadata: () => AllureMetadataProxy<AllureGlobalMetadata>;
+  readonly getGlobalMetadata: () => AllureMetadataProxy<AllureTestRunMetadata>;
   readonly getCurrentMetadata: () => AllureTestItemMetadataProxy;
   readonly getNow: () => number;
 
   readonly flush: () => Promise<unknown>;
-  readonly enqueueTask: (task: MaybeFunction<Promise<unknown>>) => void;
+  readonly enqueueTask: <T>(task: MaybeFunction<Promise<T>>) => Promise<T>;
 
   constructor(config: AllureRuntimeConfig) {
     this.contentAttachmentHandlers = config.contentAttachmentHandlers ?? {
@@ -48,12 +48,15 @@ export class AllureRuntimeContext {
     this.getGlobalMetadata = () =>
       new AllureMetadataProxy(config.getGlobalMetadata());
 
-    let idle: Promise<unknown> = Promise.resolve();
-    this.flush = () => idle;
-    this.enqueueTask = (task) => {
-      idle =
-        typeof task === 'function' ? idle.then(task) : idle.then(() => task);
-    };
+    const taskQueue = new TaskQueue({
+      logError(error) {
+        // TODO: print Bunyamin warning
+        throw error;
+      },
+    });
+
+    this.flush = taskQueue.flush;
+    this.enqueueTask = taskQueue.enqueueTask;
 
     Object.defineProperty(this.contentAttachmentHandlers, 'default', {
       get: () => {

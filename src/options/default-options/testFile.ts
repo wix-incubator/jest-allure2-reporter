@@ -1,38 +1,31 @@
-import fs from 'node:fs';
 import path from 'node:path';
 
 import type {
   ExtractorContext,
+  Label,
+  Link,
+  ReporterConfig,
+  TestCasePropertyCustomizer,
   TestFileExtractorContext,
-  ResolvedTestFileCustomizer,
-  TestCaseCustomizer,
 } from 'jest-allure2-reporter';
-import type { Label, Link } from 'jest-allure2-reporter';
 
-import {
-  aggregateLabelCustomizers,
-  composeExtractors,
-  stripStatusDetails,
-} from '../utils';
-import { getStatusDetails } from '../../utils';
+import {getStatusDetails, isNonNullish} from '../../utils';
+import { labels } from '../compose-options';
+import { composeExtractors2, last } from '../extractors';
 
-const identity = <T>(context: ExtractorContext<T>) => context.value;
-const last = <T>(context: ExtractorContext<T[]>) => context.value?.at(-1);
-const all = identity;
+const all = <T>(context: ExtractorContext<T>) => context.value;
 
-export const testFile: ResolvedTestFileCustomizer = {
+export const testFile: ReporterConfig['testFile'] = {
   hidden: ({ testFile }) => !testFile.testExecError,
+  $: ({ $ }) => $,
   historyId: ({ filePath }) => filePath.join('/'),
   name: ({ filePath }) => filePath.join(path.sep),
   fullName: ({ globalConfig, testFile }) =>
     path.relative(globalConfig.rootDir, testFile.testFilePath),
-  description: ({ detectLanguage, testFile, testFileMetadata }) => {
+  description: async ({ $, testFileMetadata }) => {
     const text = testFileMetadata.description?.join('\n') ?? '';
-    const contents = fs.readFileSync(testFile.testFilePath, 'utf8');
-    const lang = detectLanguage?.(testFile.testFilePath, contents) ?? '';
-    const fence = '```';
-    const code = `${fence}${lang}\n${contents}\n${fence}`;
-    return [text, code].filter(Boolean).join('\n\n');
+    const code = await $.extractSourceCode(testFileMetadata);
+    return [text, $.sourceCode2Markdown(code)].filter(isNonNullish).join('\n\n');
   },
   descriptionHtml: ({ testFileMetadata }) =>
     testFileMetadata.descriptionHtml?.join('\n'),
@@ -42,28 +35,21 @@ export const testFile: ResolvedTestFileCustomizer = {
     testFile.testExecError == null ? 'finished' : 'interrupted',
   status: ({ testFile }) =>
     testFile.testExecError == null ? 'passed' : 'broken',
-  statusDetails: ({ testFile }) =>
-    stripStatusDetails(getStatusDetails(testFile.testExecError)),
+  statusDetails: ({ $, testFile }) =>
+    $.stripAnsi(getStatusDetails(testFile.testExecError)),
   attachments: ({ testFileMetadata }) => testFileMetadata.attachments ?? [],
   parameters: ({ testFileMetadata }) => testFileMetadata.parameters ?? [],
-  labels: composeExtractors<Label[], TestFileExtractorContext<Label[]>>(
-    aggregateLabelCustomizers({
-      package: last,
-      testClass: last,
-      testMethod: last,
-      parentSuite: last,
-      subSuite: last,
-      suite: () => '(test file execution)',
-      epic: all,
-      feature: all,
-      story: all,
-      thread: ({ testFileMetadata }) => testFileMetadata.workerId,
-      severity: last,
-      tag: all,
-      owner: last,
-    } as TestCaseCustomizer['labels']),
-    ({ testFileMetadata }) => testFileMetadata.labels ?? [],
-  ),
+  labels: labels({
+    package: last,
+    testClass: last,
+    testMethod: last,
+    parentSuite: last,
+    subSuite: last,
+    suite: () => '(test file execution)',
+    thread: ({ testFileMetadata }) => testFileMetadata.workerId,
+    severity: last,
+    owner: last,
+  } as TestCasePropertyCustomizer['labels']),
   links: ({ testFileMetadata }: TestFileExtractorContext<Link[]>) =>
     testFileMetadata.links ?? [],
 };

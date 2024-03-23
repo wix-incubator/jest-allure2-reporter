@@ -1,4 +1,3 @@
-import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import type {
@@ -12,59 +11,51 @@ import type {
 } from '@jest/reporters';
 import { state } from 'jest-metadata';
 import JestMetadataReporter from 'jest-metadata/reporter';
-import rimraf from 'rimraf';
-import type {
-  AllureGroup,
-  Attachment,
-  Category,
-  ExecutableItemWrapper,
-  Label,
-  Link,
-  Parameter,
-  Stage,
-  Status,
-  StatusDetails,
-} from '@noomorph/allure-js-commons';
+import type { Category } from '@noomorph/allure-js-commons';
 import { AllureRuntime } from '@noomorph/allure-js-commons';
 import type {
-  AllureGlobalMetadata,
+  AllureTestRunMetadata,
+  AllureTestCaseMetadata,
   AllureTestFileMetadata,
-  AllureTestStepMetadata,
-  GlobalExtractorContext,
-  Plugin,
-  PluginHookName,
-  ReporterConfig,
+  Helpers,
+  PropertyExtractorContext,
   ReporterOptions,
   TestCaseExtractorContext,
   TestFileExtractorContext,
-  TestStepExtractorContext,
+  TestRunExtractorContext,
 } from 'jest-allure2-reporter';
 
-import { resolveOptions } from '../options';
+import { type ReporterConfig, resolveOptions } from '../options';
 import { AllureMetadataProxy, MetadataSquasher } from '../metadata';
-import { md5 } from '../utils';
+import { novalue } from '../options/extractors';
+import { stringifyValues } from '../utils';
 
-import { ThreadService } from './ThreadService';
+import * as fallbacks from './fallbacks';
+import { overwriteDirectory } from './overwriteDirectory';
+import { postProcessMetadata } from './postProcessMetadata';
+import { writeTest } from './allureCommons';
 
 export class JestAllure2Reporter extends JestMetadataReporter {
-  private _plugins: readonly Plugin[] = [];
+  private readonly _$: Partial<Helpers> = {};
   private readonly _allure: AllureRuntime;
   private readonly _config: ReporterConfig;
+  private readonly _options: ReporterOptions;
   private readonly _globalConfig: Config.GlobalConfig;
-  private readonly _threadService = new ThreadService();
 
   constructor(globalConfig: Config.GlobalConfig, options: ReporterOptions) {
     super(globalConfig);
 
     this._globalConfig = globalConfig;
-    const pluginContext = { globalConfig };
-    this._config = resolveOptions(pluginContext, options);
+    this._options = options;
+    this._config = resolveOptions(options);
     this._allure = new AllureRuntime({
       resultsDir: this._config.resultsDir,
     });
 
-    const globalMetadata = new AllureMetadataProxy<AllureGlobalMetadata>(state);
-    globalMetadata.set('config', {
+    const testRunMetadata = new AllureMetadataProxy<AllureTestRunMetadata>(
+      state,
+    );
+    testRunMetadata.set('config', {
       resultsDir: this._config.resultsDir,
       overwrite: this._config.overwrite,
       attachments: this._config.attachments,
@@ -73,98 +64,110 @@ export class JestAllure2Reporter extends JestMetadataReporter {
   }
 
   async onRunStart(
-    results: AggregatedResult,
+    aggregatedResult: AggregatedResult,
     options: ReporterOnStartOptions,
   ): Promise<void> {
-    this._plugins = await this._config.plugins;
-
-    await super.onRunStart(results, options);
+    await super.onRunStart(aggregatedResult, options);
 
     if (this._config.overwrite) {
-      await rimraf(this._config.resultsDir);
-      await fs.mkdir(this._config.resultsDir, { recursive: true });
+      await overwriteDirectory(this._config.resultsDir);
     }
   }
 
-  onTestFileStart(test: Test) {
+  async onTestFileStart(test: Test) {
     super.onTestFileStart(test);
 
-    const testFileMetadata = JestAllure2Reporter.query.test(test);
-    const threadId = this._threadService.allocateThread(test.path);
-    const metadataProxy = new AllureMetadataProxy<AllureTestFileMetadata>(
-      testFileMetadata,
+    const rawMetadata = JestAllure2Reporter.query.test(test);
+    const testFileMetadata = new AllureMetadataProxy<AllureTestFileMetadata>(
+      rawMetadata,
     );
-    metadataProxy.assign({
-      workerId: String(1 + threadId),
-      start: Date.now(),
-    });
+
+    fallbacks.onTestFileStart(test, testFileMetadata);
   }
 
-  onTestCaseResult(test: Test, testCaseResult: TestCaseResult) {
-    const now = Date.now();
+  async onTestCaseResult(test: Test, testCaseResult: TestCaseResult) {
     super.onTestCaseResult(test, testCaseResult);
-    const metadata =
-      JestAllure2Reporter.query.testCaseResult(testCaseResult).lastInvocation!;
-    const metadataProxy = new AllureMetadataProxy<AllureTestStepMetadata>(
-      metadata,
+
+    const testCaseMetadata = new AllureMetadataProxy<AllureTestCaseMetadata>(
+      JestAllure2Reporter.query.testCaseResult(testCaseResult).lastInvocation!,
     );
-    const stop = metadataProxy.get('stop', Number.NaN);
-    if (Number.isNaN(stop)) {
-      metadataProxy.set('stop', now);
-    }
+
+    fallbacks.onTestCaseResult(testCaseMetadata);
   }
 
-  onTestFileResult(
+  async onTestFileResult(
     test: Test,
     testResult: TestResult,
     aggregatedResult: AggregatedResult,
   ) {
-    this._threadService.freeThread(test.path);
+    await super.onTestFileResult(test, testResult, aggregatedResult);
 
-    const testFileMetadata = JestAllure2Reporter.query.test(test);
-    const metadataProxy = new AllureMetadataProxy<AllureTestFileMetadata>(
-      testFileMetadata,
+    const rawMetadata = JestAllure2Reporter.query.test(test);
+    const testFileMetadata = new AllureMetadataProxy<AllureTestFileMetadata>(
+      rawMetadata,
     );
-    metadataProxy.set('stop', Date.now());
 
-    return super.onTestFileResult(test, testResult, aggregatedResult);
+    fallbacks.onTestFileResult(test, testFileMetadata);
+    await postProcessMetadata(this._$ as Helpers, rawMetadata);
   }
 
   async onRunComplete(
     testContexts: Set<TestContext>,
-    results: AggregatedResult,
+    aggregatedResult: AggregatedResult,
   ): Promise<void> {
-    await super.onRunComplete(testContexts, results);
+    await super.onRunComplete(testContexts, aggregatedResult);
 
     const config = this._config;
 
-    const globalContext: GlobalExtractorContext = {
+    const testRunMetadata = JestAllure2Reporter.query.globalMetadata();
+    const globalMetadataProxy = new AllureMetadataProxy<AllureTestRunMetadata>(
+      testRunMetadata,
+    );
+
+    const globalContext: PropertyExtractorContext<
+      TestRunExtractorContext,
+      never
+    > = {
+      $: this._$ as Helpers,
+      aggregatedResult,
       globalConfig: this._globalConfig,
-      config,
-      value: undefined,
+      reporterOptions: this._options,
+      testRunMetadata: globalMetadataProxy.get(),
+      result: {},
+      value: novalue(),
     };
 
-    await this._callPlugins('globalContext', globalContext);
-
-    const environment = config.environment(globalContext);
+    const environment = await config.environment(globalContext);
     if (environment) {
-      this._allure.writeEnvironmentInfo(environment);
+      this._allure.writeEnvironmentInfo(stringifyValues(environment));
     }
 
-    const executor = config.executor(globalContext);
+    const executor = await config.executor(globalContext);
     if (executor) {
       this._allure.writeExecutorInfo(executor);
     }
 
-    const categories = config.categories(globalContext);
+    const categories = await config.categories(globalContext);
     if (categories) {
       this._allure.writeCategoriesDefinitions(categories as Category[]);
     }
 
     const squasher = new MetadataSquasher();
 
-    for (const testResult of results.testResults) {
-      const testFileContext: TestFileExtractorContext = {
+    const allureRunTest = await config.testRun(globalContext);
+    if (allureRunTest) {
+      writeTest({
+        containerName: `Test Run (${process.pid})`,
+        runtime: this._allure,
+        test: allureRunTest,
+      });
+    }
+
+    for (const testResult of aggregatedResult.testResults) {
+      const testFileContext: PropertyExtractorContext<
+        TestFileExtractorContext,
+        never
+      > = {
         ...globalContext,
         filePath: path
           .relative(globalContext.globalConfig.rootDir, testResult.testFilePath)
@@ -175,33 +178,11 @@ export class JestAllure2Reporter extends JestMetadataReporter {
         ),
       };
 
-      await this._callPlugins('testFileContext', testFileContext);
-
-      if (!config.testFile.hidden(testFileContext)) {
-        // pseudo-test entity, used for reporting file-level errors and other obscure purposes
-        const allureFileTest: AllurePayloadTest = {
-          name: config.testFile.name(testFileContext),
-          start: config.testFile.start(testFileContext),
-          stop: config.testFile.stop(testFileContext),
-          historyId: config.testFile.historyId(testFileContext),
-          fullName: config.testFile.fullName(testFileContext),
-          description: config.testFile.description(testFileContext),
-          descriptionHtml: config.testFile.descriptionHtml(testFileContext),
-          // TODO: merge @noomorph/allure-js-commons into this package and remove casting
-          stage: config.testFile.stage(testFileContext) as string as Stage,
-          status: config.testFile.status(testFileContext) as string as Status,
-          statusDetails: config.testFile.statusDetails(testFileContext),
-          links: config.testFile.links(testFileContext),
-          labels: config.testFile.labels(testFileContext),
-          parameters: config.testFile.parameters(testFileContext),
-          attachments: config.testFile
-            .attachments(testFileContext)
-            ?.map(this._relativizeAttachment),
-        };
-
-        await this._renderHtmlDescription(testFileContext, allureFileTest);
-        await this._createTest({
+      const allureFileTest = await config.testFile(testFileContext);
+      if (allureFileTest) {
+        writeTest({
           containerName: `${testResult.testFilePath}`,
+          runtime: this._allure,
           test: allureFileTest,
         });
       }
@@ -213,265 +194,34 @@ export class JestAllure2Reporter extends JestMetadataReporter {
 
         for (const testInvocationMetadata of allInvocations) {
           const testCaseMetadata = squasher.testInvocation(
-            testFileContext.testFileMetadata,
             testInvocationMetadata,
           );
 
-          const testCaseContext: TestCaseExtractorContext = {
+          const testCaseContext: PropertyExtractorContext<
+            TestCaseExtractorContext,
+            never
+          > = {
             ...testFileContext,
             testCase: testCaseResult,
             testCaseMetadata,
           };
 
-          await this._callPlugins('testCaseContext', testCaseContext);
-
-          if (config.testCase.hidden(testCaseContext)) {
+          const allureTest = await config.testCase(testCaseContext);
+          if (!allureTest) {
             continue;
           }
-
-          const testCaseSteps = testCaseMetadata.steps ?? [];
-          const visibleTestStepContexts = testCaseSteps
-            .map(
-              (testStepMetadata) =>
-                ({
-                  ...testCaseContext,
-                  testStepMetadata,
-                }) as TestStepExtractorContext,
-            )
-            .filter((testStepMetadataContext) => {
-              return !config.testStep.hidden(testStepMetadataContext);
-            });
-
-          if (testCaseMetadata.steps) {
-            testCaseMetadata.steps = visibleTestStepContexts.map(
-              (c) => c.testStepMetadata,
-            );
-          }
-
-          let allureSteps: AllurePayloadStep[] = await Promise.all(
-            visibleTestStepContexts.map(async (testStepContext) => {
-              await this._callPlugins('testStepContext', testStepContext);
-
-              const result: AllurePayloadStep = {
-                hookType: testStepContext.testStepMetadata.hookType,
-                name: config.testStep.name(testStepContext),
-                start: config.testStep.start(testStepContext),
-                stop: config.testStep.stop(testStepContext),
-                stage: config.testStep.stage(
-                  testStepContext,
-                ) as string as Stage,
-                status: config.testStep.status(
-                  testStepContext,
-                ) as string as Status,
-                statusDetails: config.testStep.statusDetails(testStepContext),
-                parameters: config.testStep.parameters(testStepContext),
-                attachments: config.testStep
-                  .attachments(testStepContext)
-                  ?.map(this._relativizeAttachment),
-              };
-
-              return result;
-            }),
-          );
-
-          const allureTest: AllurePayloadTest = {
-            name: config.testCase.name(testCaseContext),
-            start: config.testCase.start(testCaseContext),
-            stop: config.testCase.stop(testCaseContext),
-            historyId: config.testCase.historyId(testCaseContext),
-            fullName: config.testCase.fullName(testCaseContext),
-            description: config.testCase.description(testCaseContext),
-            descriptionHtml: config.testCase.descriptionHtml(testCaseContext),
-            // TODO: merge @noomorph/allure-js-commons into this package and remove casting
-            stage: config.testCase.stage(testCaseContext) as string as Stage,
-            status: config.testCase.status(testCaseContext) as string as Status,
-            statusDetails: config.testCase.statusDetails(testCaseContext),
-            links: config.testCase.links(testCaseContext),
-            labels: config.testCase.labels(testCaseContext),
-            parameters: config.testCase.parameters(testCaseContext),
-            attachments: config.testCase
-              .attachments(testCaseContext)
-              ?.map(this._relativizeAttachment),
-            steps: allureSteps.filter((step) => !step.hookType),
-          };
-
-          allureSteps = allureSteps.filter((step) => step.hookType);
-
-          await this._renderHtmlDescription(testCaseContext, allureTest);
 
           const invocationIndex = allInvocations.indexOf(
             testInvocationMetadata,
           );
 
-          await this._createTest({
+          writeTest({
             containerName: `${testCaseResult.fullName} (${invocationIndex})`,
+            runtime: this._allure,
             test: allureTest,
-            steps: allureSteps,
           });
         }
       }
     }
   }
-
-  private async _createTest({ test, containerName, steps }: AllurePayload) {
-    const allure = this._allure;
-    const allureGroup = allure.startGroup(containerName);
-    const allureTest = allureGroup.startTest();
-
-    this._fillStep(allureTest, test);
-
-    if (test.historyId) {
-      allureTest.historyId = md5(test.historyId);
-    }
-    if (test.fullName) {
-      allureTest.fullName = test.fullName;
-    }
-    if (test.description) {
-      allureTest.description = test.description;
-    }
-    if (test.descriptionHtml) {
-      allureTest.descriptionHtml = test.descriptionHtml;
-    }
-    if (test.links) {
-      for (const link of test.links) {
-        allureTest.addLink(link.url, link.name, link.type);
-      }
-    }
-    if (test.labels) {
-      for (const label of test.labels) {
-        allureTest.addLabel(label.name, label.value);
-      }
-    }
-    if (steps) {
-      for (const step of steps) {
-        const executable = this._createStepExecutable(
-          allureGroup,
-          step.hookType,
-        );
-        await this._fillStep(executable, step);
-      }
-    }
-
-    allureTest.endTest(test.stop);
-    allureGroup.endGroup();
-  }
-
-  private async _renderHtmlDescription(
-    context: GlobalExtractorContext,
-    test: AllurePayloadTest,
-  ) {
-    if (test.description && context.processMarkdown) {
-      test.descriptionHtml =
-        (test.descriptionHtml ? test.descriptionHtml + '\n' : '') +
-        (await context.processMarkdown(test.description));
-    }
-  }
-
-  private _createStepExecutable(
-    parent: AllureGroup,
-    hookType: AllureTestStepMetadata['hookType'],
-  ) {
-    switch (hookType) {
-      case 'beforeAll':
-      case 'beforeEach': {
-        return parent.addBefore();
-      }
-      case 'afterEach':
-      case 'afterAll': {
-        return parent.addAfter();
-      }
-      default: {
-        throw new Error(`Cannot create step executable for ${hookType}`);
-      }
-    }
-  }
-
-  private _fillStep(
-    executable: ExecutableItemWrapper,
-    step: AllurePayloadStep,
-  ) {
-    if (step.name !== undefined) {
-      executable.name = step.name;
-    }
-    if (step.start !== undefined) {
-      executable.wrappedItem.start = step.start;
-    }
-    if (step.stop !== undefined) {
-      executable.wrappedItem.stop = step.stop;
-    }
-    if (step.stage !== undefined) {
-      executable.stage = step.stage;
-    }
-    if (step.status !== undefined) {
-      executable.status = step.status;
-    }
-    if (step.statusDetails !== undefined) {
-      executable.statusDetails = step.statusDetails;
-    }
-    if (step.attachments !== undefined) {
-      executable.wrappedItem.attachments = step.attachments;
-    }
-    if (step.parameters) {
-      executable.wrappedItem.parameters = step.parameters;
-    }
-    if (step.steps) {
-      for (const innerStep of step.steps) {
-        this._fillStep(
-          executable.startStep(innerStep.name ?? '', innerStep.start),
-          innerStep,
-        );
-      }
-    }
-  }
-
-  async _callPlugins(method: PluginHookName, context: any) {
-    await Promise.all(
-      this._plugins.map((p) => {
-        return p[method]?.(context);
-      }),
-    );
-  }
-
-  _relativizeAttachment = (attachment: Attachment) => {
-    const source = path.relative(this._config.resultsDir, attachment.source);
-    if (source.startsWith('..')) {
-      return attachment;
-    }
-
-    return {
-      ...attachment,
-      source,
-    };
-  };
 }
-
-type AllurePayload = {
-  containerName: string;
-  test: AllurePayloadTest;
-  steps?: AllurePayloadStep[];
-};
-
-type AllurePayloadStep = Partial<{
-  hookType?: 'beforeAll' | 'beforeEach' | 'afterEach' | 'afterAll';
-
-  name: string;
-  start: number;
-  stop: number;
-  status: Status;
-  statusDetails: StatusDetails;
-  stage: Stage;
-  steps: AllurePayloadStep[];
-  attachments: Attachment[];
-  parameters: Parameter[];
-}>;
-
-type AllurePayloadTest = Partial<{
-  hookType?: never;
-  historyId: string;
-  fullName: string;
-  description: string;
-  descriptionHtml: string;
-  labels: Label[];
-  links: Link[];
-}> &
-  AllurePayloadStep;

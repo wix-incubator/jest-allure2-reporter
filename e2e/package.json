@@ -12,6 +12,7 @@
     "jest": "29.x.x",
     "jest-jasmine2": "29.x.x",
     "jest-allure2-reporter": "..",
+    "coffeescript": "^2.7.0",
     "ts-jest": "29.x.x",
     "typescript": "5.x.x"
   }

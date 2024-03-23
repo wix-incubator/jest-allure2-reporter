@@ -27,8 +27,9 @@ export const hijackFunction: FunctionHijacker = (function_, callback) => {
         arguments_,
       ) as MaybePromise<any>;
 
-      return processMaybePromise(result, (value) =>
-        callback(value, arguments_),
+      return processMaybePromise(
+        result,
+        (value) => (callback(value, arguments_), value),
       );
     },
   );

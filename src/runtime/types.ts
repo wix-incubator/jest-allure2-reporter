@@ -1,4 +1,4 @@
-import type { AllureGlobalMetadata } from 'jest-allure2-reporter';
+import type { AllureTestRunMetadata } from 'jest-allure2-reporter';
 import type {
   BuiltinFileAttachmentHandler,
   BuiltinContentAttachmentHandler,
@@ -11,12 +11,12 @@ import type {
 
 import type { Function_, MaybePromise } from '../utils';
 
-export interface IAllureRuntime {
+export interface AllureRuntime {
   /**
    * Advanced API for attaching metadata to the same step or test.
    * Useful when your artifacts are delayed and are created asynchronously.
    */
-  $bind(options?: AllureRuntimeBindOptions): IAllureRuntime;
+  $bind(options?: AllureRuntimeBindOptions): AllureRuntime;
 
   /**
    * Attach a runtime plugin using a callback.
@@ -28,11 +28,11 @@ export interface IAllureRuntime {
 
   descriptionHtml(value: string): void;
 
+  displayName(value: string): void;
+
+  fullName(value: string): void;
+
   historyId(value: string): void;
-
-  status(status: Status, statusDetails?: StatusDetails): void;
-
-  statusDetails(statusDetails: StatusDetails): void;
 
   label(name: LabelName, value: string): void;
 
@@ -42,11 +42,15 @@ export interface IAllureRuntime {
 
   parameters(parameters: Record<string, unknown>): void;
 
+  status(status: Status, statusDetails?: StatusDetails): void;
+
+  statusDetails(statusDetails: StatusDetails): void;
+
   attachment<T extends AttachmentContent>(
     name: string,
     content: MaybePromise<T>,
     mimeType?: string,
-  ): typeof content;
+  ): Promise<string | undefined>;
 
   createAttachment<
     T extends AttachmentContent,
@@ -63,16 +67,14 @@ export interface IAllureRuntime {
     options: ContentAttachmentOptions,
   ): typeof function_;
 
-  fileAttachment(filePath: string, name?: string): string;
-  fileAttachment(filePath: string, options?: FileAttachmentOptions): string;
   fileAttachment(
-    filePathPromise: Promise<string>,
+    filePath: string | Promise<string>,
     name?: string,
-  ): Promise<string>;
+  ): Promise<string | undefined>;
   fileAttachment(
-    filePathPromise: Promise<string>,
+    filePath: string | Promise<string>,
     options?: FileAttachmentOptions,
-  ): Promise<string>;
+  ): Promise<string | undefined>;
 
   createFileAttachment<F extends Function_<MaybePromise<string>>>(
     function_: F,
@@ -93,14 +95,14 @@ export interface IAllureRuntime {
   step<T>(name: string, function_: () => T): T;
 }
 
-export type SharedReporterConfig = AllureGlobalMetadata['config'];
+export type SharedReporterConfig = AllureTestRunMetadata['config'];
 
 export type AllureRuntimePluginCallback = (
   context: AllureRuntimePluginContext,
 ) => void;
 
 export interface AllureRuntimePluginContext {
-  readonly runtime: IAllureRuntime;
+  readonly runtime: AllureRuntime;
   readonly contentAttachmentHandlers: Record<
     BuiltinContentAttachmentHandler | 'default' | string,
     ContentAttachmentHandler

@@ -22,7 +22,7 @@
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
+    "skipLibCheck": false,
     "forceConsistentCasingInFileNames": true,
     "importsNotUsedAsValues": "error",
     "rootDir": "src",
