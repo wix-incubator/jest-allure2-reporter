@@ -21,6 +21,7 @@ export * from './isJestAssertionError';
 export * from './isLibraryPath';
 export * from './isPromiseLike';
 export * from './md5';
+export * from './onceSmart';
 export * from './processMaybePromise';
 export * from './shallowEqualArrays';
 export * from './stringifyValues';

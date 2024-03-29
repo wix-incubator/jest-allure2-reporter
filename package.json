@@ -113,6 +113,7 @@
   },
   "dependencies": {
     "@noomorph/allure-js-commons": "^2.3.0",
+    "bunyamin": "^1.5.2",
     "ci-info": "^3.8.0",
     "import-from": "^4.0.0",
     "jest-metadata": "^1.4.1",

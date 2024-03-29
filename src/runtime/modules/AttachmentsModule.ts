@@ -189,7 +189,7 @@ export class ContentAttachmentsModule extends AttachmentsModule<
       },
       get outDir() {
         const config = context.getReporterConfig();
-        return path.join(config.resultsDir, config.attachments.subDir);
+        return path.join(config.resultsDir, config.attachments.subDir ?? '');
       },
       waitFor: context.enqueueTask,
     });

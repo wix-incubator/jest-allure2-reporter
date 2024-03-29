@@ -109,14 +109,11 @@ declare module 'jest-allure2-reporter' {
 
   // region Customizers
 
-  /**
-   * Global customizations for how test cases are reported
-   */
   export interface TestCaseCustomizer<Context> {
     /**
-     * Extractor to omit test file cases from the report.
+     * Extractor to omit test cases from the report.
      */
-    hidden?: PropertyCustomizer<boolean, never, Context>;
+    ignored?: PropertyCustomizer<boolean, never, Context>;
     /**
      * Test case ID extractor to fine-tune Allure's history feature.
      * @example ({ package, file, test }) => `${package.name}:${file.path}:${test.fullName}`
@@ -207,7 +204,7 @@ declare module 'jest-allure2-reporter' {
     /**
      * Extractor to omit test steps from the report.
      */
-    hidden?: PropertyCustomizer<boolean, never, Context>;
+    ignored?: PropertyCustomizer<boolean, never, Context>;
     /**
      * Extractor for the step name.
      * @example ({ value }) => value.replace(/(before|after)(Each|All)/, (_, p1, p2) => p1 + ' ' + p2.toLowerCase())
@@ -236,7 +233,7 @@ declare module 'jest-allure2-reporter' {
     /**
      * Extractor for the test step status details.
      */
-    statusDetails?: PropertyCustomizer<StatusDetails, Partial<StatusDetails>, Context>;
+    statusDetails?: PropertyCustomizer<StatusDetails, undefined, Context>;
     /**
      * Customize step or test step attachments.
      */
@@ -305,7 +302,7 @@ declare module 'jest-allure2-reporter' {
     R,
     Ra = never,
     Context = never,
-    V = R
+    V = R | Promise<R>
   > = R | Ra | PropertyExtractor<R, Ra, Context, V>;
 
   // endregion
@@ -316,10 +313,14 @@ declare module 'jest-allure2-reporter' {
     R,
     Ra = never,
     Context = {},
-    V = R,
+    V = R | Promise<R>
   > = (context: PropertyExtractorContext<Context, V>) => R | Ra | Promise<R | Ra>;
 
-  export type PropertyExtractorContext<Context, Value> = Readonly<Context & { value: Value | Promise<Value> }>;
+  export type PropertyExtractorContext<Context, Value> = Readonly<Context & { value: Value }>;
+
+  export type PromisedProperties<T> = {
+    readonly [K in keyof T]: Promise<T[K]> | T[K];
+  };
 
   export interface GlobalExtractorContext extends GlobalExtractorContextAugmentation {
     $: Helpers;
@@ -329,7 +330,7 @@ declare module 'jest-allure2-reporter' {
 
   export interface TestRunExtractorContext extends GlobalExtractorContext, TestRunExtractorContextAugmentation {
     aggregatedResult: AggregatedResult;
-    result: Partial<AllureTestCaseResult>;
+    result: Partial<PromisedProperties<AllureTestCaseResult>>;
     testRunMetadata: AllureTestRunMetadata;
   }
 
@@ -339,7 +340,7 @@ declare module 'jest-allure2-reporter' {
     testRunMetadata: AllureTestRunMetadata;
     testFile: TestResult;
     testFileMetadata: AllureTestFileMetadata;
-    result: Partial<AllureTestCaseResult>;
+    result: Partial<PromisedProperties<AllureTestCaseResult>>;
   }
 
   export interface TestCaseExtractorContext extends GlobalExtractorContext, TestCaseExtractorContextAugmentation {
@@ -350,7 +351,7 @@ declare module 'jest-allure2-reporter' {
     testFileMetadata: AllureTestFileMetadata;
     testCase: TestCaseResult;
     testCaseMetadata: AllureTestCaseMetadata;
-    result: Partial<AllureTestCaseResult>;
+    result: Partial<PromisedProperties<AllureTestCaseResult>>;
   }
 
   export interface TestStepExtractorContext extends GlobalExtractorContext, TestStepExtractorContextAugmentation {
@@ -362,7 +363,7 @@ declare module 'jest-allure2-reporter' {
     testCase: TestCaseResult;
     testCaseMetadata: AllureTestCaseMetadata;
     testStepMetadata: AllureTestStepMetadata;
-    result: Partial<AllureTestStepResult>;
+    result: Partial<PromisedProperties<AllureTestStepResult>>;
   }
 
   export interface Helpers extends HelpersAugmentation {
@@ -589,7 +590,7 @@ declare module 'jest-allure2-reporter' {
   // region Allure Test Data
 
   export interface AllureTestCaseResult {
-    hidden: boolean;
+    ignored: boolean;
     historyId: string;
     displayName: string;
     fullName: string;
@@ -608,7 +609,6 @@ declare module 'jest-allure2-reporter' {
   }
 
   export interface AllureTestStepResult {
-    hidden: boolean;
     hookType: AllureTestStepMetadata['hookType'];
     displayName: string;
     start: number;

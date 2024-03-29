@@ -1,30 +1,14 @@
 import path from 'node:path';
 
-import type {
-  TestRunExtractorContext,
-  TestFileExtractorContext,
-  TestCaseExtractorContext,
-  TestStepExtractorContext,
-} from 'jest-allure2-reporter';
-
-import { defaultOptions } from './default-options';
-import * as customizers from './customizers';
-import * as extractors from './extractors';
+import * as customizers from './custom';
+import * as extractors from './common';
+import { defaultOptions } from './default';
 import type { ReporterConfig, ReporterOptions } from './types';
-import { composeTestStepPropertyCustomizers } from './compose-options/testStep';
-import { composeTestCasePropertyCustomizers } from './compose-options/testCase';
 
 export function resolveOptions(
   custom?: ReporterOptions | undefined,
 ): ReporterConfig {
   const base = defaultOptions();
-
-  const testStep = customizers.testStep(
-    composeTestStepPropertyCustomizers<TestStepExtractorContext>(
-      custom?.testStep,
-      base.testStep,
-    ),
-  );
 
   return {
     overwrite: custom?.overwrite ?? base.overwrite,
@@ -53,28 +37,22 @@ export function resolveOptions(
       extractors.merger(custom?.helpers),
       base.helpers,
     ),
-    testRun: customizers.testRun(
-      composeTestCasePropertyCustomizers<TestRunExtractorContext>(
-        custom?.testRun,
-        base.testRun,
-      ),
-      testStep,
+    testRun: extractors.compose2(
+      customizers.testCase(custom?.testRun),
+      base.testRun,
     ),
-    testFile: customizers.testFile(
-      composeTestCasePropertyCustomizers<TestFileExtractorContext>(
-        custom?.testFile,
-        base.testFile,
-      ),
-      testStep,
+    testFile: extractors.compose2(
+      customizers.testCase(custom?.testFile),
+      base.testFile,
     ),
-    testCase: customizers.testCase(
-      composeTestCasePropertyCustomizers<TestCaseExtractorContext>(
-        custom?.testCase,
-        base.testCase,
-      ),
-      testStep,
+    testCase: extractors.compose2(
+      customizers.testCase(custom?.testCase),
+      base.testCase,
     ),
-    testStep,
+    testStep: extractors.compose2(
+      customizers.testStep(custom?.testStep),
+      base.testStep,
+    ),
   };
 }
 
