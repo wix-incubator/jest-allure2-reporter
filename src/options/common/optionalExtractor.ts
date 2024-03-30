@@ -5,11 +5,7 @@ import { isPromiseLike } from '../../utils';
 import { isExtractor } from './isExtractor';
 
 export function optionalExtractor<R, Context>(
-  maybeExtractor:
-    | undefined
-    | null
-    | R
-    | PropertyExtractor<R, undefined, Context>,
+  maybeExtractor: undefined | null | R | PropertyExtractor<R, undefined, Context>,
 ): PropertyExtractor<R, never, Context> | undefined {
   if (maybeExtractor == null) {
     return;

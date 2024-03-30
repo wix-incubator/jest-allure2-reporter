@@ -1,8 +1,4 @@
-import type {
-  Metadata,
-  TestFileMetadata,
-  TestInvocationMetadata,
-} from 'jest-metadata';
+import type { Metadata, TestFileMetadata, TestInvocationMetadata } from 'jest-metadata';
 import type {
   AllureTestItemDocblock,
   AllureNestedTestStepMetadata,
@@ -14,35 +10,20 @@ import { DOCBLOCK, PREFIX } from '../constants';
 import * as docblock from '../docblockMapping';
 
 import { MetadataSelector } from './MetadataSelector';
-import {
-  mergeTestCaseMetadata,
-  mergeTestFileMetadata,
-  mergeTestStepMetadata,
-} from './mergers';
+import { mergeTestCaseMetadata, mergeTestFileMetadata, mergeTestStepMetadata } from './mergers';
 
 export class MetadataSquasher {
-  protected readonly _fileSelector: MetadataSelector<
-    Metadata,
-    AllureTestFileMetadata
-  >;
+  protected readonly _fileSelector: MetadataSelector<Metadata, AllureTestFileMetadata>;
 
-  protected readonly _testSelector: MetadataSelector<
-    Metadata,
-    AllureTestCaseMetadata
-  >;
+  protected readonly _testSelector: MetadataSelector<Metadata, AllureTestCaseMetadata>;
 
-  protected readonly _stepSelector: MetadataSelector<
-    Metadata,
-    AllureNestedTestStepMetadata
-  >;
+  protected readonly _stepSelector: MetadataSelector<Metadata, AllureNestedTestStepMetadata>;
 
   constructor() {
     this._fileSelector = new MetadataSelector({
       empty: () => ({}),
       getDocblock: (metadata) =>
-        docblock.mapTestFileDocblock(
-          metadata.get<AllureTestItemDocblock>(DOCBLOCK, {}),
-        ),
+        docblock.mapTestFileDocblock(metadata.get<AllureTestItemDocblock>(DOCBLOCK, {})),
       getMetadata: (metadata) => metadata.get<AllureTestFileMetadata>(PREFIX),
       mergeUnsafe: mergeTestFileMetadata,
     });
@@ -50,9 +31,7 @@ export class MetadataSquasher {
     this._testSelector = new MetadataSelector({
       empty: () => ({}),
       getDocblock: (metadata) =>
-        docblock.mapTestCaseDocblock(
-          metadata.get<AllureTestItemDocblock>(DOCBLOCK, {}),
-        ),
+        docblock.mapTestCaseDocblock(metadata.get<AllureTestItemDocblock>(DOCBLOCK, {})),
       getMetadata: (metadata) => metadata.get<AllureTestCaseMetadata>(PREFIX),
       mergeUnsafe: mergeTestCaseMetadata,
     });
@@ -60,11 +39,8 @@ export class MetadataSquasher {
     this._stepSelector = new MetadataSelector({
       empty: () => ({}),
       getDocblock: (metadata) =>
-        docblock.mapTestStepDocblock(
-          metadata.get<AllureTestItemDocblock>(DOCBLOCK, {}),
-        ),
-      getMetadata: (metadata) =>
-        metadata.get<AllureNestedTestStepMetadata>(PREFIX),
+        docblock.mapTestStepDocblock(metadata.get<AllureTestItemDocblock>(DOCBLOCK, {})),
+      getMetadata: (metadata) => metadata.get<AllureNestedTestStepMetadata>(PREFIX),
       mergeUnsafe: mergeTestStepMetadata,
     });
   }
@@ -80,13 +56,11 @@ export class MetadataSquasher {
 
   testInvocation(invocation: TestInvocationMetadata): AllureTestCaseMetadata {
     const test_vertical = this._testSelector.testVertical(invocation);
-    const test_definition_and_below =
-      this._testSelector.testDefinitionAndBelow(invocation);
+    const test_definition_and_below = this._testSelector.testDefinitionAndBelow(invocation);
     const test_definition_and_below_direct =
       this._testSelector.testDefinitionAndBelowDirect(invocation);
     const test_invocation = this._testSelector.testInvocation(invocation);
-    const test_invocation_and_below =
-      this._testSelector.testInvocationAndBelow(invocation);
+    const test_invocation_and_below = this._testSelector.testInvocationAndBelow(invocation);
     const global_file_and_test_invocation = this._testSelector.merge(
       this._testSelector.globalAndTestFileAndTestInvocation(invocation),
       test_invocation,

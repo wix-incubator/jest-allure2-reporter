@@ -27,8 +27,8 @@ import type {
 
 import { type ReporterConfig, resolveOptions } from '../options';
 import { AllureMetadataProxy, MetadataSquasher } from '../metadata';
-import { novalue } from '../options/extractors';
 import { stringifyValues } from '../utils';
+import { resolvePromisedProperties } from '../utils/resolvePromisedProperties';
 
 import * as fallbacks from './fallbacks';
 import { overwriteDirectory } from './overwriteDirectory';
@@ -39,22 +39,18 @@ export class JestAllure2Reporter extends JestMetadataReporter {
   private readonly _$: Partial<Helpers> = {};
   private readonly _allure: AllureRuntime;
   private readonly _config: ReporterConfig;
-  private readonly _options: ReporterOptions;
   private readonly _globalConfig: Config.GlobalConfig;
 
   constructor(globalConfig: Config.GlobalConfig, options: ReporterOptions) {
     super(globalConfig);
 
     this._globalConfig = globalConfig;
-    this._options = options;
     this._config = resolveOptions(options);
     this._allure = new AllureRuntime({
       resultsDir: this._config.resultsDir,
     });
 
-    const testRunMetadata = new AllureMetadataProxy<AllureTestRunMetadata>(
-      state,
-    );
+    const testRunMetadata = new AllureMetadataProxy<AllureTestRunMetadata>(state);
     testRunMetadata.set('config', {
       resultsDir: this._config.resultsDir,
       overwrite: this._config.overwrite,
@@ -78,9 +74,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     super.onTestFileStart(test);
 
     const rawMetadata = JestAllure2Reporter.query.test(test);
-    const testFileMetadata = new AllureMetadataProxy<AllureTestFileMetadata>(
-      rawMetadata,
-    );
+    const testFileMetadata = new AllureMetadataProxy<AllureTestFileMetadata>(rawMetadata);
 
     fallbacks.onTestFileStart(test, testFileMetadata);
   }
@@ -95,17 +89,11 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     fallbacks.onTestCaseResult(testCaseMetadata);
   }
 
-  async onTestFileResult(
-    test: Test,
-    testResult: TestResult,
-    aggregatedResult: AggregatedResult,
-  ) {
+  async onTestFileResult(test: Test, testResult: TestResult, aggregatedResult: AggregatedResult) {
     await super.onTestFileResult(test, testResult, aggregatedResult);
 
     const rawMetadata = JestAllure2Reporter.query.test(test);
-    const testFileMetadata = new AllureMetadataProxy<AllureTestFileMetadata>(
-      rawMetadata,
-    );
+    const testFileMetadata = new AllureMetadataProxy<AllureTestFileMetadata>(rawMetadata);
 
     fallbacks.onTestFileResult(test, testFileMetadata);
     await postProcessMetadata(this._$ as Helpers, rawMetadata);
@@ -120,21 +108,16 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     const config = this._config;
 
     const testRunMetadata = JestAllure2Reporter.query.globalMetadata();
-    const globalMetadataProxy = new AllureMetadataProxy<AllureTestRunMetadata>(
-      testRunMetadata,
-    );
+    const globalMetadataProxy = new AllureMetadataProxy<AllureTestRunMetadata>(testRunMetadata);
 
-    const globalContext: PropertyExtractorContext<
-      TestRunExtractorContext,
-      never
-    > = {
+    const globalContext: PropertyExtractorContext<TestRunExtractorContext, never> = {
       $: this._$ as Helpers,
       aggregatedResult,
       globalConfig: this._globalConfig,
-      reporterOptions: this._options,
+      config: this._config,
       testRunMetadata: globalMetadataProxy.get(),
       result: {},
-      value: novalue(),
+      value: undefined as never,
     };
 
     const environment = await config.environment(globalContext);
@@ -154,7 +137,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
 
     const squasher = new MetadataSquasher();
 
-    const allureRunTest = await config.testRun(globalContext);
+    const allureRunTest = await resolvePromisedProperties(config.testRun(globalContext));
     if (allureRunTest) {
       writeTest({
         containerName: `Test Run (${process.pid})`,
@@ -164,21 +147,16 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     }
 
     for (const testResult of aggregatedResult.testResults) {
-      const testFileContext: PropertyExtractorContext<
-        TestFileExtractorContext,
-        never
-      > = {
+      const testFileContext: PropertyExtractorContext<TestFileExtractorContext, never> = {
         ...globalContext,
         filePath: path
           .relative(globalContext.globalConfig.rootDir, testResult.testFilePath)
           .split(path.sep),
         testFile: testResult,
-        testFileMetadata: squasher.testFile(
-          JestAllure2Reporter.query.testResult(testResult),
-        ),
+        testFileMetadata: squasher.testFile(JestAllure2Reporter.query.testResult(testResult)),
       };
 
-      const allureFileTest = await config.testFile(testFileContext);
+      const allureFileTest = await resolvePromisedProperties(config.testFile(testFileContext));
       if (allureFileTest) {
         writeTest({
           containerName: `${testResult.testFilePath}`,
@@ -189,31 +167,23 @@ export class JestAllure2Reporter extends JestMetadataReporter {
 
       for (const testCaseResult of testResult.testResults) {
         const allInvocations =
-          JestAllure2Reporter.query.testCaseResult(testCaseResult)
-            .invocations ?? [];
+          JestAllure2Reporter.query.testCaseResult(testCaseResult).invocations ?? [];
 
         for (const testInvocationMetadata of allInvocations) {
-          const testCaseMetadata = squasher.testInvocation(
-            testInvocationMetadata,
-          );
+          const testCaseMetadata = squasher.testInvocation(testInvocationMetadata);
 
-          const testCaseContext: PropertyExtractorContext<
-            TestCaseExtractorContext,
-            never
-          > = {
+          const testCaseContext: PropertyExtractorContext<TestCaseExtractorContext, never> = {
             ...testFileContext,
             testCase: testCaseResult,
             testCaseMetadata,
           };
 
-          const allureTest = await config.testCase(testCaseContext);
+          const allureTest = await resolvePromisedProperties(config.testCase(testCaseContext));
           if (!allureTest) {
             continue;
           }
 
-          const invocationIndex = allInvocations.indexOf(
-            testInvocationMetadata,
-          );
+          const invocationIndex = allInvocations.indexOf(testInvocationMetadata);
 
           writeTest({
             containerName: `${testCaseResult.fullName} (${invocationIndex})`,

@@ -35,9 +35,7 @@ const ALL_LINKS = Object.keys(
   }),
 ) as LinkType[];
 
-export function mapTestStepDocblock({
-  comments,
-}: AllureTestItemDocblock): AllureTestStepMetadata {
+export function mapTestStepDocblock({ comments }: AllureTestItemDocblock): AllureTestStepMetadata {
   const metadata: AllureTestStepMetadata = {};
   if (comments) {
     metadata.displayName = comments;
@@ -46,15 +44,11 @@ export function mapTestStepDocblock({
   return metadata;
 }
 
-export function mapTestCaseDocblock(
-  context: AllureTestItemDocblock,
-): AllureTestCaseMetadata {
+export function mapTestCaseDocblock(context: AllureTestItemDocblock): AllureTestCaseMetadata {
   const metadata: AllureTestCaseMetadata = {};
   const { comments, pragmas = {} } = context;
 
-  const labels = ALL_LABELS.flatMap((name) =>
-    asArray(pragmas[name]).map(createLabelMapper(name)),
-  );
+  const labels = ALL_LABELS.flatMap((name) => asArray(pragmas[name]).map(createLabelMapper(name)));
 
   if (labels.length > 0) metadata.labels = labels;
 
@@ -65,10 +59,7 @@ export function mapTestCaseDocblock(
   if (links.length > 0) metadata.links = links;
 
   if (comments || pragmas.description)
-    metadata.description = [
-      ...asArray(comments),
-      ...asArray(pragmas.description),
-    ];
+    metadata.description = [...asArray(comments), ...asArray(pragmas.description)];
 
   if (pragmas.descriptionHtml) {
     metadata.descriptionHtml = asArray(pragmas.descriptionHtml);

@@ -74,6 +74,13 @@ declare module 'jest-allure2-reporter' {
     testStep?: TestStepCustomizer<TestStepExtractorContext>;
   }
 
+  export interface ReporterConfig {
+    overwrite: boolean;
+    resultsDir: string;
+    injectGlobals: boolean;
+    attachments: Required<AttachmentsOptions>;
+  }
+
   export interface AttachmentsOptions {
     /**
      * Defines a subdirectory within the {@link ReporterOptions#resultsDir} where attachments will be stored.
@@ -162,7 +169,7 @@ declare module 'jest-allure2-reporter' {
     /**
      * Extractor for the test case status details.
      */
-    statusDetails?: PropertyCustomizer<StatusDetails, undefined, Context>;
+    statusDetails?: PropertyCustomizer<StatusDetails | undefined, never, Context>;
     /**
      * Customize Allure labels for the test case.
      *
@@ -233,7 +240,7 @@ declare module 'jest-allure2-reporter' {
     /**
      * Extractor for the test step status details.
      */
-    statusDetails?: PropertyCustomizer<StatusDetails, undefined, Context>;
+    statusDetails?: PropertyCustomizer<StatusDetails | undefined, never, Context>;
     /**
      * Customize step or test step attachments.
      */
@@ -246,11 +253,11 @@ declare module 'jest-allure2-reporter' {
 
   export type CategoriesCustomizer = Category[] | PropertyExtractor<Category[], undefined, GlobalExtractorContext>;
 
-  export type EnvironmentCustomizer = PropertyCustomizer<Record<string, Primitive>, undefined, GlobalExtractorContext>;
+  export type EnvironmentCustomizer = PropertyCustomizer<Record<string, Primitive> | undefined, never, GlobalExtractorContext>;
 
-  export type ExecutorCustomizer = PropertyExtractor<ExecutorInfo, never, GlobalExtractorContext> | Partial<ExecutorInfo>;
+  export type ExecutorCustomizer = PropertyExtractor<ExecutorInfo | undefined, never, GlobalExtractorContext> | Partial<ExecutorInfo>;
 
-  export type HelpersCustomizer = PropertyExtractor<Helpers, never, GlobalExtractorContext> | Partial<Helpers>;
+  export type HelpersCustomizer = PropertyExtractor<Helpers | undefined, never, GlobalExtractorContext> | Partial<Helpers>;
 
   export type AttachmentsCustomizer<Context> = PropertyCustomizer<Attachment[], never, Context>;
 
@@ -295,7 +302,7 @@ declare module 'jest-allure2-reporter' {
         Array<Primitive | Partial<Parameter>>,
         Primitive | Partial<Parameter>,
         Context,
-        Parameter[]
+        Parameter[] | Promise<Parameter[]>
       >;
 
   export type PropertyCustomizer<
@@ -325,7 +332,7 @@ declare module 'jest-allure2-reporter' {
   export interface GlobalExtractorContext extends GlobalExtractorContextAugmentation {
     $: Helpers;
     globalConfig: Config.GlobalConfig;
-    reporterOptions: ReporterOptions;
+    config: ReporterConfig;
   }
 
   export interface TestRunExtractorContext extends GlobalExtractorContext, TestRunExtractorContextAugmentation {
@@ -537,7 +544,7 @@ declare module 'jest-allure2-reporter' {
 
   /** @inheritDoc */
   export interface AllureTestRunMetadata extends AllureTestCaseMetadata {
-    config: Required<Pick<ReporterOptions, 'resultsDir' | 'overwrite' | 'attachments' | 'injectGlobals'>>;
+    config: ReporterConfig;
     sourceLocation?: never;
     transformedCode?: never;
   }

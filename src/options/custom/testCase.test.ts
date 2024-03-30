@@ -1,52 +1,34 @@
+import _ from 'lodash';
 import type {
   AllureTestCaseResult,
+  PromisedProperties,
   PropertyExtractorContext,
   TestCaseExtractorContext,
 } from 'jest-allure2-reporter';
 
-import type { CompositeExtractor } from '../types';
-
 import { testCase as testCaseCustomizer } from './testCase';
 
 describe('testCase', () => {
-  const createContext = (): PropertyExtractorContext<
-    TestCaseExtractorContext,
-    never
-  > => ({
-    value: undefined as never,
-    result: {},
-    aggregatedResult: {} as any,
-    testRunMetadata: {} as any,
-    testCase: {} as any,
-    testCaseMetadata: {} as any,
-    filePath: [],
-    testFile: {} as any,
-    testFileMetadata: {} as any,
-    $: {} as any,
-    globalConfig: {} as any,
-    reporterOptions: {} as any,
-  });
-
-  const defaultTestCaseExtractor: CompositeExtractor<
-    AllureTestCaseResult,
-    TestCaseExtractorContext
-  > = {
-    attachments: ({ value }) => value,
-    description: ({ value }) => value,
-    descriptionHtml: ({ value }) => value,
-    displayName: ({ value }) => value,
-    fullName: ({ value }) => value,
-    ignored: ({ value }) => value,
-    historyId: ({ value }) => value,
-    labels: ({ value }) => value,
-    links: ({ value }) => value,
-    parameters: ({ value }) => value,
-    stage: ({ value }) => value,
-    start: ({ value }) => value,
-    status: ({ value }) => value,
-    statusDetails: ({ value }) => value,
-    stop: ({ value }) => value,
-  };
+  const createContext = (
+    overrides: Partial<TestCaseExtractorContext> = {},
+  ): PropertyExtractorContext<TestCaseExtractorContext, PromisedProperties<AllureTestCaseResult>> =>
+    _.merge(
+      {
+        value: undefined as never,
+        result: {},
+        aggregatedResult: {} as any,
+        testRunMetadata: {} as any,
+        testCase: {} as any,
+        testCaseMetadata: {} as any,
+        filePath: [],
+        testFile: {} as any,
+        testFileMetadata: {} as any,
+        $: {} as any,
+        globalConfig: {} as any,
+        config: {} as any,
+      },
+      overrides,
+    );
 
   test.each`
     property             | defaultValue   | extractedValue
@@ -77,12 +59,8 @@ describe('testCase', () => {
       extractedValue: any;
     }) => {
       const extractor = jest.fn().mockResolvedValue(extractedValue);
-      const testCase = testCaseCustomizer({
-        ...defaultTestCaseExtractor,
-        [property]: extractor,
-      });
-
-      const result = await testCase(createContext());
+      const testCase = testCaseCustomizer({ [property]: extractor });
+      const result = await testCase(createContext({ [property]: defaultValue }));
 
       expect(extractor).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -94,19 +72,4 @@ describe('testCase', () => {
       expect(result?.[property]).toEqual(extractedValue);
     },
   );
-
-  it('should return undefined when ignored is true', async () => {
-    const ignoredExtractor = jest.fn().mockResolvedValue(true);
-    const testCase = testCaseCustomizer({
-      ...defaultTestCaseExtractor,
-      ignored: ignoredExtractor,
-    });
-    const context = createContext();
-    const result = await testCase(context);
-
-    expect(ignoredExtractor).toHaveBeenCalledWith(
-      expect.objectContaining({ value: false, result: { ignored: true } }),
-    );
-    expect(result).toBeUndefined();
-  });
 });

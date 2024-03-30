@@ -1,23 +1,24 @@
 import type {
   AllureTestStepResult,
+  PromisedProperties,
   PropertyExtractorContext,
   TestStepExtractorContext,
 } from 'jest-allure2-reporter';
 
-import type { TestStepCompositeExtractor } from '../types';
-
-import { testStepCustomizer } from './testStep';
+import { testStep as testStepCustomizer } from './testStep';
 
 describe('testStepCustomizer', () => {
-  const createContext = (): PropertyExtractorContext<
+  const createContext = (
+    value?: any,
+  ): PropertyExtractorContext<
     TestStepExtractorContext,
-    void
+    PromisedProperties<AllureTestStepResult>
   > => ({
-    value: void 0,
-    result: {},
+    value,
+    result: undefined as never,
     aggregatedResult: {} as any,
     testRunMetadata: {} as any,
-    testStepMetadata: { hookType: 'beforeEach' } as any,
+    testStepMetadata: {} as any,
     testCase: {} as any,
     testCaseMetadata: {} as any,
     filePath: [],
@@ -25,26 +26,11 @@ describe('testStepCustomizer', () => {
     testFileMetadata: {} as any,
     $: {} as any,
     globalConfig: {} as any,
-    reporterOptions: {} as any,
+    config: {} as any,
   });
 
-  const defaultCompositeExtractor: TestStepCompositeExtractor<TestStepExtractorContext> =
-    {
-      attachments: ({ value }) => value,
-      displayName: ({ value }) => value,
-      ignored: ({ value }) => value,
-      parameters: ({ value }) => value,
-      stage: ({ value }) => {
-        return value;
-      },
-      start: ({ value }) => value,
-      status: ({ value }) => value,
-      statusDetails: ({ value }) => value,
-      stop: ({ value }) => value,
-    };
-
   test.each`
-    property           | defaultValue   | extractedValue
+    property           | defaultValue   | customValue
     ${'ignored'}       | ${false}       | ${false}
     ${'displayName'}   | ${''}          | ${'Custom Step'}
     ${'start'}         | ${Number.NaN}  | ${1_234_567_890}
@@ -55,75 +41,92 @@ describe('testStepCustomizer', () => {
     ${'attachments'}   | ${[]}          | ${[{ name: 'attachment1' }, { name: 'attachment2' }]}
     ${'parameters'}    | ${[]}          | ${[{ name: 'param1', value: 'value1' }, { name: 'param2', value: 'value2' }]}
   `(
-    'should extract $property with default value $defaultValue and extracted value $extractedValue',
+    'should asynchronously customize $property with $customValue yet to be able to access the default value $defaultValue',
     async ({
       property,
       defaultValue,
-      extractedValue,
+      customValue,
     }: {
       property: keyof AllureTestStepResult;
       defaultValue: any;
-      extractedValue: any;
+      customValue: any;
     }) => {
-      const extractor = jest.fn().mockResolvedValue(extractedValue);
-      const testStep = testStepCustomizer({
-        ...defaultCompositeExtractor,
-        [property]: extractor,
-      });
+      const asyncExtractor = jest.fn().mockResolvedValue(customValue);
+      const testStep = testStepCustomizer({ [property]: asyncExtractor });
+      const context = createContext({ [property]: defaultValue });
+      const result = testStep(context) as AllureTestStepResult;
 
-      const result = await testStep(createContext());
-
-      expect(extractor).toHaveBeenCalledWith(
+      expect(asyncExtractor).not.toHaveBeenCalled();
+      await expect(result?.[property]).resolves.toEqual(customValue);
+      expect(asyncExtractor).toHaveBeenCalledWith(
         expect.objectContaining({
           value: defaultValue,
-          result: expect.any(Object),
+          result: context.value,
         }),
       );
-
-      expect(result?.[property]).toEqual(extractedValue);
     },
   );
 
-  it('should return undefined when hidden is true', async () => {
-    const hiddenExtractor = jest.fn().mockResolvedValue(true);
-    const testStep = testStepCustomizer({
-      ...defaultCompositeExtractor,
-      hidden: hiddenExtractor,
-    });
-    const context = createContext();
-    const result = await testStep(context);
+  test.each`
+    property           | defaultValue   | customValue
+    ${'ignored'}       | ${false}       | ${false}
+    ${'displayName'}   | ${''}          | ${'Custom Step'}
+    ${'start'}         | ${Number.NaN}  | ${1_234_567_890}
+    ${'stop'}          | ${Number.NaN}  | ${1_234_567_899}
+    ${'stage'}         | ${'scheduled'} | ${'running'}
+    ${'status'}        | ${'unknown'}   | ${'passed'}
+    ${'statusDetails'} | ${{}}          | ${{ message: 'Step passed' }}
+    ${'attachments'}   | ${[]}          | ${[{ name: 'attachment1' }, { name: 'attachment2' }]}
+    ${'parameters'}    | ${[]}          | ${[{ name: 'param1', value: 'value1' }, { name: 'param2', value: 'value2' }]}
+  `(
+    'should synchronously customize $property with $customValue yet to be able to access the default value $defaultValue',
+    ({
+      property,
+      defaultValue,
+      customValue,
+    }: {
+      property: keyof AllureTestStepResult;
+      defaultValue: any;
+      customValue: any;
+    }) => {
+      const syncExtractor = jest.fn().mockReturnValue(customValue);
+      const testStep = testStepCustomizer({ [property]: syncExtractor });
+      const context = createContext({ [property]: defaultValue });
+      const result = testStep(context) as AllureTestStepResult;
 
-    expect(hiddenExtractor).toHaveBeenCalledWith(
-      expect.objectContaining({
-        value: false,
-        result: { hookType: 'beforeEach', hidden: true },
-      }),
-    );
-    expect(result).toBeUndefined();
-  });
+      expect(syncExtractor).not.toHaveBeenCalled();
+      expect(result?.[property]).toBe(customValue);
+      expect(syncExtractor).toHaveBeenCalledWith(
+        expect.objectContaining({
+          value: defaultValue,
+          result: context.value,
+        }),
+      );
+    },
+  );
 
-  it('should extract hookType directly from testStepMetadata', async () => {
-    const testStep = testStepCustomizer(defaultCompositeExtractor);
-    const context = createContext();
-    const result = await testStep(context);
-    expect(result?.hookType).toBe('beforeEach');
-  });
+  test.each`
+    property      | defaultValue    | customValue
+    ${'steps'}    | ${[]}           | ${[]}
+    ${'hookType'} | ${'beforeEach'} | ${'afterEach'}
+  `(
+    'should not be able to customize $property',
+    async ({
+      property,
+      defaultValue,
+      customValue,
+    }: {
+      property: keyof AllureTestStepResult;
+      defaultValue: any;
+      customValue: any;
+    }) => {
+      const extractor = jest.fn().mockResolvedValue(customValue);
+      const testStep = testStepCustomizer({ [property]: extractor });
+      const context = createContext({ [property]: defaultValue });
+      const result = testStep(context) as AllureTestStepResult;
 
-  it('should extract nested steps', async () => {
-    let counter = 0;
-    const testStep = testStepCustomizer({
-      ...defaultCompositeExtractor,
-      displayName: () => `Step ${++counter}`,
-    });
-
-    const context = createContext();
-    context.testStepMetadata.steps = [{}, {}];
-
-    const result = await testStep(context);
-
-    expect(result?.displayName).toBe('Step 1');
-    expect(result?.steps).toHaveLength(2);
-    expect(result?.steps[0].displayName).toBe('Step 2');
-    expect(result?.steps[1].displayName).toBe('Step 3');
-  });
+      expect(result?.[property]).toBe(defaultValue);
+      expect(extractor).not.toHaveBeenCalled();
+    },
+  );
 });

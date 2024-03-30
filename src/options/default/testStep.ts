@@ -9,14 +9,11 @@ import type {
 export const testStep: TestStepCustomizer<TestStepExtractorContext> = {
   ignored: () => false,
   displayName: ({ testStepMetadata }) =>
-    testStepMetadata.displayName ||
-    testStepMetadata.hookType ||
-    'Untitled step',
+    testStepMetadata.displayName || testStepMetadata.hookType || 'Untitled step',
   start: ({ testStepMetadata }) => testStepMetadata.start!,
   stop: ({ testStepMetadata }) => testStepMetadata.stop!,
   stage: ({ testStepMetadata }) => testStepMetadata.stage!,
-  status: ({ testStepMetadata }) =>
-    testStepMetadata.status ?? inferStatus(testStepMetadata),
+  status: ({ testStepMetadata }) => testStepMetadata.status ?? inferStatus(testStepMetadata),
   statusDetails: ({ testStepMetadata }) => testStepMetadata.statusDetails ?? {},
   attachments: ({ testStepMetadata }) => testStepMetadata.attachments ?? [],
   parameters: ({ testStepMetadata }) => testStepMetadata.parameters ?? [],

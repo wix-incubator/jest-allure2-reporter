@@ -1,7 +1,4 @@
-import type {
-  AllureTestRunMetadata,
-  AllureTestFileMetadata,
-} from 'jest-allure2-reporter';
+import type { AllureTestRunMetadata, AllureTestFileMetadata } from 'jest-allure2-reporter';
 
 import { type MaybeFunction, once, TaskQueue } from '../utils';
 import { AllureMetadataProxy, AllureTestItemMetadataProxy } from '../metadata';
@@ -37,16 +34,12 @@ export class AllureRuntimeContext {
       move: attachmentHandlers.moveHandler,
       ref: attachmentHandlers.referenceHandler,
     };
-    this.inferMimeType =
-      config.inferMimeType ?? attachmentHandlers.inferMimeType;
+    this.inferMimeType = config.inferMimeType ?? attachmentHandlers.inferMimeType;
     this.getNow = config.getNow;
     this.getReporterConfig = once(config.getReporterConfig);
-    this.getCurrentMetadata = () =>
-      new AllureTestItemMetadataProxy(config.getCurrentMetadata());
-    this.getFileMetadata = () =>
-      new AllureMetadataProxy(config.getFileMetadata());
-    this.getGlobalMetadata = () =>
-      new AllureMetadataProxy(config.getGlobalMetadata());
+    this.getCurrentMetadata = () => new AllureTestItemMetadataProxy(config.getCurrentMetadata());
+    this.getFileMetadata = () => new AllureMetadataProxy(config.getFileMetadata());
+    this.getGlobalMetadata = () => new AllureMetadataProxy(config.getGlobalMetadata());
 
     const taskQueue = new TaskQueue({
       logError(error) {

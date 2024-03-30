@@ -37,10 +37,7 @@ describe('mapValues', () => {
 
     const result = mapValues(object, (value, key) => {
       if (typeof value === 'object' && value !== null) {
-        return mapValues(
-          value,
-          (nestedValue, nestedKey) => `${nestedKey}:${nestedValue}`,
-        );
+        return mapValues(value, (nestedValue, nestedKey) => `${nestedKey}:${nestedValue}`);
       }
       return `${key}:${value}`;
     });

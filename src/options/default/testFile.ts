@@ -19,20 +19,15 @@ export const testFile: TestCaseCustomizer<TestFileExtractorContext> = {
   description: async ({ $, testFileMetadata }) => {
     const text = testFileMetadata.description?.join('\n') ?? '';
     const code = await $.extractSourceCode(testFileMetadata);
-    return [text, $.sourceCode2Markdown(code)]
-      .filter(isNonNullish)
-      .join('\n\n');
+    return [text, $.sourceCode2Markdown(code)].filter(isNonNullish).join('\n\n');
   },
   descriptionHtml: async ({ $, result }) =>
     $.markdown2html?.((await result.description) ?? '') ?? '',
   start: ({ testFileMetadata }) => testFileMetadata.start!,
   stop: ({ testFileMetadata }) => testFileMetadata.stop!,
-  stage: ({ testFile }) =>
-    testFile.testExecError == null ? 'finished' : 'interrupted',
-  status: ({ testFile }) =>
-    testFile.testExecError == null ? 'passed' : 'broken',
-  statusDetails: ({ $, testFile }) =>
-    $.stripAnsi(getStatusDetails(testFile.testExecError)),
+  stage: ({ testFile }) => (testFile.testExecError == null ? 'finished' : 'interrupted'),
+  status: ({ testFile }) => (testFile.testExecError == null ? 'passed' : 'broken'),
+  statusDetails: ({ $, testFile }) => $.stripAnsi(getStatusDetails(testFile.testExecError)),
   attachments: ({ testFileMetadata }) => testFileMetadata.attachments ?? [],
   parameters: ({ testFileMetadata }) => testFileMetadata.parameters ?? [],
   labels: compose2(

@@ -1,2 +1,0 @@
-
-// TODO: pick last labels

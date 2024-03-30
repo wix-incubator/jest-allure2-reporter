@@ -1,8 +1,4 @@
-import {
-  isPromiseLike,
-  isJestAssertionError,
-  getStatusDetails,
-} from '../../utils';
+import { isPromiseLike, isJestAssertionError, getStatusDetails } from '../../utils';
 import type { AllureTestItemMetadataProxy } from '../../metadata';
 import type { AllureRuntimeContext } from '../AllureRuntimeContext';
 

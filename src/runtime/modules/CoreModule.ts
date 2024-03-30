@@ -1,10 +1,4 @@
-import type {
-  LabelName,
-  Link,
-  Parameter,
-  Status,
-  StatusDetails,
-} from 'jest-allure2-reporter';
+import type { LabelName, Link, Parameter, Status, StatusDetails } from 'jest-allure2-reporter';
 
 import type { AllureTestItemMetadataProxy } from '../../metadata';
 import type { AllureRuntimeContext } from '../AllureRuntimeContext';

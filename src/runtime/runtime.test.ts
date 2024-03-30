@@ -14,8 +14,7 @@ describe('AllureRuntime', () => {
 
     const context = new AllureRuntimeContext({
       contentAttachmentHandlers: {
-        write: (context) =>
-          path.join(context.outDir, context.content.toString()),
+        write: (context) => path.join(context.outDir, context.content.toString()),
       },
       getCurrentMetadata: () => state.currentMetadata,
       getFileMetadata: () => state.lastTestFile!,
@@ -44,16 +43,13 @@ describe('AllureRuntime', () => {
 
     expect(resultingPath).toBe('/attachments/first');
 
-    const innerStep3 = runtime.createStep(
-      'inner step 3',
-      async (message: string) => {
-        runtime.attachment('attachment4', message, 'text/plain');
+    const innerStep3 = runtime.createStep('inner step 3', async (message: string) => {
+      runtime.attachment('attachment4', message, 'text/plain');
 
-        const error = new Error('Async error');
-        error.stack = 'Test stack';
-        throw error;
-      },
-    );
+      const error = new Error('Async error');
+      error.stack = 'Test stack';
+      throw error;
+    });
 
     await runtime.step('outer step', async () => {
       try {

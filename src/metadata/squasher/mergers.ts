@@ -42,9 +42,7 @@ export function mergeTestStepMetadata(
     ? {
         ...mergeTestItemMetadata(a, b),
         hookType: b.hookType ?? a.hookType,
-        steps: mergeArrays(a.steps, b.steps)?.map((step) =>
-          mergeTestStepMetadata({}, step),
-        ),
+        steps: mergeArrays(a.steps, b.steps)?.map((step) => mergeTestStepMetadata({}, step)),
       }
     : a;
 }
@@ -70,10 +68,7 @@ function mergeTestItemMetadata(
     : a;
 }
 
-function mergeArrays<T>(
-  a: T[] | undefined,
-  b: T[] | undefined,
-): T[] | undefined {
+function mergeArrays<T>(a: T[] | undefined, b: T[] | undefined): T[] | undefined {
   if (a && b) {
     return [...a, ...b];
   }
@@ -97,10 +92,7 @@ function max(a: number | undefined, b: number | undefined): number | undefined {
   return a ?? b;
 }
 
-function mergeStage(
-  a: Stage | undefined,
-  b: Stage | undefined,
-): Stage | undefined {
+function mergeStage(a: Stage | undefined, b: Stage | undefined): Stage | undefined {
   if (a === 'interrupted' || b === 'interrupted') {
     return 'interrupted';
   }
@@ -108,10 +100,7 @@ function mergeStage(
   return b ?? a;
 }
 
-function mergeStatus(
-  a: Status | undefined,
-  b: Status | undefined,
-): Status | undefined {
+function mergeStatus(a: Status | undefined, b: Status | undefined): Status | undefined {
   if (a === 'broken' || b === 'broken') {
     return 'broken';
   }

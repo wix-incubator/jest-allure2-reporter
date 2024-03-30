@@ -4,11 +4,7 @@ import type { Parameter } from 'jest-allure2-reporter';
 
 import { constant, isObject } from '../utils';
 
-import type {
-  AllureRuntimeBindOptions,
-  AllureRuntimePluginCallback,
-  AllureRuntime,
-} from './types';
+import type { AllureRuntimeBindOptions, AllureRuntimePluginCallback, AllureRuntime } from './types';
 import * as runtimeModules from './modules';
 import type { AllureRuntimeContext } from './AllureRuntimeContext';
 
@@ -24,10 +20,8 @@ export class AllureRuntimeImplementation implements AllureRuntime {
     this.#context = context;
     this.#coreModule = runtimeModules.CoreModule.create(context);
     this.#basicStepsModule = runtimeModules.StepsModule.create(context);
-    this.#contentAttachmentsModule =
-      runtimeModules.ContentAttachmentsModule.create(context);
-    this.#fileAttachmentsModule =
-      runtimeModules.FileAttachmentsModule.create(context);
+    this.#contentAttachmentsModule = runtimeModules.ContentAttachmentsModule.create(context);
+    this.#fileAttachmentsModule = runtimeModules.FileAttachmentsModule.create(context);
     this.#stepsDecorator = new runtimeModules.StepsDecorator({ runtime: this });
   }
 
@@ -133,28 +127,16 @@ export class AllureRuntimeImplementation implements AllureRuntime {
     this.#basicStepsModule.step(name, function_);
 
   // @ts-expect-error TS2322: too few arguments
-  createStep: AllureRuntime['createStep'] = (
-    nameFormat,
-    maybeParameters,
-    maybeFunction,
-  ) => {
+  createStep: AllureRuntime['createStep'] = (nameFormat, maybeParameters, maybeFunction) => {
     // TODO: assert nameFormat is a string
     const function_: any = maybeFunction ?? maybeParameters;
     if (typeof function_ !== 'function') {
-      throw new TypeError(
-        `Expected a function, got instead: ${util.inspect(function_)}`,
-      );
+      throw new TypeError(`Expected a function, got instead: ${util.inspect(function_)}`);
     }
 
-    const userParameters = Array.isArray(maybeParameters)
-      ? maybeParameters
-      : undefined;
+    const userParameters = Array.isArray(maybeParameters) ? maybeParameters : undefined;
 
-    return this.#stepsDecorator.createStep(
-      nameFormat,
-      function_,
-      userParameters,
-    );
+    return this.#stepsDecorator.createStep(nameFormat, function_, userParameters);
   };
 
   attachment: AllureRuntime['attachment'] = (name, content, mimeType) =>
@@ -164,43 +146,28 @@ export class AllureRuntimeImplementation implements AllureRuntime {
       mimeType,
     });
 
-  fileAttachment: AllureRuntime['fileAttachment'] = (
-    filePath,
-    nameOrOptions,
-  ) => {
+  fileAttachment: AllureRuntime['fileAttachment'] = (filePath, nameOrOptions) => {
     // TODO: assert filePath is a string
     const options =
-      typeof nameOrOptions === 'string'
-        ? { name: nameOrOptions }
-        : { ...nameOrOptions };
+      typeof nameOrOptions === 'string' ? { name: nameOrOptions } : { ...nameOrOptions };
 
     return this.#fileAttachmentsModule.attachment(filePath, options);
   };
 
-  createAttachment: AllureRuntime['createAttachment'] = (
-    function_,
-    nameOrOptions,
-  ) => {
+  createAttachment: AllureRuntime['createAttachment'] = (function_, nameOrOptions) => {
     // TODO: assert function_ is a function
     // TODO: assert nameOrOptions is a string or an object
     const options =
-      typeof nameOrOptions === 'string'
-        ? { name: nameOrOptions }
-        : { ...nameOrOptions };
+      typeof nameOrOptions === 'string' ? { name: nameOrOptions } : { ...nameOrOptions };
 
     return this.#contentAttachmentsModule.createAttachment(function_, options);
   };
 
-  createFileAttachment: AllureRuntime['createFileAttachment'] = (
-    function_,
-    nameOrOptions,
-  ) => {
+  createFileAttachment: AllureRuntime['createFileAttachment'] = (function_, nameOrOptions) => {
     // TODO: assert function_ is a function
     // TODO: assert nameOrOptions is a string or an object
     const options =
-      typeof nameOrOptions === 'string'
-        ? { name: nameOrOptions }
-        : { ...nameOrOptions };
+      typeof nameOrOptions === 'string' ? { name: nameOrOptions } : { ...nameOrOptions };
 
     return this.#fileAttachmentsModule.createAttachment(function_, options);
   };

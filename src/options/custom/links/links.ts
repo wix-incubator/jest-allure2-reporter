@@ -1,7 +1,7 @@
 import type { LinksCustomizer, PropertyExtractor } from 'jest-allure2-reporter';
 import type { Link } from 'jest-allure2-reporter';
 
-import { constant } from '../common';
+import { constant } from '../../common';
 
 export function links<Context>(
   customizer: undefined | null | LinksCustomizer<Context>,

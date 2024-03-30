@@ -16,9 +16,7 @@ export class TaskQueue {
 
   readonly enqueueTask = <T>(task: MaybeFunction<Promise<T>>): Promise<T> => {
     const result = (this.#idle =
-      typeof task === 'function'
-        ? this.#idle.then<T>(task)
-        : this.#idle.then<T>(() => task));
+      typeof task === 'function' ? this.#idle.then<T>(task) : this.#idle.then<T>(() => task));
 
     this.#idle = this.#idle.catch(this.#logError);
     return result;

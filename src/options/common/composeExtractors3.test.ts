@@ -12,12 +12,9 @@ describe('extractors', () => {
       const one: PropertyExtractor<number, never, {}, never> = () => 1;
       const two: PropertyExtractor<number | string> = ({ value }) =>
         String(assertNumber(value) * 2);
-      const three: PropertyExtractor<
-        number,
-        never,
-        {},
-        MaybePromise<number | string>
-      > = async ({ value }) => {
+      const three: PropertyExtractor<number, never, {}, MaybePromise<number | string>> = async ({
+        value,
+      }) => {
         return Number(assertString(value));
       };
 

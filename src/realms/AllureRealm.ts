@@ -15,9 +15,7 @@ export class AllureRealm {
     getGlobalMetadata: () => state,
     getNow: () => Date.now(),
     getReporterConfig() {
-      let config = new AllureMetadataProxy<AllureTestRunMetadata>(state).get(
-        'config',
-      );
+      let config = new AllureMetadataProxy<AllureTestRunMetadata>(state).get('config');
       if (!config) {
         console.warn(
           "Cannot receive jest-allure2-reporter's config from the parent process. Have you set up Jest test environment correctly?",

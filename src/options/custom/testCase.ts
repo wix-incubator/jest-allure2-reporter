@@ -1,122 +1,48 @@
 import type {
   AllureTestCaseResult,
+  PropertyExtractor,
   TestCaseCustomizer,
+  TestCaseExtractorContext,
 } from 'jest-allure2-reporter';
 
-import type { CompositeExtractor, TestCaseExtractor } from '../types';
+import * as extractors from '../common';
+import * as custom from '../custom';
+import type { TestCaseCompositeExtractor, TestCaseExtractor } from '../types';
+
+import { parameters } from './parameters';
+
+const fallback: PropertyExtractor<unknown> = (context) => context.value;
 
 export function testCase<Context>(
-  testCase: TestCaseCustomizer<Context>,
+  customizer: TestCaseCustomizer<Context>,
 ): TestCaseExtractor<Context>;
-export function testCase(testCase: null | undefined): undefined;
+export function testCase(customizer: null | undefined): undefined;
 export function testCase<Context>(
-  testCase: TestCaseCustomizer<Context> | null | undefined,
+  customizer: TestCaseCustomizer<Context> | null | undefined,
 ): TestCaseExtractor<Context> | undefined;
-export function testCase<Context>(
-  testCase: TestCaseCustomizer<Context> | null | undefined,
+export function testCase<Context extends TestCaseExtractorContext>(
+  customizer: TestCaseCustomizer<Context> | null | undefined,
 ): TestCaseExtractor<Context> | undefined {
-  if (testCase == null) {
+  if (customizer == null) {
     return;
   }
 
-  const composite: CompositeExtractor<AllureTestCaseResult, Context> = {};
-
-  return async (context) => {
-    const result: Partial<AllureTestCaseResult> = {};
-    result.ignored = await composite.ignored({
-      ...context,
-      value: false,
-      result,
-    });
-
-    if (result.ignored) {
-      return;
-    }
-
-    result.displayName = await composite.displayName({
-      ...context,
-      value: '',
-      result,
-    });
-
-    result.start = await composite.start({
-      ...context,
-      value: Number.NaN,
-      result,
-    });
-
-    result.stop = await composite.stop({
-      ...context,
-      value: Number.NaN,
-      result,
-    });
-
-    result.fullName = await composite.fullName({
-      ...context,
-      value: '',
-      result,
-    });
-
-    result.historyId = await composite.historyId({
-      ...context,
-      value: '',
-      result,
-    });
-
-    result.stage = await composite.stage({
-      ...context,
-      value: 'scheduled',
-      result,
-    });
-
-    result.status = await composite.status({
-      ...context,
-      value: 'unknown',
-      result,
-    });
-
-    result.statusDetails = await composite.statusDetails({
-      ...context,
-      value: {},
-      result,
-    });
-
-    result.labels = await composite.labels({
-      ...context,
-      value: [],
-      result,
-    });
-
-    result.links = await composite.links({
-      ...context,
-      value: [],
-      result,
-    });
-
-    result.attachments = await composite.attachments({
-      ...context,
-      value: [],
-      result,
-    });
-
-    result.parameters = await composite.parameters({
-      ...context,
-      value: [],
-      result,
-    });
-
-    result.description = await composite.description({
-      ...context,
-      value: '',
-      result,
-    });
-
-    result.descriptionHtml = await composite.descriptionHtml({
-      ...context,
-      value: '',
-      result,
-    });
-
-    return result as AllureTestCaseResult;
-  };
+  return extractors.proxyObject<AllureTestCaseResult, Context>({
+    ignored: extractors.constant(customizer.ignored) ?? fallback,
+    historyId: extractors.constant(customizer.historyId) ?? fallback,
+    displayName: extractors.constant(customizer.displayName) ?? fallback,
+    fullName: extractors.constant(customizer.fullName) ?? fallback,
+    start: extractors.constant(customizer.start) ?? fallback,
+    stop: extractors.constant(customizer.stop) ?? fallback,
+    description: extractors.constant(customizer.description) ?? fallback,
+    descriptionHtml: extractors.constant(customizer.descriptionHtml) ?? fallback,
+    stage: extractors.constant(customizer.stage) ?? fallback,
+    status: extractors.constant(customizer.status) ?? fallback,
+    statusDetails: extractors.merger(customizer.statusDetails) ?? fallback,
+    attachments: extractors.appender(customizer.attachments) ?? fallback,
+    parameters: parameters(customizer.parameters) ?? fallback,
+    labels: custom.labels(customizer.labels) ?? fallback,
+    links: custom.links(customizer.links) ?? fallback,
+    steps: fallback,
+  } as TestCaseCompositeExtractor<Context>);
 }

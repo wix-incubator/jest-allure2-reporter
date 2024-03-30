@@ -139,7 +139,7 @@ function createHookMetadata(
 
 export function getFullBlownTestCase(): LikeTestInvocation<StubTestCaseMetadata> {
   const testFile: LikeTestFile<StubTestFileMetadata> = {
-    testRunMetadata: { data: createTestFileMetadata('global') },
+    globalMetadata: { data: createTestFileMetadata('global') },
     data: createTestFileMetadata('file'),
   };
 
@@ -179,13 +179,7 @@ export function getFullBlownTestCase(): LikeTestInvocation<StubTestCaseMetadata>
   };
 }
 
-const STAGES: Stage[] = [
-  'scheduled',
-  'running',
-  'finished',
-  'pending',
-  'interrupted',
-];
+const STAGES: Stage[] = ['scheduled', 'running', 'finished', 'pending', 'interrupted'];
 const STATUSES: Status[] = ['passed', 'skipped', 'unknown', 'failed', 'broken'];
 
 function castStart(scope: Scope): number {

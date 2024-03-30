@@ -1,8 +1,5 @@
 import type { Test } from '@jest/reporters';
-import type {
-  AllureTestItemMetadata,
-  AllureTestFileMetadata,
-} from 'jest-allure2-reporter';
+import type { AllureTestItemMetadata, AllureTestFileMetadata } from 'jest-allure2-reporter';
 
 import type { AllureMetadataProxy } from '../metadata';
 

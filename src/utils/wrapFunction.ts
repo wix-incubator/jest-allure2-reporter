@@ -1,9 +1,6 @@
 import type { Function_ } from './types';
 
-export function wrapFunction<T, F extends Function_<T>>(
-  function_: F,
-  callback: F,
-): F {
+export function wrapFunction<T, F extends Function_<T>>(function_: F, callback: F): F {
   const wrapper = {
     [function_.name](this: unknown) {
       return Reflect.apply(callback, this, arguments);

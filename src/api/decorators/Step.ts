@@ -3,10 +3,7 @@ import realm from '../../realms';
 
 const allure = realm.runtime;
 
-export function Step(
-  name: string,
-  arguments_?: ParameterOrString[],
-): MethodDecorator {
+export function Step(name: string, arguments_?: ParameterOrString[]): MethodDecorator {
   return function (
     _target: object,
     _propertyName: string | symbol,

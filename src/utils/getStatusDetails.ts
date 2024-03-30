@@ -1,9 +1,7 @@
 import type { StatusDetails } from 'jest-allure2-reporter';
 import _ from 'lodash';
 
-export function getStatusDetails(
-  maybeError: unknown,
-): StatusDetails | undefined {
+export function getStatusDetails(maybeError: unknown): StatusDetails | undefined {
   if (maybeError) {
     const error = maybeError as Error;
     const trace =

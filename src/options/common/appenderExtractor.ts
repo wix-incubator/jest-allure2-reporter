@@ -5,11 +5,7 @@ import { isPromiseLike } from '../../utils';
 import { optionalExtractor } from './optionalExtractor';
 
 export function appenderExtractor<R, Context>(
-  maybeExtractor:
-    | undefined
-    | null
-    | R[]
-    | PropertyExtractor<R[], undefined, Context>,
+  maybeExtractor: undefined | null | R[] | PropertyExtractor<R[], undefined, Context>,
 ): PropertyExtractor<R[], never, Context> | undefined {
   if (maybeExtractor != null && Array.isArray(maybeExtractor)) {
     const value = maybeExtractor;
@@ -17,9 +13,7 @@ export function appenderExtractor<R, Context>(
     return (context): R[] | Promise<R[]> => {
       const base: R[] | Promise<R[]> = context.value;
 
-      return isPromiseLike(base)
-        ? base.then((v) => [...v, ...value])
-        : [...base, ...value];
+      return isPromiseLike(base) ? base.then((v) => [...v, ...value]) : [...base, ...value];
     };
   }
 

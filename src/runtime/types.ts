@@ -1,4 +1,4 @@
-import type { AllureTestRunMetadata } from 'jest-allure2-reporter';
+import type { ReporterConfig } from 'jest-allure2-reporter';
 import type {
   BuiltinFileAttachmentHandler,
   BuiltinContentAttachmentHandler,
@@ -52,54 +52,36 @@ export interface AllureRuntime {
     mimeType?: string,
   ): Promise<string | undefined>;
 
-  createAttachment<
-    T extends AttachmentContent,
-    F extends Function_<MaybePromise<T>>,
-  >(
+  createAttachment<T extends AttachmentContent, F extends Function_<MaybePromise<T>>>(
     function_: F,
     name: string,
   ): F;
-  createAttachment<
-    T extends AttachmentContent,
-    F extends Function_<MaybePromise<T>>,
-  >(
+  createAttachment<T extends AttachmentContent, F extends Function_<MaybePromise<T>>>(
     function_: F,
     options: ContentAttachmentOptions,
   ): typeof function_;
 
-  fileAttachment(
-    filePath: string | Promise<string>,
-    name?: string,
-  ): Promise<string | undefined>;
+  fileAttachment(filePath: string | Promise<string>, name?: string): Promise<string | undefined>;
   fileAttachment(
     filePath: string | Promise<string>,
     options?: FileAttachmentOptions,
   ): Promise<string | undefined>;
 
-  createFileAttachment<F extends Function_<MaybePromise<string>>>(
-    function_: F,
-    name?: string,
-  ): F;
+  createFileAttachment<F extends Function_<MaybePromise<string>>>(function_: F, name?: string): F;
   createFileAttachment<F extends Function_<MaybePromise<string>>>(
     function_: F,
     options?: FileAttachmentOptions,
   ): F;
 
   createStep<F extends Function>(name: string, function_: F): F;
-  createStep<F extends Function>(
-    name: string,
-    arguments_: ParameterOrString[],
-    function_: F,
-  ): F;
+  createStep<F extends Function>(name: string, arguments_: ParameterOrString[], function_: F): F;
 
   step<T>(name: string, function_: () => T): T;
 }
 
-export type SharedReporterConfig = AllureTestRunMetadata['config'];
+export type SharedReporterConfig = ReporterConfig;
 
-export type AllureRuntimePluginCallback = (
-  context: AllureRuntimePluginContext,
-) => void;
+export type AllureRuntimePluginCallback = (context: AllureRuntimePluginContext) => void;
 
 export interface AllureRuntimePluginContext {
   readonly runtime: AllureRuntime;
@@ -121,8 +103,9 @@ export type AttachmentOptions<Context extends AttachmentContext> = {
 };
 
 export type FileAttachmentOptions = AttachmentOptions<FileAttachmentContext>;
-export type ContentAttachmentOptions =
-  AttachmentOptions<ContentAttachmentContext> & { name: string };
+export type ContentAttachmentOptions = AttachmentOptions<ContentAttachmentContext> & {
+  name: string;
+};
 
 export type ParameterOrString = string | Omit<Parameter, 'value'>;
 
@@ -159,8 +142,7 @@ export type AttachmentHandler<Context extends AttachmentContext> = (
 
 export type FileAttachmentHandler = AttachmentHandler<FileAttachmentContext>;
 
-export type ContentAttachmentHandler =
-  AttachmentHandler<ContentAttachmentContext>;
+export type ContentAttachmentHandler = AttachmentHandler<ContentAttachmentContext>;
 
 export type MIMEInferer = (context: MIMEInfererContext) => string | undefined;
 

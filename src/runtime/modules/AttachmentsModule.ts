@@ -1,10 +1,6 @@
 import path from 'node:path';
 
-import {
-  type Function_,
-  type MaybePromise,
-  processMaybePromise,
-} from '../../utils';
+import { type Function_, type MaybePromise, processMaybePromise } from '../../utils';
 import { formatString, hijackFunction } from '../../utils';
 import type {
   AttachmentContent,
@@ -39,18 +35,13 @@ abstract class AttachmentsModule<
   Handler extends AttachmentHandler<Context>,
   Options extends AttachmentOptions<Context>,
 > {
-  constructor(
-    protected readonly context: AttachmentsModuleContext<Context, Handler>,
-  ) {}
+  constructor(protected readonly context: AttachmentsModuleContext<Context, Handler>) {}
 
   attachment<T extends Content>(
     content: MaybePromise<T>,
     options: Options,
   ): Promise<string | undefined> {
-    if (
-      typeof options.handler === 'string' &&
-      !this.context.handlers[options.handler]
-    ) {
+    if (typeof options.handler === 'string' && !this.context.handlers[options.handler]) {
       // TODO: throw a more specific error
       throw new Error(`Unknown attachment handler: ${options.handler}`);
     }
@@ -65,20 +56,12 @@ abstract class AttachmentsModule<
     return hijackFunction(function_, this.#handleAttachment(options));
   }
 
-  protected abstract _createMimeContext(
-    name: string,
-    content: Content,
-  ): MIMEInfererContext;
+  protected abstract _createMimeContext(name: string, content: Content): MIMEInfererContext;
 
-  protected abstract _createAttachmentContext(
-    context: AttachmentContext,
-  ): Context;
+  protected abstract _createAttachmentContext(context: AttachmentContext): Context;
 
   #handleAttachment(userOptions: Options) {
-    return (
-      userContent: Content,
-      arguments_?: unknown[],
-    ): Promise<string | undefined> => {
+    return (userContent: Content, arguments_?: unknown[]): Promise<string | undefined> => {
       const handler = this.#resolveHandler(userOptions);
       const name = this.#formatName(userOptions.name, arguments_);
       const mimeContext = this._createMimeContext(name, userContent);
@@ -106,9 +89,7 @@ abstract class AttachmentsModule<
 
   #resolveHandler(options: Options): Handler {
     const handler = (options.handler ?? 'default') as string | Handler;
-    return typeof handler === 'function'
-      ? handler
-      : this.context.handlers[handler];
+    return typeof handler === 'function' ? handler : this.context.handlers[handler];
   }
 
   #schedulePushAttachment(
@@ -154,7 +135,7 @@ export class FileAttachmentsModule extends AttachmentsModule<
       },
       get outDir() {
         const config = context.getReporterConfig();
-        return path.join(config.resultsDir, config.attachments.subDir);
+        return path.join(config.resultsDir, config.attachments.subDir ?? '');
       },
       waitFor: context.enqueueTask,
     });

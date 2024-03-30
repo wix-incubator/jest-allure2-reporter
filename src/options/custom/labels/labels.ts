@@ -1,11 +1,7 @@
 /* eslint-disable unicorn/no-array-reduce */
-import type {
-  Label,
-  LabelsCustomizer,
-  PropertyExtractor,
-} from 'jest-allure2-reporter';
+import type { Label, LabelsCustomizer, PropertyExtractor } from 'jest-allure2-reporter';
 
-import { constant } from '../common';
+import { constant } from '../../common';
 
 export function labels<Context>(
   customizer: undefined | null | LabelsCustomizer<Context>,

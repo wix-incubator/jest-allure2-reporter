@@ -15,12 +15,9 @@ import { getStatusDetails, isNonNullish } from '../../utils';
 
 export const testCase: TestCaseCustomizer<TestCaseExtractorContext> = {
   ignored: () => false,
-  historyId: ({ testCase, testCaseMetadata }) =>
-    testCaseMetadata.historyId ?? testCase.fullName,
-  displayName: ({ testCase, testCaseMetadata }) =>
-    testCaseMetadata.displayName ?? testCase.title,
-  fullName: ({ testCase, testCaseMetadata }) =>
-    testCaseMetadata.fullName ?? testCase.fullName,
+  historyId: ({ testCase, testCaseMetadata }) => testCaseMetadata.historyId ?? testCase.fullName,
+  displayName: ({ testCase, testCaseMetadata }) => testCaseMetadata.displayName ?? testCase.title,
+  fullName: ({ testCase, testCaseMetadata }) => testCaseMetadata.fullName ?? testCase.fullName,
   description: async ({ $, testCaseMetadata }) => {
     const text = testCaseMetadata.description?.join('\n\n') ?? '';
     const codes = await $.extractSourceCode(testCaseMetadata, true);
@@ -30,11 +27,9 @@ export const testCase: TestCaseCustomizer<TestCaseExtractorContext> = {
   descriptionHtml: async ({ $, result }) =>
     $.markdown2html?.((await result.description) ?? '') ?? '',
   start: ({ testCase, testCaseMetadata }) =>
-    testCaseMetadata.start ??
-    (testCaseMetadata.stop ?? Date.now()) - (testCase.duration ?? 0),
+    testCaseMetadata.start ?? (testCaseMetadata.stop ?? Date.now()) - (testCase.duration ?? 0),
   stop: ({ testCaseMetadata }) => testCaseMetadata.stop ?? Date.now(),
-  stage: ({ testCase, testCaseMetadata }) =>
-    testCaseMetadata.stage ?? getTestCaseStage(testCase),
+  stage: ({ testCase, testCaseMetadata }) => testCaseMetadata.stage ?? getTestCaseStage(testCase),
   status: ({ testCase, testCaseMetadata }) =>
     testCaseMetadata.status ?? getTestCaseStatus(testCase),
   statusDetails: ({ $, testCase, testCaseMetadata }) =>
@@ -58,8 +53,7 @@ export const testCase: TestCaseCustomizer<TestCaseExtractorContext> = {
 
 function getTestCaseStatus(testCase: TestCaseResult): Status {
   const hasErrors = testCase.failureMessages?.length > 0;
-  const hasBuiltinErrors =
-    hasErrors && testCase.failureMessages.some(looksLikeBroken);
+  const hasBuiltinErrors = hasErrors && testCase.failureMessages.some(looksLikeBroken);
 
   switch (testCase.status) {
     case 'passed': {

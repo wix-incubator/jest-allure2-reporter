@@ -1,18 +1,9 @@
-import type {
-  PropertyExtractor,
-  PropertyExtractorContext,
-} from 'jest-allure2-reporter';
+import type { PropertyExtractor, PropertyExtractorContext } from 'jest-allure2-reporter';
 
 import { once } from '../../utils';
 import type { MaybePromise } from '../types';
 
-export function composeExtractors2<
-  R,
-  Ra = never,
-  Rb = never,
-  Context = {},
-  V = MaybePromise<R>,
->(
+export function composeExtractors2<R, Ra = never, Rb = never, Context = {}, V = MaybePromise<R>>(
   a: PropertyExtractor<R, Ra, Context, MaybePromise<R | Rb>> | undefined,
   b: PropertyExtractor<R, Rb, Context, V>,
 ): PropertyExtractor<R, Ra, Context, V> {

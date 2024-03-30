@@ -17,8 +17,7 @@ export class StepsDecorator {
     const runtime = this.context.runtime;
     const handleArguments = (arguments_: IArguments) => {
       const parameters =
-        userParameters ??
-        (Array.from(arguments_, noop) as (ParameterOrString | undefined)[]);
+        userParameters ?? (Array.from(arguments_, noop) as (ParameterOrString | undefined)[]);
 
       const allureParameters = parameters.map(resolveParameter, arguments_);
 

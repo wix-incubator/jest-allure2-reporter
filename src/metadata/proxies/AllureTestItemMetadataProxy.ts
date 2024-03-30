@@ -10,8 +10,7 @@ import { CURRENT_STEP, PREFIX } from '../constants';
 import { AllureMetadataProxy } from './AllureMetadataProxy';
 
 export class AllureTestItemMetadataProxy<
-  T extends AllureTestItemMetadata = AllureTestStepMetadata &
-    AllureTestCaseMetadata,
+  T extends AllureTestItemMetadata = AllureTestStepMetadata & AllureTestCaseMetadata,
 > extends AllureMetadataProxy<T> {
   protected readonly $boundPath?: string[];
 

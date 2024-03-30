@@ -1,7 +1,4 @@
-import type {
-  AllureTestCaseMetadata,
-  AllureTestStepMetadata,
-} from 'jest-allure2-reporter';
+import type { AllureTestCaseMetadata, AllureTestStepMetadata } from 'jest-allure2-reporter';
 
 import { MetadataSelector } from '../MetadataSelector';
 import { mergeTestCaseMetadata, mergeTestStepMetadata } from '../mergers';
@@ -16,14 +13,8 @@ import {
 
 describe('mergeTestCaseMetadata', () => {
   let docblocks = new WeakMap();
-  let stepSelector: MetadataSelector<
-    StubTestStepMetadata,
-    AllureTestStepMetadata
-  >;
-  let testSelector: MetadataSelector<
-    StubTestCaseMetadata,
-    AllureTestCaseMetadata
-  >;
+  let stepSelector: MetadataSelector<StubTestStepMetadata, AllureTestStepMetadata>;
+  let testSelector: MetadataSelector<StubTestCaseMetadata, AllureTestCaseMetadata>;
   let testCase: ReturnType<typeof getFullBlownTestCase>;
 
   beforeEach(() => {
@@ -47,10 +38,7 @@ describe('mergeTestCaseMetadata', () => {
 
     testCase = getFullBlownTestCase();
     docblocks.set(testCase.file, createTestFileMetadata('file_docblock'));
-    docblocks.set(
-      testCase.definition,
-      createTestCaseMetadata('test_definition_docblock'),
-    );
+    docblocks.set(testCase.definition, createTestCaseMetadata('test_definition_docblock'));
   });
 
   test('merge', () => {
@@ -74,9 +62,7 @@ describe('mergeTestCaseMetadata', () => {
   });
 
   test('testInvocationAndBelowDirect', () => {
-    expect(
-      testSelector.testInvocationAndBelowDirect(testCase),
-    ).toMatchSnapshot();
+    expect(testSelector.testInvocationAndBelowDirect(testCase)).toMatchSnapshot();
   });
 
   test('testDefinitionAndBelow', () => {
@@ -84,9 +70,7 @@ describe('mergeTestCaseMetadata', () => {
   });
 
   test('testDefinitionAndBelowDirect', () => {
-    expect(
-      testSelector.testDefinitionAndBelowDirect(testCase),
-    ).toMatchSnapshot();
+    expect(testSelector.testDefinitionAndBelowDirect(testCase)).toMatchSnapshot();
   });
 
   test('testVertical', () => {
@@ -122,9 +106,7 @@ describe('mergeTestCaseMetadata', () => {
   });
 
   test('globalAndTestFileAndTestInvocation', () => {
-    expect(
-      testSelector.globalAndTestFileAndTestInvocation(testCase),
-    ).toMatchSnapshot();
+    expect(testSelector.globalAndTestFileAndTestInvocation(testCase)).toMatchSnapshot();
   });
 
   test('stepsSelector merge', () => {

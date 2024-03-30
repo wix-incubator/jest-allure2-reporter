@@ -9,17 +9,30 @@ export function mergerExtractor<R, Context>(
     | undefined
     | null
     | Partial<R>
-    | PropertyExtractor<R, undefined, Context>,
-): PropertyExtractor<R, undefined, Context> | undefined {
+    | PropertyExtractor<R | undefined, undefined, Context>,
+): PropertyExtractor<R | undefined, never, Context> | undefined {
+  if (maybeExtractor != null && typeof maybeExtractor === 'object') {
+    return mergerExtractorStrict(maybeExtractor) as PropertyExtractor<
+      R | undefined,
+      never,
+      Context
+    >;
+  }
+
+  return constantExtractor(maybeExtractor);
+}
+
+export function mergerExtractorStrict<R, Context>(
+  maybeExtractor: undefined | null | Partial<R> | PropertyExtractor<R | undefined, never, Context>,
+): PropertyExtractor<R, never, Context> | undefined {
   if (maybeExtractor != null && typeof maybeExtractor === 'object') {
     const value = maybeExtractor as Partial<R>;
     return (context): R | Promise<R> => {
       const base: R | Promise<R> = context.value;
-      return isPromiseLike(base)
-        ? base.then((v) => ({ ...v, ...value }))
-        : { ...base, ...value };
+      return isPromiseLike(base) ? base.then((v) => ({ ...v, ...value })) : { ...base, ...value };
     };
   }
 
-  return constantExtractor(maybeExtractor);
+  const extractor = maybeExtractor as PropertyExtractor<R, undefined, Context>;
+  return (context) => ({ ...context.value, ...extractor(context) });
 }

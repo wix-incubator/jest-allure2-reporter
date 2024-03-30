@@ -1,8 +1,4 @@
-import type {
-  AllureTestStepResult,
-  AllureTestCaseResult,
-  Parameter,
-} from 'jest-allure2-reporter';
+import type { AllureTestStepResult, AllureTestCaseResult, Parameter } from 'jest-allure2-reporter';
 import type {
   AllureGroup,
   AllureRuntime,
@@ -20,11 +16,7 @@ type CreateTestArguments = {
   test: AllureTestCaseResult;
 };
 
-export function writeTest({
-  runtime,
-  test,
-  containerName,
-}: CreateTestArguments) {
+export function writeTest({ runtime, test, containerName }: CreateTestArguments) {
   const allureGroup = runtime.startGroup(containerName);
   const allureTest = allureGroup.startTest();
   const steps = test.steps;
@@ -94,10 +86,7 @@ function fillStep(
   }
   if (step.steps) {
     for (const innerStep of step.steps) {
-      fillStep(
-        executable.startStep(innerStep.displayName ?? '', innerStep.start),
-        innerStep,
-      );
+      fillStep(executable.startStep(innerStep.displayName ?? '', innerStep.start), innerStep);
     }
   }
 }
@@ -106,10 +95,7 @@ function stringifyParameter(parameter: Parameter): AllureParameter {
   return { ...parameter, value: String(parameter.value) };
 }
 
-function createStepExecutable(
-  parent: AllureGroup,
-  hookType: AllureTestStepResult['hookType'],
-) {
+function createStepExecutable(parent: AllureGroup, hookType: AllureTestStepResult['hookType']) {
   switch (hookType) {
     case 'beforeAll':
     case 'beforeEach': {
