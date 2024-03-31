@@ -2,12 +2,12 @@ import type { KeyedParameterCustomizer, Parameter, PropertyExtractor } from 'jes
 
 import { groupBy, uniq } from '../../../utils';
 
-import { simplifyCustomizer } from './simplifyCustomizer';
+import { simplifyParametersMap } from './simplifyParametersMap';
 
 export function parametersMap<Context>(
   customizer: Record<string, KeyedParameterCustomizer<Context>>,
 ): PropertyExtractor<Parameter[], never, Context> {
-  const simplifiedCustomizer = simplifyCustomizer(customizer);
+  const simplifiedCustomizer = simplifyParametersMap(customizer);
   const customizerKeys = Object.keys(simplifiedCustomizer);
 
   return async (context) => {

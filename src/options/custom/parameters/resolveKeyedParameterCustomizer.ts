@@ -5,7 +5,7 @@ import * as extractors from '../../common';
 import type { AmbiguousParameterCustomizer } from './types';
 import { isParameter } from './isParameter';
 
-export function resolveAmbiguousCustomizer<Context>(
+export function resolveKeyedParameterCustomizer<Context>(
   value: KeyedParameterCustomizer<Context>,
   key: string,
 ): AmbiguousParameterCustomizer<Context> | undefined {

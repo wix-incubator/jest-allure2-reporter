@@ -6,7 +6,7 @@ import { compactArray, isPromiseLike } from '../../../utils';
 import type { AmbiguousParameterValue } from './types';
 import { isParameter } from './isParameter';
 
-export function createFlattener<Context>(
+export function parametersFlattener<Context>(
   name: string,
 ): PropertyExtractor<Parameter[], never, Context, MaybePromise<AmbiguousParameterValue>> {
   function repair(value: Primitive | Partial<Parameter>): Parameter | undefined {

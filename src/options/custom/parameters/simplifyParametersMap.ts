@@ -4,10 +4,10 @@ import { compactObject, mapValues } from '../../../utils';
 import * as extractors from '../../common';
 
 import type { SimplifiedParameterCustomizer } from './types';
-import { createFlattener } from './createFlattener';
-import { resolveAmbiguousCustomizer } from './resolveAmbiguousCustomizer';
+import { parametersFlattener } from './parametersFlattener';
+import { resolveKeyedParameterCustomizer } from './resolveKeyedParameterCustomizer';
 
-export function simplifyCustomizer<Context>(
+export function simplifyParametersMap<Context>(
   customizer: Record<string, KeyedParameterCustomizer<Context>>,
 ): Record<string, SimplifiedParameterCustomizer<Context>> {
   const result = mapValues(
@@ -16,12 +16,12 @@ export function simplifyCustomizer<Context>(
       value: KeyedParameterCustomizer<Context>,
       key: string,
     ): SimplifiedParameterCustomizer<Context> | undefined => {
-      const ambiguousCustomizer = resolveAmbiguousCustomizer<Context>(value, key);
+      const ambiguousCustomizer = resolveKeyedParameterCustomizer<Context>(value, key);
       if (!ambiguousCustomizer) {
         return;
       }
 
-      return extractors.compose2(createFlattener(key), ambiguousCustomizer);
+      return extractors.compose2(parametersFlattener(key), ambiguousCustomizer);
     },
   );
 
