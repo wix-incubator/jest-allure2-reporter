@@ -1,5 +1,3 @@
-import type { Helpers } from 'jest-allure2-reporter';
-
 import type { ReporterConfig } from '../types';
 import * as common from '../common';
 import * as custom from '../custom';
@@ -21,7 +19,7 @@ export function defaultOptions(): ReporterConfig {
       contentHandler: 'write',
       fileHandler: 'ref',
     },
-    helpers: common.constant(helpers as Helpers)!,
+    helpers: custom.helpers(helpers),
     testRun: custom.testCase(testRun),
     testFile: custom.testCase(testFile),
     testCase: custom.testCase(testCase),

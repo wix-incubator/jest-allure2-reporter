@@ -13,7 +13,7 @@ declare module 'jest-allure2-reporter' {
      */
     overwrite?: boolean;
     /**
-     * Specifies where to output test result files.
+     * Specify where to output test result files.
      * Please note that the results directory is not a ready-to-use Allure report.
      * You'll need to generate the report using the `allure` CLI.
      *
@@ -29,9 +29,18 @@ declare module 'jest-allure2-reporter' {
      */
     injectGlobals?: boolean;
     /**
-     * Configures how external attachments are attached to the report.
+     * Configure how external attachments are attached to the report.
      */
     attachments?: AttachmentsOptions;
+    /**
+     * Tweak the way markdown is processed.
+     * You can enable or disable the processor, add remark plugins, etc.
+     */
+    markdown?: MarkdownProcessorOptions;
+    /**
+     * Tweak the way source code and docblocks are extracted from test files.
+     */
+    sourceCode?: SourceCodeProcessorOptions;
     /**
      * Configures the defect categories for the report.
      *
@@ -74,11 +83,13 @@ declare module 'jest-allure2-reporter' {
     testStep?: TestStepCustomizer<TestStepExtractorContext>;
   }
 
-  export interface ReporterConfig {
+  export interface ReporterConfig extends ReporterOptionsAugmentation {
     overwrite: boolean;
     resultsDir: string;
     injectGlobals: boolean;
     attachments: Required<AttachmentsOptions>;
+    markdown: Required<MarkdownProcessorOptions>;
+    sourceCode: SourceCodeProcessorConfig;
   }
 
   export interface AttachmentsOptions {
@@ -112,9 +123,35 @@ declare module 'jest-allure2-reporter' {
   /** @see {@link AttachmentsOptions#contentHandler} */
   export type BuiltinContentAttachmentHandler = 'write';
 
+  export interface MarkdownProcessorOptions {
+    enabled?: boolean;
+    keepSource?: boolean;
+    remarkPlugins?: unknown[];
+    rehypePlugins?: unknown[];
+  }
+
+  export interface SourceCodeProcessorOptions {
+    enabled?: boolean;
+    plugins?: SourceCodePluginCustomizer[];
+  }
+
+  export interface SourceCodeProcessorConfig {
+    enabled: boolean;
+    plugins: SourceCodePlugin[];
+  }
+
   // endregion
 
   // region Customizers
+
+  export type SourceCodePluginCustomizer = PropertyCustomizer<SourceCodePlugin | undefined, never, GlobalExtractorContext>;
+
+  export interface SourceCodePlugin<Context = unknown> {
+    // TODO: use more interesting context type than `AllureTestItemSourceLocation`
+    prepareContext?(context: AllureTestItemSourceLocation): Promise<Context | undefined> | Context | undefined;
+    extractDocblock?(sourceCode: Context): Promise<AllureTestItemDocblock | undefined> | AllureTestItemDocblock | undefined;
+    extractSourceCode?(sourceCode: Context): Promise<AllureTestItemDocblock | undefined> | ExtractorHelperSourceCode | undefined;
+  }
 
   export interface TestCaseCustomizer<Context> {
     /**
@@ -257,7 +294,19 @@ declare module 'jest-allure2-reporter' {
 
   export type ExecutorCustomizer = PropertyExtractor<ExecutorInfo | undefined, never, GlobalExtractorContext> | Partial<ExecutorInfo>;
 
-  export type HelpersCustomizer = PropertyExtractor<Helpers | undefined, never, GlobalExtractorContext> | Partial<Helpers>;
+  export type HelpersCustomizer =
+    | PropertyExtractor<Helpers | undefined, never, GlobalExtractorContext>
+    | HelperCustomizersMap;
+
+  export type HelperCustomizersMap = {
+    [K in keyof Helpers]?: KeyedHelperCustomizer<K>;
+  };
+
+  export type KeyedHelperCustomizer<K extends keyof Helpers> =
+    | undefined
+    | null
+    | string
+    | PropertyExtractor<Helpers[K], never, GlobalExtractorContext>;
 
   export type AttachmentsCustomizer<Context> = PropertyCustomizer<Attachment[], never, Context>;
 
@@ -329,19 +378,19 @@ declare module 'jest-allure2-reporter' {
     readonly [K in keyof T]: Promise<T[K]> | T[K];
   };
 
-  export interface GlobalExtractorContext extends GlobalExtractorContextAugmentation {
+  export interface GlobalExtractorContext {
     $: Helpers;
     globalConfig: Config.GlobalConfig;
     config: ReporterConfig;
   }
 
-  export interface TestRunExtractorContext extends GlobalExtractorContext, TestRunExtractorContextAugmentation {
+  export interface TestRunExtractorContext extends GlobalExtractorContext {
     aggregatedResult: AggregatedResult;
     result: Partial<PromisedProperties<AllureTestCaseResult>>;
     testRunMetadata: AllureTestRunMetadata;
   }
 
-  export interface TestFileExtractorContext extends GlobalExtractorContext, TestFileExtractorContextAugmentation {
+  export interface TestFileExtractorContext extends GlobalExtractorContext {
     aggregatedResult: AggregatedResult;
     filePath: string[];
     testRunMetadata: AllureTestRunMetadata;
@@ -350,7 +399,7 @@ declare module 'jest-allure2-reporter' {
     result: Partial<PromisedProperties<AllureTestCaseResult>>;
   }
 
-  export interface TestCaseExtractorContext extends GlobalExtractorContext, TestCaseExtractorContextAugmentation {
+  export interface TestCaseExtractorContext extends GlobalExtractorContext {
     aggregatedResult: AggregatedResult;
     filePath: string[];
     testRunMetadata: AllureTestRunMetadata;
@@ -361,7 +410,7 @@ declare module 'jest-allure2-reporter' {
     result: Partial<PromisedProperties<AllureTestCaseResult>>;
   }
 
-  export interface TestStepExtractorContext extends GlobalExtractorContext, TestStepExtractorContextAugmentation {
+  export interface TestStepExtractorContext extends GlobalExtractorContext {
     aggregatedResult: AggregatedResult;
     filePath: string[];
     testRunMetadata: AllureTestRunMetadata;
@@ -410,7 +459,7 @@ declare module 'jest-allure2-reporter' {
      */
     manifest: ExtractorManifestHelper;
     markdown2html(markdown: string): Promise<string>;
-    sourceCode2Markdown(sourceCode: Partial<ExtractorHelperSourceCode> | undefined): string;
+    source2markdown(sourceCode: Partial<ExtractorHelperSourceCode> | undefined): string;
     stripAnsi: StripAnsiHelper;
   }
 
@@ -442,6 +491,15 @@ declare module 'jest-allure2-reporter' {
   }
 
   export interface StripAnsiHelper {
+    /**
+      * Strips ANSI escape codes from the given string or object.
+      *
+      * @example
+      * $.stripAnsi('Hello, \u001b[31mworld\u001b[0m!')
+      *
+      * @example
+      * $.stripAnsi({ message: 'Hello, \u001b[31mworld\u001b[0m!' })
+      */
     <R>(textOrObject: R): R;
   }
 
@@ -570,26 +628,6 @@ declare module 'jest-allure2-reporter' {
 
   export interface HelpersAugmentation {
     // Use to extend Helpers
-  }
-
-  export interface GlobalExtractorContextAugmentation {
-    // Use to extend GlobalExtractorContext
-  }
-
-  export interface TestRunExtractorContextAugmentation {
-    // Use to extend TestRunExtractorContext
-  }
-
-  export interface TestFileExtractorContextAugmentation {
-    // Use to extend TestFileExtractorContext
-  }
-
-  export interface TestCaseExtractorContextAugmentation {
-    // Use to extend TestCaseExtractorContext
-  }
-
-  export interface TestStepExtractorContextAugmentation {
-    // Use to extend TestStepExtractorContext
   }
 
   // endregion
