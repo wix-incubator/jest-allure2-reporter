@@ -1,5 +1,3 @@
-import type { Link } from 'jest-allure2-reporter';
-
-import type { MaybeArray } from '../../../utils';
+import type { MaybeArray, Link } from 'jest-allure2-reporter';
 
 export type AmbiguousLinkValue = MaybeArray<string | Partial<Link>>;

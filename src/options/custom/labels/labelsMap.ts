@@ -7,7 +7,7 @@ import { simplifyLabelsMap } from './simplifyLabelsMap';
 
 export function labelsMap<Context>(
   customizer: Record<string, KeyedLabelCustomizer<Context>>,
-): PropertyExtractor<Label[], never, Context> {
+): PropertyExtractor<Label[], Context> {
   const simplifiedCustomizer = simplifyLabelsMap(customizer);
   const customizerKeys = Object.keys(simplifiedCustomizer);
 

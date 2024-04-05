@@ -1,5 +1,3 @@
-import type { Label } from 'jest-allure2-reporter';
-
-import type { MaybeArray } from '../../../utils';
+import type { MaybeArray, Label } from 'jest-allure2-reporter';
 
 export type AmbiguousLabelValue = MaybeArray<string | Partial<Label>>;

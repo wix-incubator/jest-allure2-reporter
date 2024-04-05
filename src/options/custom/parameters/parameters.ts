@@ -1,15 +1,25 @@
-import type { Parameter, ParametersCustomizer, PropertyExtractor } from 'jest-allure2-reporter';
+import type {
+  MaybeNullish,
+  MaybePromise,
+  Parameter,
+  ParametersCustomizer,
+  PropertyExtractor,
+} from 'jest-allure2-reporter';
 
 import * as extractors from '../../common';
 
 import { parametersMap } from './parametersMap';
 
 export function parameters<Context>(
-  customizer: undefined | null | ParametersCustomizer<Context>,
-): PropertyExtractor<Parameter[], never, Context> | undefined {
-  if (customizer != null && typeof customizer === 'object') {
-    return parametersMap(customizer);
+  customizer: MaybeNullish<ParametersCustomizer<Context>>,
+): PropertyExtractor<Context, MaybePromise<Parameter[]>> | undefined {
+  if (customizer == null) {
+    return;
   }
 
-  return extractors.constant(customizer);
+  if (typeof customizer === 'function' || Array.isArray(customizer)) {
+    return extractors.constant(customizer);
+  }
+
+  return parametersMap(customizer);
 }

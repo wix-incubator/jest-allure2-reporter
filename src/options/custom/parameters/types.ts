@@ -1,14 +1,20 @@
-import type { Parameter, Primitive, PropertyExtractor } from 'jest-allure2-reporter';
+import type { MaybePromise, Parameter, Primitive, PropertyExtractor } from 'jest-allure2-reporter';
 
-import type { MaybeArray, MaybePromise } from '../../../utils';
-
-export type SimplifiedParameterCustomizer<Context> = PropertyExtractor<Parameter[], never, Context>;
-
-export type AmbiguousParameterCustomizer<Context> = PropertyExtractor<
-  AmbiguousParameterValue,
-  never,
+export type ParameterExtractor<Context> = PropertyExtractor<
   Context,
-  MaybePromise<Parameter[]>
+  MaybePromise<Parameter | undefined>
 >;
 
-export type AmbiguousParameterValue = MaybeArray<Primitive | Partial<Parameter>>;
+export type ParameterOrPrimitiveExtractor<Context> = PropertyExtractor<
+  Context,
+  MaybePromise<Parameter | undefined>,
+  MaybePromise<ParameterOrPrimitive>
+>;
+
+export type ParameterOrPrimitiveInflator<Context> = PropertyExtractor<
+  Context,
+  MaybePromise<ParameterOrPrimitive>,
+  MaybePromise<Parameter | undefined>
+>;
+
+export type ParameterOrPrimitive = Primitive | Partial<Parameter>;

@@ -1,14 +1,14 @@
 import { format } from 'node:util';
 
-import type { Link, PropertyExtractor } from 'jest-allure2-reporter';
+import type { MaybePromise, Link, PropertyExtractor } from 'jest-allure2-reporter';
 
-import { compactArray, isPromiseLike, type MaybePromise } from '../../../utils';
+import { compactArray, isPromiseLike } from '../../../utils';
 
 import type { AmbiguousLinkValue } from './types';
 
 export function linksFlattener<Context>(
   name: string,
-): PropertyExtractor<Link[], never, Context, MaybePromise<AmbiguousLinkValue>> {
+): PropertyExtractor<Link[], Context, MaybePromise<AmbiguousLinkValue>> {
   function repair(value: string | Partial<Link>): Link | undefined {
     if (value == null) {
       return;

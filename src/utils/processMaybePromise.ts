@@ -1,10 +1,14 @@
+import type { MaybePromise } from 'jest-allure2-reporter';
+
 import { isPromiseLike } from './isPromiseLike';
-import type { MaybePromise } from './types';
 
 interface MaybePromiseProcessor {
-  <T, R>(value: T, callback: (resolvedValue: T) => Promise<R>): Promise<R>;
-  <T, R>(value: Promise<T>, callback: (resolvedValue: T) => Promise<R>): Promise<R>;
-  <T, R>(value: MaybePromise<T>, callback: (resolvedValue: T) => Promise<R>): Promise<R>;
+  <T, R = T>(value: T, callback: (resolvedValue: T) => R): R;
+  <T, R = T>(value: Promise<T>, callback: (resolvedValue: T) => MaybePromise<R>): Promise<R>;
+  <T, R = T>(
+    value: MaybePromise<T>,
+    callback: (resolvedValue: T) => MaybePromise<R>,
+  ): MaybePromise<R>;
 }
 
 export const processMaybePromise: MaybePromiseProcessor = (input, callback) => {

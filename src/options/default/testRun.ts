@@ -18,7 +18,7 @@ export const testRun: TestCaseCustomizer<TestRunExtractorContext> = {
   statusDetails: ({ testRunMetadata }) => testRunMetadata.statusDetails,
   attachments: ({ testRunMetadata }) => testRunMetadata.attachments ?? [],
   parameters: compose2(
-    custom.parameters({
+    custom.parameters<TestRunExtractorContext>({
       'Suites passed': ({ aggregatedResult }) => aggregatedResult.numPassedTestSuites,
       'Suites failed': ({ aggregatedResult }) => aggregatedResult.numFailedTestSuites,
       'Suites broken': ({ aggregatedResult }) => aggregatedResult.numRuntimeErrorTestSuites,
@@ -27,7 +27,7 @@ export const testRun: TestCaseCustomizer<TestRunExtractorContext> = {
     ({ testRunMetadata }) => testRunMetadata.parameters ?? [],
   ),
   labels: compose2(
-    custom.labels({
+    custom.labels<TestRunExtractorContext>({
       suite: '(test file execution)',
     }),
     ({ testRunMetadata }) => testRunMetadata.labels ?? [],

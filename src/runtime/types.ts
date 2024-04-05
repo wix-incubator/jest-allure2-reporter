@@ -1,4 +1,4 @@
-import type { ReporterConfig } from 'jest-allure2-reporter';
+import type { MaybePromise, ReporterConfig } from 'jest-allure2-reporter';
 import type {
   BuiltinFileAttachmentHandler,
   BuiltinContentAttachmentHandler,
@@ -9,7 +9,7 @@ import type {
   StatusDetails,
 } from 'jest-allure2-reporter';
 
-import type { Function_, MaybePromise } from '../utils';
+import type { Function_ } from '../utils';
 
 export interface AllureRuntime {
   /**

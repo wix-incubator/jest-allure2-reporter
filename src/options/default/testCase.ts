@@ -2,7 +2,6 @@ import path from 'node:path';
 
 import type { TestCaseResult } from '@jest/reporters';
 import type {
-  LabelsCustomizer,
   Stage,
   Status,
   TestCaseCustomizer,
@@ -21,7 +20,7 @@ export const testCase: TestCaseCustomizer<TestCaseExtractorContext> = {
   description: async ({ $, testCaseMetadata }) => {
     const text = testCaseMetadata.description?.join('\n\n') ?? '';
     const codes = await $.extractSourceCode(testCaseMetadata, true);
-    const snippets = codes.map($.sourceCode2Markdown);
+    const snippets = codes.map($.source2markdown);
     return [text, ...snippets].filter(isNonNullish).join('\n\n');
   },
   descriptionHtml: async ({ $, result }) =>
@@ -40,12 +39,12 @@ export const testCase: TestCaseCustomizer<TestCaseExtractorContext> = {
   attachments: ({ testCaseMetadata }) => testCaseMetadata.attachments ?? [],
   parameters: ({ testCaseMetadata }) => testCaseMetadata.parameters ?? [],
   labels: compose2(
-    custom.labels({
+    custom.labels<TestCaseExtractorContext>({
       suite: ({ testCase, testFile }) =>
         testCase.ancestorTitles[0] ?? path.basename(testFile.testFilePath),
       subSuite: ({ testCase }) => testCase.ancestorTitles.slice(1).join(' '),
       thread: ({ testCaseMetadata }) => testCaseMetadata.workerId,
-    } as LabelsCustomizer<TestCaseExtractorContext>),
+    }),
     ({ testCaseMetadata }) => testCaseMetadata.labels ?? [],
   ),
   links: ({ testCaseMetadata }) => testCaseMetadata.links ?? [],

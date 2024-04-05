@@ -1,12 +1,17 @@
-import type { PropertyExtractor } from 'jest-allure2-reporter';
+import type {
+  MaybeNullish,
+  MaybePromise,
+  PropertyCustomizer,
+  PropertyExtractor,
+} from 'jest-allure2-reporter';
 
 import { isPromiseLike } from '../../utils';
 
 import { optionalExtractor } from './optionalExtractor';
 
-export function appenderExtractor<R, Context>(
-  maybeExtractor: undefined | null | R[] | PropertyExtractor<R[], undefined, Context>,
-): PropertyExtractor<R[], never, Context> | undefined {
+export function appenderExtractor<Context, R>(
+  maybeExtractor: PropertyCustomizer<Context, R[], MaybeNullish<R[]>>,
+): PropertyExtractor<Context, MaybePromise<R[]>> | undefined {
   if (maybeExtractor != null && Array.isArray(maybeExtractor)) {
     const value = maybeExtractor;
 
@@ -17,5 +22,5 @@ export function appenderExtractor<R, Context>(
     };
   }
 
-  return optionalExtractor<R[], Context>(maybeExtractor);
+  return optionalExtractor<Context, R[]>(maybeExtractor);
 }

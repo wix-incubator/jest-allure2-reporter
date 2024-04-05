@@ -1,6 +1,8 @@
 import path from 'node:path';
 
-import { type Function_, type MaybePromise, processMaybePromise } from '../../utils';
+import type { MaybePromise } from 'jest-allure2-reporter';
+
+import { type Function_, processMaybePromise } from '../../utils';
 import { formatString, hijackFunction } from '../../utils';
 import type {
   AttachmentContent,

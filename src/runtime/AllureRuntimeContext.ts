@@ -1,6 +1,10 @@
-import type { AllureTestRunMetadata, AllureTestFileMetadata } from 'jest-allure2-reporter';
+import type {
+  AllureTestRunMetadata,
+  AllureTestFileMetadata,
+  MaybeFunction,
+} from 'jest-allure2-reporter';
 
-import { type MaybeFunction, once, TaskQueue } from '../utils';
+import { once, TaskQueue } from '../utils';
 import { AllureMetadataProxy, AllureTestItemMetadataProxy } from '../metadata';
 
 import type { AllureRuntimeConfig } from './AllureRuntimeConfig';

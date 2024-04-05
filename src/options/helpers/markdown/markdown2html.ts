@@ -8,10 +8,10 @@ export const markdown2html: KeyedHelperCustomizer<'markdown2html'> = async ({ co
     [
       'remark-gfm',
       'remark-rehype',
-      ...config.markdown.remarkPlugins,
+      ...config.markdown!.remarkPlugins,
       'rehype-sanitize',
       'rehype-highlight',
-      ...config.markdown.rehypePlugins,
+      ...config.markdown!.rehypePlugins,
       'rehype-stringify',
     ].map(resolvePlugin),
   );

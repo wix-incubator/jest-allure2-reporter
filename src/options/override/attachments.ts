@@ -1,12 +1,8 @@
 import path from 'node:path';
 
-import type {
-  Attachment,
-  PropertyExtractor,
-  GlobalExtractorContext,
-} from 'jest-allure2-reporter';
+import type { GlobalExtractorContext, TestCaseCustomizer } from 'jest-allure2-reporter';
 
-export const attachments: PropertyExtractor<Attachment[], never, GlobalExtractorContext> = async ({
+export const attachments: TestCaseCustomizer<GlobalExtractorContext>['attachments'] = async ({
   config,
   value,
 }) => {

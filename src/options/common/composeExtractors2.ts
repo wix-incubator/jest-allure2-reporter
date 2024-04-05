@@ -1,23 +1,38 @@
-import type { PropertyExtractor, PropertyExtractorContext } from 'jest-allure2-reporter';
+import type {
+  MaybeNullish,
+  PropertyExtractor,
+  PropertyExtractorContext,
+} from 'jest-allure2-reporter';
 
 import { once } from '../../utils';
-import type { MaybePromise } from '../types';
 
-export function composeExtractors2<R, Ra = never, Rb = never, Context = {}, V = MaybePromise<R>>(
-  a: PropertyExtractor<R, Ra, Context, MaybePromise<R | Rb>> | undefined,
-  b: PropertyExtractor<R, Rb, Context, V>,
-): PropertyExtractor<R, Ra, Context, V> {
+export function composeExtractors2<Context, Value, Result>(
+  a: undefined | null,
+  b: PropertyExtractor<Context, Value, Result>,
+): typeof b;
+export function composeExtractors2<Context, Value, Ra, Rb>(
+  a: PropertyExtractor<Context, Rb, Ra>,
+  b: PropertyExtractor<Context, Value, Rb>,
+): PropertyExtractor<Context, Value, Ra>;
+export function composeExtractors2<Context, Value, Ra, Rb>(
+  a: MaybeNullish<PropertyExtractor<Context, Rb, Ra>>,
+  b: PropertyExtractor<Context, Value, Rb>,
+): PropertyExtractor<Context, Value, Ra | Rb>;
+export function composeExtractors2<Context, Value, Ra, Rb>(
+  a: MaybeNullish<PropertyExtractor<Context, Rb, Ra>>,
+  b: PropertyExtractor<Context, Value, Rb>,
+): PropertyExtractor<Context, Value, Ra | Rb> {
   if (!a) {
-    return b as PropertyExtractor<R, Ra, Context, V>;
+    return b;
   }
 
   return (context) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { value, ...restContext } = context;
-    const newContext = Object.defineProperty(restContext, 'value', {
+    const newContext = Object.defineProperty(restContext as {}, 'value', {
       get: once(() => b(context)),
       enumerable: false,
-    }) as unknown as PropertyExtractorContext<Context, MaybePromise<R | Rb>>;
+    }) as PropertyExtractorContext<Context, Rb>;
 
     return a(newContext);
   };

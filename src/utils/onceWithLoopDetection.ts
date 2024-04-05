@@ -1,6 +1,6 @@
 import { log } from '../logger';
 
-export function onceSmart<F extends (...arguments_: any[]) => any>(function_: F): F {
+export function onceWithLoopDetection<F extends (...arguments_: any[]) => any>(function_: F): F {
   let result: ReturnType<F>;
   let called = false;
   let executed = false;

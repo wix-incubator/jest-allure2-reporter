@@ -1,8 +1,6 @@
-import type { PromisedProperties } from 'jest-allure2-reporter';
+import type { MaybePromise, PromisedProperties } from 'jest-allure2-reporter';
 
 import { log } from '../logger';
-
-import type { MaybePromise } from './types';
 
 export async function resolvePromisedProperties<T>(
   maybePromised: MaybePromise<PromisedProperties<T>>,

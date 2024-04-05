@@ -1,38 +1,29 @@
-import type { PropertyExtractor } from 'jest-allure2-reporter';
+import type {
+  MaybeNullish,
+  MaybePromise,
+  PropertyCustomizer,
+  PropertyExtractor,
+} from 'jest-allure2-reporter';
 
 import { isPromiseLike } from '../../utils';
 
-import { constantExtractor } from './constantExtractor';
+import { optionalExtractor } from './optionalExtractor';
 
-export function mergerExtractor<R, Context>(
-  maybeExtractor:
-    | undefined
-    | null
-    | Partial<R>
-    | PropertyExtractor<R | undefined, undefined, Context>,
-): PropertyExtractor<R | undefined, never, Context> | undefined {
-  if (maybeExtractor != null && typeof maybeExtractor === 'object') {
-    return mergerExtractorStrict(maybeExtractor) as PropertyExtractor<
-      R | undefined,
-      never,
-      Context
-    >;
+export function mergerExtractor<Context, Value>(
+  maybeExtractor: PropertyCustomizer<Context, Value, MaybeNullish<Value>>,
+  fallbackValue?: Value,
+): PropertyExtractor<Context, MaybePromise<Value>> | undefined {
+  if (maybeExtractor == null) {
+    return;
   }
 
-  return constantExtractor(maybeExtractor);
-}
-
-export function mergerExtractorStrict<R, Context>(
-  maybeExtractor: undefined | null | Partial<R> | PropertyExtractor<R | undefined, never, Context>,
-): PropertyExtractor<R, never, Context> | undefined {
-  if (maybeExtractor != null && typeof maybeExtractor === 'object') {
-    const value = maybeExtractor as Partial<R>;
-    return (context): R | Promise<R> => {
-      const base: R | Promise<R> = context.value;
+  if (typeof maybeExtractor === 'object') {
+    const value = maybeExtractor;
+    return (context): MaybePromise<Value> => {
+      const base = context.value;
       return isPromiseLike(base) ? base.then((v) => ({ ...v, ...value })) : { ...base, ...value };
     };
   }
 
-  const extractor = maybeExtractor as PropertyExtractor<R, undefined, Context>;
-  return (context) => ({ ...context.value, ...extractor(context) });
+  return optionalExtractor(maybeExtractor, fallbackValue);
 }

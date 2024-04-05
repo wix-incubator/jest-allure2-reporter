@@ -1,14 +1,13 @@
 import path from 'node:path';
 
 import type {
-  LabelsCustomizer,
   TestCaseCustomizer,
   TestFileExtractorContext,
 } from 'jest-allure2-reporter';
 
 import { getStatusDetails, isNonNullish } from '../../utils';
 import * as custom from '../custom';
-import { compose2, last } from '../common';
+import { compose2 } from '../common';
 
 export const testFile: TestCaseCustomizer<TestFileExtractorContext> = {
   ignored: ({ testFile }) => !testFile.testExecError,
@@ -19,7 +18,7 @@ export const testFile: TestCaseCustomizer<TestFileExtractorContext> = {
   description: async ({ $, testFileMetadata }) => {
     const text = testFileMetadata.description?.join('\n') ?? '';
     const code = await $.extractSourceCode(testFileMetadata);
-    return [text, $.sourceCode2Markdown(code)].filter(isNonNullish).join('\n\n');
+    return [text, $.source2markdown(code)].filter(isNonNullish).join('\n\n');
   },
   descriptionHtml: async ({ $, result }) =>
     $.markdown2html?.((await result.description) ?? '') ?? '',
@@ -31,10 +30,10 @@ export const testFile: TestCaseCustomizer<TestFileExtractorContext> = {
   attachments: ({ testFileMetadata }) => testFileMetadata.attachments ?? [],
   parameters: ({ testFileMetadata }) => testFileMetadata.parameters ?? [],
   labels: compose2(
-    custom.labels({
+    custom.labels<TestFileExtractorContext>({
       suite: () => '(test file execution)',
       thread: ({ testFileMetadata }) => testFileMetadata.workerId,
-    } as LabelsCustomizer<TestFileExtractorContext>),
+    }),
     ({ testFileMetadata }) => testFileMetadata.labels ?? [],
   ),
   links: ({ testFileMetadata }) => testFileMetadata.links ?? [],

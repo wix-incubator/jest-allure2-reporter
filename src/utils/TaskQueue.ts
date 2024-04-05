@@ -1,4 +1,4 @@
-import type { MaybeFunction } from './types';
+import type { MaybeFunction } from 'jest-allure2-reporter';
 
 export interface TaskQueueConfig {
   readonly logError: (error: unknown) => void;

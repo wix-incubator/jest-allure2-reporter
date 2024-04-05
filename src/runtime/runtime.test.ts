@@ -30,6 +30,16 @@ describe('AllureRuntime', () => {
             contentHandler: 'write',
             fileHandler: 'ref',
           },
+          markdown: {
+            enabled: false,
+            keepSource: false,
+            remarkPlugins: [],
+            rehypePlugins: [],
+          },
+          sourceCode: {
+            enabled: false,
+            plugins: [],
+          },
         };
       },
     });

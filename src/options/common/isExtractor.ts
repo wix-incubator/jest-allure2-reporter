@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { PropertyExtractor } from 'jest-allure2-reporter';
 
-export function isExtractor<R, Ra = never, Context = {}, V = R | Promise<R>>(
+export function isExtractor<Context, Value, Result>(
   value: unknown,
-): value is PropertyExtractor<R, Ra, Context, V> {
+): value is PropertyExtractor<Context, Value, Result> {
   return typeof value === 'function';
 }

@@ -1,13 +1,18 @@
-// labels/index.ts
-import type { Label, LabelsCustomizer, PropertyExtractor } from 'jest-allure2-reporter';
+import type {
+  Label,
+  LabelsCustomizer,
+  MaybeNullish,
+  MaybePromise,
+  PropertyExtractor,
+} from 'jest-allure2-reporter';
 
 import { appender, constant } from '../../common';
 
 import { labelsMap } from './labelsMap';
 
 export function labels<Context>(
-  customizer: undefined | null | LabelsCustomizer<Context>,
-): PropertyExtractor<Label[], never, Context> | undefined {
+  customizer: MaybeNullish<LabelsCustomizer<Context>>,
+): PropertyExtractor<Context, MaybePromise<Label[]>> | undefined {
   if (customizer == null || typeof customizer === 'function') {
     return constant(customizer);
   }
@@ -18,3 +23,18 @@ export function labels<Context>(
 
   return labelsMap(customizer);
 }
+
+/*
+
+labels: undefined
+labels: null
+labels: (context) => [],
+labels: {
+  epic: undefined,
+  feature: null,
+  owner: 'Yaroslav',
+
+},
+
+
+*/

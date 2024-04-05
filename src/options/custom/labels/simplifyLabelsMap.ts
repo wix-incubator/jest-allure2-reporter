@@ -9,13 +9,13 @@ import { labelsFlattener } from './labelsFlattener';
 
 export function simplifyLabelsMap<Context>(
   customizer: Record<string, KeyedLabelCustomizer<Context>>,
-): Record<string, PropertyExtractor<Label[], never, Context>> {
+): Record<string, PropertyExtractor<Label[], Context>> {
   const result = mapValues(
     customizer,
     (
       value: KeyedLabelCustomizer<Context>,
       key: string,
-    ): PropertyExtractor<Label[], never, Context> | undefined => {
+    ): PropertyExtractor<Label[], Context> | undefined => {
       const ambiguousCustomizer = resolveKeyedLabelCustomizer<Context>(value, key);
       if (!ambiguousCustomizer) {
         return;
@@ -25,5 +25,5 @@ export function simplifyLabelsMap<Context>(
     },
   );
 
-  return compactObject(result) as Record<string, PropertyExtractor<Label[], never, Context>>;
+  return compactObject(result) as Record<string, PropertyExtractor<Label[], Context>>;
 }

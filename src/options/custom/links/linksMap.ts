@@ -6,7 +6,7 @@ import { simplifyLinksMap } from './simplifyLinksMap';
 
 export function linksMap<Context>(
   customizer: Record<string, KeyedLinkCustomizer<Context>>,
-): PropertyExtractor<Link[], never, Context> {
+): PropertyExtractor<Link[], Context> {
   const simplifiedCustomizer = simplifyLinksMap(customizer);
   const customizerKeys = Object.keys(simplifiedCustomizer);
 

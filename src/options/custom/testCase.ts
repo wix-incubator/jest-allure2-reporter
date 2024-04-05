@@ -11,7 +11,7 @@ import type { TestCaseCompositeExtractor, TestCaseExtractor } from '../types';
 
 import { parameters } from './parameters';
 
-const fallback: PropertyExtractor<unknown> = (context) => context.value;
+const fallback: PropertyExtractor<{}, unknown> = (context) => context.value;
 
 export function testCase<Context>(
   customizer: TestCaseCustomizer<Context>,
@@ -27,7 +27,7 @@ export function testCase<Context extends TestCaseExtractorContext>(
     return;
   }
 
-  return extractors.proxyObject<AllureTestCaseResult, Context>({
+  return extractors.proxyObject<Context, AllureTestCaseResult>({
     ignored: extractors.constant(customizer.ignored) ?? fallback,
     historyId: extractors.constant(customizer.historyId) ?? fallback,
     displayName: extractors.constant(customizer.displayName) ?? fallback,

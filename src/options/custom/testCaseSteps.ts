@@ -1,16 +1,16 @@
 import type { AllureNestedTestStepMetadata, TestCaseExtractorContext } from 'jest-allure2-reporter';
 
 import type { TestCaseExtractor, TestStepExtractor } from '../types';
-import { isNonNullish, onceSmart } from '../../utils';
+import { isNonNullish, onceWithLoopDetection } from '../../utils';
 
 export function testCaseSteps<Context extends Partial<TestCaseExtractorContext>>(
   testStep: TestStepExtractor<Context>,
   metadataKey?: 'testCaseMetadata' | 'testFileMetadata' | 'testRunMetadata',
 ): TestCaseExtractor<Context> {
-  const extractor: TestCaseExtractor<Context> = async (context) => {
+  const extractor: TestCaseExtractor<Context> = (context) => {
     Object.defineProperty(context.value, 'steps', {
       enumerable: true,
-      get: onceSmart(async () => {
+      get: onceWithLoopDetection(async () => {
         const steps: AllureNestedTestStepMetadata[] | undefined = metadataKey
           ? context[metadataKey]?.steps
           : undefined;
@@ -35,6 +35,7 @@ export function testCaseSteps<Context extends Partial<TestCaseExtractorContext>>
         return;
       }),
     });
+
     return context.value;
   };
 

@@ -1,9 +1,9 @@
-import type { PropertyExtractorContext } from 'jest-allure2-reporter';
+import type { MaybePromise, PropertyExtractorContext } from 'jest-allure2-reporter';
 
 import { mergerExtractor } from './mergerExtractor';
 
 type TestValue = Record<string, number>;
-type TestContext = PropertyExtractorContext<{}, TestValue | Promise<TestValue>>;
+type TestContext = PropertyExtractorContext<{}, MaybePromise<TestValue>>;
 
 describe('extractors', () => {
   describe('mergerExtractor', () => {
@@ -21,7 +21,7 @@ describe('extractors', () => {
       const extractor = jest.fn().mockReturnValue({ c: 3, d: 4 });
       const context = { value: { a: 1, b: 2 } };
 
-      const result = mergerExtractor(extractor)!;
+      const result = mergerExtractor<TestContext, TestValue>(extractor)!;
       const value = result(context);
 
       expect(extractor).toHaveBeenCalledWith(context);
@@ -32,7 +32,7 @@ describe('extractors', () => {
       const extractor = jest.fn().mockResolvedValue({ c: 3, d: 4 });
       const context = { value: Promise.resolve({ a: 1, b: 2 }) };
 
-      const result = mergerExtractor(extractor)!;
+      const result = mergerExtractor<TestContext, TestValue>(extractor)!;
       const value = await result(context);
 
       expect(extractor).toHaveBeenCalledWith(context);
@@ -40,7 +40,7 @@ describe('extractors', () => {
     });
 
     it('should merge the given values with the context value (sync)', async () => {
-      const value = { c: 3, d: 4 } as TestValue;
+      const value: TestValue = { c: 3, d: 4 };
       const context: TestContext = { value: { a: 1, b: 2 } };
 
       const result = mergerExtractor(value)!;
@@ -50,7 +50,7 @@ describe('extractors', () => {
     });
 
     it('should merge the given values with the context value (async)', async () => {
-      const value = { c: 3, d: 4 } as TestValue;
+      const value: TestValue = { c: 3, d: 4 };
       const context: TestContext = { value: Promise.resolve({ a: 1, b: 2 }) };
 
       const result = mergerExtractor(value)!;

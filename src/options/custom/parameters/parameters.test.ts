@@ -44,7 +44,7 @@ describe('parameters custom extractor', () => {
 
   it('should extract parameters from a keyed customizer with array values', async () => {
     const customizer: ParametersCustomizer<{}> = {
-      param3: () => ['value5', { value: 'value6', mode: 'masked' }],
+      param3: () => ({ name: 'cannot-rename', value: 'value6', mode: 'masked' }),
     };
 
     const extractor = parameters(customizer)!;
@@ -52,7 +52,6 @@ describe('parameters custom extractor', () => {
     const result = await extractor(context);
 
     expect(result).toEqual([
-      { name: 'param3', value: 'value5' },
       { name: 'param3', value: 'value6', mode: 'masked' },
     ]);
   });

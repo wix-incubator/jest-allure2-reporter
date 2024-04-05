@@ -13,12 +13,13 @@ import type {
   TestStepExtractorContext,
   Primitive,
   PromisedProperties,
+  MarkdownProcessorOptions,
+  SourceCodeProcessorConfig,
+  MaybePromise,
 } from 'jest-allure2-reporter';
 
-export { MaybePromise } from '../utils';
-
-export type CompositeExtractor<T, Context> = {
-  readonly [K in keyof T]: PropertyExtractor<T[K], never, Context>;
+export type CompositeExtractor<Context, Shape> = {
+  readonly [K in keyof Shape]?: PropertyExtractor<Context, MaybePromise<Shape[K]>>;
 };
 
 export interface ReporterConfig {
@@ -26,6 +27,8 @@ export interface ReporterConfig {
   resultsDir: string;
   injectGlobals: boolean;
   attachments: Required<AttachmentsOptions>;
+  markdown?: Required<MarkdownProcessorOptions>;
+  sourceCode?: SourceCodeProcessorConfig;
   categories: CategoriesExtractor;
   environment: EnvironmentExtractor;
   executor: ExecutorExtractor;
@@ -36,46 +39,38 @@ export interface ReporterConfig {
   testStep: TestStepExtractor<TestStepExtractorContext>;
 }
 
-export type ExecutorExtractor = PropertyExtractor<ExecutorInfo, undefined, GlobalExtractorContext>;
+export type ExecutorExtractor = PropertyExtractor<
+  GlobalExtractorContext,
+  MaybePromise<ExecutorInfo>
+>;
 
-export type HelpersExtractor = PropertyExtractor<Helpers, never, GlobalExtractorContext>;
+export type HelpersExtractor = PropertyExtractor<
+  GlobalExtractorContext,
+  PromisedProperties<Helpers>
+>;
 
 export type CategoriesExtractor = PropertyExtractor<
-  Category[],
-  never,
   GlobalExtractorContext,
-  never
+  MaybePromise<Category[]>
 >;
 
 export type EnvironmentExtractor = PropertyExtractor<
-  Record<string, Primitive>,
-  undefined,
   GlobalExtractorContext,
-  never
+  MaybePromise<Record<string, Primitive>>
 >;
 
 export type TestCaseExtractor<Context> = PropertyExtractor<
-  PromisedProperties<AllureTestCaseResult>,
-  never,
   Context,
   PromisedProperties<AllureTestCaseResult>
 >;
 
 export type TestStepExtractor<Context> = PropertyExtractor<
-  PromisedProperties<AllureTestStepResult>,
-  never,
   Context,
   PromisedProperties<AllureTestStepResult>
 >;
 
-export type TestCaseCompositeExtractor<Context> = CompositeExtractor<
-  Partial<PromisedProperties<AllureTestCaseResult>>,
-  Context
->;
+export type TestCaseCompositeExtractor<Context> = CompositeExtractor<Context, AllureTestCaseResult>;
 
-export type TestStepCompositeExtractor<Context> = CompositeExtractor<
-  Partial<PromisedProperties<AllureTestStepResult>>,
-  Context
->;
+export type TestStepCompositeExtractor<Context> = CompositeExtractor<Context, AllureTestStepResult>;
 
 export { ReporterOptions } from 'jest-allure2-reporter';

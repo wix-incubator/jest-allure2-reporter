@@ -24,7 +24,7 @@ export function defaultOptions(): ReporterConfig {
     testFile: custom.testCase(testFile),
     testCase: custom.testCase(testCase),
     testStep: custom.testStep(testStep),
-    categories: common.constant(categories)!,
+    categories: common.constant(categories),
     environment: () => ({}),
     executor: ({ $ }) => $.getExecutorInfo(true),
   };

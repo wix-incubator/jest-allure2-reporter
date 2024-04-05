@@ -10,7 +10,7 @@ import type { TestStepCompositeExtractor, TestStepExtractor } from '../types';
 
 import { parameters } from './parameters';
 
-const fallback: PropertyExtractor<unknown> = (context) => context.value;
+const fallback: PropertyExtractor<{}, unknown> = (context) => context.value;
 
 export function testStep<Context>(
   customizer: TestStepCustomizer<Context>,
@@ -26,7 +26,7 @@ export function testStep<Context extends TestStepExtractorContext>(
     return;
   }
 
-  return extractors.proxyObject<AllureTestStepResult, Context>({
+  return extractors.proxyObject<Context, AllureTestStepResult>({
     hookType: fallback,
     steps: fallback,
     ignored: extractors.constant(customizer.ignored) ?? fallback,

@@ -1,27 +1,35 @@
-import type { PropertyExtractor } from 'jest-allure2-reporter';
+import type {
+  MaybeNullish,
+  MaybePromise,
+  PropertyCustomizer,
+  PropertyExtractor,
+} from 'jest-allure2-reporter';
 
 import { isPromiseLike } from '../../utils';
 
 import { isExtractor } from './isExtractor';
 
-export function optionalExtractor<R, Context>(
-  maybeExtractor: undefined | null | R | PropertyExtractor<R, undefined, Context>,
-): PropertyExtractor<R, never, Context> | undefined {
+export function optionalExtractor<Context, Value>(
+  maybeExtractor: PropertyCustomizer<Context, Value, MaybeNullish<Value>>,
+  fallback?: Value,
+): PropertyExtractor<Context, MaybePromise<Value>> | undefined {
   if (maybeExtractor == null) {
     return;
   }
 
-  if (isExtractor<R, undefined, unknown>(maybeExtractor)) {
-    return (context): R | Promise<R> => {
+  if (
+    isExtractor<Context, MaybePromise<Value>, MaybePromise<MaybeNullish<Value>>>(maybeExtractor)
+  ) {
+    return (context): Value | Promise<Value> => {
       const value = maybeExtractor(context);
 
       return isPromiseLike(value)
-        ? value.then<R>((v) => v ?? context.value)
-        : value ?? context.value;
+        ? value.then<Value>((v) => v ?? fallback ?? context.value)
+        : value ?? fallback ?? context.value;
     };
   }
 
-  const value = maybeExtractor as R;
+  const value = maybeExtractor as Value;
   return (context) => {
     return value ?? context.value;
   };
