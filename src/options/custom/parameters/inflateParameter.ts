@@ -1,6 +1,6 @@
 import type { Parameter } from 'jest-allure2-reporter';
 
-import { processMaybePromise } from '../../../utils';
+import { thruMaybePromise } from '../../../utils';
 
 import type { ParameterOrPrimitive, ParameterOrPrimitiveInflator } from './types';
 import { isParameter } from './isParameter';
@@ -19,5 +19,5 @@ export function inflateParameter<Context>(name: string): ParameterOrPrimitiveInf
   }
 
   return ({ value }) =>
-    processMaybePromise<ParameterOrPrimitive, Parameter | undefined>(value, repair);
+    thruMaybePromise<ParameterOrPrimitive, Parameter | undefined>(value, repair);
 }

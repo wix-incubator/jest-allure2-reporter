@@ -5,7 +5,7 @@ import { parameters } from './parameters';
 describe('parameters custom extractor', () => {
   it('should return a constant extractor when customizer is not an object', () => {
     const customizer = () => [{ name: 'param1', value: 'value1' }];
-    const extractor = parameters(customizer)!;
+    const extractor = parameters(customizer);
 
     expect(extractor).toBeInstanceOf(Function);
 
@@ -29,7 +29,7 @@ describe('parameters custom extractor', () => {
       param5: async ({ value }) => (await value) ?? 'fallback',
     };
 
-    const extractor = parameters(customizer)!;
+    const extractor = parameters(customizer);
     const context = { value: [{ name: 'param5', value: 'original' }] };
     const result = await extractor(context);
 
@@ -47,13 +47,11 @@ describe('parameters custom extractor', () => {
       param3: () => ({ name: 'cannot-rename', value: 'value6', mode: 'masked' }),
     };
 
-    const extractor = parameters(customizer)!;
+    const extractor = parameters(customizer);
     const context = { value: [] };
     const result = await extractor(context);
 
-    expect(result).toEqual([
-      { name: 'param3', value: 'value6', mode: 'masked' },
-    ]);
+    expect(result).toEqual([{ name: 'param3', value: 'value6', mode: 'masked' }]);
   });
 
   it('should extract parameters from a keyed customizer and merge with existing parameters', async () => {
@@ -62,7 +60,7 @@ describe('parameters custom extractor', () => {
       param2: { value: 'value2', excluded: true },
     };
 
-    const extractor = parameters(customizer)!;
+    const extractor = parameters(customizer);
     const context = {
       value: [
         { name: 'param2', value: 'original2' },
@@ -86,7 +84,7 @@ describe('parameters custom extractor', () => {
       param4: async () => void 0,
     };
 
-    const extractor = parameters(customizer)!;
+    const extractor = parameters(customizer);
     const context = { value: [] };
     const result = await extractor(context);
 

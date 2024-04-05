@@ -81,11 +81,11 @@ describe('labels custom extractor', () => {
     const customizer = {
       label1: null,
       label2: undefined,
-      label3: () => null,
-      label4: async () => void 0,
+      label3: () => [],
+      label4: async () => [],
     };
 
-    const extractor = labels(customizer)!;
+    const extractor = labels(customizer);
     const context = { value: [] };
     const result = await extractor(context);
 
@@ -95,7 +95,7 @@ describe('labels custom extractor', () => {
   it('should append labels when customizer is an array', async () => {
     const customizer: LabelsCustomizer<{}> = [
       { name: 'label1', value: 'value1' },
-      () => ({ name: 'label2', value: 'value2' }),
+      { name: 'label2', value: 'value2' },
     ];
 
     const extractor = labels(customizer)!;

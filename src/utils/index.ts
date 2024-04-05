@@ -23,7 +23,7 @@ export * from './isPromiseLike';
 export * from './maybePromiseAll';
 export * from './md5';
 export * from './onceWithLoopDetection';
-export * from './processMaybePromise';
+export * from './thruMaybePromise';
 export * from './shallowEqualArrays';
 export * from './stringifyValues';
 export * from './TaskQueue';

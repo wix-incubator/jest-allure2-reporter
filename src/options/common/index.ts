@@ -5,4 +5,5 @@ export { constantExtractor as constant } from './constantExtractor';
 export { last } from './last';
 export { optionalExtractor as optional } from './optionalExtractor';
 export { compositeExtractor as proxyObject } from './compositeExtractor';
+export { mapper } from './mapper';
 export { mergerExtractor as merger } from './mergerExtractor';

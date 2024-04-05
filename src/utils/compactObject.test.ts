@@ -35,24 +35,14 @@ describe('compactObject', () => {
   });
 
   it('should preserve the original object type', () => {
-    interface MyObject {
-      a?: number;
-      b?: string;
-      c?: boolean;
-    }
-
-    const object: MyObject = {
-      a: 1,
+    const record: Record<string, string | undefined> = {
+      a: 'hello',
       b: undefined,
-      c: true,
     };
 
-    const result = compactObject(object);
-
-    expect(result).toEqual({
-      a: 1,
-      c: true,
+    const compacted: Record<string, string> = compactObject(record);
+    expect(compacted).toEqual({
+      a: 'hello',
     });
-    expect(result).toBeInstanceOf(Object);
   });
 });

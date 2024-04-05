@@ -1,6 +1,6 @@
 import type { MaybePromise } from 'jest-allure2-reporter';
 import type { Function_ } from './types';
-import { processMaybePromise } from './processMaybePromise';
+import { thruMaybePromise } from './thruMaybePromise';
 import { wrapFunction } from './wrapFunction';
 
 interface FunctionHijacker {
@@ -24,7 +24,7 @@ export const hijackFunction: FunctionHijacker = (function_, callback) => {
     function hijackFunctionWrapper(this: unknown, ...arguments_: unknown[]) {
       const result = Reflect.apply(function_, this, arguments_) as MaybePromise<any>;
 
-      return processMaybePromise(result, (value) => (callback(value, arguments_), value));
+      return thruMaybePromise(result, (value) => (callback(value, arguments_), value));
     },
   );
 };

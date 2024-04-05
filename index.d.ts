@@ -88,8 +88,8 @@ declare module 'jest-allure2-reporter' {
     resultsDir: string;
     injectGlobals: boolean;
     attachments: Required<AttachmentsOptions>;
-    markdown: Required<MarkdownProcessorOptions>;
-    sourceCode: SourceCodeProcessorConfig;
+    markdown?: Required<MarkdownProcessorOptions>;
+    sourceCode?: SourceCodeProcessorConfig;
   }
 
   export interface AttachmentsOptions {
@@ -144,69 +144,69 @@ declare module 'jest-allure2-reporter' {
 
   // region Customizers
 
-  export type SourceCodePluginCustomizer = PropertyCustomizer<SourceCodePlugin | undefined, never, GlobalExtractorContext>;
+  export type SourceCodePluginCustomizer = PropertyCustomizer<GlobalExtractorContext, SourceCodePlugin | undefined>;
 
-  export interface SourceCodePlugin<Context = unknown> {
+  export interface SourceCodePlugin<Context = {}> {
     // TODO: use more interesting context type than `AllureTestItemSourceLocation`
-    prepareContext?(context: AllureTestItemSourceLocation): Promise<Context | undefined> | Context | undefined;
-    extractDocblock?(sourceCode: Context): Promise<AllureTestItemDocblock | undefined> | AllureTestItemDocblock | undefined;
-    extractSourceCode?(sourceCode: Context): Promise<AllureTestItemDocblock | undefined> | ExtractorHelperSourceCode | undefined;
+    prepareContext?(context: AllureTestItemSourceLocation): MaybePromise<Context | undefined>;
+    extractDocblock?(sourceCode: Context): MaybePromise<AllureTestItemDocblock | undefined>;
+    extractSourceCode?(sourceCode: Context): MaybePromise<AllureTestItemDocblock | undefined>;
   }
 
-  export interface TestCaseCustomizer<Context> {
+  export interface TestCaseCustomizer<Context = {}> {
     /**
      * Extractor to omit test cases from the report.
      */
-    ignored?: PropertyCustomizer<boolean, never, Context>;
+    ignored?: PropertyCustomizer<Context, boolean>;
     /**
      * Test case ID extractor to fine-tune Allure's history feature.
      * @example ({ package, file, test }) => `${package.name}:${file.path}:${test.fullName}`
      * @example ({ test }) => `${test.identifier}:${test.title}`
      * @see https://wix-incubator.github.io/jest-allure2-reporter/docs/config/history/#test-case-id
      */
-    historyId?: PropertyCustomizer<Primitive, never, Context>;
+    historyId?: PropertyCustomizer<Context, Primitive>;
     /**
      * Extractor for the default test or step name.
      * @default ({ test }) => test.title
      */
-    displayName?: PropertyCustomizer<string, never, Context>;
+    displayName?: PropertyCustomizer<Context, string>;
     /**
      * Extractor for the full test case name.
      * @default ({ test }) => test.fullName
      */
-    fullName?: PropertyCustomizer<string, never, Context>;
+    fullName?: PropertyCustomizer<Context, string>;
     /**
      * Extractor for the test case start timestamp.
      */
-    start?: PropertyCustomizer<number, never, Context>;
+    start?: PropertyCustomizer<Context, number>;
     /**
      * Extractor for the test case stop timestamp.
      */
-    stop?: PropertyCustomizer<number, never, Context>;
+    stop?: PropertyCustomizer<Context, number>;
     /**
      * Extractor for the test case description.
      * @example ({ testCaseMetadata }) => '```js\n' + testCaseMetadata.sourceCode + '\n```'
      */
-    description?: PropertyCustomizer<string, never, Context>;
+    description?: PropertyCustomizer<Context, string>;
     /**
      * Extractor for the test case description in HTML format.
      * @example ({ testCaseMetadata }) => '<pre><code>' + testCaseMetadata.sourceCode + '</code></pre>'
      */
-    descriptionHtml?: PropertyCustomizer<string, never, Context>;
+    descriptionHtml?: PropertyCustomizer<Context, string>;
     /**
      * Extractor for the test case stage.
      */
-    stage?: PropertyCustomizer<Stage, never, Context>;
+    stage?: PropertyCustomizer<Context, Stage>;
     /**
      * Extractor for the test case status.
      * @see https://wix-incubator.github.io/jest-allure2-reporter/docs/config/statuses/
      * @example ({ value }) => value === 'broken' ? 'failed' : value
      */
-    status?: PropertyCustomizer<Status, never, Context>;
+    status?: PropertyCustomizer<Context, Status>;
     /**
      * Extractor for the test case status details.
      */
-    statusDetails?: PropertyCustomizer<StatusDetails | undefined, never, Context>;
+    statusDetails?: PropertyCustomizer<Context, MaybeNullish<StatusDetails>>;
     /**
      * Customize Allure labels for the test case.
      *
@@ -244,40 +244,40 @@ declare module 'jest-allure2-reporter' {
    * Global customizations for how test steps are reported, e.g.
    * beforeAll, beforeEach, afterEach, afterAll hooks and custom steps.
    */
-  export interface TestStepCustomizer<Context> {
+  export interface TestStepCustomizer<Context = {}> {
     /**
      * Extractor to omit test steps from the report.
      */
-    ignored?: PropertyCustomizer<boolean, never, Context>;
+    ignored?: PropertyCustomizer<Context, boolean>;
     /**
      * Extractor for the step name.
      * @example ({ value }) => value.replace(/(before|after)(Each|All)/, (_, p1, p2) => p1 + ' ' + p2.toLowerCase())
      */
-    displayName?: PropertyCustomizer<string, never, Context>;
+    displayName?: PropertyCustomizer<Context, string>;
     /**
      * Extractor for the test step start timestamp.
      */
-    start?: PropertyCustomizer<number, never, Context>;
+    start?: PropertyCustomizer<Context, number>;
     /**
      * Extractor for the test step stop timestamp.
      */
-    stop?: PropertyCustomizer<number, never, Context>;
+    stop?: PropertyCustomizer<Context, number>;
     /**
      * Extractor for the test step stage.
      * @see https://wix-incubator.github.io/jest-allure2-reporter/docs/config/statuses/
      * TODO: add example
      */
-    stage?: PropertyCustomizer<Stage, never, Context>;
+    stage?: PropertyCustomizer<Context, Stage>;
     /**
      * Extractor for the test step status.
      * @see https://wix-incubator.github.io/jest-allure2-reporter/docs/config/statuses/
      * @example ({ value }) => value === 'broken' ? 'failed' : value
      */
-    status?: PropertyCustomizer<Status, never, Context>;
+    status?: PropertyCustomizer<Context, Status>;
     /**
      * Extractor for the test step status details.
      */
-    statusDetails?: PropertyCustomizer<StatusDetails | undefined, never, Context>;
+    statusDetails?: PropertyCustomizer<Context, MaybeNullish<StatusDetails>>;
     /**
      * Customize step or test step attachments.
      */
@@ -288,14 +288,14 @@ declare module 'jest-allure2-reporter' {
     parameters?: ParametersCustomizer<Context>;
   }
 
-  export type CategoriesCustomizer = Category[] | PropertyExtractor<Category[], undefined, GlobalExtractorContext>;
+  export type CategoriesCustomizer = PropertyCustomizer<GlobalExtractorContext, Category[]>;
 
-  export type EnvironmentCustomizer = PropertyCustomizer<Record<string, Primitive> | undefined, never, GlobalExtractorContext>;
+  export type EnvironmentCustomizer = PropertyCustomizer<GlobalExtractorContext, Record<string, Primitive>>;
 
-  export type ExecutorCustomizer = PropertyExtractor<ExecutorInfo | undefined, never, GlobalExtractorContext> | Partial<ExecutorInfo>;
+  export type ExecutorCustomizer = PropertyCustomizer<GlobalExtractorContext, ExecutorInfo>;
 
   export type HelpersCustomizer =
-    | PropertyExtractor<Helpers | undefined, never, GlobalExtractorContext>
+    | PropertyExtractor<GlobalExtractorContext, Helpers>
     | HelperCustomizersMap;
 
   export type HelperCustomizersMap = {
@@ -303,79 +303,60 @@ declare module 'jest-allure2-reporter' {
   };
 
   export type KeyedHelperCustomizer<K extends keyof Helpers> =
-    | undefined
-    | null
-    | string
-    | PropertyExtractor<Helpers[K], never, GlobalExtractorContext>;
+    PropertyExtractor<GlobalExtractorContext, MaybePromise<Helpers[K]>>;
 
-  export type AttachmentsCustomizer<Context> = PropertyCustomizer<Attachment[], never, Context>;
+  export type AttachmentsCustomizer<Context> = PropertyCustomizer<Context, Attachment[]>;
 
   export type LabelsCustomizer<Context> =
-    | PropertyCustomizer<Label[], never, Context>
+    | PropertyCustomizer<Context, Label[]>
     | Record<LabelName | string, KeyedLabelCustomizer<Context>>;
 
-  export type KeyedLabelCustomizer<Context> =
-    | undefined
-    | null
-    | string
-    | PropertyExtractor<
-        Array<Partial<Label> | string>,
-        Partial<Label> | string,
-        Context,
-        Label[]
-      >;
+  export type KeyedLabelCustomizer<Context> = MaybeNullish<
+    PropertyCustomizer<
+      Context,
+      string[],
+      MaybeArray<string>
+    >
+  >;
 
   export type LinksCustomizer<Context> =
-    | PropertyCustomizer<Link[], never, Context>
+    | PropertyCustomizer<Context, MaybeNullish<Link[]>>
     | Record<LinkType | string, KeyedLinkCustomizer<Context>>;
 
   export type KeyedLinkCustomizer<Context> =
-    | undefined
-    | null
-    | string
+    | MaybeNullish<string>
     | PropertyExtractor<
-        Array<Partial<Link> | string>,
-        Partial<Link> | string,
         Context,
-        Link[]
+        Link[],
+        MaybeNullish<MaybeArray<Partial<Link>>>
       >;
 
   export type ParametersCustomizer<Context> =
-    | PropertyExtractor<Parameter[], never, Context>
+    | PropertyCustomizer<Context, Parameter[]>
     | Record<string, KeyedParameterCustomizer<Context>>;
 
-  export type KeyedParameterCustomizer<Context> =
-    | Primitive
-    | Partial<Parameter>
-    | PropertyExtractor<
-        Array<Primitive | Partial<Parameter>>,
-        Primitive | Partial<Parameter>,
-        Context,
-        Parameter[] | Promise<Parameter[]>
-      >;
+  export type KeyedParameterCustomizer<Context> = PropertyCustomizer<
+    Context,
+    Parameter,
+    Primitive | Partial<Parameter>
+  >;
 
-  export type PropertyCustomizer<
-    R,
-    Ra = never,
-    Context = never,
-    V = R | Promise<R>
-  > = R | Ra | PropertyExtractor<R, Ra, Context, V>;
+  export type PropertyCustomizer<Context, Value, Result = Value> = Result | PropertyExtractor<Context, MaybePromise<Value>, MaybePromise<Result>>;
 
   // endregion
 
   // region Extractors
 
   export type PropertyExtractor<
-    R,
-    Ra = never,
-    Context = {},
-    V = R | Promise<R>
-  > = (context: PropertyExtractorContext<Context, V>) => R | Ra | Promise<R | Ra>;
+    Context,
+    Value,
+    Result = Value,
+  > = (context: PropertyExtractorContext<Context, Value>) => Result;
 
   export type PropertyExtractorContext<Context, Value> = Readonly<Context & { value: Value }>;
 
   export type PromisedProperties<T> = {
-    readonly [K in keyof T]: Promise<T[K]> | T[K];
+    readonly [K in keyof T]: MaybePromise<T[K]>;
   };
 
   export interface GlobalExtractorContext {
@@ -464,20 +445,20 @@ declare module 'jest-allure2-reporter' {
   }
 
   export interface ExtractorSourceCodeHelper {
-    (metadata: AllureTestItemMetadata): Promise<ExtractorHelperSourceCode | undefined>;
-    (metadata: AllureTestItemMetadata, recursive: true): Promise<ExtractorHelperSourceCode[]>;
+    (metadata: AllureTestItemMetadata): MaybePromise<ExtractorHelperSourceCode | undefined>;
+    (metadata: AllureTestItemMetadata, recursive: true): MaybePromise<ExtractorHelperSourceCode[]>;
   }
 
   export interface ExtractorExecutorInfoHelper {
-    (): Promise<ExecutorInfo | undefined>;
-    (includeLocal: true): Promise<ExecutorInfo>;
+    (): MaybePromise<ExecutorInfo | undefined>;
+    (includeLocal: true): MaybePromise<ExecutorInfo>;
   }
 
   export interface ExtractorManifestHelper {
-    (): Promise<Record<string, any> | undefined>;
-    (packageName: string): Promise<Record<string, any> | undefined>;
-    <T>(callback: ExtractorManifestHelperCallback<T>): Promise<T | undefined>;
-    <T>(packageName: string, callback: ExtractorManifestHelperCallback<T>): Promise<T>;
+    (): MaybePromise<Record<string, any> | undefined>;
+    (packageName: string): MaybePromise<Record<string, any> | undefined>;
+    <T>(callback: ExtractorManifestHelperCallback<T>): MaybePromise<T | undefined>;
+    <T>(packageName: string, callback: ExtractorManifestHelperCallback<T>): MaybePromise<T | undefined>;
   }
 
   export type ExtractorManifestHelperCallback<T> = (manifest: Record<string, any>) => T;
@@ -751,6 +732,14 @@ declare module 'jest-allure2-reporter' {
   //endregion
 
   export type Primitive = string | number | boolean | null | undefined;
+
+  export type MaybePromise<T> = T | Promise<T>;
+
+  export type MaybeArray<T> = T | T[];
+
+  export type MaybeNullish<T> = T | null | undefined;
+
+  export type MaybeFunction<T> = T | ((...args: any[]) => T);
 }
 
 export default class JestAllure2Reporter extends JestMetadataReporter {

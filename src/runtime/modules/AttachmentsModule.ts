@@ -2,7 +2,7 @@ import path from 'node:path';
 
 import type { MaybePromise } from 'jest-allure2-reporter';
 
-import { type Function_, processMaybePromise } from '../../utils';
+import { type Function_, thruMaybePromise } from '../../utils';
 import { formatString, hijackFunction } from '../../utils';
 import type {
   AttachmentContent,
@@ -48,7 +48,7 @@ abstract class AttachmentsModule<
       throw new Error(`Unknown attachment handler: ${options.handler}`);
     }
 
-    return processMaybePromise(content, this.#handleAttachment(options));
+    return thruMaybePromise(content, this.#handleAttachment(options));
   }
 
   createAttachment<T extends Content>(

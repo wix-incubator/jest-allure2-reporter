@@ -23,5 +23,5 @@ export function simplifyParametersMap<Context>(
     },
   );
 
-  return compactObject(result) as Record<string, ParameterExtractor<Context>>;
+  return compactObject(result);
 }

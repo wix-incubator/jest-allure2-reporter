@@ -1,19 +1,28 @@
-// labels/resolveKeyedLabelCustomizer.ts
-import type { KeyedLabelCustomizer, PropertyExtractor } from 'jest-allure2-reporter';
+import type {
+  KeyedLabelCustomizer,
+  MaybeArray,
+  MaybePromise,
+  PropertyExtractor,
+} from 'jest-allure2-reporter';
 
-import { constant } from '../../common';
+import { appender, constant } from '../../common';
 
 export function resolveKeyedLabelCustomizer<Context>(
   value: KeyedLabelCustomizer<Context>,
-  key: string,
-): PropertyExtractor<unknown, Context> | undefined {
+):
+  | PropertyExtractor<Context, MaybePromise<string[]>, MaybePromise<MaybeArray<string>>>
+  | undefined {
   if (value == null) {
     return;
   }
 
   if (typeof value === 'function') {
-    return value as PropertyExtractor<unknown, Context>;
+    return value;
   }
 
-  return constant(value);
+  if (typeof value === 'string') {
+    return constant([value]);
+  }
+
+  return appender(value);
 }

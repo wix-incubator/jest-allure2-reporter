@@ -10,7 +10,7 @@ import {
   groupBy,
   last,
   maybePromiseAll,
-  processMaybePromise,
+  thruMaybePromise,
   uniq,
 } from '../../../utils';
 
@@ -23,7 +23,7 @@ export function parametersMap<Context>(
   const customizerKeys = Object.keys(simplifiedCustomizer);
 
   return async (context) => {
-    return processMaybePromise<Parameter[]>(context.value, (value) => {
+    return thruMaybePromise<Parameter[]>(context.value, (value) => {
       const parameters = groupBy(value, 'name');
       const keys = uniq([...customizerKeys, ...Object.keys(parameters)]);
       const batches: MaybePromise<Parameter | undefined>[] = keys.map((key) => {

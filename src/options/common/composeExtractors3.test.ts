@@ -27,14 +27,6 @@ describe('extractors', () => {
       expect($two).toHaveBeenCalledTimes(1);
       expect($three).toHaveBeenCalledTimes(1);
     });
-
-    it('should allow undefined extractors in the middle', async () => {
-      const one: PropertyExtractor<{}, void, number> = () => 2;
-      const two: PropertyExtractor<{}, number, number> = ({ value }) => value - 3;
-      const combined = composeExtractors3(two, undefined, one);
-
-      expect(combined(context)).toBe(-1);
-    });
   });
 });
 

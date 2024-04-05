@@ -1,8 +1,8 @@
-export function compactObject<T extends object>(object: T): Partial<T> {
-  return Object.entries(object).reduce((result, [key, value]) => {
+export function compactObject<V>(object: Record<string, V | undefined>): Record<string, V> {
+  return Object.entries(object).reduce((result: Record<string, V>, [key, value]) => {
     if (value !== undefined) {
-      result[key as keyof T] = value;
+      result[key] = value;
     }
     return result;
-  }, {} as Partial<T>);
+  }, {});
 }

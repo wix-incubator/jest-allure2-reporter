@@ -24,5 +24,5 @@ export function simplifyLinksMap<Context>(
     },
   );
 
-  return compactObject(result) as Record<string, PropertyExtractor<Link[], Context>>;
+  return compactObject(result);
 }
