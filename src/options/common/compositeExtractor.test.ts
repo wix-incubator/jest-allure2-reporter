@@ -1,8 +1,9 @@
 import type { PromisedProperties, PropertyExtractorContext } from 'jest-allure2-reporter';
 
-import { isPromiseLike } from '../../utils';
+import { thruMaybePromise } from '../../utils';
 
 import { compositeExtractor } from './compositeExtractor';
+import { composeExtractors2 } from './composeExtractors2';
 
 interface TestShape {
   number: number;
@@ -16,12 +17,18 @@ interface TestShape {
 type TestContext = PropertyExtractorContext<{}, PromisedProperties<TestShape>>;
 
 describe('compositeExtractor', () => {
+  const invert = (value: boolean) => !value;
+  const nullify = (value: any): null => value && null;
+  const worldify = (value: string) => value + ' world';
+  const plusTwo = (value: number) => value + 2;
+
   const extractor = compositeExtractor<TestContext, TestShape>({
-    number: ({ value }) => (isPromiseLike(value) ? value.then((v) => v + 2) : value + 2),
-    string: ({ value }) =>
-      isPromiseLike(value) ? value.then((v) => v + ' world') : value + ' world',
-    boolean: ({ value }) => (isPromiseLike(value) ? value.then((v) => !v) : !value),
-    null: ({ value }) => (isPromiseLike(value) ? value.then((v) => v && null) : value && null),
+    number: ({ value }) => thruMaybePromise(value, plusTwo),
+    string: ({ value }) => thruMaybePromise(value, worldify),
+    boolean: ({ value }) => thruMaybePromise(value, invert),
+    null: ({ value }) => thruMaybePromise(value, nullify),
+    undefined: ({ value }) => value,
+    extra: ({ value }) => value,
   });
 
   it('should return an object with the extracted properties (sync)', () => {
@@ -64,5 +71,28 @@ describe('compositeExtractor', () => {
     await expect(result.null).resolves.toBe(null);
     await expect(result.undefined).resolves.toBe(undefined);
     await expect(result.extra).resolves.toEqual(/test/);
+  });
+
+  it('should compose composite extractors correctly', async () => {
+    const double = composeExtractors2(extractor, extractor);
+    expect(
+      double({
+        value: {
+          number: 40,
+          string: 'hello',
+          boolean: false,
+          null: null,
+          undefined: undefined,
+          extra: /test/,
+        },
+      }),
+    ).toEqual({
+      number: 44,
+      string: 'hello world world',
+      boolean: false,
+      null: null,
+      undefined: undefined,
+      extra: /test/,
+    });
   });
 });

@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import _ from 'lodash';
 import pkgUp from 'pkg-up';
-import type {
-  ExtractorManifestHelper,
-  ExtractorManifestHelperCallback,
-} from 'jest-allure2-reporter';
+import type { ManifestHelper, ManifestHelperExtractor } from 'jest-allure2-reporter';
 
 export type ImportModuleFunction = (
   path: string,
@@ -18,45 +16,36 @@ export class ManifestResolver {
     this.importFn = importFunction;
   }
 
-  public extract: ExtractorManifestHelper = <T>(
-    packageNameOrCallback?: string | ExtractorManifestHelperCallback<T>,
-    callback?: ExtractorManifestHelperCallback<T>,
-  ) => {
-    if (!packageNameOrCallback) {
-      return this.manifestImpl<T>();
-    } else if (this.isManifestExtractorCallback<T>(packageNameOrCallback)) {
-      return this.manifestImpl<T>(undefined, packageNameOrCallback);
-    } else if (callback) {
-      return this.manifestImpl<T>(packageNameOrCallback, callback);
-    } else {
-      return this.manifestImpl<T>(packageNameOrCallback);
-    }
-  };
-
-  private isManifestExtractorCallback<T>(
-    value: unknown,
-  ): value is ExtractorManifestHelperCallback<T> {
-    return typeof value === 'function';
-  }
-
-  private async manifestImpl<T>(
+  public extract: ManifestHelper = async <T>(
     packageName?: string,
-    callback?: ExtractorManifestHelperCallback<T>,
-  ): Promise<any> {
+    maybeCallback?: ManifestHelperExtractor<T>,
+    defaultValue?: T,
+  ): Promise<any> => {
     const manifestPath = await this.resolveManifestPath(packageName);
     if (!manifestPath) {
       // TODO: log warning
-      return;
+      return defaultValue;
     }
 
     try {
       const manifest = await this.importFn(manifestPath);
-      return callback ? callback(manifest as any) : manifest;
+
+      if (typeof maybeCallback === 'function') {
+        const callback = maybeCallback;
+        return callback(manifest as any) ?? defaultValue;
+      }
+
+      if (typeof maybeCallback === 'string') {
+        const propertyPath = maybeCallback.split('.');
+        return _.get(manifest, propertyPath, defaultValue);
+      }
+
+      return manifest;
     } catch {
       // TODO: log error
       return;
     }
-  }
+  };
 
   private async resolveManifestPath(packageName?: string) {
     return packageName

@@ -311,24 +311,24 @@ declare module 'jest-allure2-reporter' {
     | PropertyCustomizer<Context, Label[]>
     | Record<LabelName | string, KeyedLabelCustomizer<Context>>;
 
-  export type KeyedLabelCustomizer<Context> = MaybeNullish<
-    PropertyCustomizer<
-      Context,
-      string[],
-      MaybeArray<string>
-    >
-  >;
+  export type KeyedLabelCustomizer<Context> =
+    | MaybeNullish<MaybeArray<string>>
+    | PropertyExtractor<
+        Context,
+        string[],
+        MaybePromise<MaybeNullish<MaybeArray<string>>>
+      >;
 
   export type LinksCustomizer<Context> =
-    | PropertyCustomizer<Context, MaybeNullish<Link[]>>
+    | PropertyCustomizer<Context, Link[]>
     | Record<LinkType | string, KeyedLinkCustomizer<Context>>;
 
   export type KeyedLinkCustomizer<Context> =
-    | MaybeNullish<string>
+    | MaybeNullish<string | Link | Link[]>
     | PropertyExtractor<
         Context,
         Link[],
-        MaybeNullish<MaybeArray<Partial<Link>>>
+        MaybePromise<MaybeArray<Link>>
       >;
 
   export type ParametersCustomizer<Context> =
@@ -413,7 +413,7 @@ declare module 'jest-allure2-reporter' {
       * @example
       * ({ $, testCaseMetadata }) => $.extractSourceCode(testCaseMetadata, true)
       */
-    extractSourceCode: ExtractorSourceCodeHelper;
+    extractSourceCode: ExtractSourceCodeHelper;
     /**
      * Extracts the executor information from the current environment.
      * Pass `true` as the argument to include local executor information.
@@ -424,13 +424,13 @@ declare module 'jest-allure2-reporter' {
      * @example
      * ({ $ }) => $.getExecutorInfo(true)
      */
-    getExecutorInfo: ExtractorExecutorInfoHelper;
+    getExecutorInfo: GetExecutorInfoHelper;
     /**
      * Extracts the manifest of the current project or a specific package.
      * Pass a callback to extract specific data from the manifest – this way you can omit async/await.
      *
      * @example
-     * ({ $ }) => $.manifest(m => m.version)
+     * ({ $ }) => $.manifest('', m => m.version)
      * @example
      * ({ $ }) => $.manifest('jest', jest => jest.version)
      * @example
@@ -438,30 +438,29 @@ declare module 'jest-allure2-reporter' {
      * @example
      * ({ $ }) => (await $.manifest('jest')).version
      */
-    manifest: ExtractorManifestHelper;
+    manifest: ManifestHelper;
     markdown2html(markdown: string): Promise<string>;
     source2markdown(sourceCode: Partial<ExtractorHelperSourceCode> | undefined): string;
     stripAnsi: StripAnsiHelper;
   }
 
-  export interface ExtractorSourceCodeHelper {
+  export interface ExtractSourceCodeHelper {
     (metadata: AllureTestItemMetadata): MaybePromise<ExtractorHelperSourceCode | undefined>;
     (metadata: AllureTestItemMetadata, recursive: true): MaybePromise<ExtractorHelperSourceCode[]>;
   }
 
-  export interface ExtractorExecutorInfoHelper {
+  export interface GetExecutorInfoHelper {
     (): MaybePromise<ExecutorInfo | undefined>;
     (includeLocal: true): MaybePromise<ExecutorInfo>;
   }
 
-  export interface ExtractorManifestHelper {
-    (): MaybePromise<Record<string, any> | undefined>;
-    (packageName: string): MaybePromise<Record<string, any> | undefined>;
-    <T>(callback: ExtractorManifestHelperCallback<T>): MaybePromise<T | undefined>;
-    <T>(packageName: string, callback: ExtractorManifestHelperCallback<T>): MaybePromise<T | undefined>;
+  export interface ManifestHelper {
+    (packageName?: string): Promise<Record<string, any> | undefined>;
+    <T>(packageName: string, callback: ManifestHelperExtractor<T>): Promise<T | undefined>;
+    <T>(packageName: string, callback: ManifestHelperExtractor<T>, defaultValue: T): Promise<T>;
   }
 
-  export type ExtractorManifestHelperCallback<T> = (manifest: Record<string, any>) => T;
+  export type ManifestHelperExtractor<T> = string | ((manifest: Record<string, any>) => T);
 
   export interface ExtractorHelperSourceCode {
     code: string;
@@ -635,16 +634,17 @@ declare module 'jest-allure2-reporter' {
   }
 
   export interface AllureTestStepResult {
-    hookType: AllureTestStepMetadata['hookType'];
+    ignored: boolean;
+    hookType?: AllureTestStepMetadata['hookType'];
     displayName: string;
     start: number;
     stop: number;
     stage: Stage;
     status: Status;
-    statusDetails: StatusDetails;
-    steps: AllureTestStepResult[];
-    attachments: Attachment[];
-    parameters: Parameter[];
+    statusDetails?: StatusDetails;
+    steps?: AllureTestStepResult[];
+    attachments?: Attachment[];
+    parameters?: Parameter[];
   }
 
   // endregion

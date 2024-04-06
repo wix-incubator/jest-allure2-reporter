@@ -1,9 +1,10 @@
 import type { Function_ } from '../../utils';
-import { formatString, wrapFunction } from '../../utils';
-import type { AllureRuntime, ParameterOrString } from '../types';
+import { wrapFunction } from '../../utils';
+import type { AllureRuntime, HandlebarsAPI, ParameterOrString } from '../types';
 
 export type FunctionalStepsModuleContext = {
   runtime: Pick<AllureRuntime, 'step' | 'parameter'>;
+  handlebars: HandlebarsAPI;
 };
 
 export class StepsDecorator {
@@ -15,6 +16,7 @@ export class StepsDecorator {
     userParameters?: ParameterOrString[],
   ): F {
     const runtime = this.context.runtime;
+    const formatName = this.context.handlebars.compile(nameFormat);
     const handleArguments = (arguments_: IArguments) => {
       const parameters =
         userParameters ?? (Array.from(arguments_, noop) as (ParameterOrString | undefined)[]);
@@ -28,9 +30,8 @@ export class StepsDecorator {
 
     return wrapFunction(function_, function (this: unknown): T {
       const arguments_ = arguments;
-      const name = formatString(nameFormat, ...arguments_);
       return runtime.step(
-        name,
+        formatName(arguments_),
         wrapFunction(
           function_,
           function step(this: unknown) {

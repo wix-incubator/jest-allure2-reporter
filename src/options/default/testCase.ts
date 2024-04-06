@@ -2,6 +2,7 @@ import path from 'node:path';
 
 import type { TestCaseResult } from '@jest/reporters';
 import type {
+  Label,
   Stage,
   Status,
   TestCaseCustomizer,
@@ -45,7 +46,7 @@ export const testCase: TestCaseCustomizer<TestCaseExtractorContext> = {
       subSuite: ({ testCase }) => testCase.ancestorTitles.slice(1).join(' '),
       thread: ({ testCaseMetadata }) => testCaseMetadata.workerId,
     }),
-    ({ testCaseMetadata }) => testCaseMetadata.labels ?? [],
+    ({ testCaseMetadata }): Label[] => testCaseMetadata.labels ?? [],
   ),
   links: ({ testCaseMetadata }) => testCaseMetadata.links ?? [],
 };

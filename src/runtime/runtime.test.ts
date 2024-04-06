@@ -53,7 +53,7 @@ describe('AllureRuntime', () => {
 
     expect(resultingPath).toBe('/attachments/first');
 
-    const innerStep3 = runtime.createStep('inner step 3', async (message: string) => {
+    const innerStep3 = runtime.createStep('inner step 3 ({{0}})', async (message: string) => {
       runtime.attachment('attachment4', message, 'text/plain');
 
       const error = new Error('Async error');

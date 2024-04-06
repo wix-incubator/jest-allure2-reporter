@@ -22,7 +22,10 @@ export class AllureRuntimeImplementation implements AllureRuntime {
     this.#basicStepsModule = runtimeModules.StepsModule.create(context);
     this.#contentAttachmentsModule = runtimeModules.ContentAttachmentsModule.create(context);
     this.#fileAttachmentsModule = runtimeModules.FileAttachmentsModule.create(context);
-    this.#stepsDecorator = new runtimeModules.StepsDecorator({ runtime: this });
+    this.#stepsDecorator = new runtimeModules.StepsDecorator({
+      handlebars: context.handlebars,
+      runtime: this,
+    });
   }
 
   $bind = (options?: AllureRuntimeBindOptions): AllureRuntimeImplementation => {
@@ -40,6 +43,7 @@ export class AllureRuntimeImplementation implements AllureRuntime {
   $plug = (callback: AllureRuntimePluginCallback): this => {
     callback({
       runtime: this,
+      handlebars: this.#context.handlebars,
       contentAttachmentHandlers: this.#context.contentAttachmentHandlers,
       fileAttachmentHandlers: this.#context.fileAttachmentHandlers,
       inferMimeType: this.#context.inferMimeType,

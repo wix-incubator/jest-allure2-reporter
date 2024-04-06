@@ -3,18 +3,6 @@ import type { LinksCustomizer } from 'jest-allure2-reporter';
 import { links } from './links';
 
 describe('links custom extractor', () => {
-  it('should return a constant extractor when customizer is a function', () => {
-    const customizer = () => [{ name: 'link1', url: 'https://example.com' }];
-    const extractor = links(customizer)!;
-
-    expect(extractor).toBeInstanceOf(Function);
-
-    const context = { value: undefined as never };
-    const result = extractor(context);
-
-    expect(result).toEqual(customizer());
-  });
-
   it('should return undefined when customizer is null or undefined', () => {
     expect(links(null)).toBeUndefined();
     expect(links(void 0)).toBeUndefined();
@@ -22,106 +10,72 @@ describe('links custom extractor', () => {
 
   it('should extract links from a keyed customizer', async () => {
     const customizer: LinksCustomizer<{}> = {
-      link1: 'https://example.com/1',
-      link2: { url: 'https://example.com/2', type: 'issue' },
-      link3: () => 'https://example.com/3',
-      link4: async () => ({ url: 'https://example.com/4', type: 'tms' }),
-      link5: async ({ value }) => (await value) ?? 'https://example.com/fallback',
+      undefined: undefined,
+      null: null,
+      issue: 'https://github.com/my-org/my-repo/issues/{{name}}',
+      tms: ({ value }) =>
+        value.map((link) => ({
+          url: `https://tms.com/${link.name}`,
+          name: link.name?.toUpperCase(),
+          type: 'override-should-not-work',
+        })),
+      company: { url: 'https://example.com/company', name: 'Company' },
+      extra: [
+        { url: 'https://example.com/extra1', name: 'Extra1' },
+        { url: 'https://example.com/extra2', name: 'Extra2' },
+      ],
+      createSync: () => ({ url: 'https://example.com/sync', name: 'Sync' }),
+      createAsync: async () => ({ url: 'https://example.com/async', name: 'Async' }),
+      append: async ({ value }) => [...value, { url: 'https://example.com/new', name: 'Append' }],
     };
 
     const extractor = links(customizer)!;
-    const context = { value: [{ name: 'link5', url: 'https://example.com/original' }] };
-    const result = await extractor(context);
+    const result = await extractor({
+      value: [
+        { type: 'issue', name: 'GITHUB-001', url: 'GITHUB-001' },
+        { type: 'tms', name: 'Issue', url: '' },
+        { type: 'append', name: 'Existing', url: 'https://example.com/existing' },
+      ],
+    });
 
     expect(result).toEqual([
-      { name: 'link1', url: 'https://example.com/1' },
-      { name: 'link2', url: 'https://example.com/2', type: 'issue' },
-      { name: 'link3', url: 'https://example.com/3' },
-      { name: 'link4', url: 'https://example.com/4', type: 'tms' },
-      { name: 'link5', url: 'https://example.com/original' },
+      {
+        type: 'issue',
+        name: 'GITHUB-001',
+        url: 'https://github.com/my-org/my-repo/issues/GITHUB-001',
+      },
+      { type: 'tms', name: 'ISSUE', url: 'https://tms.com/Issue' },
+      {
+        type: 'company',
+        name: 'Company',
+        url: 'https://example.com/company',
+      },
+      {
+        type: 'extra',
+        name: 'Extra1',
+        url: 'https://example.com/extra1',
+      },
+      {
+        type: 'extra',
+        name: 'Extra2',
+        url: 'https://example.com/extra2',
+      },
+      { url: 'https://example.com/sync', name: 'Sync', type: 'createSync' },
+      { url: 'https://example.com/async', name: 'Async', type: 'createAsync' },
+      { type: 'append', name: 'Existing', url: 'https://example.com/existing' },
+      { type: 'append', name: 'Append', url: 'https://example.com/new' },
     ]);
   });
 
   it('should extract links from a keyed customizer with array values', async () => {
-    const customizer: LinksCustomizer<{}> = {
-      link3: () => ['https://example.com/5', { url: 'https://example.com/6', type: 'issue' }],
-    };
+    const customizer: LinksCustomizer<{}> = [{ url: 'https://example.com/new', type: 'issue' }];
 
     const extractor = links(customizer)!;
-    const context = { value: [] };
-    const result = await extractor(context);
+    const result = await extractor({ value: [{ url: 'https://example.com/old', type: 'issue' }] });
 
     expect(result).toEqual([
-      { name: 'link3', url: 'https://example.com/5' },
-      { name: 'link3', url: 'https://example.com/6', type: 'issue' },
-    ]);
-  });
-
-  it('should extract links from a keyed customizer and merge with existing links', async () => {
-    const customizer = {
-      link1: 'https://example.com/1',
-      link2: { url: 'https://example.com/2', type: 'issue' },
-    };
-
-    const extractor = links(customizer)!;
-    const context = {
-      value: [
-        { name: 'link2', url: 'https://example.com/original2' },
-        { name: 'link3', url: 'https://example.com/3' },
-      ],
-    };
-    const result = await extractor(context);
-
-    expect(result).toEqual([
-      { name: 'link1', url: 'https://example.com/1' },
-      { name: 'link2', url: 'https://example.com/2', type: 'issue' },
-      { name: 'link3', url: 'https://example.com/3' },
-    ]);
-  });
-
-  it('should handle null or undefined values in the customizer', async () => {
-    const customizer = {
-      link1: null,
-      link2: undefined,
-      link3: () => null,
-      link4: async () => void 0,
-    };
-
-    const extractor = links(customizer)!;
-    const context = { value: [] };
-    const result = await extractor(context);
-
-    expect(result).toEqual([]);
-  });
-
-  it('should append links when customizer is an array', async () => {
-    const customizer: LinksCustomizer<{}> = [
-      { name: 'link1', url: 'https://example.com/1' },
-      () => ({ name: 'link2', url: 'https://example.com/2' }),
-    ];
-
-    const extractor = links(customizer)!;
-    const context = { value: [{ name: 'link3', url: 'https://example.com/3' }] };
-    const result = await extractor(context);
-
-    expect(result).toEqual([
-      { name: 'link3', url: 'https://example.com/3' },
-      { name: 'link1', url: 'https://example.com/1' },
-      { name: 'link2', url: 'https://example.com/2' },
-    ]);
-  });
-
-  it('should format link URLs using util.format', async () => {
-    const customizer: LinksCustomizer<{}> = {
-      issue: 'https://example.com/issues/%s',
-    };
-
-    const extractor = links(customizer)!;
-    const context = { value: [] };
-    const result = await extractor(context);
-
-    expect(result).toEqual([
-      { name: 'issue', url: 'https://example.com/issues/issue' },
+      { url: 'https://example.com/old', type: 'issue' },
+      { url: 'https://example.com/new', type: 'issue' },
     ]);
   });
 });

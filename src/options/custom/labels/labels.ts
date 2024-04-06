@@ -12,13 +12,13 @@ import { labelsMap } from './labelsMap';
 
 export function labels<Context>(
   customizer: LabelsCustomizer<Context>,
-): PropertyExtractor<Context, MaybePromise<Label[]>>;
+): PropertyExtractor<Context, Label[], MaybePromise<Label[]>>;
 export function labels<Context>(
   customizer: MaybeNullish<LabelsCustomizer<Context>>,
-): PropertyExtractor<Context, MaybePromise<Label[]>> | undefined;
+): PropertyExtractor<Context, Label[], MaybePromise<Label[]>> | undefined;
 export function labels<Context>(
   customizer: MaybeNullish<LabelsCustomizer<Context>>,
-): PropertyExtractor<Context, MaybePromise<Label[]>> | undefined {
+): PropertyExtractor<Context, Label[], MaybePromise<Label[]>> | undefined {
   if (customizer == null) {
     return;
   }

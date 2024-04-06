@@ -61,7 +61,7 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
               "type": "text/plain",
             },
           ],
-          "displayName": "inner step 3",
+          "displayName": "inner step 3 (fourth)",
           "parameters": [
             {
               "name": "0",

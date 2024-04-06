@@ -3,7 +3,7 @@ import path from 'node:path';
 import type { MaybePromise } from 'jest-allure2-reporter';
 
 import { type Function_, thruMaybePromise } from '../../utils';
-import { formatString, hijackFunction } from '../../utils';
+import { hijackFunction } from '../../utils';
 import type {
   AttachmentContent,
   AttachmentContext,
@@ -15,6 +15,7 @@ import type {
   FileAttachmentContext,
   FileAttachmentHandler,
   FileAttachmentOptions,
+  HandlebarsAPI,
   MIMEInfererContext,
 } from '../types';
 import type { AllureTestItemMetadataProxy } from '../../metadata';
@@ -25,6 +26,7 @@ type AttachmentsModuleContext<
   Handler extends AttachmentHandler<Context>,
 > = {
   readonly handlers: Record<string, Handler>;
+  readonly handlebars: HandlebarsAPI;
   readonly inferMimeType: (context: MIMEInfererContext) => string | undefined;
   readonly metadata: AllureTestItemMetadataProxy;
   readonly outDir: string;
@@ -63,9 +65,11 @@ abstract class AttachmentsModule<
   protected abstract _createAttachmentContext(context: AttachmentContext): Context;
 
   #handleAttachment(userOptions: Options) {
+    const formatName = this.context.handlebars.compile(userOptions.name ?? 'untitled');
+
     return (userContent: Content, arguments_?: unknown[]): Promise<string | undefined> => {
       const handler = this.#resolveHandler(userOptions);
-      const name = this.#formatName(userOptions.name, arguments_);
+      const name = formatName(arguments_);
       const mimeContext = this._createMimeContext(name, userContent);
       const mimeType =
         userOptions.mimeType ??
@@ -112,10 +116,6 @@ abstract class AttachmentsModule<
       return destinationPath;
     };
   }
-
-  #formatName(nameFormat = 'untitled', arguments_?: unknown[]) {
-    return arguments_ ? formatString(nameFormat, ...arguments_) : nameFormat;
-  }
 }
 
 export class FileAttachmentsModule extends AttachmentsModule<
@@ -128,6 +128,9 @@ export class FileAttachmentsModule extends AttachmentsModule<
     return new FileAttachmentsModule({
       get handlers() {
         return context.fileAttachmentHandlers;
+      },
+      get handlebars() {
+        return context.handlebars;
       },
       get inferMimeType() {
         return context.inferMimeType;
@@ -163,6 +166,9 @@ export class ContentAttachmentsModule extends AttachmentsModule<
     return new ContentAttachmentsModule({
       get handlers() {
         return context.contentAttachmentHandlers;
+      },
+      get handlebars() {
+        return context.handlebars;
       },
       get inferMimeType() {
         return context.inferMimeType;

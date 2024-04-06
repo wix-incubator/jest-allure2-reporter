@@ -25,7 +25,8 @@ describe('labels custom extractor', () => {
       label1: 'value1',
       label2: () => 'value2',
       label3: async () => 'value3',
-      label4: async ({ value }) => (await value) ?? 'fallback',
+      label4: async ({ value }): Promise<string[]> => (value.length > 0 ? value : ['fallback']),
+      label5: async ({ value }): Promise<string[]> => (value.length > 0 ? value : ['fallback']),
     };
 
     const extractor = labels(customizer)!;
@@ -37,6 +38,7 @@ describe('labels custom extractor', () => {
       { name: 'label2', value: 'value2' },
       { name: 'label3', value: 'value3' },
       { name: 'label4', value: 'original' },
+      { name: 'label5', value: 'fallback' },
     ]);
   });
 

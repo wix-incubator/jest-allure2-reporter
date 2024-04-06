@@ -5,7 +5,7 @@ import * as extractors from '../../common';
 import type { ParameterOrPrimitiveExtractor } from './types';
 import { isParameter } from './isParameter';
 
-export function resolveKeyedParameterCustomizer<Context>(
+export function keyedParameter<Context>(
   value: KeyedParameterCustomizer<Context>,
   key: string,
 ): ParameterOrPrimitiveExtractor<Context> | undefined {

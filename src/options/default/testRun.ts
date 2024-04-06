@@ -6,7 +6,7 @@ import { compose2 } from '../common';
 export const testRun: TestCaseCustomizer<TestRunExtractorContext> = {
   ignored: ({ aggregatedResult }) => aggregatedResult.numFailedTestSuites > 0,
   historyId: ({ result }) => result.fullName ?? String(Math.random()),
-  fullName: async ({ $ }) => (await $.manifest((x) => x.name)) ?? '',
+  fullName: async ({ $ }) => $.manifest('', 'name', 'untitled project'),
   displayName: () => '(test run)',
   description: ({ testRunMetadata }) => testRunMetadata.description?.join('\n\n') ?? '',
   descriptionHtml: async ({ $, result }) => $.markdown2html((await result.description) ?? ''),

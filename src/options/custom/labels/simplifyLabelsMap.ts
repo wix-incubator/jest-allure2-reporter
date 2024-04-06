@@ -1,4 +1,3 @@
-// labels/simplifyLabelsMap.ts
 import type {
   KeyedLabelCustomizer,
   Label,
@@ -10,7 +9,7 @@ import type {
 import { compactArray, compactObject, mapValues, thruMaybePromise } from '../../../utils';
 import { compose3 } from '../../common';
 
-import { resolveKeyedLabelCustomizer } from './resolveKeyedLabelCustomizer';
+import { keyedLabel } from './keyedLabel';
 
 export function simplifyLabelsMap<Context>(
   customizer: Record<string, KeyedLabelCustomizer<Context>>,
@@ -22,15 +21,15 @@ export function simplifyLabelsMap<Context>(
         value: KeyedLabelCustomizer<Context>,
         key: string,
       ): PropertyExtractor<Context, Label[], MaybePromise<Label[]>> | undefined => {
-        const keyCustomizer = resolveKeyedLabelCustomizer(value);
-        return keyCustomizer
+        const keyedCustomizer = keyedLabel(value);
+        return keyedCustomizer
           ? compose3<
               Context,
               Label[],
               string[],
               MaybePromise<MaybeArray<string>>,
               MaybePromise<Label[]>
-            >(inflateLabels(key), keyCustomizer, deflateLabels)
+            >(inflateLabels(key), keyedCustomizer, deflateLabels)
           : undefined;
       },
     ),

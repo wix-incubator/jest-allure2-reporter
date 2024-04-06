@@ -5,14 +5,21 @@ import type {
   PropertyExtractor,
 } from 'jest-allure2-reporter';
 
-import { isPromiseLike } from '../../utils';
+import { isPromiseLike, thruMaybePromise } from '../../utils';
 
-import { optionalExtractor } from './optionalExtractor';
+import { composeExtractors2 } from './composeExtractors2';
 
-export function mergerExtractor<Context, Value>(
+export function mergerExtractor<Context, Value extends {}>(
+  maybeExtractor: PropertyCustomizer<Context, Value, MaybeNullish<Value>>,
+): PropertyExtractor<Context, MaybePromise<Value>, MaybePromise<Value | undefined>>;
+export function mergerExtractor<Context, Value extends {}>(
+  maybeExtractor: PropertyCustomizer<Context, Value, MaybeNullish<Value>>,
+  fallbackValue: Value,
+): PropertyExtractor<Context, MaybePromise<Value>> | undefined;
+export function mergerExtractor<Context, Value extends {}>(
   maybeExtractor: PropertyCustomizer<Context, Value, MaybeNullish<Value>>,
   fallbackValue?: Value,
-): PropertyExtractor<Context, MaybePromise<Value>> | undefined {
+): PropertyExtractor<Context, MaybePromise<Value>, MaybePromise<Value | undefined>> | undefined {
   if (maybeExtractor == null) {
     return;
   }
@@ -25,5 +32,18 @@ export function mergerExtractor<Context, Value>(
     };
   }
 
-  return optionalExtractor(maybeExtractor, fallbackValue);
+  const extractor = maybeExtractor as PropertyExtractor<
+    Context,
+    MaybePromise<Value>,
+    MaybePromise<MaybeNullish<Value>>
+  >;
+
+  return composeExtractors2(
+    ({ value }) =>
+      thruMaybePromise(
+        value,
+        (base: MaybeNullish<Value>): Value | undefined => base ?? fallbackValue,
+      ),
+    extractor,
+  );
 }

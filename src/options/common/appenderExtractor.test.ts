@@ -34,7 +34,7 @@ describe('extractors', () => {
       expect(value).toEqual([3, 4]);
     });
 
-    it('should guard against undefined results from the extractor', async () => {
+    it('should turn undefined results from the extractor into empty arrays', async () => {
       const extractor = jest.fn().mockReturnValue(void 0);
       const context = { value: [1, 2] };
 
@@ -42,7 +42,7 @@ describe('extractors', () => {
       const value = await result(context);
 
       expect(extractor).toHaveBeenCalledWith(context);
-      expect(value).toEqual([1, 2]);
+      expect(value).toEqual([]);
     });
 
     it('should append given values to the context value (sync)', async () => {

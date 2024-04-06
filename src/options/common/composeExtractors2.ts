@@ -30,9 +30,13 @@ export function composeExtractors2<Context, Value, Ra, Rb>(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { value, ...restContext } = context;
     const newContext = Object.defineProperty(restContext as {}, 'value', {
-      get: once(() => b(context)),
+      get: once(getValueFromParent),
       enumerable: false,
     }) as PropertyExtractorContext<Context, Rb>;
+
+    function getValueFromParent() {
+      return b(context);
+    }
 
     return a(newContext);
   };

@@ -1,6 +1,8 @@
+import { importDefault } from '../../../utils';
+
 export async function resolvePlugin(maybePlugin: unknown): Promise<[any, unknown?]> {
   if (typeof maybePlugin === 'string') {
-    return [import(maybePlugin).then((module) => module?.default ?? module)];
+    return [await importDefault(maybePlugin)];
   }
 
   if (Array.isArray(maybePlugin)) {

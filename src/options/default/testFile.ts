@@ -1,9 +1,6 @@
 import path from 'node:path';
 
-import type {
-  TestCaseCustomizer,
-  TestFileExtractorContext,
-} from 'jest-allure2-reporter';
+import type { TestCaseCustomizer, TestFileExtractorContext } from 'jest-allure2-reporter';
 
 import { getStatusDetails, isNonNullish } from '../../utils';
 import * as custom from '../custom';
@@ -31,7 +28,7 @@ export const testFile: TestCaseCustomizer<TestFileExtractorContext> = {
   parameters: ({ testFileMetadata }) => testFileMetadata.parameters ?? [],
   labels: compose2(
     custom.labels<TestFileExtractorContext>({
-      suite: () => '(test file execution)',
+      suite: '(test file execution)',
       thread: ({ testFileMetadata }) => testFileMetadata.workerId,
     }),
     ({ testFileMetadata }) => testFileMetadata.labels ?? [],

@@ -1,10 +1,11 @@
-import type { MaybePromise, ReporterConfig } from 'jest-allure2-reporter';
 import type {
-  BuiltinFileAttachmentHandler,
   BuiltinContentAttachmentHandler,
+  BuiltinFileAttachmentHandler,
   LabelName,
   LinkType,
+  MaybePromise,
   Parameter,
+  ReporterConfig,
   Status,
   StatusDetails,
 } from 'jest-allure2-reporter';
@@ -83,8 +84,12 @@ export type SharedReporterConfig = ReporterConfig;
 
 export type AllureRuntimePluginCallback = (context: AllureRuntimePluginContext) => void;
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+export type HandlebarsAPI = typeof import('handlebars');
+
 export interface AllureRuntimePluginContext {
   readonly runtime: AllureRuntime;
+  readonly handlebars: HandlebarsAPI;
   readonly contentAttachmentHandlers: Record<
     BuiltinContentAttachmentHandler | 'default' | string,
     ContentAttachmentHandler

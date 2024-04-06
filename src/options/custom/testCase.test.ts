@@ -1,35 +1,9 @@
-import _ from 'lodash';
-import type {
-  AllureTestCaseResult,
-  PromisedProperties,
-  PropertyExtractorContext,
-  TestCaseExtractorContext,
-} from 'jest-allure2-reporter';
+import type { AllureTestCaseResult } from 'jest-allure2-reporter';
 
 import { testCase as testCaseCustomizer } from './testCase';
+import { createTestCaseContext } from './__utils__/contexts';
 
 describe('testCase', () => {
-  const createContext = (
-    overrides: Partial<TestCaseExtractorContext> = {},
-  ): PropertyExtractorContext<TestCaseExtractorContext, PromisedProperties<AllureTestCaseResult>> =>
-    _.merge(
-      {
-        value: undefined as never,
-        result: {},
-        aggregatedResult: {} as any,
-        testRunMetadata: {} as any,
-        testCase: {} as any,
-        testCaseMetadata: {} as any,
-        filePath: [],
-        testFile: {} as any,
-        testFileMetadata: {} as any,
-        $: {} as any,
-        globalConfig: {} as any,
-        config: {} as any,
-      },
-      overrides,
-    );
-
   test.each`
     property             | defaultValue   | extractedValue
     ${'ignored'}         | ${false}       | ${false}
@@ -60,7 +34,9 @@ describe('testCase', () => {
     }) => {
       const extractor = jest.fn().mockResolvedValue(extractedValue);
       const testCase = testCaseCustomizer({ [property]: extractor });
-      const result = await testCase(createContext({ [property]: defaultValue }));
+      const result = testCase(createTestCaseContext({ [property]: defaultValue }));
+
+      await expect(result?.[property]).resolves.toEqual(extractedValue);
 
       expect(extractor).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -68,8 +44,6 @@ describe('testCase', () => {
           result: expect.any(Object),
         }),
       );
-
-      expect(result?.[property]).toEqual(extractedValue);
     },
   );
 });

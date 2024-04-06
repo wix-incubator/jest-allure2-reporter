@@ -1,4 +1,3 @@
-// labels/labelsMap.ts
 import type {
   KeyedLabelCustomizer,
   Label,
@@ -12,7 +11,7 @@ import { simplifyLabelsMap } from './simplifyLabelsMap';
 
 export function labelsMap<Context>(
   customizer: Record<string, KeyedLabelCustomizer<Context>>,
-): PropertyExtractor<Context, MaybePromise<Label[]>> {
+): PropertyExtractor<Context, Label[], MaybePromise<Label[]>> {
   const simplifiedCustomizer = simplifyLabelsMap(customizer);
   const customizerKeys = Object.keys(simplifiedCustomizer);
 
@@ -21,12 +20,12 @@ export function labelsMap<Context>(
       const labels = groupBy(value, 'name');
       const keys = uniq([...customizerKeys, ...Object.keys(labels)]);
       const batches: MaybePromise<Label[]>[] = keys.map((key) => {
-        const keyedContext = { ...context, value: labels[key] };
+        const keyedContext = { ...context, value: labels[key] ?? [] };
         const keyedCustomizer = simplifiedCustomizer[key];
         return keyedCustomizer ? keyedCustomizer(keyedContext) : keyedContext.value;
       });
 
-      return maybePromiseAll<Label[], Label[]>(batches, (batches) => batches.flat());
+      return maybePromiseAll(batches, (batches) => batches.flat());
     });
   };
 }

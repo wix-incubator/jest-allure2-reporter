@@ -1,8 +1,10 @@
 import path from 'node:path';
 
+import type { ReporterOptions } from 'jest-allure2-reporter';
+
 import * as customizers from './custom';
 import * as extractors from './common';
-import type { ReporterConfig, ReporterOptions } from './types';
+import type { ReporterConfig } from './types';
 
 export function extendOptions(
   base: ReporterConfig,
@@ -19,7 +21,7 @@ export function extendOptions(
     },
     categories: extractors.compose2(extractors.appender(custom?.categories), base.categories),
     environment: extractors.compose2(extractors.merger(custom?.environment, {}), base.environment),
-    executor: extractors.compose2(extractors.merger(custom?.executor), base.executor),
+    executor: extractors.compose2(extractors.merger(custom?.executor, {}), base.executor),
     helpers: extractors.compose2(customizers.helpers(custom?.helpers), base.helpers),
     testRun: extractors.compose2(customizers.testCase(custom?.testRun), base.testRun),
     testFile: extractors.compose2(customizers.testCase(custom?.testFile), base.testFile),

@@ -1,9 +1,9 @@
 import type { ReporterConfig } from '../types';
 import * as common from '../common';
 import * as custom from '../custom';
+import * as helpers from '../helpers';
 
 import { categories } from './categories';
-import { helpers } from './helpers';
 import { testRun } from './testRun';
 import { testFile } from './testFile';
 import { testCase } from './testCase';

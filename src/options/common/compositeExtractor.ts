@@ -31,8 +31,8 @@ function getPropertyContext<Context, Shape, K extends keyof Shape>(
 export function compositeExtractor<Context, Shape>(
   customizer: CompositeExtractor<Context, Shape>,
 ): PropertyExtractor<Context, PromisedProperties<Shape>, PromisedProperties<Shape>> {
+  const propertyNames = Object.keys(customizer) as (keyof Shape)[];
   return (context) => {
-    const propertyNames = Object.keys(context.value) as (keyof Shape)[];
     const descriptors = Object.fromEntries(
       propertyNames.map(<K extends keyof Shape>(key: K) => {
         const propertyContext = getPropertyContext<Context, Shape, K>(context, key);

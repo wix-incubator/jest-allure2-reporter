@@ -19,7 +19,7 @@ import type {
 } from 'jest-allure2-reporter';
 
 export type CompositeExtractor<Context, Shape> = {
-  readonly [K in keyof Shape]?: PropertyExtractor<Context, MaybePromise<Shape[K]>>;
+  readonly [K in keyof Shape]-?: PropertyExtractor<Context, MaybePromise<Shape[K]>>;
 };
 
 export interface ReporterConfig {
@@ -72,5 +72,3 @@ export type TestStepExtractor<Context> = PropertyExtractor<
 export type TestCaseCompositeExtractor<Context> = CompositeExtractor<Context, AllureTestCaseResult>;
 
 export type TestStepCompositeExtractor<Context> = CompositeExtractor<Context, AllureTestStepResult>;
-
-export { ReporterOptions } from 'jest-allure2-reporter';

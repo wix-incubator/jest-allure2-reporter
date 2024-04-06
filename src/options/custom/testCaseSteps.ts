@@ -1,23 +1,26 @@
-import type { AllureNestedTestStepMetadata, TestCaseExtractorContext } from 'jest-allure2-reporter';
+import type { TestCaseExtractorContext } from 'jest-allure2-reporter';
 
 import type { TestCaseExtractor, TestStepExtractor } from '../types';
-import { isNonNullish, onceWithLoopDetection } from '../../utils';
+import { isNonNullish, maybePromiseAll, onceWithLoopDetection } from '../../utils';
 
-export function testCaseSteps<Context extends Partial<TestCaseExtractorContext>>(
+interface HasMetadata {
+  testCaseMetadata?: TestCaseExtractorContext['testCaseMetadata'];
+  testFileMetadata?: TestCaseExtractorContext['testFileMetadata'];
+  testRunMetadata?: TestCaseExtractorContext['testRunMetadata'];
+}
+
+export function testCaseSteps<Context extends HasMetadata>(
   testStep: TestStepExtractor<Context>,
-  metadataKey?: 'testCaseMetadata' | 'testFileMetadata' | 'testRunMetadata',
+  metadataKey: keyof HasMetadata,
 ): TestCaseExtractor<Context> {
-  const extractor: TestCaseExtractor<Context> = (context) => {
+  return (context) => {
     Object.defineProperty(context.value, 'steps', {
       enumerable: true,
-      get: onceWithLoopDetection(async () => {
-        const steps: AllureNestedTestStepMetadata[] | undefined = metadataKey
-          ? context[metadataKey]?.steps
-          : undefined;
-
+      get: onceWithLoopDetection(() => {
+        const steps = context[metadataKey]?.steps;
         if (steps && steps.length > 0) {
-          const allSteps = await Promise.all(
-            steps.map(async (testStepMetadata) => {
+          return maybePromiseAll(
+            steps.map((testStepMetadata) => {
               const stepContext = {
                 ...context,
                 testStepMetadata,
@@ -27,9 +30,8 @@ export function testCaseSteps<Context extends Partial<TestCaseExtractorContext>>
 
               return testStep(stepContext);
             }),
+            (allSteps) => allSteps.filter(isNonNullish),
           );
-
-          return allSteps.filter(isNonNullish);
         }
 
         return;
@@ -38,6 +40,4 @@ export function testCaseSteps<Context extends Partial<TestCaseExtractorContext>>
 
     return context.value;
   };
-
-  return extractor;
 }

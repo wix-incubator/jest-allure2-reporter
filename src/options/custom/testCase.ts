@@ -1,5 +1,4 @@
 import type {
-  AllureTestCaseResult,
   PropertyExtractor,
   TestCaseCustomizer,
   TestCaseExtractorContext,
@@ -27,7 +26,7 @@ export function testCase<Context extends TestCaseExtractorContext>(
     return;
   }
 
-  return extractors.proxyObject<Context, AllureTestCaseResult>({
+  return extractors.composite({
     ignored: extractors.constant(customizer.ignored) ?? fallback,
     historyId: extractors.constant(customizer.historyId) ?? fallback,
     displayName: extractors.constant(customizer.displayName) ?? fallback,

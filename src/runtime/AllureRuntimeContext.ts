@@ -3,6 +3,7 @@ import type {
   AllureTestFileMetadata,
   MaybeFunction,
 } from 'jest-allure2-reporter';
+import Handlebars from 'handlebars';
 
 import { once, TaskQueue } from '../utils';
 import { AllureMetadataProxy, AllureTestItemMetadataProxy } from '../metadata';
@@ -19,6 +20,7 @@ import type {
 export class AllureRuntimeContext {
   readonly contentAttachmentHandlers: Record<string, ContentAttachmentHandler>;
   readonly fileAttachmentHandlers: Record<string, FileAttachmentHandler>;
+  readonly handlebars = Handlebars.create();
   readonly inferMimeType: MIMEInferer;
   readonly getReporterConfig: () => SharedReporterConfig;
   readonly getFileMetadata: () => AllureMetadataProxy<AllureTestFileMetadata>;
