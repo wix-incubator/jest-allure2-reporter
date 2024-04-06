@@ -45,7 +45,17 @@ export const createTestCaseContext = (
   TestCaseExtractorContext,
   PromisedProperties<AllureTestCaseResult>
 > => ({
-  ...createTestStepContext({}),
+  result: {},
+  aggregatedResult: {} as any,
+  testRunMetadata: {} as any,
+  testCase: {} as any,
+  testCaseMetadata: {} as any,
+  filePath: [],
+  testFile: {} as any,
+  testFileMetadata: {} as any,
+  $: {} as any,
+  globalConfig: {} as any,
+  config: {} as any,
   value: {
     ignored: false,
     historyId: '',

@@ -5,7 +5,7 @@ import type {
   PropertyExtractor,
 } from 'jest-allure2-reporter';
 
-import { isPromiseLike, thruMaybePromise } from '../../utils';
+import { thruMaybePromise } from '../../utils';
 
 import { composeExtractors2 } from './composeExtractors2';
 
@@ -28,7 +28,7 @@ export function mergerExtractor<Context, Value extends {}>(
     const value = maybeExtractor;
     return (context): MaybePromise<Value> => {
       const base = context.value;
-      return isPromiseLike(base) ? base.then((v) => ({ ...v, ...value })) : { ...base, ...value };
+      return thruMaybePromise(base, (v) => ({ ...v, ...value }));
     };
   }
 

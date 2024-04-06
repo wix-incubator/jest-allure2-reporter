@@ -70,7 +70,7 @@ export class MetadataSquasher {
       attachments: test_definition_and_below_direct.attachments,
       description: test_vertical.description,
       descriptionHtml: test_vertical.descriptionHtml,
-      displayName: test_definition_and_below.displayName,
+      displayName: test_definition_and_below_direct.displayName,
       fullName: test_definition_and_below.fullName,
       historyId: test_definition_and_below.historyId,
       labels: test_vertical.labels,

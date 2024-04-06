@@ -1,10 +1,11 @@
 import type { MaybeNullish, MaybePromise, PropertyExtractorContext } from 'jest-allure2-reporter';
 
-import { isPromiseLike } from '../../utils';
+import { thruMaybePromise } from '../../utils';
 
-export const last = async <T>(
+export const last = <T>(
   context: PropertyExtractorContext<{}, MaybePromise<MaybeNullish<T[]>>>,
-): Promise<T | undefined> => {
-  const value = isPromiseLike(context.value) ? await context.value : context.value;
-  return value?.at(-1);
+): MaybePromise<T | undefined> => {
+  return thruMaybePromise<MaybeNullish<T[]>, T | undefined>(context.value, (value) =>
+    value?.at(-1),
+  );
 };

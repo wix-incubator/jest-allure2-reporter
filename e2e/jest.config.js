@@ -27,8 +27,14 @@ const jestAllure2ReporterOptions = {
       'package.version': await $.manifest('', 'version'),
     });
   },
+  testRun: {
+    ignored: false,
+  },
+  testFile: {
+    ignored: false,
+  },
   testCase: {
-    name: ({ testCase }) =>
+    displayName: ({ testCase }) =>
       [...testCase.ancestorTitles, testCase.title].join(' » '),
     labels: {
       parentSuite: ({ filePath }) => filePath[0],
@@ -43,7 +49,7 @@ const jestAllure2ReporterOptions = {
       owner: ({ value }) => value ?? 'Unknown',
     },
     links: {
-      issue: ({ value }) => ({ ...value, url: `https://youtrack.jetbrains.com/issue/${value.url}/` }),
+      issue: 'https://youtrack.jetbrains.com/issue/{{name}}',
     },
   },
 };

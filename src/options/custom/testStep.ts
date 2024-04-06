@@ -11,10 +11,10 @@ import { parameters } from './parameters';
 
 const fallback: PropertyExtractor<{}, any> = (context) => context.value;
 
+export function testStep(customizer: null | undefined): undefined;
 export function testStep<Context>(
   customizer: TestStepCustomizer<Context>,
 ): TestStepExtractor<Context>;
-export function testStep(customizer: null | undefined): undefined;
 export function testStep<Context>(
   customizer: TestStepCustomizer<Context> | null | undefined,
 ): TestStepExtractor<Context> | undefined;

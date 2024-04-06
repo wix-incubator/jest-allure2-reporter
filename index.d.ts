@@ -80,7 +80,7 @@ declare module 'jest-allure2-reporter' {
     /**
      * Customize how individual test steps are reported.
      */
-    testStep?: TestStepCustomizer<TestStepExtractorContext>;
+    testStep?: TestStepCustomizer;
   }
 
   export interface ReporterConfig extends ReporterOptionsAugmentation {
@@ -244,7 +244,7 @@ declare module 'jest-allure2-reporter' {
    * Global customizations for how test steps are reported, e.g.
    * beforeAll, beforeEach, afterEach, afterAll hooks and custom steps.
    */
-  export interface TestStepCustomizer<Context = {}> {
+  export interface TestStepCustomizer<Context =  TestStepExtractorContext> {
     /**
      * Extractor to omit test steps from the report.
      */
@@ -395,12 +395,12 @@ declare module 'jest-allure2-reporter' {
     aggregatedResult: AggregatedResult;
     filePath: string[];
     testRunMetadata: AllureTestRunMetadata;
-    testFile: TestResult;
-    testFileMetadata: AllureTestFileMetadata;
-    testCase: TestCaseResult;
-    testCaseMetadata: AllureTestCaseMetadata;
+    testFile?: TestResult;
+    testFileMetadata?: AllureTestFileMetadata;
+    testCase?: TestCaseResult;
+    testCaseMetadata?: AllureTestCaseMetadata;
     testStepMetadata: AllureTestStepMetadata;
-    result: Partial<PromisedProperties<AllureTestStepResult>>;
+    result: Partial<PromisedProperties<AllureTestCaseResult>>;
   }
 
   export interface Helpers extends HelpersAugmentation {

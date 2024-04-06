@@ -48,7 +48,7 @@ function inflateLabels<Context>(
   name: string,
 ): PropertyExtractor<Context, MaybePromise<MaybeArray<string>>, MaybePromise<Label[]>> {
   function repair(value: string | undefined): Label | undefined {
-    return value == null ? undefined : { value, name };
+    return value ? { value, name } : undefined;
   }
 
   function repairMaybeArray(value: MaybeArray<string>): Label[] {

@@ -15,7 +15,7 @@ describe('testStepCustomizer', () => {
     PromisedProperties<AllureTestStepResult>
   > => ({
     value,
-    result: undefined as never,
+    result: {} as any,
     aggregatedResult: {} as any,
     testRunMetadata: {} as any,
     testStepMetadata: {} as any,
@@ -61,7 +61,7 @@ describe('testStepCustomizer', () => {
       expect(asyncExtractor).toHaveBeenCalledWith(
         expect.objectContaining({
           value: defaultValue,
-          result: context.value,
+          result: context.result,
         }),
       );
     },
@@ -99,7 +99,7 @@ describe('testStepCustomizer', () => {
       expect(syncExtractor).toHaveBeenCalledWith(
         expect.objectContaining({
           value: defaultValue,
-          result: context.value,
+          result: context.result,
         }),
       );
     },

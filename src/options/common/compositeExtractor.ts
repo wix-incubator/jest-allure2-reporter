@@ -22,9 +22,6 @@ function getPropertyContext<Context, Shape, K extends keyof Shape>(
     get value() {
       return context.value[key] as MaybePromise<Shape[K]>;
     },
-    get result() {
-      return context.value;
-    },
   };
 }
 
@@ -39,10 +36,12 @@ export function compositeExtractor<Context, Shape>(
         const propertyCustomizer = customizer[key];
         const descriptor: ProxyPropertyDescriptor<Shape, K> = {
           enumerable: true,
-          get: propertyCustomizer
-            ? onceWithLoopDetection(() => propertyCustomizer(propertyContext))
-            : () => propertyContext.value,
+          get: onceWithLoopDetection(computePropertyValue),
         };
+
+        function computePropertyValue() {
+          return propertyCustomizer(propertyContext);
+        }
 
         return [key, descriptor] as const;
       }),

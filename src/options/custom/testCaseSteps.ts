@@ -1,43 +1,40 @@
-import type { TestCaseExtractorContext } from 'jest-allure2-reporter';
+import type {
+  AllureTestItemMetadata,
+  AllureTestStepResult,
+  TestStepExtractorContext,
+  PromisedProperties,
+} from 'jest-allure2-reporter';
 
-import type { TestCaseExtractor, TestStepExtractor } from '../types';
-import { isNonNullish, maybePromiseAll, onceWithLoopDetection } from '../../utils';
+import type { TestStepExtractor, TestStepsExtractor } from '../types';
 
-interface HasMetadata {
-  testCaseMetadata?: TestCaseExtractorContext['testCaseMetadata'];
-  testFileMetadata?: TestCaseExtractorContext['testFileMetadata'];
-  testRunMetadata?: TestCaseExtractorContext['testRunMetadata'];
-}
+type HasMetadata<Context, Key extends keyof Context> = Context & {
+  [key in Key]: AllureTestItemMetadata;
+};
 
-export function testCaseSteps<Context extends HasMetadata>(
-  testStep: TestStepExtractor<Context>,
-  metadataKey: keyof HasMetadata,
-): TestCaseExtractor<Context> {
-  return (context) => {
-    Object.defineProperty(context.value, 'steps', {
-      enumerable: true,
-      get: onceWithLoopDetection(() => {
-        const steps = context[metadataKey]?.steps;
-        if (steps && steps.length > 0) {
-          return maybePromiseAll(
-            steps.map((testStepMetadata) => {
-              const stepContext = {
-                ...context,
-                testStepMetadata,
-                result: {},
-                value: undefined as never,
-              };
+export function testCaseSteps<
+  BaseContext extends Partial<Omit<TestStepExtractorContext, 'testStepMetadata'>>,
+  Key extends keyof BaseContext,
+  Context extends HasMetadata<BaseContext, Key>,
+>(
+  testStep: TestStepExtractor<TestStepExtractorContext>,
+  metadataKey: Key,
+): TestStepsExtractor<Context, void> {
+  return (context): PromisedProperties<AllureTestStepResult>[] => {
+    const steps = context[metadataKey]?.steps;
+    if (!steps || steps.length === 0) {
+      return [];
+    }
 
-              return testStep(stepContext);
-            }),
-            (allSteps) => allSteps.filter(isNonNullish),
-          );
-        }
+    return steps.map((testStepMetadata) => {
+      const testStepContext: any = {
+        ...context,
+        testStepMetadata,
+        result: {},
+        value: {},
+      };
 
-        return;
-      }),
+      testStepContext.result = testStep(testStepContext);
+      return testStep(testStepContext);
     });
-
-    return context.value;
   };
 }
