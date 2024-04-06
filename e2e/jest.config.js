@@ -19,12 +19,12 @@ const jestAllure2ReporterOptions = {
       messageRegex: /.*Exceeded timeout of.*/,
     },
   ],
-  environment: async ({ $ }) => {
+  environment: async ({ $  }) => {
     return ({
       'version.node': process.version,
-      'version.jest': await $.manifest('jest', jest => jest.version),
-      'package.name': await $.manifest(pkg => pkg.name),
-      'package.version': await $.manifest(pkg => pkg.version),
+      'version.jest': await $.manifest('jest', 'version'),
+      'package.name': await $.manifest('', 'name'),
+      'package.version': await $.manifest('', 'version'),
     });
   },
   testCase: {
@@ -36,7 +36,7 @@ const jestAllure2ReporterOptions = {
       subSuite: ({ filePath }) => filePath.slice(2).join('/'),
       epic: ({ value }) => value ?? 'Uncategorized',
       story: ({ value }) => value ?? 'Untitled story',
-      feature: ({ value }) => value ?? 'Untitled feature',
+      feature: async ({ value }) => (await value) ?? 'Untitled feature',
       package: ({ filePath }) => filePath.slice(0, -1).join('.'),
       testClass: ({ filePath }) => filePath.join('.').replace(/\.test\.[jt]s$/, ''),
       testMethod: ({ testCase }) => testCase.fullName,

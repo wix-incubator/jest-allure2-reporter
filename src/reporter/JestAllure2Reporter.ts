@@ -23,6 +23,7 @@ import type {
   TestCaseExtractorContext,
   TestFileExtractorContext,
   TestRunExtractorContext,
+  GlobalExtractorContext,
 } from 'jest-allure2-reporter';
 
 import { type ReporterConfig, resolveOptions } from '../options';
@@ -36,10 +37,11 @@ import { postProcessMetadata } from './postProcessMetadata';
 import { writeTest } from './allureCommons';
 
 export class JestAllure2Reporter extends JestMetadataReporter {
-  private readonly _$: Partial<Helpers> = {};
+  private _$: Helpers | undefined;
   private readonly _allure: AllureRuntime;
   private readonly _config: ReporterConfig;
   private readonly _globalConfig: Config.GlobalConfig;
+  private readonly _globalContext: GlobalExtractorContext;
 
   constructor(globalConfig: Config.GlobalConfig, options: ReporterOptions) {
     super(globalConfig);
@@ -57,6 +59,12 @@ export class JestAllure2Reporter extends JestMetadataReporter {
       attachments: this._config.attachments,
       injectGlobals: this._config.injectGlobals,
     });
+
+    this._globalContext = {
+      $: {} as Helpers,
+      globalConfig: this._globalConfig,
+      config: this._config,
+    };
   }
 
   async onRunStart(
@@ -64,6 +72,12 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     options: ReporterOnStartOptions,
   ): Promise<void> {
     await super.onRunStart(aggregatedResult, options);
+
+    this._$ = await resolvePromisedProperties(
+      this._config.helpers({ ...this._globalContext, value: this._globalContext.$ }),
+    );
+
+    this._globalContext.$ = this._$!;
 
     if (this._config.overwrite) {
       await overwriteDirectory(this._config.resultsDir);

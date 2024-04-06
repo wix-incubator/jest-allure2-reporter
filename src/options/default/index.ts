@@ -19,7 +19,17 @@ export function defaultOptions(): ReporterConfig {
       contentHandler: 'write',
       fileHandler: 'ref',
     },
-    helpers: custom.helpers(helpers),
+    sourceCode: {
+      enabled: false,
+      plugins: [],
+    },
+    markdown: {
+      enabled: true,
+      keepSource: true,
+      remarkPlugins: [],
+      rehypePlugins: [],
+    },
+    helpers: custom.helpers(helpers)!,
     testRun: custom.testCase(testRun),
     testFile: custom.testCase(testFile),
     testCase: custom.testCase(testCase),

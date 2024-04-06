@@ -11,6 +11,8 @@ export function extendOptions(
   custom?: ReporterOptions | undefined,
 ): ReporterConfig {
   return {
+    ...base,
+    ...(custom as any),
     overwrite: custom?.overwrite ?? base.overwrite,
     resultsDir: path.resolve(custom?.resultsDir ?? base.resultsDir),
     injectGlobals: custom?.injectGlobals ?? base.injectGlobals,
