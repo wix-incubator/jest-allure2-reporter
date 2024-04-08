@@ -14,12 +14,8 @@ export async function postProcessMetadata($: Helpers, testFile: TestFileMetadata
   await Promise.all(
     batch.map(async (metadata) => {
       const allureProxy = new AllureMetadataProxy<AllureTestItemMetadata>(metadata);
-      // TODO: do it for real
-      $.extractSourceCode(allureProxy.get('sourceLocation', {}));
-      // await this._callPlugins('postProcessMetadata', {
-      //   $: this._$ as Helpers,
-      //   metadata: allureProxy.assign({}).get(),
-      // });
+      // Cache source code for each test item
+      return $.extractSourceCode(allureProxy.get() ?? {});
     }),
   );
 }

@@ -20,7 +20,7 @@ export function defaultOptions(): ReporterConfig {
       fileHandler: 'ref',
     },
     sourceCode: {
-      enabled: false,
+      enabled: true,
       plugins: [],
     },
     markdown: {

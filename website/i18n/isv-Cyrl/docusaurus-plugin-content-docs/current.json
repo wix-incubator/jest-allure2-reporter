@@ -1,0 +1,22 @@
+{
+  "version.label": {
+    "message": "Next",
+    "description": "The label for version current"
+  },
+  "sidebar.docsSidebar.category.Introduction": {
+    "message": "Introduction",
+    "description": "The label for category Introduction in sidebar docsSidebar"
+  },
+  "sidebar.docsSidebar.category.Config": {
+    "message": "Config",
+    "description": "The label for category Config in sidebar docsSidebar"
+  },
+  "sidebar.docsSidebar.category.Grouping": {
+    "message": "Grouping",
+    "description": "The label for category Grouping in sidebar docsSidebar"
+  },
+  "sidebar.docsSidebar.category.API": {
+    "message": "API",
+    "description": "The label for category API in sidebar docsSidebar"
+  }
+}

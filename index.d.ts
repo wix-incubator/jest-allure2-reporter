@@ -144,13 +144,11 @@ declare module 'jest-allure2-reporter' {
 
   // region Customizers
 
-  export type SourceCodePluginCustomizer = PropertyCustomizer<GlobalExtractorContext, SourceCodePlugin | undefined>;
+  export type SourceCodePluginCustomizer = PropertyExtractor<GlobalExtractorContext, unknown, MaybePromise<SourceCodePlugin>>;
 
-  export interface SourceCodePlugin<Context = {}> {
-    // TODO: use more interesting context type than `AllureTestItemSourceLocation`
-    prepareContext?(context: AllureTestItemSourceLocation): MaybePromise<Context | undefined>;
-    extractDocblock?(sourceCode: Context): MaybePromise<AllureTestItemDocblock | undefined>;
-    extractSourceCode?(sourceCode: Context): MaybePromise<AllureTestItemDocblock | undefined>;
+  export interface SourceCodePlugin {
+    extractDocblock?(location: AllureTestItemSourceLocation): MaybePromise<AllureTestItemDocblock | undefined>;
+    extractSourceCode?(location: AllureTestItemSourceLocation): MaybePromise<string | undefined>;
   }
 
   export interface TestCaseCustomizer<Context = {}> {
@@ -404,6 +402,7 @@ declare module 'jest-allure2-reporter' {
   }
 
   export interface Helpers extends HelpersAugmentation {
+    getFileNavigator(filePath: string): Promise<FileNavigator>;
     /**
       * Extracts the source code of the current test case, test step or a test file.
       * Pass `true` as the second argument to extract source code recursively from all steps.
@@ -440,13 +439,24 @@ declare module 'jest-allure2-reporter' {
      */
     manifest: ManifestHelper;
     markdown2html(markdown: string): Promise<string>;
-    source2markdown(sourceCode: Partial<ExtractorHelperSourceCode> | undefined): string;
+    source2markdown(sourceCode: Partial<ExtractSourceCodeHelperResult> | undefined): string;
     stripAnsi: StripAnsiHelper;
   }
 
+  export interface FileNavigator {
+    getContent(): string;
+    getLines(): string[];
+    getLineCount(): number;
+    getPosition(): [number, number, number];
+    jump(lineNumber: number): boolean;
+    moveUp(countOfLines?: number): boolean;
+    moveDown(countOfLines?: number): boolean;
+    readLine(lineNumber?: number): string;
+  }
+
   export interface ExtractSourceCodeHelper {
-    (metadata: AllureTestItemMetadata): MaybePromise<ExtractorHelperSourceCode | undefined>;
-    (metadata: AllureTestItemMetadata, recursive: true): MaybePromise<ExtractorHelperSourceCode[]>;
+    (metadata: AllureTestItemMetadata, recursive?: never): Promise<ExtractSourceCodeHelperResult | undefined>;
+    (metadata: AllureTestItemMetadata, recursive: true): Promise<ExtractSourceCodeHelperResult[]>;
   }
 
   export interface GetExecutorInfoHelper {
@@ -462,7 +472,7 @@ declare module 'jest-allure2-reporter' {
 
   export type ManifestHelperExtractor<T> = string | ((manifest: Record<string, any>) => T);
 
-  export interface ExtractorHelperSourceCode {
+  export interface ExtractSourceCodeHelperResult {
     code: string;
     language: string;
     fileName: string;

@@ -28,6 +28,7 @@ import type {
 
 import { type ReporterConfig, resolveOptions } from '../options';
 import { AllureMetadataProxy, MetadataSquasher } from '../metadata';
+import * as sourceCode from '../source-code';
 import { stringifyValues } from '../utils';
 
 import * as fallbacks from './fallbacks';
@@ -76,6 +77,12 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     };
 
     globalContext.$ = await resolvePromisedItem(globalContext, config.helpers, '$');
+    if (config.sourceCode?.enabled) {
+      config.sourceCode.plugins.push(
+        await sourceCode.typescript(globalContext),
+        await sourceCode.javascript(globalContext),
+      );
+    }
 
     this._globalContext = globalContext;
 

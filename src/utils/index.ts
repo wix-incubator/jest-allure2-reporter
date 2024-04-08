@@ -13,6 +13,7 @@ export const uniq = _.uniq;
 export * from './asArray';
 export * from './autoIndent';
 export * from './compactObject';
+export * from './FileNavigator';
 export * from './getStatusDetails';
 export * from './hijackFunction';
 export * from './importDefault';
