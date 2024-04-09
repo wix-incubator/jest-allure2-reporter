@@ -19,21 +19,18 @@
     "write-heading-ids": "docusaurus write-heading-ids"
   },
   "dependencies": {
-    "@docusaurus/core": "3.0.0-alpha.0",
-    "@docusaurus/module-type-aliases": "3.0.0-alpha.0",
-    "@docusaurus/preset-classic": "3.0.0-alpha.0",
-    "@docusaurus/remark-plugin-npm2yarn": "3.0.0-alpha.0",
-    "@mdx-js/react": "^2.3.0",
-    "@noomorph/docusaurus-plugin-sass": "^0.2.6",
-    "@noomorph/docusaurus-search-local": "^1.1.0",
-    "clsx": "^1.2.1",
-    "prism-react-renderer": "^2.0.6",
+    "@docusaurus/core": "^3.2.0",
+    "@docusaurus/module-type-aliases": "^3.2.0",
+    "@docusaurus/preset-classic": "^3.2.0",
+    "@mdx-js/react": "^3.0.0",
+    "@noomorph/docusaurus-search-local": "^1.1.1",
+    "clsx": "^2.0.0",
+    "docusaurus-plugin-sass": "^0.2.5",
+    "prism-react-renderer": "^2.3.0",
     "puppeteer": "^20.8.2",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "sass": "^1.63.6",
-    "typedoc": "^0.24.8",
-    "typedoc-plugin-markdown": "^3.15.3"
+    "sass": "^1.63.6"
   },
   "browserslist": {
     "production": [
@@ -49,5 +46,9 @@
   },
   "engines": {
     "node": ">=16.14"
+  },
+  "devDependencies": {
+    "@docusaurus/remark-plugin-npm2yarn": "^3.2.1",
+    "unist-util-visit": "^5.0.0"
   }
 }

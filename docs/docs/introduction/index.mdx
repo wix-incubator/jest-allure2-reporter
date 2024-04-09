@@ -1,18 +1,12 @@
 ---
 sidebar_position: 1
 slug: /docs
+verified: true
 ---
 
 # Introduction
 
-:::caution
-
-This website version refers to the unreleased version of `jest-allure2-reporter`, partially available as `2.0.0-beta.3` release.
-Please use GitHub docs for the latest stable version, `1.x.x`.
-
-:::
-
-Thanks for choosing Jest Allure 2 Reporter!
+Thanks for choosing `jest-allure2-reporter` !
 
 Whether you're a developer, QA professional, or someone involved in unit, integration, or end-to-end testing, this tool will make your testing process more efficient, organized, and insightful.
 
@@ -52,17 +46,30 @@ It provides several **entry points**:
 
 ## Why one more Allure reporter for Jest?
 
-Jest's evolution from Jasmine to its own [Circus test runner](https://github.com/jestjs/jest/pull/3668) in [version 27.0.0](https://jestjs.io/blog/2021/05/25/jest-27#flipping-defaults) brought new opportunities for enhanced testing, but it also created a void: existing Allure reporters[^1], designed for Jasmine, fell short of leveraging Jest's new features and refined test lifecycle.
+Let's start from the fact that **none** of the existing Allure reporters[^1][^2][^3][^4] for Jest is a **reporter** in the Jest sense. Both official and unofficial implementations are built as custom test environment implementations in Jest, whereas _test environments were never meant to be used as reporters_.
 
-While community-made reporters sought to bridge this gap[^2][^3][^4], they had their own shortcomings &mdash; issues with irregular maintenance, limited reach, and significant feature gaps were prevalent. Most critically, they took a non-idiomatic approach by acting as extensions to Jest's `testEnvironment`, which led to a critical shortcomings: e.g., inability to report early test issues like `SyntaxError` or test environment setup failures.
+You may ask, _"So what? As long as that approach works, why should I care?"_. Valid thinking, but... try running a test file with a syntax error and see how the existing reporters handle it. You'll be surprised.
 
-## Takeaways
+That was just one example of issues that arise when you don't implement a reporter as a _reporter_. Let's move the next point of failure happening early – test environment setup.
 
-* This reporter is a powerful tool tailor-made for the **modern** Jest ecosystem, not "yet another Allure reporter".
-* Easy to understand, straightforward to adopt, and flexible to work with – it's the Jest Allure reporter you've been waiting for.
-* It is progressive by design &mdash; you can start using it like a [standard reporter][jest-reporters], but the more you invest in it, the more you get out of it.
+At Wix, we've been maintaining CI pipelines for hundreds of Detox E2E projects, and one of the reasons why a test environment would fail to initialize could be an Android emulator being unresponsive or disconnected before the test file even started. So, when a test environment itself can break, is that the best place to put your core reporting logic?
 
-Ready to explore what this reporter can do for you? [Begin your journey here.][config]
+A few more important questions we've been struggling to answer were:
+
+* You may have executed dozens of test files, but where do you put attachments related to the whole test run?
+* How do you attach links to the test file's source code on GitHub which failed due to a syntax error and even didn't start?
+
+This is the reason why `jest-allure2-reporter` was born, and this is why it's the _idiomatic_ Allure reporter for Jest.
+
+To sum it up, here's a comparison of the existing Allure reporters for Jest:
+
+| Feature | jest-allure2-reporter | allure-jest | jest-allure | jest-circus-allure-environment | jest-allure-circus |
+| --- | --- | --- | --- | --- | --- |
+| Attachments API | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| Early test issues reporting | :heavy_check_mark: | :x: | :x: | :x: | :x: |
+| TODO                        | | | | | |
+
+Ready to explore what this reporter can do for you? [Start your journey here.][config]
 
 [^1]: https://github.com/allure-framework/allure-js/tree/master/packages/allure-jest
 [^2]: https://github.com/zaqqaz/jest-allure
