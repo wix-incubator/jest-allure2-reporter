@@ -1,4 +1,5 @@
 import type { MaybePromise } from 'jest-allure2-reporter';
+
 import type { Function_ } from './types';
 import { thruMaybePromise } from './thruMaybePromise';
 import { wrapFunction } from './wrapFunction';

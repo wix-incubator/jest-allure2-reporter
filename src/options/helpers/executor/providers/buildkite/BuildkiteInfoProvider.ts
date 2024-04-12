@@ -17,11 +17,7 @@ export class BuildkiteInfoProvider implements ExecutorInfoProvider {
   }
 
   async getExecutorInfo(): Promise<ExecutorInfo> {
-    const {
-      BUILDKITE_AGENT_NAME,
-      BUILDKITE_BUILD_URL,
-      BUILDKITE_BUILD_NUMBER,
-    } = this.environment;
+    const { BUILDKITE_AGENT_NAME, BUILDKITE_BUILD_URL, BUILDKITE_BUILD_NUMBER } = this.environment;
     const agentName = BUILDKITE_AGENT_NAME || 'Buildkite';
 
     return {

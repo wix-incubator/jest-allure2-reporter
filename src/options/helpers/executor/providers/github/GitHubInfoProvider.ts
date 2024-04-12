@@ -87,16 +87,13 @@ export class GitHubInfoProvider implements ExecutorInfoProvider {
   }
 
   private _buildApiUrl(): string {
-    const { GITHUB_REPOSITORY, GITHUB_RUN_ID, GITHUB_RUN_ATTEMPT } =
-      this.environment;
+    const { GITHUB_REPOSITORY, GITHUB_RUN_ID, GITHUB_RUN_ATTEMPT } = this.environment;
     return `https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/attempts/${GITHUB_RUN_ATTEMPT}/jobs`;
   }
 
   private _findJob(jobs: Job[]): Job | undefined {
     const { GITHUB_JOB } = this.environment;
 
-    return jobs.length === 1
-      ? jobs[0]
-      : jobs.find((job) => _.snakeCase(job.name) === GITHUB_JOB);
+    return jobs.length === 1 ? jobs[0] : jobs.find((job) => _.snakeCase(job.name) === GITHUB_JOB);
   }
 }
