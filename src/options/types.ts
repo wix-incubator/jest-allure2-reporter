@@ -13,9 +13,10 @@ import type {
   Primitive,
   PromisedProperties,
   MarkdownProcessorOptions,
-  SourceCodeProcessorConfig,
   MaybePromise,
   TestStepExtractorContext,
+  SourceCodePluginCustomizer,
+  SourceCodePlugin,
 } from 'jest-allure2-reporter';
 
 export type CompositeExtractor<Context, Shape> = {
@@ -27,8 +28,8 @@ export interface ReporterConfig {
   resultsDir: string;
   injectGlobals: boolean;
   attachments: Required<AttachmentsOptions>;
-  markdown?: Required<MarkdownProcessorOptions>;
-  sourceCode?: SourceCodeProcessorConfig;
+  markdown: Required<MarkdownProcessorOptions>;
+  sourceCode: SourceCodeProcessorConfig;
   categories: CategoriesExtractor;
   environment: EnvironmentExtractor;
   executor: ExecutorExtractor;
@@ -40,6 +41,12 @@ export interface ReporterConfig {
 }
 
 export interface ReporterFinalConfig extends ReporterConfig {
+  overwrite: boolean;
+  resultsDir: string;
+  injectGlobals: boolean;
+  attachments: Required<AttachmentsOptions>;
+  markdown: Required<MarkdownProcessorOptions>;
+  sourceCode: SourceCodeProcessorConfig;
   categories: CategoriesExtractor<void>;
   environment: EnvironmentExtractor<void>;
   executor: ExecutorExtractor<void>;
@@ -51,6 +58,13 @@ export interface ReporterFinalConfig extends ReporterConfig {
   testCaseSteps: TestStepsExtractor<TestCaseExtractorContext, void>;
   testFileSteps: TestStepsExtractor<TestFileExtractorContext, void>;
   testRunSteps: TestStepsExtractor<TestRunExtractorContext, void>;
+}
+
+export interface SourceCodeProcessorConfig {
+  enabled: boolean;
+  factories: Record<string, SourceCodePluginCustomizer>;
+  options: Record<string, unknown>;
+  plugins: SourceCodePlugin[];
 }
 
 export type ExecutorExtractor<T = never> = PropertyExtractor<

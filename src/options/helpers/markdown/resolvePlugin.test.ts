@@ -1,5 +1,5 @@
-jest.mock('../../../utils/importDefault', () => ({
-  importDefault: (name: string) => Promise.resolve({ name }),
+jest.mock('../../../utils/importCwd', () => ({
+  importCwd: (name: string) => Promise.resolve({ name }),
 }));
 
 import { resolvePlugin } from './resolvePlugin';

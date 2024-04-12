@@ -1,4 +1,4 @@
-import { FileNavigator } from '../../utils';
+import { FileNavigator } from '../../../utils';
 
 import { extractDocblockAbove as extractJsDocument_ } from './extractDocblockAbove';
 

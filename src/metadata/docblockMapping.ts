@@ -8,7 +8,7 @@ import type {
   LinkType,
 } from 'jest-allure2-reporter';
 
-import { asArray, isNonNullish } from '../utils';
+import { asArray, compactArray } from '../utils';
 
 const ALL_LABELS = Object.keys(
   assertType<Record<LabelName, 0>>({
@@ -28,13 +28,6 @@ const ALL_LABELS = Object.keys(
   }),
 ) as LabelName[];
 
-const ALL_LINKS = Object.keys(
-  assertType<Record<LinkType, 0>>({
-    issue: 0,
-    tms: 0,
-  }),
-) as LinkType[];
-
 export function mapTestStepDocblock({ comments }: AllureTestItemDocblock): AllureTestStepMetadata {
   const metadata: AllureTestStepMetadata = {};
   if (comments) {
@@ -52,9 +45,11 @@ export function mapTestCaseDocblock(context: AllureTestItemDocblock): AllureTest
 
   if (labels.length > 0) metadata.labels = labels;
 
-  const links = ALL_LINKS.flatMap((name) =>
-    asArray(pragmas[name]).map(createLinkMapper(name)),
-  ).filter(isNonNullish);
+  const links = compactArray<Link>([
+    ...asArray(pragmas.issue).map(issueMapper),
+    ...asArray(pragmas.tms).map(tmsMapper),
+    ...asArray(pragmas.url).map(linkMapper),
+  ]);
 
   if (links.length > 0) metadata.links = links;
 
@@ -74,9 +69,19 @@ function createLabelMapper(name: LabelName) {
   return (value: string): Label => ({ name, value });
 }
 
-function createLinkMapper(type?: LinkType) {
-  return (url: string): Link => ({ type, url, name: url });
+function linkMapper(value: string): Link {
+  const nameIndex = value.indexOf(' ');
+  const rawUrl = nameIndex === -1 ? value : value.slice(0, nameIndex);
+  const rawName = nameIndex === -1 ? rawUrl : value.slice(nameIndex + 1);
+  return { url: rawUrl.trim(), name: rawName.trim() };
 }
+
+function createTypedLinkMapper(type: LinkType) {
+  return (value: string): Link => ({ type, url: '', name: value.trim() });
+}
+
+const issueMapper = createTypedLinkMapper('issue');
+const tmsMapper = createTypedLinkMapper('tms');
 
 function assertType<T>(value: T) {
   return value;

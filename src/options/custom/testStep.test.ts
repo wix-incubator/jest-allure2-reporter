@@ -26,7 +26,7 @@ describe('testStepCustomizer', () => {
     testFileMetadata: {} as any,
     $: {} as any,
     globalConfig: {} as any,
-    config: {} as any,
+    reporterConfig: {} as any,
   });
 
   test.each`

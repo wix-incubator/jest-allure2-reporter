@@ -11,15 +11,21 @@ import { log } from '../logger';
 export async function resolvePromisedTestCase<Context extends TestRunExtractorContext>(
   context: Context,
   extractor: PropertyExtractor<Context, PromisedProperties<AllureTestCaseResult>>,
-  _stepsExtractor: PropertyExtractor<Context, PromisedProperties<AllureTestStepResult>[]>,
+  stepsExtractor: PropertyExtractor<Context, PromisedProperties<AllureTestStepResult>[]>,
 ): Promise<AllureTestCaseResult | undefined> {
-  const promised = preparePromisedItem(context, extractor, 'result');
+  const promisedItem = preparePromisedItem(context, extractor, 'result');
   try {
-    if (await promised.ignored) {
+    if (await promisedItem.ignored) {
       return;
     }
 
-    const item = await resolvePromisedProperties(promised);
+    const item = await resolvePromisedProperties(promisedItem);
+    const steps = stepsExtractor({ ...context, value: [] });
+    const ignoredSteps = await Promise.all(steps.map((s) => s.ignored));
+    item.steps = await Promise.all(
+      steps.filter((_step, index) => !ignoredSteps[index]).map(resolvePromisedProperties),
+    );
+
     return item;
   } catch (error: unknown) {
     log.warn({ err: error }, 'Failed to resolve test case', error);

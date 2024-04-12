@@ -7,8 +7,13 @@ import type {
 
 import { log } from '../../../logger';
 import { compactArray } from '../../../utils';
+import type { ReporterFinalConfig } from '../../types';
 
-export const extractSourceCode: KeyedHelperCustomizer<'extractSourceCode'> = ({ config }): any => {
+export const extractSourceCode: KeyedHelperCustomizer<'extractSourceCode'> = ({
+  reporterConfig,
+}): any => {
+  const config = reporterConfig as ReporterFinalConfig;
+
   async function extractRecursively(
     item: AllureTestItemMetadata,
   ): Promise<ExtractSourceCodeHelperResult[]> {
@@ -24,30 +29,34 @@ export const extractSourceCode: KeyedHelperCustomizer<'extractSourceCode'> = ({ 
     item: AllureTestItemMetadata,
   ): Promise<ExtractSourceCodeHelperResult | undefined> {
     let code: string | undefined;
-    const sourceLocation = item.sourceLocation;
-    if (config.sourceCode?.enabled && sourceLocation) {
-      for (const p of config.sourceCode.plugins) {
-        try {
-          code = await p.extractSourceCode?.(sourceLocation);
-        } catch (error: unknown) {
-          log.warn(
-            error,
-            `Failed to extract source code for ${sourceLocation.fileName}:${sourceLocation.lineNumber}:${sourceLocation.columnNumber}`,
-          );
-        }
-        if (code) {
-          break;
-        }
+    let language: string | undefined;
+
+    const context = { ...item.sourceLocation, transformedCode: item.transformedCode };
+    const plugins = config.sourceCode ? Object.values(config.sourceCode.plugins) : [];
+
+    log.trace(context, 'Extracting source code');
+    for (const p of plugins) {
+      try {
+        language ??= await p.detectLanguage?.(context);
+        code ??= await p.extractSourceCode?.(context);
+      } catch (error: unknown) {
+        log.warn(
+          error,
+          `Plugin "${p.name}" failed to extract source code for ${context.fileName}:${context.lineNumber}:${context.columnNumber}`,
+        );
+      }
+      if (language && code) {
+        break;
       }
     }
 
-    return code && sourceLocation
+    return code
       ? {
           code,
-          language: 'typescript',
-          fileName: sourceLocation.fileName!,
-          lineNumber: sourceLocation.lineNumber!,
-          columnNumber: sourceLocation.columnNumber!,
+          language,
+          fileName: context.fileName,
+          lineNumber: context.lineNumber,
+          columnNumber: context.columnNumber,
         }
       : undefined;
   }

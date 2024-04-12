@@ -2,6 +2,7 @@ import type { ReporterConfig } from '../types';
 import * as common from '../common';
 import * as custom from '../custom';
 import * as helpers from '../helpers';
+import * as sourceCode from '../source-code';
 
 import { categories } from './categories';
 import { testRun } from './testRun';
@@ -19,15 +20,15 @@ export function defaultOptions(): ReporterConfig {
       contentHandler: 'write',
       fileHandler: 'ref',
     },
-    sourceCode: {
+    sourceCode: custom.sourceCode({
       enabled: true,
-      plugins: [],
-    },
+      plugins: sourceCode,
+    }),
     markdown: {
       enabled: true,
       keepSource: true,
-      remarkPlugins: [],
-      rehypePlugins: [],
+      remarkPlugins: ['remark-gfm'],
+      rehypePlugins: ['rehype-highlight'],
     },
     helpers: custom.helpers(helpers)!,
     testRun: custom.testCase(testRun),

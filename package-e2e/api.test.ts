@@ -29,7 +29,7 @@ import type {
   IAllureRuntime,
   MIMEInferer,
   MIMEInfererContext,
-  ParameterOrString,
+  UserParameter,
 } from 'jest-allure2-reporter/api';
 
 enablePlugins();
@@ -135,8 +135,8 @@ test('typings of jest-allure2-reporter/api', async () => {
   });
 
   const login2 = allure.createStep('Login', [
-    assertType<ParameterOrString>('username'),
-    assertType<ParameterOrString>({ name: 'password', mode: 'masked'}),
+    assertType<UserParameter>('username'),
+    assertType<UserParameter>({ name: 'password', mode: 'masked'}),
   ], async (username: string, password: string) => {
     console.log('Login executed via %s and %s', username, password);
   });

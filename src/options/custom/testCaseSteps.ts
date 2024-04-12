@@ -30,7 +30,9 @@ export function testCaseSteps<
         ...context,
         testStepMetadata,
         result: {},
-        value: {},
+        value: {
+          ...testStepMetadata,
+        },
       };
 
       testStepContext.result = testStep(testStepContext);

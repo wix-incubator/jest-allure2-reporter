@@ -42,9 +42,13 @@ function linkFormatter(format: string): PropertyExtractor<{}, Link[]> {
   const formatter = Handlebars.compile(format);
 
   return ({ value }) => {
-    return value.map((link) => ({
-      ...link,
-      url: formatter(link),
-    }));
+    return value.map((link) =>
+      link.url
+        ? link
+        : {
+            ...link,
+            url: formatter(link),
+          },
+    );
   };
 }

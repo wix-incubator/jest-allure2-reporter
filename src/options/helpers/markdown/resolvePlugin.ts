@@ -1,8 +1,8 @@
-import { importDefault } from '../../../utils';
+import { importCwd } from '../../../utils';
 
 export async function resolvePlugin(maybePlugin: unknown): Promise<[any, unknown?]> {
   if (typeof maybePlugin === 'string') {
-    return [await importDefault(maybePlugin)];
+    return [await importCwd(maybePlugin)];
   }
 
   if (Array.isArray(maybePlugin)) {

@@ -2,9 +2,15 @@ import util from 'node:util';
 
 import type { Parameter } from 'jest-allure2-reporter';
 
-import { constant, isObject } from '../utils';
+import { constant, isObject, typeAssertions } from '../utils';
 
-import type { AllureRuntimeBindOptions, AllureRuntimePluginCallback, AllureRuntime } from './types';
+import type {
+  AllureRuntimeBindOptions,
+  AllureRuntimePluginCallback,
+  AllureRuntime,
+  ContentAttachmentOptions,
+  FileAttachmentOptions,
+} from './types';
 import * as runtimeModules from './modules';
 import type { AllureRuntimeContext } from './AllureRuntimeContext';
 
@@ -55,45 +61,47 @@ export class AllureRuntimeImplementation implements AllureRuntime {
   flush = () => this.#context.flush();
 
   description: AllureRuntime['description'] = (value) => {
-    // TODO: assert is a string
+    typeAssertions.assertString(value);
     this.#coreModule.description(value);
   };
 
   descriptionHtml: AllureRuntime['descriptionHtml'] = (value) => {
-    // TODO: assert is a string
+    typeAssertions.assertString(value);
     this.#coreModule.descriptionHtml(value);
   };
 
+  displayName: AllureRuntime['displayName'] = (value) => {
+    typeAssertions.assertString(value);
+    this.#coreModule.displayName(value);
+  };
+
   fullName: AllureRuntime['fullName'] = (value) => {
-    // TODO: assert is a string
+    typeAssertions.assertString(value);
     this.#coreModule.fullName(value);
   };
 
-  historyId(value: string) {
-    // TODO: assert is a string
+  historyId: AllureRuntime['historyId'] = (value) => {
+    typeAssertions.assertPrimitive(value);
     this.#coreModule.historyId(value);
-  }
+  };
 
   label: AllureRuntime['label'] = (name, value) => {
-    // TODO: assert name is a string
-    // TODO: assert value is a string
+    typeAssertions.assertString(name, 'name');
+    typeAssertions.assertString(value, 'value');
     this.#coreModule.label(name, value);
   };
 
   link: AllureRuntime['link'] = (url, name, type) => {
-    // TODO: url is a string
-    // TODO: name is a string or nullish
-    // TODO: type is a string or nullish
+    typeAssertions.assertString(url, 'url');
+    if (name != null) typeAssertions.assertString(name, 'name');
+    if (type != null) typeAssertions.assertString(type, 'type');
     this.#coreModule.link({ name, url, type });
   };
 
-  displayName: AllureRuntime['displayName'] = (value) => {
-    // TODO: assert is a string
-    this.#coreModule.displayName(value);
-  };
-
   parameter: AllureRuntime['parameter'] = (name, value, options) => {
-    // TODO: assert name is a string
+    typeAssertions.assertString(name, 'name');
+    typeAssertions.assertPrimitive(value, 'value');
+
     this.#coreModule.parameter({
       name,
       value: String(value),
@@ -102,6 +110,8 @@ export class AllureRuntimeImplementation implements AllureRuntime {
   };
 
   parameters: AllureRuntime['parameters'] = (parameters) => {
+    typeAssertions.assertNotNullish(parameters);
+
     for (const [name, value] of Object.entries(parameters)) {
       if (value && typeof value === 'object') {
         const raw = value as Parameter;
@@ -113,7 +123,7 @@ export class AllureRuntimeImplementation implements AllureRuntime {
   };
 
   status: AllureRuntime['status'] = (status, statusDetails) => {
-    // TODO: assert string literal
+    typeAssertions.assertStatus(status);
     this.#coreModule.status(status);
     if (isObject(statusDetails)) {
       this.#coreModule.statusDetails(statusDetails);
@@ -121,18 +131,55 @@ export class AllureRuntimeImplementation implements AllureRuntime {
   };
 
   statusDetails: AllureRuntime['statusDetails'] = (statusDetails) => {
-    // TODO: assert is not nullish
+    typeAssertions.assertNotNullish(statusDetails);
     this.#coreModule.statusDetails(statusDetails);
   };
 
-  step: AllureRuntime['step'] = (name, function_) =>
-    // TODO: assert name is a string
-    // TODO: assert function_ is a function
-    this.#basicStepsModule.step(name, function_);
+  attachment: AllureRuntime['attachment'] = (name, content, maybeOptions) => {
+    typeAssertions.assertString(name, 'name');
+
+    const options = typeof maybeOptions === 'string' ? { mimeType: maybeOptions } : maybeOptions;
+
+    return this.#contentAttachmentsModule.attachment(content, {
+      ...options,
+      name,
+    });
+  };
+
+  createAttachment: AllureRuntime['createAttachment'] = (function_, nameOrOptions) => {
+    typeAssertions.assertFunction(function_);
+    this.#assertNameOrOptions<ContentAttachmentOptions>(nameOrOptions);
+
+    const options =
+      typeof nameOrOptions === 'string' ? { name: nameOrOptions } : { ...nameOrOptions };
+
+    return this.#contentAttachmentsModule.createAttachment(function_, options);
+  };
+
+  fileAttachment: AllureRuntime['fileAttachment'] = (filePath, nameOrOptions) => {
+    typeAssertions.assertString(filePath, 'filePath');
+
+    const options =
+      typeof nameOrOptions === 'string' ? { name: nameOrOptions } : { ...nameOrOptions };
+
+    return this.#fileAttachmentsModule.attachment(filePath, options);
+  };
+
+  createFileAttachment: AllureRuntime['createFileAttachment'] = (function_, nameOrOptions) => {
+    typeAssertions.assertFunction(function_);
+    if (nameOrOptions != null) {
+      this.#assertNameOrOptions<FileAttachmentOptions>(nameOrOptions);
+    }
+
+    const options =
+      typeof nameOrOptions === 'string' ? { name: nameOrOptions } : { ...nameOrOptions };
+
+    return this.#fileAttachmentsModule.createAttachment(function_, options);
+  };
 
   // @ts-expect-error TS2322: too few arguments
   createStep: AllureRuntime['createStep'] = (nameFormat, maybeParameters, maybeFunction) => {
-    // TODO: assert nameFormat is a string
+    typeAssertions.assertString(nameFormat, 'nameFormat');
     const function_: any = maybeFunction ?? maybeParameters;
     if (typeof function_ !== 'function') {
       throw new TypeError(`Expected a function, got instead: ${util.inspect(function_)}`);
@@ -143,36 +190,103 @@ export class AllureRuntimeImplementation implements AllureRuntime {
     return this.#stepsDecorator.createStep(nameFormat, function_, userParameters);
   };
 
-  attachment: AllureRuntime['attachment'] = (name, content, mimeType) =>
-    // TODO: assert name is a string
-    this.#contentAttachmentsModule.attachment(content, {
-      name,
-      mimeType,
-    });
-
-  fileAttachment: AllureRuntime['fileAttachment'] = (filePath, nameOrOptions) => {
-    // TODO: assert filePath is a string
-    const options =
-      typeof nameOrOptions === 'string' ? { name: nameOrOptions } : { ...nameOrOptions };
-
-    return this.#fileAttachmentsModule.attachment(filePath, options);
+  step: AllureRuntime['step'] = (name, function_) => {
+    typeAssertions.assertString(name, 'name');
+    typeAssertions.assertFunction(function_);
+    return this.#basicStepsModule.step(name, function_);
   };
 
-  createAttachment: AllureRuntime['createAttachment'] = (function_, nameOrOptions) => {
-    // TODO: assert function_ is a function
-    // TODO: assert nameOrOptions is a string or an object
-    const options =
-      typeof nameOrOptions === 'string' ? { name: nameOrOptions } : { ...nameOrOptions };
-
-    return this.#contentAttachmentsModule.createAttachment(function_, options);
+  epic: AllureRuntime['epic'] = (value) => {
+    typeAssertions.assertString(value);
+    this.#coreModule.label('epic', value);
   };
 
-  createFileAttachment: AllureRuntime['createFileAttachment'] = (function_, nameOrOptions) => {
-    // TODO: assert function_ is a function
-    // TODO: assert nameOrOptions is a string or an object
-    const options =
-      typeof nameOrOptions === 'string' ? { name: nameOrOptions } : { ...nameOrOptions };
+  feature: AllureRuntime['feature'] = (value) => {
+    typeAssertions.assertString(value);
+    this.#coreModule.label('feature', value);
+  };
 
-    return this.#fileAttachmentsModule.createAttachment(function_, options);
+  issue: AllureRuntime['issue'] = (name, url) => {
+    typeAssertions.assertString(name, 'name');
+    if (url != null) typeAssertions.assertString(url, 'url');
+
+    this.#coreModule.link({ name, url: url ?? '', type: 'issue' });
+  };
+
+  owner: AllureRuntime['owner'] = (value) => {
+    typeAssertions.assertString(value);
+    this.#coreModule.label('owner', value);
+  };
+
+  package: AllureRuntime['package'] = (value) => {
+    typeAssertions.assertString(value);
+    this.#coreModule.label('package', value);
+  };
+
+  parentSuite: AllureRuntime['parentSuite'] = (value) => {
+    typeAssertions.assertString(value);
+    this.#coreModule.label('parentSuite', value);
+  };
+
+  severity: AllureRuntime['severity'] = (value) => {
+    typeAssertions.assertSeverity(value);
+    this.#coreModule.label('severity', value);
+  };
+
+  story: AllureRuntime['story'] = (value) => {
+    typeAssertions.assertString(value);
+    this.#coreModule.label('story', value);
+  };
+
+  subSuite: AllureRuntime['subSuite'] = (value) => {
+    typeAssertions.assertString(value);
+    this.#coreModule.label('subSuite', value);
+  };
+
+  suite: AllureRuntime['suite'] = (value) => {
+    typeAssertions.assertString(value);
+    this.#coreModule.label('suite', value);
+  };
+
+  tag: AllureRuntime['tag'] = (value) => {
+    typeAssertions.assertString(value);
+    this.#coreModule.label('tag', value);
+  };
+
+  tags: AllureRuntime['tags'] = (...values) => {
+    for (const [index, value] of values.entries()) {
+      typeAssertions.assertString(value, `values[${index}]`);
+      this.#coreModule.label('tag', value);
+    }
+  };
+
+  testClass: AllureRuntime['testClass'] = (value) => {
+    typeAssertions.assertString(value);
+    this.#coreModule.label('testClass', value);
+  };
+
+  testMethod: AllureRuntime['testMethod'] = (value) => {
+    typeAssertions.assertString(value);
+    this.#coreModule.label('testMethod', value);
+  };
+
+  thread: AllureRuntime['thread'] = (value) => {
+    typeAssertions.assertPrimitive(value);
+    this.#coreModule.label('thread', String(value));
+  };
+
+  tms: AllureRuntime['tms'] = (name, url) => {
+    typeAssertions.assertString(name, 'name');
+
+    if (url != null) typeAssertions.assertString(url, 'url');
+    this.#coreModule.link({ name, url: url ?? '', type: 'tms' });
+  };
+
+  #assertNameOrOptions = <T extends {}>(nameOrOptions: string | T) => {
+    if (nameOrOptions == null || (typeof nameOrOptions !== 'string' && !isObject(nameOrOptions))) {
+      throw new TypeError(
+        `Expected a name format string or attachment options, got instead: ${util.inspect(nameOrOptions)}`,
+      );
+    }
   };
 }

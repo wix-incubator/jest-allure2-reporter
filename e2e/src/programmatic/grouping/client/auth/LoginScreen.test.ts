@@ -22,12 +22,12 @@ describe('Login screen', () => {
 
   $Story('Validation');
   describe('Form Submission', () => {
+    /**
+     * @owner Samantha Jones
+     * @issue IDEA-235211
+     * @url https://example.com/235211 Example
+     */
     it('should show error on invalid e-mail format', async () => {
-      /**
-       * @owner Samantha Jones
-       * @issue IDEA-235211
-       */
-
       await LoginHelper.typeEmail('someone#example.com');
       await LoginHelper.typePassword('123456');
       await allure.step('Hello', () => {
@@ -37,7 +37,8 @@ describe('Login screen', () => {
       });
     });
 
-    it('should show error on short or invalid password format', () => {
+    it('should show error on short or invalid password format', async () => {
+      await LoginHelper.fillForm('someone@example.com', 'abc');
       allure.status('failed', { message: 'The password is too short' });
       // ...
     });

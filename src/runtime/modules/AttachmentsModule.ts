@@ -20,6 +20,7 @@ import type {
 } from '../types';
 import type { AllureTestItemMetadataProxy } from '../../metadata';
 import type { AllureRuntimeContext } from '../AllureRuntimeContext';
+import { AllureRuntimeError } from '../../errors';
 
 type AttachmentsModuleContext<
   Context extends AttachmentContext,
@@ -46,8 +47,7 @@ abstract class AttachmentsModule<
     options: Options,
   ): Promise<string | undefined> {
     if (typeof options.handler === 'string' && !this.context.handlers[options.handler]) {
-      // TODO: throw a more specific error
-      throw new Error(`Unknown attachment handler: ${options.handler}`);
+      throw new AllureRuntimeError(`Unknown attachment handler: ${options.handler}`);
     }
 
     return thruMaybePromise(content, this.#handleAttachment(options));

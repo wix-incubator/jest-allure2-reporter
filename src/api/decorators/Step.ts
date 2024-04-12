@@ -1,9 +1,9 @@
-import type { ParameterOrString } from '../../runtime';
+import type { UserParameter } from '../../runtime';
 import realm from '../../realms';
 
 const allure = realm.runtime;
 
-export function Step(name: string, arguments_?: ParameterOrString[]): MethodDecorator {
+export function Step(name: string, arguments_?: UserParameter[]): MethodDecorator {
   return function (
     _target: object,
     _propertyName: string | symbol,

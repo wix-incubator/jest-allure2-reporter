@@ -8,7 +8,7 @@ import type {
   Status,
 } from '@noomorph/allure-js-commons';
 
-import { md5 } from '../utils';
+import { AllureReporterError } from '../errors';
 
 type CreateTestArguments = {
   runtime: AllureRuntime;
@@ -19,12 +19,14 @@ type CreateTestArguments = {
 export function writeTest({ runtime, test, containerName }: CreateTestArguments) {
   const allureGroup = runtime.startGroup(containerName);
   const allureTest = allureGroup.startTest();
-  const steps = test.steps;
+  const hooks = test.steps?.filter((step) => step.hookType !== undefined);
+  const steps = test.steps?.filter((step) => step.hookType === undefined);
 
-  fillStep(allureTest, test);
+  fillStep(allureTest, { ...test, steps });
 
   if (test.historyId) {
-    allureTest.historyId = md5(test.historyId);
+    // The string casting + MD5 hashing hould happen in options/override/historyId.ts
+    allureTest.historyId = test.historyId as string;
   }
   if (test.fullName) {
     allureTest.fullName = test.fullName;
@@ -45,8 +47,8 @@ export function writeTest({ runtime, test, containerName }: CreateTestArguments)
       allureTest.addLabel(label.name, label.value);
     }
   }
-  if (steps) {
-    for (const step of steps) {
+  if (hooks) {
+    for (const step of hooks) {
       const executable = createStepExecutable(allureGroup, step.hookType);
       fillStep(executable, step);
     }
@@ -106,8 +108,7 @@ function createStepExecutable(parent: AllureGroup, hookType: AllureTestStepResul
       return parent.addAfter();
     }
     default: {
-      // TODO: throw a more specific error
-      throw new Error(`Cannot create step executable for ${hookType}`);
+      throw new AllureReporterError(`Unknown hook type: ${hookType}`);
     }
   }
 }

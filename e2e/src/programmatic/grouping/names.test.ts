@@ -35,6 +35,7 @@ describe('Names', () => {
    * @displayName Docblock test (custom)
    * @fullName Names - Docblock test (custom)
    * @description Even more description (docblock)
+   * @url https://jestjs.io/docs/en/api#testname-fn-timeout Jest Docs
    */
   test('Docblock test', () => {
   });

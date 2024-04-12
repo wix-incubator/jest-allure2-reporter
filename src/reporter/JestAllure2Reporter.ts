@@ -28,8 +28,7 @@ import type {
 
 import { type ReporterConfig, resolveOptions } from '../options';
 import { AllureMetadataProxy, MetadataSquasher } from '../metadata';
-import * as sourceCode from '../source-code';
-import { stringifyValues } from '../utils';
+import { compactArray, stringifyValues } from '../utils';
 
 import * as fallbacks from './fallbacks';
 import { overwriteDirectory } from './overwriteDirectory';
@@ -67,40 +66,48 @@ export class JestAllure2Reporter extends JestMetadataReporter {
   ): Promise<void> {
     await super.onRunStart(aggregatedResult, options);
 
-    const config = this._config;
+    const reporterConfig = this._config;
 
     const globalContext = {
       $: {} as Helpers,
       globalConfig: this._globalConfig,
-      config,
+      reporterConfig,
       value: undefined,
     };
 
-    globalContext.$ = await resolvePromisedItem(globalContext, config.helpers, '$');
-    if (config.sourceCode?.enabled) {
-      config.sourceCode.plugins.push(
-        await sourceCode.typescript(globalContext),
-        await sourceCode.javascript(globalContext),
+    globalContext.$ = await resolvePromisedItem(globalContext, reporterConfig.helpers, '$');
+
+    if (reporterConfig.sourceCode.enabled) {
+      const { factories, options, plugins } = reporterConfig.sourceCode;
+      const maybePlugins = await Promise.all(
+        Object.entries(factories).map(async ([key, factory]) =>
+          factory({
+            ...globalContext,
+            value: options[key],
+          }),
+        ),
       );
+
+      plugins.push(...compactArray(maybePlugins));
     }
 
     this._globalContext = globalContext;
 
-    if (config.overwrite) {
-      await overwriteDirectory(config.resultsDir);
+    if (reporterConfig.overwrite) {
+      await overwriteDirectory(reporterConfig.resultsDir);
     }
 
-    const environment = await config.environment(globalContext);
+    const environment = await reporterConfig.environment(globalContext);
     if (environment) {
       this._allure.writeEnvironmentInfo(stringifyValues(environment));
     }
 
-    const executor = await config.executor(globalContext);
+    const executor = await reporterConfig.executor(globalContext);
     if (executor) {
       this._allure.writeExecutorInfo(executor);
     }
 
-    const categories = await config.categories(globalContext);
+    const categories = await reporterConfig.categories(globalContext);
     if (categories) {
       this._allure.writeCategoriesDefinitions(categories as Category[]);
     }
@@ -132,7 +139,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     const testFileMetadata = new AllureMetadataProxy<AllureTestFileMetadata>(rawMetadata);
 
     fallbacks.onTestFileResult(test, testFileMetadata);
-    await postProcessMetadata(this._globalContext!.$, rawMetadata);
+    await postProcessMetadata(this._globalContext!, rawMetadata);
   }
 
   async onRunComplete(

@@ -2,10 +2,13 @@ import path from 'node:path';
 
 import type { GlobalExtractorContext, TestCaseCustomizer } from 'jest-allure2-reporter';
 
+import type { ReporterFinalConfig } from '../types';
+
 export const attachments: TestCaseCustomizer<GlobalExtractorContext>['attachments'] = async ({
-  config,
+  reporterConfig,
   value,
 }) => {
+  const config = reporterConfig as ReporterFinalConfig;
   const attachments = (await value) ?? [];
 
   return attachments.map((attachment) => {

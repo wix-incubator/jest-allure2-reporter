@@ -6,7 +6,7 @@ import JestMetadataReporter from 'jest-metadata/reporter';
 declare module 'jest-allure2-reporter' {
   // region Options
 
-  export interface ReporterOptions extends ReporterOptionsAugmentation {
+  export interface ReporterOptions {
     /**
      * Overwrite the results directory if it already exists.
      * @default true
@@ -83,15 +83,6 @@ declare module 'jest-allure2-reporter' {
     testStep?: TestStepCustomizer;
   }
 
-  export interface ReporterConfig extends ReporterOptionsAugmentation {
-    overwrite: boolean;
-    resultsDir: string;
-    injectGlobals: boolean;
-    attachments: Required<AttachmentsOptions>;
-    markdown?: Required<MarkdownProcessorOptions>;
-    sourceCode?: SourceCodeProcessorConfig;
-  }
-
   export interface AttachmentsOptions {
     /**
      * Defines a subdirectory within the {@link ReporterOptions#resultsDir} where attachments will be stored.
@@ -126,29 +117,31 @@ declare module 'jest-allure2-reporter' {
   export interface MarkdownProcessorOptions {
     enabled?: boolean;
     keepSource?: boolean;
-    remarkPlugins?: unknown[];
-    rehypePlugins?: unknown[];
+    remarkPlugins?: MaybeWithOptions<unknown>[];
+    rehypePlugins?: MaybeWithOptions<unknown>[];
   }
 
   export interface SourceCodeProcessorOptions {
     enabled?: boolean;
-    plugins?: SourceCodePluginCustomizer[];
-  }
-
-  export interface SourceCodeProcessorConfig {
-    enabled: boolean;
-    plugins: SourceCodePlugin[];
+    plugins?: Record<string, SourceCodePluginCustomizer | unknown | [SourceCodePluginCustomizer, unknown?]>;
   }
 
   // endregion
 
   // region Customizers
 
-  export type SourceCodePluginCustomizer = PropertyExtractor<GlobalExtractorContext, unknown, MaybePromise<SourceCodePlugin>>;
+  export type SourceCodePluginCustomizer = PropertyExtractor<GlobalExtractorContext, unknown, MaybePromise<SourceCodePlugin | undefined>>;
 
   export interface SourceCodePlugin {
-    extractDocblock?(location: AllureTestItemSourceLocation): MaybePromise<AllureTestItemDocblock | undefined>;
-    extractSourceCode?(location: AllureTestItemSourceLocation): MaybePromise<string | undefined>;
+    readonly name: string;
+
+    detectLanguage?(context: Readonly<SourceCodeExtractionContext>): MaybePromise<string | undefined>;
+    extractDocblock?(context: Readonly<SourceCodeExtractionContext>): MaybePromise<AllureTestItemDocblock | undefined>;
+    extractSourceCode?(context: Readonly<SourceCodeExtractionContext>): MaybePromise<string | undefined>;
+  }
+
+  export interface SourceCodeExtractionContext extends AllureTestItemSourceLocation {
+    transformedCode?: string;
   }
 
   export interface TestCaseCustomizer<Context = {}> {
@@ -360,7 +353,7 @@ declare module 'jest-allure2-reporter' {
   export interface GlobalExtractorContext {
     $: Helpers;
     globalConfig: Config.GlobalConfig;
-    config: ReporterConfig;
+    reporterConfig: unknown;
   }
 
   export interface TestRunExtractorContext extends GlobalExtractorContext {
@@ -402,7 +395,11 @@ declare module 'jest-allure2-reporter' {
   }
 
   export interface Helpers extends HelpersAugmentation {
-    getFileNavigator(filePath: string): Promise<FileNavigator>;
+    /**
+     * Provides an optimized way to navigate through the test file content.
+     * Returns undefined if the file is not found or cannot be read.
+     */
+    getFileNavigator(filePath: string): Promise<FileNavigator | undefined>;
     /**
       * Extracts the source code of the current test case, test step or a test file.
       * Pass `true` as the second argument to extract source code recursively from all steps.
@@ -474,10 +471,10 @@ declare module 'jest-allure2-reporter' {
 
   export interface ExtractSourceCodeHelperResult {
     code: string;
-    language: string;
-    fileName: string;
-    lineNumber: number;
-    columnNumber: number;
+    language?: string;
+    fileName?: string;
+    lineNumber?: number;
+    columnNumber?: number;
   }
 
   export interface StripAnsiHelper {
@@ -519,7 +516,7 @@ declare module 'jest-allure2-reporter' {
     /**
      * Custom history ID to distinguish between tests and their retry attempts.
      */
-    historyId?: string;
+    historyId?: Primitive;
     /**
      * Key-value pairs to disambiguate test cases or to provide additional information.
      */
@@ -592,7 +589,7 @@ declare module 'jest-allure2-reporter' {
 
   /** @inheritDoc */
   export interface AllureTestRunMetadata extends AllureTestCaseMetadata {
-    config: ReporterConfig;
+    config: unknown;
     sourceLocation?: never;
     transformedCode?: never;
   }
@@ -612,10 +609,6 @@ declare module 'jest-allure2-reporter' {
 
   // region Extensibility
 
-  export interface ReporterOptionsAugmentation {
-    // Use to extend ReporterOptions
-  }
-
   export interface HelpersAugmentation {
     // Use to extend Helpers
   }
@@ -626,7 +619,7 @@ declare module 'jest-allure2-reporter' {
 
   export interface AllureTestCaseResult {
     ignored: boolean;
-    historyId: string;
+    historyId: Primitive;
     displayName: string;
     fullName: string;
     start: number;
@@ -750,6 +743,8 @@ declare module 'jest-allure2-reporter' {
   export type MaybeNullish<T> = T | null | undefined;
 
   export type MaybeFunction<T> = T | ((...args: any[]) => T);
+
+  export type MaybeWithOptions<T> = T | [T, unknown?];
 }
 
 export default class JestAllure2Reporter extends JestMetadataReporter {

@@ -4,7 +4,13 @@ class LoginHelper {
   #email?: string;
   #password?: string;
 
-  @Step('Type e-mail: %s', ['email'])
+  @Step('Type email: {{0}}', [null, 'password'])
+  async fillForm(email: string, password: string) {
+    this.#email = email;
+    this.#password = password;
+  }
+
+  @Step('Type e-mail: {{email}}', ['email'])
   async typeEmail(email: string) {
     this.#email = email;
     return 'Entered: ' + email;

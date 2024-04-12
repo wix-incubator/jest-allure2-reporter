@@ -1,4 +1,11 @@
-import type { LabelName, Link, Parameter, Status, StatusDetails } from 'jest-allure2-reporter';
+import type {
+  LabelName,
+  Link,
+  Parameter,
+  Primitive,
+  Status,
+  StatusDetails,
+} from 'jest-allure2-reporter';
 
 import type { AllureTestItemMetadataProxy } from '../../metadata';
 import type { AllureRuntimeContext } from '../AllureRuntimeContext';
@@ -52,7 +59,7 @@ export class CoreModule {
     this.context.metadata.$bind(null).set('fullName', value);
   }
 
-  historyId(value: string) {
+  historyId(value: Primitive) {
     this.context.metadata.$bind(null).set('historyId', value);
   }
 

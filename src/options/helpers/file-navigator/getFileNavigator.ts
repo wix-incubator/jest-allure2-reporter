@@ -6,9 +6,9 @@ import type { KeyedHelperCustomizer } from 'jest-allure2-reporter';
 import { FileNavigator } from '../../../utils';
 
 class FileNavigatorCache {
-  #cache = new Map<string, Promise<FileNavigator>>();
+  #cache = new Map<string, Promise<FileNavigator | undefined>>();
 
-  resolve(filePath: string): Promise<FileNavigator> {
+  resolve(filePath: string): Promise<FileNavigator | undefined> {
     const absolutePath = path.resolve(filePath);
     if (!this.#cache.has(absolutePath)) {
       this.#cache.set(absolutePath, this.#createNavigator(absolutePath));
@@ -18,8 +18,8 @@ class FileNavigatorCache {
   }
 
   #createNavigator = async (filePath: string) => {
-    const sourceCode = await fs.readFile(filePath, 'utf8').catch(() => '');
-    return new FileNavigator(sourceCode);
+    const sourceCode = await fs.readFile(filePath, 'utf8').catch(() => void 0);
+    return sourceCode == null ? undefined : new FileNavigator(sourceCode);
   };
 
   clear() {

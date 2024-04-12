@@ -32,7 +32,7 @@ describe('links custom extractor', () => {
     const extractor = links(customizer)!;
     const result = await extractor({
       value: [
-        { type: 'issue', name: 'GITHUB-001', url: 'GITHUB-001' },
+        { type: 'issue', name: 'GITHUB-001', url: '' },
         { type: 'tms', name: 'Issue', url: '' },
         { type: 'append', name: 'Existing', url: 'https://example.com/existing' },
       ],

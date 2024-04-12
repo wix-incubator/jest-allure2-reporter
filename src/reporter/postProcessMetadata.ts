@@ -1,9 +1,22 @@
-import type { AllureTestItemMetadata, Helpers } from 'jest-allure2-reporter';
+import type {
+  AllureTestItemMetadata,
+  GlobalExtractorContext,
+  SourceCodeExtractionContext,
+} from 'jest-allure2-reporter';
 import type { TestFileMetadata } from 'jest-metadata';
 
 import { AllureMetadataProxy } from '../metadata';
+import type { ReporterConfig } from '../options';
 
-export async function postProcessMetadata($: Helpers, testFile: TestFileMetadata) {
+export async function postProcessMetadata(
+  globalContext: GlobalExtractorContext,
+  testFile: TestFileMetadata,
+) {
+  const config = globalContext.reporterConfig as ReporterConfig;
+  if (!config.sourceCode.enabled) {
+    return;
+  }
+
   const allDescribeBlocks = [...testFile.allDescribeBlocks()];
   const allHooks = allDescribeBlocks.flatMap((describeBlock) => [
     ...describeBlock.hookDefinitions(),
@@ -14,8 +27,17 @@ export async function postProcessMetadata($: Helpers, testFile: TestFileMetadata
   await Promise.all(
     batch.map(async (metadata) => {
       const allureProxy = new AllureMetadataProxy<AllureTestItemMetadata>(metadata);
-      // Cache source code for each test item
-      return $.extractSourceCode(allureProxy.get() ?? {});
+      const context: SourceCodeExtractionContext = {
+        ...allureProxy.get('sourceLocation'),
+        transformedCode: allureProxy.get('transformedCode'),
+      };
+      for (const p of config.sourceCode.plugins) {
+        const docblock = await p.extractDocblock?.(context);
+        if (docblock) {
+          allureProxy.assign({ docblock });
+          break;
+        }
+      }
     }),
   );
 }

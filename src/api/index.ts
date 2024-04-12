@@ -21,5 +21,5 @@ export type {
   AllureRuntime,
   MIMEInferer,
   MIMEInfererContext,
-  ParameterOrString,
+  UserParameter,
 } from '../runtime';

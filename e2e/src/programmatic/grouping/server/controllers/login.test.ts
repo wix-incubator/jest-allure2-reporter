@@ -6,20 +6,23 @@
  * @feature Login
  */
 describe('POST /login', () => {
+  /** Environment setup */
   beforeEach(() => {
-    /** Environment setup */
     // This hook should set up the environment for each test case.
   });
 
+  /** @story Validation */
   it('should return 401 if user is not found', () => {
-    /** @story Validation */
+    // This test case should check if the server returns 401 when the user is not found.
   });
 
+  /** @story Validation */
   it('should return 401 if password is incorrect', () => {
-    /** @story Validation */
+    // This test case should check if the server returns 401 when the password is incorrect.
   });
 
+  /** @story Happy path */
   it('should return 200 and user details if login is successful', () => {
-    /** @story Happy path */
+    // This test case should check if the server returns 200 and user details when login is successful.
   });
 });

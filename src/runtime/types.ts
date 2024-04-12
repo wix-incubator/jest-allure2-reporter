@@ -1,11 +1,14 @@
 import type {
+  AttachmentsOptions,
   BuiltinContentAttachmentHandler,
   BuiltinFileAttachmentHandler,
   LabelName,
   LinkType,
+  MaybeNullish,
   MaybePromise,
   Parameter,
-  ReporterConfig,
+  Primitive,
+  Severity,
   Status,
   StatusDetails,
 } from 'jest-allure2-reporter';
@@ -33,7 +36,7 @@ export interface AllureRuntime {
 
   fullName(value: string): void;
 
-  historyId(value: string): void;
+  historyId(value: Primitive): void;
 
   label(name: LabelName, value: string): void;
 
@@ -47,6 +50,11 @@ export interface AllureRuntime {
 
   statusDetails(statusDetails: StatusDetails): void;
 
+  attachment<T extends AttachmentContent>(
+    name: string,
+    content: MaybePromise<T>,
+    options?: Omit<ContentAttachmentOptions, 'name'>,
+  ): Promise<string | undefined>;
   attachment<T extends AttachmentContent>(
     name: string,
     content: MaybePromise<T>,
@@ -75,12 +83,38 @@ export interface AllureRuntime {
   ): F;
 
   createStep<F extends Function>(name: string, function_: F): F;
-  createStep<F extends Function>(name: string, arguments_: ParameterOrString[], function_: F): F;
+  createStep<F extends Function>(name: string, arguments_: UserParameter[], function_: F): F;
 
   step<T>(name: string, function_: () => T): T;
+
+  // region Labels
+
+  epic(value: string): void;
+  feature(value: string): void;
+  issue(name: string, url?: string): void;
+  owner(value: string): void;
+  package(value: string): void;
+  parentSuite(name: string): void;
+  severity(value: Severity): void;
+  story(value: string): void;
+  subSuite(name: string): void;
+  suite(name: string): void;
+  tag(value: string): void;
+  tags(...values: string[]): void;
+  testClass(value: string): void;
+  testMethod(value: string): void;
+  thread(value: Primitive): void;
+  tms(name: string, url?: string): void;
+
+  // endregion
 }
 
-export type SharedReporterConfig = ReporterConfig;
+export interface SharedReporterConfig {
+  overwrite: boolean;
+  resultsDir: string;
+  injectGlobals: boolean;
+  attachments: Required<AttachmentsOptions>;
+}
 
 export type AllureRuntimePluginCallback = (context: AllureRuntimePluginContext) => void;
 
@@ -112,7 +146,7 @@ export type ContentAttachmentOptions = AttachmentOptions<ContentAttachmentContex
   name: string;
 };
 
-export type ParameterOrString = string | Omit<Parameter, 'value'>;
+export type UserParameter = MaybeNullish<string | Omit<Parameter, 'value'>>;
 
 export type ParameterOptions = Pick<Parameter, 'mode' | 'excluded'>;
 

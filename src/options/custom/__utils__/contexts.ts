@@ -36,7 +36,7 @@ export const createTestStepContext = (
   testFileMetadata: {} as any,
   $: {} as any,
   globalConfig: {} as any,
-  config: {} as any,
+  reporterConfig: {} as any,
 });
 
 export const createTestCaseContext = (
@@ -55,7 +55,7 @@ export const createTestCaseContext = (
   testFileMetadata: {} as any,
   $: {} as any,
   globalConfig: {} as any,
-  config: {} as any,
+  reporterConfig: {} as any,
   value: {
     ignored: false,
     historyId: '',

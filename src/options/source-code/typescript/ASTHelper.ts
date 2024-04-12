@@ -1,3 +1,4 @@
+// eslint-disable-next-line node/no-unpublished-import
 import type TypeScript from 'typescript';
 
 export class ASTHelper {

@@ -11,7 +11,10 @@ describe 'CoffeeScript', ->
     counter++
 
   ###*
+  # This comment contains URL to the official CoffeeScript website
   # @tag coffeescript
+  # @url https://coffeescript.org CoffeeScript
+  # @url https://codeschool.com
   ###
   it 'should work well with Allure', ->
     expect(counter).toBeGreaterThan(0)
