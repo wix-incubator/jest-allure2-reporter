@@ -286,7 +286,7 @@ declare module 'jest-allure2-reporter' {
   export type ExecutorCustomizer = PropertyCustomizer<GlobalExtractorContext, ExecutorInfo>;
 
   export type HelpersCustomizer =
-    | PropertyExtractor<GlobalExtractorContext, Helpers>
+    | PropertyExtractor<GlobalExtractorContext, PromisedProperties<Helpers>>
     | HelperCustomizersMap;
 
   export type HelperCustomizersMap = {
@@ -356,42 +356,37 @@ declare module 'jest-allure2-reporter' {
     reporterConfig: unknown;
   }
 
-  export interface TestRunExtractorContext extends GlobalExtractorContext {
-    aggregatedResult: AggregatedResult;
-    result: Partial<PromisedProperties<AllureTestCaseResult>>;
+  export interface TestItemExtractorContext<Value> extends GlobalExtractorContext {
+    result: Partial<PromisedProperties<Value>>;
     testRunMetadata: AllureTestRunMetadata;
   }
 
-  export interface TestFileExtractorContext extends GlobalExtractorContext {
+  export interface TestRunExtractorContext extends TestItemExtractorContext<AllureTestCaseResult> {
     aggregatedResult: AggregatedResult;
-    filePath: string[];
-    testRunMetadata: AllureTestRunMetadata;
-    testFile: TestResult;
-    testFileMetadata: AllureTestFileMetadata;
-    result: Partial<PromisedProperties<AllureTestCaseResult>>;
   }
 
-  export interface TestCaseExtractorContext extends GlobalExtractorContext {
-    aggregatedResult: AggregatedResult;
+  export interface TestFileExtractorContext extends TestItemExtractorContext<AllureTestCaseResult> {
     filePath: string[];
-    testRunMetadata: AllureTestRunMetadata;
     testFile: TestResult;
     testFileMetadata: AllureTestFileMetadata;
+  }
+
+  export interface TestCaseExtractorContext extends TestItemExtractorContext<AllureTestCaseResult> {
+    filePath: string[];
     testCase: TestCaseResult;
     testCaseMetadata: AllureTestCaseMetadata;
-    result: Partial<PromisedProperties<AllureTestCaseResult>>;
+    testFileMetadata: AllureTestFileMetadata;
   }
 
-  export interface TestStepExtractorContext extends GlobalExtractorContext {
-    aggregatedResult: AggregatedResult;
-    filePath: string[];
-    testRunMetadata: AllureTestRunMetadata;
-    testFile?: TestResult;
-    testFileMetadata?: AllureTestFileMetadata;
+  export interface TestStepExtractorContext extends TestItemExtractorContext<AllureTestStepResult> {
+    aggregatedResult?: AggregatedResult;
+
+    filePath?: string[];
     testCase?: TestCaseResult;
     testCaseMetadata?: AllureTestCaseMetadata;
+    testFile?: TestResult;
+    testFileMetadata?: AllureTestFileMetadata;
     testStepMetadata: AllureTestStepMetadata;
-    result: Partial<PromisedProperties<AllureTestCaseResult>>;
   }
 
   export interface Helpers extends HelpersAugmentation {
@@ -452,8 +447,9 @@ declare module 'jest-allure2-reporter' {
   }
 
   export interface ExtractSourceCodeHelper {
-    (metadata: AllureTestItemMetadata, recursive?: never): Promise<ExtractSourceCodeHelperResult | undefined>;
+    (metadata: AllureTestItemMetadata, recursive?: false): Promise<ExtractSourceCodeHelperResult | undefined>;
     (metadata: AllureTestItemMetadata, recursive: true): Promise<ExtractSourceCodeHelperResult[]>;
+    (metadata: AllureTestItemMetadata, recursive: boolean): Promise<MaybeArray<ExtractSourceCodeHelperResult> | undefined>;
   }
 
   export interface GetExecutorInfoHelper {
@@ -463,11 +459,13 @@ declare module 'jest-allure2-reporter' {
 
   export interface ManifestHelper {
     (packageName?: string): Promise<Record<string, any> | undefined>;
-    <T>(packageName: string, callback: ManifestHelperExtractor<T>): Promise<T | undefined>;
-    <T>(packageName: string, callback: ManifestHelperExtractor<T>, defaultValue: T): Promise<T>;
+    <T>(extractor: string[] | ManifestHelperExtractor<T>): Promise<T | undefined>;
+    <T>(extractor: string[] | ManifestHelperExtractor<T>, defaultValue: T): Promise<T>;
+    <T>(packageName: string, extractor: MaybeArray<string> | ManifestHelperExtractor<T>): Promise<T | undefined>;
+    <T>(packageName: string, extractor: MaybeArray<string> | ManifestHelperExtractor<T>, defaultValue: T): Promise<T>;
   }
 
-  export type ManifestHelperExtractor<T> = string | ((manifest: Record<string, any>) => T);
+  export type ManifestHelperExtractor<T> = (manifest: Record<string, any>) => T;
 
   export interface ExtractSourceCodeHelperResult {
     code: string;

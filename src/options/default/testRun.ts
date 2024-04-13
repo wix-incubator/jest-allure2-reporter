@@ -4,25 +4,28 @@ import * as custom from '../custom';
 import { compose2 } from '../common';
 
 export const testRun: TestCaseCustomizer<TestRunExtractorContext> = {
-  ignored: ({ aggregatedResult }) => aggregatedResult.numFailedTestSuites > 0,
-  historyId: ({ result }) => result.fullName ?? String(Math.random()),
-  fullName: async ({ $ }) => $.manifest('', 'name', 'untitled project'),
-  displayName: () => '(test run)',
+  ignored: true,
+  historyId: ({ testRunMetadata, result }) => testRunMetadata.historyId ?? result.fullName,
+  fullName: async ({ $, testRunMetadata }) =>
+    testRunMetadata.fullName ?? $.manifest(['name'], 'untitled project'),
+  displayName: ({ testRunMetadata }) => testRunMetadata.displayName ?? '(test run)',
   description: ({ testRunMetadata }) => testRunMetadata.description?.join('\n\n') ?? '',
   descriptionHtml: async ({ $, result }) => $.markdown2html((await result.description) ?? ''),
-  start: ({ aggregatedResult }) => aggregatedResult.startTime,
-  stop: () => Date.now(),
-  stage: ({ aggregatedResult }) => (aggregatedResult.wasInterrupted ? 'interrupted' : 'finished'),
-  status: ({ aggregatedResult }) =>
-    aggregatedResult.numFailedTestSuites > 0 ? 'failed' : 'passed',
+  start: ({ testRunMetadata, aggregatedResult }) =>
+    testRunMetadata.start ?? aggregatedResult.startTime,
+  stop: ({ testRunMetadata }) => testRunMetadata.stop!,
+  stage: ({ testRunMetadata, aggregatedResult }) =>
+    testRunMetadata.stage ?? (aggregatedResult.wasInterrupted ? 'interrupted' : 'finished'),
+  status: ({ testRunMetadata, aggregatedResult }) =>
+    testRunMetadata.status ?? (aggregatedResult.numFailedTestSuites > 0 ? 'failed' : 'passed'),
   statusDetails: ({ testRunMetadata }) => testRunMetadata.statusDetails,
   attachments: ({ testRunMetadata }) => testRunMetadata.attachments ?? [],
   parameters: compose2(
     custom.parameters<TestRunExtractorContext>({
-      'Suites passed': ({ aggregatedResult }) => aggregatedResult.numPassedTestSuites,
-      'Suites failed': ({ aggregatedResult }) => aggregatedResult.numFailedTestSuites,
-      'Suites broken': ({ aggregatedResult }) => aggregatedResult.numRuntimeErrorTestSuites,
-      'Suites pending': ({ aggregatedResult }) => aggregatedResult.numPendingTestSuites,
+      'a) Suites passed': ({ aggregatedResult }) => aggregatedResult.numPassedTestSuites,
+      'b) Suites failed': ({ aggregatedResult }) => aggregatedResult.numFailedTestSuites,
+      'c) Suites broken': ({ aggregatedResult }) => aggregatedResult.numRuntimeErrorTestSuites,
+      'd) Suites pending': ({ aggregatedResult }) => aggregatedResult.numPendingTestSuites,
     }),
     ({ testRunMetadata }) => testRunMetadata.parameters ?? [],
   ),

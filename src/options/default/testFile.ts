@@ -8,10 +8,10 @@ import { compose2 } from '../common';
 
 export const testFile: TestCaseCustomizer<TestFileExtractorContext> = {
   ignored: ({ testFile }) => !testFile.testExecError,
-  historyId: ({ filePath }) => filePath.join('/'),
-  displayName: ({ filePath }) => filePath.join(path.sep),
-  fullName: ({ globalConfig, testFile }) =>
-    path.relative(globalConfig.rootDir, testFile.testFilePath),
+  historyId: ({ testFileMetadata, result }) => testFileMetadata.historyId ?? result.fullName,
+  displayName: ({ testFileMetadata, filePath }) =>
+    testFileMetadata.displayName ?? filePath.join(path.sep),
+  fullName: ({ filePath }) => filePath.join('/'),
   description: async ({ $, testFileMetadata }) => {
     const text = testFileMetadata.description?.join('\n') ?? '';
     const code = await $.extractSourceCode(testFileMetadata);
@@ -21,9 +21,11 @@ export const testFile: TestCaseCustomizer<TestFileExtractorContext> = {
     $.markdown2html?.((await result.description) ?? '') ?? '',
   start: ({ testFileMetadata }) => testFileMetadata.start!,
   stop: ({ testFileMetadata }) => testFileMetadata.stop!,
-  stage: ({ testFile }) => (testFile.testExecError == null ? 'finished' : 'interrupted'),
-  status: ({ testFile }) => (testFile.testExecError == null ? 'passed' : 'broken'),
-  statusDetails: ({ $, testFile }) => $.stripAnsi(getStatusDetails(testFile.testExecError)),
+  stage: ({ testFileMetadata, testFile }) =>
+    testFileMetadata.stage ?? (testFile.testExecError == null ? 'finished' : 'interrupted'),
+  status: ({ testFileMetadata, testFile }) => testFileMetadata.status ?? getStatus(testFile),
+  statusDetails: ({ $, testFile, testFileMetadata }) =>
+    testFileMetadata.statusDetails ?? $.stripAnsi(getStatusDetails(testFile.testExecError)),
   attachments: ({ testFileMetadata }) => testFileMetadata.attachments ?? [],
   parameters: ({ testFileMetadata }) => testFileMetadata.parameters ?? [],
   labels: compose2(
@@ -35,3 +37,11 @@ export const testFile: TestCaseCustomizer<TestFileExtractorContext> = {
   ),
   links: ({ testFileMetadata }) => testFileMetadata.links ?? [],
 };
+
+function getStatus(testFile: TestFileExtractorContext['testFile']) {
+  if (testFile.testExecError != null) {
+    return 'broken';
+  }
+
+  return testFile.numFailingTests > 0 ? 'failed' : 'passed';
+}

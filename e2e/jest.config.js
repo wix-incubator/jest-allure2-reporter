@@ -27,11 +27,19 @@ const jestAllure2ReporterOptions = {
       'package.version': await $.manifest('', 'version'),
     });
   },
+  sourceCode: {
+  },
   testRun: {
     ignored: false,
+    labels: {
+      thread: 'W',
+    },
   },
   testFile: {
     ignored: false,
+    labels: {
+      thread: ({ value }) => `File ${value.at(-1) || '0'}`,
+    },
   },
   testCase: {
     displayName: ({ testCase }) =>

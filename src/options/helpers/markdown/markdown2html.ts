@@ -1,11 +1,11 @@
 import type { KeyedHelperCustomizer } from 'jest-allure2-reporter';
 
-import type { ReporterFinalConfig } from '../../types';
+import type { ReporterConfig } from '../../types';
 
 import { resolvePlugin } from './resolvePlugin';
 
 export const markdown2html: KeyedHelperCustomizer<'markdown2html'> = async ({ reporterConfig }) => {
-  const config = reporterConfig as ReporterFinalConfig;
+  const config = reporterConfig as ReporterConfig;
   const remark = await import('remark');
   const plugins = await Promise.all(
     [

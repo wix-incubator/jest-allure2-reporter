@@ -3,16 +3,17 @@ import type {
   AllureNestedTestStepMetadata,
   ExtractSourceCodeHelperResult,
   KeyedHelperCustomizer,
+  ExtractSourceCodeHelper,
 } from 'jest-allure2-reporter';
 
 import { log } from '../../../logger';
 import { compactArray } from '../../../utils';
-import type { ReporterFinalConfig } from '../../types';
+import type { ReporterConfig } from '../../types';
 
 export const extractSourceCode: KeyedHelperCustomizer<'extractSourceCode'> = ({
   reporterConfig,
-}): any => {
-  const config = reporterConfig as ReporterFinalConfig;
+}): ExtractSourceCodeHelper => {
+  const config = reporterConfig as ReporterConfig;
 
   async function extractRecursively(
     item: AllureTestItemMetadata,
@@ -61,8 +62,11 @@ export const extractSourceCode: KeyedHelperCustomizer<'extractSourceCode'> = ({
       : undefined;
   }
 
-  return (item: AllureTestItemMetadata, recursive: boolean) =>
-    recursive ? extractRecursively(item) : extractSingle(item);
+  function extractSourceCodeHelper(item: AllureTestItemMetadata, recursive?: boolean): any {
+    return recursive ? extractRecursively(item) : extractSingle(item);
+  }
+
+  return extractSourceCodeHelper;
 };
 
 function isBefore(step: AllureNestedTestStepMetadata): boolean {

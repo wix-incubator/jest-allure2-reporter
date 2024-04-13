@@ -23,6 +23,27 @@ describe('compactObject', () => {
     });
   });
 
+  it('should remove also null values when excludeNulls is true', () => {
+    const object = {
+      a: 1,
+      b: undefined,
+      c: 'hello',
+      d: null,
+      e: {},
+      f: [],
+      g: undefined,
+    };
+
+    const result = compactObject(object, true);
+
+    expect(result).toEqual({
+      a: 1,
+      c: 'hello',
+      e: {},
+      f: [],
+    });
+  });
+
   it('should return an empty object when all values are undefined', () => {
     const object = {
       a: undefined,

@@ -27,7 +27,7 @@ export function testStep<Context extends TestStepExtractorContext>(
 
   return extractors.composite({
     hookType: fallback,
-    steps: fallback,
+    steps: null,
     ignored: extractors.constant(customizer.ignored) ?? fallback,
     displayName: extractors.constant(customizer.displayName) ?? fallback,
     start: extractors.constant(customizer.start) ?? fallback,

@@ -1,17 +1,18 @@
 import type {
   AllureTestCaseResult,
-  AllureTestStepResult,
   PromisedProperties,
   PropertyExtractor,
-  TestRunExtractorContext,
+  TestItemExtractorContext,
 } from 'jest-allure2-reporter';
 
 import { log } from '../logger';
+import { resolvePromisedProperties } from '../utils';
 
-export async function resolvePromisedTestCase<Context extends TestRunExtractorContext>(
+export async function resolvePromisedTestCase<
+  Context extends TestItemExtractorContext<AllureTestCaseResult>,
+>(
   context: Context,
   extractor: PropertyExtractor<Context, PromisedProperties<AllureTestCaseResult>>,
-  stepsExtractor: PropertyExtractor<Context, PromisedProperties<AllureTestStepResult>[]>,
 ): Promise<AllureTestCaseResult | undefined> {
   const promisedItem = preparePromisedItem(context, extractor, 'result');
   try {
@@ -19,16 +20,9 @@ export async function resolvePromisedTestCase<Context extends TestRunExtractorCo
       return;
     }
 
-    const item = await resolvePromisedProperties(promisedItem);
-    const steps = stepsExtractor({ ...context, value: [] });
-    const ignoredSteps = await Promise.all(steps.map((s) => s.ignored));
-    item.steps = await Promise.all(
-      steps.filter((_step, index) => !ignoredSteps[index]).map(resolvePromisedProperties),
-    );
-
-    return item;
+    return resolvePromisedProperties(promisedItem);
   } catch (error: unknown) {
-    log.warn({ err: error }, 'Failed to resolve test case', error);
+    log.error(error, 'Failed to report test case');
     return;
   }
 }
@@ -51,13 +45,4 @@ function preparePromisedItem<Context, ResultKey extends keyof Context, Result>(
   const secondPass = extractor({ ...context, value, [resultKey]: firstPass });
 
   return secondPass;
-}
-
-async function resolvePromisedProperties<T>(maybePromised: PromisedProperties<T>): Promise<T> {
-  const promised = await maybePromised;
-  const entries = Object.entries(promised);
-  const resolvedEntries = await Promise.all(
-    entries.map(async ([key, value]) => [key, await value]),
-  );
-  return Object.fromEntries(resolvedEntries);
 }

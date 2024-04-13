@@ -33,6 +33,12 @@ export function assertFunction(function_: unknown): asserts function_ is Functio
   }
 }
 
+export function assertArray(value: unknown, name = 'value'): asserts value is unknown[] {
+  if (!Array.isArray(value)) {
+    throw new TypeError(`Expected an array ${name}, got instead: ${util.inspect(value)}`);
+  }
+}
+
 export function assertSeverity(value: unknown): asserts value is Severity {
   if (!SEVERITY_VALUES.has(value as Severity)) {
     throw new TypeError(`Expected a valid severity level, got instead: ${util.inspect(value)}`);

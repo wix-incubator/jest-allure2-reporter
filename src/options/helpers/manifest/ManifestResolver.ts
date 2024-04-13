@@ -3,6 +3,8 @@ import _ from 'lodash';
 import pkgUp from 'pkg-up';
 import type { ManifestHelper, ManifestHelperExtractor } from 'jest-allure2-reporter';
 
+import { log } from '../../../logger';
+
 export type ImportModuleFunction = (
   path: string,
 ) => Record<string, any> | Promise<Record<string, any>>;
@@ -16,33 +18,46 @@ export class ManifestResolver {
     this.importFn = importFunction;
   }
 
-  public extract: ManifestHelper = async <T>(
-    packageName?: string,
-    maybeCallback?: ManifestHelperExtractor<T>,
-    defaultValue?: T,
+  public extract: ManifestHelper = async (
+    maybePackageName: unknown,
+    maybeExtractor?: unknown,
+    maybeDefaultValue?: unknown,
   ): Promise<any> => {
+    let packageName: string | undefined;
+    let extractor: ManifestHelperExtractor<unknown> | string[] | string | undefined;
+    let defaultValue: unknown;
+
+    if (typeof maybePackageName === 'function' || Array.isArray(maybePackageName)) {
+      packageName = undefined;
+      extractor = maybePackageName as ManifestHelperExtractor<unknown> | string[];
+      defaultValue = maybeExtractor;
+    } else {
+      packageName = maybePackageName as string;
+      extractor = maybeExtractor as typeof extractor;
+      defaultValue = maybeDefaultValue;
+    }
+
+    const what = packageName ? `"${packageName}"` : 'the current project';
     const manifestPath = await this.resolveManifestPath(packageName);
     if (!manifestPath) {
-      // TODO: log warning
+      log.warn(`Cannot find package.json for ${what}`);
       return defaultValue;
     }
 
     try {
       const manifest = await this.importFn(manifestPath);
 
-      if (typeof maybeCallback === 'function') {
-        const callback = maybeCallback;
-        return callback(manifest as any) ?? defaultValue;
+      if (typeof extractor === 'function') {
+        return extractor(manifest as any) ?? defaultValue;
       }
 
-      if (typeof maybeCallback === 'string') {
-        const propertyPath = maybeCallback.split('.');
-        return _.get(manifest, propertyPath, defaultValue);
+      if (typeof extractor === 'string' || Array.isArray(extractor)) {
+        return _.get(manifest, extractor, defaultValue);
       }
 
       return manifest;
-    } catch {
-      // TODO: log error
+    } catch (error: unknown) {
+      log.error(error, `Failed to extract package.json for ${what}`);
       return;
     }
   };

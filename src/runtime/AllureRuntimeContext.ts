@@ -7,6 +7,7 @@ import Handlebars from 'handlebars';
 
 import { once, TaskQueue } from '../utils';
 import { AllureMetadataProxy, AllureTestItemMetadataProxy } from '../metadata';
+import { log } from '../logger';
 
 import type { AllureRuntimeConfig } from './AllureRuntimeConfig';
 import * as attachmentHandlers from './attachment-handlers';
@@ -49,8 +50,7 @@ export class AllureRuntimeContext {
 
     const taskQueue = new TaskQueue({
       logError(error) {
-        // TODO: print Bunyamin warning
-        throw error;
+        log.error(error, 'Allure Runtime Task Queue Error');
       },
     });
 

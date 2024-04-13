@@ -1,15 +1,4 @@
-import _ from 'lodash';
-
-export const attempt = _.attempt;
-export const compactArray = _.compact;
-export const constant = _.constant;
-export const groupBy = _.groupBy;
-export const isObject = _.isObject;
-export const mapValues = _.mapValues;
-export const once = _.once;
-export const last = _.last;
-export const uniq = _.uniq;
-
+export * from './vendor';
 export * from './asArray';
 export * from './autoIndent';
 export * from './compactObject';
@@ -24,9 +13,10 @@ export * from './isPromiseLike';
 export * from './maybePromiseAll';
 export * from './md5';
 export * from './onceWithLoopDetection';
-export * from './thruMaybePromise';
+export * from './resolvePromisedProperties';
 export * from './shallowEqualArrays';
 export * from './stringifyValues';
+export * from './thruMaybePromise';
 export * from './TaskQueue';
 export * as typeAssertions from './typeAssertions';
 export * from './types';

@@ -42,6 +42,6 @@ export function testCase<Context extends TestCaseExtractorContext>(
     parameters: parameters(customizer.parameters) ?? fallback,
     labels: custom.labels(customizer.labels) ?? fallback,
     links: custom.links(customizer.links) ?? fallback,
-    steps: fallback,
+    steps: null,
   } as TestCaseCompositeExtractor<Context>);
 }

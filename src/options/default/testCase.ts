@@ -1,5 +1,3 @@
-import path from 'node:path';
-
 import type { TestCaseResult } from '@jest/reporters';
 import type {
   Label,
@@ -15,7 +13,7 @@ import { getStatusDetails, isNonNullish } from '../../utils';
 
 export const testCase: TestCaseCustomizer<TestCaseExtractorContext> = {
   ignored: () => false,
-  historyId: ({ testCase, testCaseMetadata }) => testCaseMetadata.historyId ?? testCase.fullName,
+  historyId: ({ testCaseMetadata, result }) => testCaseMetadata.historyId ?? result.fullName,
   displayName: ({ testCase, testCaseMetadata }) => testCaseMetadata.displayName ?? testCase.title,
   fullName: ({ testCase, testCaseMetadata }) => testCaseMetadata.fullName ?? testCase.fullName,
   description: async ({ $, testCaseMetadata }) => {
@@ -41,8 +39,7 @@ export const testCase: TestCaseCustomizer<TestCaseExtractorContext> = {
   parameters: ({ testCaseMetadata }) => testCaseMetadata.parameters ?? [],
   labels: compose2(
     custom.labels<TestCaseExtractorContext>({
-      suite: ({ testCase, testFile }) =>
-        testCase.ancestorTitles[0] ?? path.basename(testFile.testFilePath),
+      suite: ({ testCase, filePath }) => testCase.ancestorTitles[0] ?? filePath.at(-1),
       subSuite: ({ testCase }) => testCase.ancestorTitles.slice(1).join(' '),
       thread: ({ testCaseMetadata }) => testCaseMetadata.workerId,
     }),
@@ -79,7 +76,6 @@ function getTestCaseStatus(testCase: TestCaseResult): Status {
   }
 }
 
-// TODO: include JestAllure2Error as well
 function looksLikeBroken(errorMessage: string): boolean {
   return errorMessage
     ? errorMessage.startsWith('Error: \n') ||
@@ -88,7 +84,11 @@ function looksLikeBroken(errorMessage: string): boolean {
         errorMessage.startsWith('ReferenceError:') ||
         errorMessage.startsWith('SyntaxError:') ||
         errorMessage.startsWith('TypeError:') ||
-        errorMessage.startsWith('URIError:')
+        errorMessage.startsWith('URIError:') ||
+        errorMessage.startsWith('AggregateError:') ||
+        errorMessage.startsWith('InternalError:') ||
+        errorMessage.startsWith('AllureRuntimeError:') ||
+        errorMessage.startsWith('AllureReporterError:')
     : true;
 }
 

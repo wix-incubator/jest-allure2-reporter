@@ -46,12 +46,10 @@ export const createTestCaseContext = (
   PromisedProperties<AllureTestCaseResult>
 > => ({
   result: {},
-  aggregatedResult: {} as any,
   testRunMetadata: {} as any,
   testCase: {} as any,
   testCaseMetadata: {} as any,
   filePath: [],
-  testFile: {} as any,
   testFileMetadata: {} as any,
   $: {} as any,
   globalConfig: {} as any,

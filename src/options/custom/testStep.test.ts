@@ -107,7 +107,7 @@ describe('testStepCustomizer', () => {
 
   test.each`
     property      | defaultValue    | customValue
-    ${'steps'}    | ${[]}           | ${[]}
+    ${'steps'}    | ${undefined}    | ${[]}
     ${'hookType'} | ${'beforeEach'} | ${'afterEach'}
   `(
     'should not be able to customize $property',
