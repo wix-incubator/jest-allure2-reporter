@@ -6,7 +6,6 @@ module.exports = {
       inline: true,
     });
 
-    process.stdout.write(js);
     return {
       code: js,
     };

@@ -28,6 +28,9 @@ const jestAllure2ReporterOptions = {
     });
   },
   sourceCode: {
+    plugins: {
+      coffee: require('./coffee-plugin'),
+    },
   },
   testRun: {
     ignored: false,
@@ -70,7 +73,7 @@ module.exports = {
   reporters: ['default', ['jest-allure2-reporter', jestAllure2ReporterOptions]],
   rootDir: './src/programmatic/grouping',
   transform: {
-    '^.+\\.coffee$': path.join(__dirname, 'coffee-machine.js'),
+    '^.+\\.coffee$': path.join(__dirname, 'coffee-transformer.js'),
   },
   testEnvironment: 'jest-allure2-reporter/environment-node',
   testMatch: ['<rootDir>/**/*.test.ts', '<rootDir>/**/*.test.coffee'],
