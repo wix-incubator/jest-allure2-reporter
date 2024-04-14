@@ -1,12 +1,13 @@
 /**
  * This suite checks how default and custom naming works for test files, test cases and test steps.
  *
+ * ---
+ *
  * @tag displayName
  * @tag fullName
  * @tag description
  */
-
-import { allure } from 'jest-allure2-reporter/api';
+import { allure, $Description, $DisplayName, $FullName, $Link } from 'jest-allure2-reporter/api';
 
 describe('Names', () => {
   // Regular beforeAll
@@ -15,7 +16,9 @@ describe('Names', () => {
   /** Docblock beforeAll */
   beforeAll(() => {
   });
-
+  $DisplayName('DSL beforeAll');
+  beforeAll(() => {
+  });
   beforeAll(() => {
     allure.displayName('Programmatic beforeAll');
   });
@@ -24,6 +27,9 @@ describe('Names', () => {
   afterEach(() => {
   });
   /** Docblock afterEach */
+  afterEach(() => {
+  });
+  $DisplayName('DSL afterEach');
   afterEach(() => {
   });
   afterEach(() => {
@@ -38,6 +44,13 @@ describe('Names', () => {
    * @url https://jestjs.io/docs/en/api#testname-fn-timeout Jest Docs
    */
   test('Docblock test', () => {
+  });
+
+  $DisplayName('DSL test (custom)');
+  $FullName('Names - DSL test (custom)');
+  $Description('Extra description (DSL)');
+  $Link('https://jestjs.io/docs/en/api#testname-fn-timeout', '📖 Jest Docs');
+  test('DSL test', () => {
   });
 
   test('Programmatic test', () => {

@@ -7,6 +7,7 @@ export * from './decorators';
 export const allure = realm.runtime as AllureRuntime;
 
 export type {
+  AllureRuntime,
   AllureRuntimePluginCallback,
   AllureRuntimePluginContext,
   AttachmentContent,
@@ -18,8 +19,8 @@ export type {
   FileAttachmentContext,
   FileAttachmentHandler,
   FileAttachmentOptions,
-  AllureRuntime,
   MIMEInferer,
   MIMEInfererContext,
+  ParameterOptions,
   UserParameter,
 } from '../runtime';

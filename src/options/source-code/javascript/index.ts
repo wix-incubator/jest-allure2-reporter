@@ -2,6 +2,7 @@ import type { SourceCodePluginCustomizer } from 'jest-allure2-reporter';
 import { extract, parseWithComments, strip } from 'jest-docblock';
 
 import { autoIndent } from '../../../utils';
+import { detectJS } from '../common';
 
 import { extractDocblockAbove } from './extractDocblockAbove';
 
@@ -12,15 +13,11 @@ export type JavaScriptSourceCodePluginOptions = {
 export const javascript: SourceCodePluginCustomizer = ({ $, value = {} }) => {
   const options = value as JavaScriptSourceCodePluginOptions;
 
-  function detectLanguage(fileName: string | undefined) {
-    return fileName && /\.m?jsx?$/.test(fileName) ? 'javascript' : undefined;
-  }
-
   return {
     name: 'javascript',
 
     detectLanguage({ fileName }) {
-      return detectLanguage(fileName);
+      return detectJS(fileName);
     },
 
     extractSourceCode: ({ fileName, lineNumber, transformedCode }) => {
@@ -36,7 +33,7 @@ export const javascript: SourceCodePluginCustomizer = ({ $, value = {} }) => {
     },
 
     extractDocblock: ({ fileName, lineNumber }) => {
-      if (fileName && detectLanguage(fileName)) {
+      if (fileName && detectJS(fileName)) {
         return $.getFileNavigator(fileName).then((navigator) => {
           if (!navigator) return;
 

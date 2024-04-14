@@ -1,5 +1,5 @@
+import type { Severity } from 'jest-allure2-reporter';
+
 import { $Label } from './$Label';
 
-export type SeverityType = 'blocker' | 'critical' | 'normal' | 'minor' | 'trivial';
-
-export const $Severity = (value: SeverityType) => $Label('severity', value);
+export const $Severity = (value: Severity) => $Label('severity', value);
