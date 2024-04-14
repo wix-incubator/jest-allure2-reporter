@@ -28,6 +28,8 @@ const ALL_LABELS = Object.keys(
   }),
 ) as LabelName[];
 
+const isMultiLabel = (name: LabelName) => name === 'tag';
+
 export function mapTestStepDocblock({ comments }: AllureTestItemDocblock): AllureTestStepMetadata {
   const metadata: AllureTestStepMetadata = {};
   if (comments) {
@@ -41,7 +43,9 @@ export function mapTestCaseDocblock(context: AllureTestItemDocblock): AllureTest
   const metadata: AllureTestCaseMetadata = {};
   const { comments, pragmas = {} } = context;
 
-  const labels = ALL_LABELS.flatMap((name) => asArray(pragmas[name]).map(createLabelMapper(name)));
+  const labels = ALL_LABELS.flatMap((name) =>
+    asArray(pragmas[name]).flatMap(createLabelMapper(name)),
+  );
 
   if (labels.length > 0) metadata.labels = labels;
 
@@ -66,7 +70,13 @@ export function mapTestCaseDocblock(context: AllureTestItemDocblock): AllureTest
 export const mapTestFileDocblock = mapTestCaseDocblock;
 
 function createLabelMapper(name: LabelName) {
-  return (value: string): Label => ({ name, value });
+  return isMultiLabel(name)
+    ? (line: string): Label[] => commaSplit(line).map((value) => ({ name, value }))
+    : (value: string): Label[] => [{ name, value }];
+}
+
+function commaSplit(value: string): string[] {
+  return value.includes(',') ? value.split(/\s*,\s*/) : [value];
 }
 
 function linkMapper(value: string): Link {
