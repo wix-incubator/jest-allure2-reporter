@@ -27,9 +27,12 @@ export function assertPrimitive(value: unknown, name = 'value'): asserts value i
   throw new TypeError(`Expected a primitive ${name}, got instead: ${util.inspect(value)}`);
 }
 
-export function assertFunction(function_: unknown): asserts function_ is Function {
+export function assertFunction(
+  function_: unknown,
+  name = 'function',
+): asserts function_ is Function {
   if (typeof function_ !== 'function') {
-    throw new TypeError(`Expected a function, got instead: ${util.inspect(function_)}`);
+    throw new TypeError(`Expected a ${name}, got instead: ${util.inspect(function_)}`);
   }
 }
 
