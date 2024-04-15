@@ -1,12 +1,11 @@
 // eslint-disable-next-line node/no-extraneous-require,@typescript-eslint/no-var-requires,import/no-extraneous-dependencies
 const path = require('node:path');
 
-const _ = require('lodash');
 const ALLURE_PRESET = process.env.ALLURE_PRESET ?? 'default';
 
 /** @type {import('jest-allure2-reporter').ReporterOptions} */
 const jestAllure2ReporterOptions = {
-  resultsDir: `allure-results/${ALLURE_PRESET}`,
+  resultsDir: `allure-results`,
   categories: [
     {
       name: 'Snapshot mismatches',
@@ -22,9 +21,9 @@ const jestAllure2ReporterOptions = {
   environment: async ({ $  }) => {
     return ({
       'version.node': process.version,
-      'version.jest': await $.manifest('jest', 'version'),
-      'package.name': await $.manifest('', 'name'),
-      'package.version': await $.manifest('', 'version'),
+      'version.jest': await $.manifest('jest', ['version']),
+      'package.name': await $.manifest(m => m.name),
+      'package.version': await $.manifest(['version']),
     });
   },
   sourceCode: {
@@ -32,36 +31,23 @@ const jestAllure2ReporterOptions = {
       coffee: require('./coffee-plugin'),
     },
   },
-  testRun: {
-    ignored: false,
-    labels: {
-      thread: 'W',
-    },
-  },
-  testFile: {
-    ignored: false,
-    labels: {
-      thread: ({ value }) => `File ${value.at(-1) || '0'}`,
-    },
-  },
   testCase: {
-    displayName: ({ testCase }) =>
-      [...testCase.ancestorTitles, testCase.title].join(' » '),
+    historyId: ({ testCaseMetadata, filePath, testCase }) => {
+      return testCaseMetadata.historyId ?? `${filePath.join('/')}:${testCase.fullName}`;
+    },
     labels: {
-      parentSuite: ({ filePath }) => filePath[0],
-      suite: ({ filePath }) => filePath.slice(1, 2).join('/'),
-      subSuite: ({ filePath }) => filePath.slice(2).join('/'),
-      epic: ({ value }) => value ?? 'Uncategorized',
-      story: ({ value }) => value ?? 'Untitled story',
-      feature: async ({ value }) => (await value) ?? 'Untitled feature',
-      package: ({ filePath }) => filePath.slice(0, -1).join('.'),
-      testClass: ({ filePath }) => filePath.join('.').replace(/\.test\.[jt]s$/, ''),
-      testMethod: ({ testCase }) => testCase.fullName,
-      owner: ({ value }) => value ?? 'Unknown',
+      parentSuite: ({ value, filePath }) => value.length ? value : filePath.join('/'),
+      epic: ({ value }) => value.length ? value : 'Untitled epic',
+      feature: ({ value }) => value.length ? value : 'Untitled feature',
+      story: ({ value }) => value.length ? value : 'Untitled story',
     },
     links: {
-      issue: 'https://youtrack.jetbrains.com/issue/{{name}}',
+      issue: 'https://issues.apache.org/jira/browse/{{name}}',
+      tms: 'https://test.testrail.io/index.php?/cases/view/{{name}}',
     },
+  },
+  testStep: {
+    ignored: ({ testStepMetadata }) => testStepMetadata.displayName?.includes('(Jest)'),
   },
 };
 
@@ -71,12 +57,11 @@ module.exports = {
   moduleFileExtensions: ['js', 'ts', 'coffee'],
   preset: 'ts-jest',
   reporters: ['default', ['jest-allure2-reporter', jestAllure2ReporterOptions]],
-  rootDir: './src/programmatic/grouping',
   transform: {
     '^.+\\.coffee$': path.join(__dirname, 'coffee-transformer.js'),
   },
   testEnvironment: 'jest-allure2-reporter/environment-node',
-  testMatch: ['<rootDir>/**/*.test.ts', '<rootDir>/**/*.test.coffee'],
+  testMatch: ['<rootDir>/**/*.test.ts', '<rootDir>/tests/**/*.*'],
 
   ...require(`./presets/${ALLURE_PRESET}`),
 };

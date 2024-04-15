@@ -22,8 +22,11 @@ export const testCase: TestCaseCustomizer<TestCaseExtractorContext> = {
     const snippets = codes.map($.source2markdown);
     return [text, ...snippets].filter(isNonNullish).join('\n\n');
   },
-  descriptionHtml: async ({ $, result }) =>
-    $.markdown2html?.((await result.description) ?? '') ?? '',
+  descriptionHtml: async ({ $, testCaseMetadata, result }) => {
+    const html = testCaseMetadata.descriptionHtml?.join('\n\n') ?? '';
+    const md2html = (await $.markdown2html?.((await result.description) ?? '')) ?? '';
+    return [html, md2html].filter(isNonNullish).join('\n\n');
+  },
   start: ({ testCase, testCaseMetadata }) =>
     testCaseMetadata.start ?? (testCaseMetadata.stop ?? Date.now()) - (testCase.duration ?? 0),
   stop: ({ testCaseMetadata }) => testCaseMetadata.stop ?? Date.now(),

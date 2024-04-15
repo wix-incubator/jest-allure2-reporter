@@ -17,8 +17,11 @@ export const testFile: TestCaseCustomizer<TestFileExtractorContext> = {
     const code = await $.extractSourceCode(testFileMetadata);
     return [text, $.source2markdown(code)].filter(isNonNullish).join('\n\n');
   },
-  descriptionHtml: async ({ $, result }) =>
-    $.markdown2html?.((await result.description) ?? '') ?? '',
+  descriptionHtml: async ({ $, testFileMetadata, result }) => {
+    const html = testFileMetadata.descriptionHtml?.join('\n\n') ?? '';
+    const md2html = (await $.markdown2html?.((await result.description) ?? '')) ?? '';
+    return [html, md2html].filter(isNonNullish).join('\n\n');
+  },
   start: ({ testFileMetadata }) => testFileMetadata.start!,
   stop: ({ testFileMetadata }) => testFileMetadata.stop!,
   stage: ({ testFileMetadata, testFile }) =>

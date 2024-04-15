@@ -2,6 +2,7 @@ import type { TestCaseCustomizer, TestRunExtractorContext } from 'jest-allure2-r
 
 import * as custom from '../custom';
 import { compose2 } from '../common';
+import { isNonNullish } from '../../utils';
 
 export const testRun: TestCaseCustomizer<TestRunExtractorContext> = {
   ignored: true,
@@ -10,7 +11,11 @@ export const testRun: TestCaseCustomizer<TestRunExtractorContext> = {
     testRunMetadata.fullName ?? $.manifest(['name'], 'untitled project'),
   displayName: ({ testRunMetadata }) => testRunMetadata.displayName ?? '(test run)',
   description: ({ testRunMetadata }) => testRunMetadata.description?.join('\n\n') ?? '',
-  descriptionHtml: async ({ $, result }) => $.markdown2html((await result.description) ?? ''),
+  descriptionHtml: async ({ $, testRunMetadata, result }) => {
+    const html = testRunMetadata.descriptionHtml?.join('\n\n') ?? '';
+    const md2html = (await $.markdown2html?.((await result.description) ?? '')) ?? '';
+    return [html, md2html].filter(isNonNullish).join('\n\n');
+  },
   start: ({ testRunMetadata, aggregatedResult }) =>
     testRunMetadata.start ?? aggregatedResult.startTime,
   stop: ({ testRunMetadata }) => testRunMetadata.stop!,
