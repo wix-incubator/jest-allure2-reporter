@@ -5,7 +5,7 @@
   "scripts": {
     "test": "jest || true",
     "build": ":",
-    "start": "ALLURE_NO_ANALYTICS=1 allure serve allure-results/default",
+    "start": "ALLURE_NO_ANALYTICS=1 allure serve allure-results",
     "start:dev": "npm run build --workspace=jest-allure2-reporter && npm test && npm start"
   },
   "devDependencies": {

@@ -1,20 +1,13 @@
 describe('Test suite', () => {
   /**
-   * @displayName Custom "beforeEach" hook
-   */
-  beforeEach(() => {
-    // Hooks can be renamed too
-  });
-
-  /**
-   * @displayName 1 + 1 = 2
+   * @fullName Arithmetic > Addition > Valid assertion
    */
   test('First test', () => {
     expect(1 + 1).toBe(2);
   });
 
   /**
-   * @displayName 2 + 2 = 3
+   * @fullName Arithmetic > Addition > Invalid assertion
    */
   test('Second test', () => {
     expect(2 + 2).toBe(3);

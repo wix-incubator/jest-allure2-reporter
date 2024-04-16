@@ -30,9 +30,16 @@ const ALL_LABELS = Object.keys(
 
 const isMultiLabel = (name: LabelName) => name === 'tag';
 
-export function mapTestStepDocblock({ comments }: AllureTestItemDocblock): AllureTestStepMetadata {
+const asSingle = <T>(value: T | T[]): T => (Array.isArray(value) ? value.at(-1)! : value);
+
+export function mapTestStepDocblock({
+  comments,
+  pragmas,
+}: AllureTestItemDocblock): AllureTestStepMetadata {
   const metadata: AllureTestStepMetadata = {};
-  if (comments) {
+  if (pragmas?.displayName) {
+    metadata.displayName = asSingle(pragmas.displayName);
+  } else if (comments) {
     metadata.displayName = comments;
   }
 
@@ -62,6 +69,23 @@ export function mapTestCaseDocblock(context: AllureTestItemDocblock): AllureTest
 
   if (pragmas.descriptionHtml) {
     metadata.descriptionHtml = asArray(pragmas.descriptionHtml);
+  }
+
+  if (pragmas.historyId) {
+    metadata.historyId = asSingle(pragmas.historyId);
+  }
+
+  if (pragmas.displayName) {
+    metadata.displayName = asSingle(pragmas.displayName);
+  }
+
+  if (pragmas.fullName) {
+    metadata.fullName = asSingle(pragmas.fullName);
+  }
+
+  if (pragmas.threadId) {
+    // TODO: rename to threadId ?
+    metadata.workerId = asSingle(pragmas.threadId);
   }
 
   return metadata;
