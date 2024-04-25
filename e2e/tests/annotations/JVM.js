@@ -1,7 +1,6 @@
-$Package('com.example')
-$TestClass('com.example.MyService')
+$Package('jest-allure2-reporter.e2e.annotations')
 describe('My service', () => {
-  $TestMethod('logMessage')
+  $TestMethod('JVM: My service should log a message')
   test('should log a message', () => {
     // 1) Instantiate com.example.MyService
     // 2) Make RPC call to its logMessage(...)

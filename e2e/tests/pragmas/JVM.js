@@ -1,11 +1,10 @@
 /**
- * @package com.example
- * @testClass com.example.MyService
+ * @package jest-allure2-reporter.e2e.pragmas
  */
 
 describe('My service', () => {
   /**
-   * @testMethod logMessage
+   * @testMethod JVM: My service should log a message
    */
   test('should log a message', () => {
     // 1) Instantiate com.example.MyService

@@ -3,7 +3,7 @@
   "compilerOptions": {
     "module": "node16",
     "ignoreDeprecations": "5.0",
-    "experimentalDecorators": true,
+    "experimentalDecorators": false,
     "noEmit": true,
     "types": ["node", "jest", "jest-allure2-reporter/globals"]
   }
