@@ -6,4 +6,6 @@ describe('Screenshot tests', () => {
     allure.fileAttachment('fixtures/screenshots/actual.png', 'actual');
     allure.fileAttachment('fixtures/screenshots/diff.png', 'diff');
   });
+
+  test('This will fail with a timeout', (_done) => {});
 });

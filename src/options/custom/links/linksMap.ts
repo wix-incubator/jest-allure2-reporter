@@ -29,7 +29,7 @@ export function linksMap<Context>(
   const customizerKeys = Object.keys(simplifiedCustomizer);
 
   return async ({ value, ...context }) => {
-    return thruMaybePromise<Link[]>(value, (value): MaybePromise<Link[]> => {
+    return thruMaybePromise(value, (value): MaybePromise<Link[]> => {
       const links = groupBy(value, 'type');
       const keys = uniq([...customizerKeys, ...Object.keys(links)]);
       const batches: MaybePromise<MaybeNullish<MaybeArray<Link>>>[] = keys.map((key) => {

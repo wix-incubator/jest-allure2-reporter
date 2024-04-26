@@ -115,19 +115,19 @@ function mergeStatusDetails(
   a: AllureTestItemMetadata,
   b: AllureTestItemMetadata,
 ): StatusDetails | undefined {
-  if (a.status === 'broken') {
+  if (a.status === 'broken' && a.statusDetails) {
     return a.statusDetails;
   }
 
-  if (b.status === 'broken') {
+  if (b.status === 'broken' && b.statusDetails) {
     return b.statusDetails;
   }
 
-  if (a.status === 'failed') {
+  if (a.status === 'failed' && a.statusDetails) {
     return a.statusDetails;
   }
 
-  if (b.status === 'failed') {
+  if (b.status === 'failed' && b.statusDetails) {
     return b.statusDetails;
   }
 

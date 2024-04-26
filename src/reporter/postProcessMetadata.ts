@@ -7,6 +7,7 @@ import type { TestFileMetadata } from 'jest-metadata';
 
 import { AllureMetadataProxy } from '../metadata';
 import type { ReporterConfig } from '../options';
+import { log } from '../logger';
 
 export async function postProcessMetadata(
   globalContext: GlobalExtractorContext,
@@ -32,10 +33,17 @@ export async function postProcessMetadata(
         transformedCode: allureProxy.get('transformedCode'),
       };
       for (const p of config.sourceCode.plugins) {
-        const docblock = await p.extractDocblock?.(context);
-        if (docblock) {
-          allureProxy.assign({ docblock });
-          break;
+        try {
+          const docblock = await p.extractDocblock?.(context);
+          if (docblock) {
+            allureProxy.assign({ docblock });
+            break;
+          }
+        } catch (error: unknown) {
+          log.warn(
+            error,
+            `Plugin "${p.name}" failed to extract docblock for ${context.fileName}:${context.lineNumber}:${context.columnNumber}`,
+          );
         }
       }
     }),

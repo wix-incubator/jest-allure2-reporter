@@ -27,6 +27,6 @@ export function appenderExtractor<Context, R>(
 
   const value = Array.isArray(maybeExtractor) ? maybeExtractor : [maybeExtractor as R];
   return (context) => {
-    return thruMaybePromise<R[]>(context.value, (base) => [...base, ...value]);
+    return thruMaybePromise(context.value, (base) => [...base, ...value]);
   };
 }

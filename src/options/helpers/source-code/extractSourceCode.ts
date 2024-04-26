@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import type {
   AllureTestItemMetadata,
   AllureNestedTestStepMetadata,
@@ -8,7 +7,7 @@ import type {
 } from 'jest-allure2-reporter';
 
 import { log } from '../../../logger';
-import { compactArray } from '../../../utils';
+import { compactArray, defaults, isEmpty } from '../../../utils';
 import type { ReporterConfig } from '../../types';
 
 export const extractSourceCode: KeyedHelperCustomizer<'extractSourceCode'> = ({
@@ -38,7 +37,7 @@ export const extractSourceCode: KeyedHelperCustomizer<'extractSourceCode'> = ({
     log.trace(context, 'Extracting source code');
     for (const p of plugins) {
       try {
-        result = _.defaults(result, await p.extractSourceCode?.(context));
+        result = defaults(result, await p.extractSourceCode?.(context));
       } catch (error: unknown) {
         log.warn(
           error,
@@ -50,7 +49,7 @@ export const extractSourceCode: KeyedHelperCustomizer<'extractSourceCode'> = ({
       }
     }
 
-    return _.isEmpty(result) ? undefined : result;
+    return isEmpty(result) ? undefined : result;
   }
 
   function extractSourceCodeHelper(item: AllureTestItemMetadata, recursive?: boolean): any {

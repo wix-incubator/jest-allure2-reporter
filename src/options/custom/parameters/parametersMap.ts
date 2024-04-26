@@ -23,7 +23,7 @@ export function parametersMap<Context>(
   const customizerKeys = Object.keys(simplifiedCustomizer);
 
   return async (context) => {
-    return thruMaybePromise<Parameter[]>(context.value, (value) => {
+    return thruMaybePromise(context.value, (value) => {
       const parameters = groupBy(value, 'name');
       const keys = uniq([...customizerKeys, ...Object.keys(parameters)]);
       const batches: MaybePromise<Parameter | undefined>[] = keys.map((key) => {
@@ -32,10 +32,7 @@ export function parametersMap<Context>(
         return keyedCustomizer ? keyedCustomizer(keyedContext) : keyedContext.value;
       });
 
-      return maybePromiseAll<Parameter | undefined, Parameter[]>(
-        batches,
-        (batch) => compactArray(batch) as Parameter[],
-      );
+      return maybePromiseAll(batches, (batch) => compactArray(batch) as Parameter[]);
     });
   };
 }

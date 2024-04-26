@@ -47,7 +47,7 @@ describe('AllureRuntime', () => {
       runtime.attachment('attachment4', message, 'text/plain');
 
       const error = new Error('Async error');
-      error.stack = 'Test stack';
+      error.stack = 'Error: Async error\n    at innerStep3';
       throw error;
     });
 
@@ -56,7 +56,7 @@ describe('AllureRuntime', () => {
         runtime.step('inner step 1', () => {
           runtime.attachment('attachment2', 'second', 'text/plain');
           const error = new Error('Sync error');
-          error.stack = 'Test stack';
+          error.stack = 'Error: Sync error\n    at innerStep1';
           // Simulating Jest assertion error
           Object.assign(error, { matcherResult: undefined });
           throw error;

@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
-import _ from 'lodash';
 import type { ExecutorInfo } from 'jest-allure2-reporter';
 
+import { snakeCase } from '../../../../../utils';
 import { type ExecutorInfoProvider, getOSDetails } from '../common';
 
 export interface GitHubEnvironment {
@@ -94,6 +94,6 @@ export class GitHubInfoProvider implements ExecutorInfoProvider {
   private _findJob(jobs: Job[]): Job | undefined {
     const { GITHUB_JOB } = this.environment;
 
-    return jobs.length === 1 ? jobs[0] : jobs.find((job) => _.snakeCase(job.name) === GITHUB_JOB);
+    return jobs.length === 1 ? jobs[0] : jobs.find((job) => snakeCase(job.name) === GITHUB_JOB);
   }
 }

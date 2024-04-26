@@ -27,11 +27,14 @@ export const typescript: SourceCodePluginCustomizer = async ({ $ }) => {
       return canProcess(context)
         ? $.getFileNavigator(context.fileName).then((navigator) => {
             if (!navigator) return;
+            if (!navigator.jump(context.lineNumber)) return;
+            const lineNumber = context.lineNumber;
+            const columnNumber = Math.min(context.columnNumber, navigator.readLine().length);
 
             const ast =
               hast.getAST(context.fileName) ||
               hast.parseAST(context.fileName, navigator.getContent());
-            const expression = hast.findNodeInAST(ast, context.lineNumber, context.columnNumber);
+            const expression = hast.findNodeInAST(ast, lineNumber, columnNumber);
             const code = autoIndent(ast.text.slice(expression.getStart(), expression.getEnd()));
             navigator.jumpToPosition(expression.getStart());
             const [startLine] = navigator.getPosition();
@@ -53,11 +56,14 @@ export const typescript: SourceCodePluginCustomizer = async ({ $ }) => {
       return canProcess(context)
         ? $.getFileNavigator(context.fileName).then((navigator) => {
             if (!navigator) return;
+            if (!navigator.jump(context.lineNumber)) return;
+            const lineNumber = context.lineNumber;
+            const columnNumber = Math.min(context.columnNumber, navigator.readLine().length);
 
             const ast =
               hast.getAST(context.fileName) ||
               hast.parseAST(context.fileName, navigator.getContent());
-            const expression = hast.findNodeInAST(ast, context.lineNumber, context.columnNumber);
+            const expression = hast.findNodeInAST(ast, lineNumber, columnNumber);
             const fullStart = expression.getFullStart();
             const start = expression.getStart();
             const docblock = extract(ast.text.slice(fullStart, start).trim());

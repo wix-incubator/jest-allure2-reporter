@@ -1,5 +1,6 @@
-import _ from 'lodash';
 import type { SourceCodePluginCustomizer } from 'jest-allure2-reporter';
+
+import { merge } from '../../../utils';
 
 export type FallbackSourceCodePluginOptions = {
   languagePatterns?: Record<string, Array<string | RegExp>>;
@@ -15,7 +16,7 @@ function compilePatterns(record: Record<string, Array<string | RegExp>> | undefi
 }
 
 export const file: SourceCodePluginCustomizer = ({ $, value = {} }) => {
-  const options = _.merge(
+  const options = merge(
     {
       languagePatterns: {
         javascript: [/\.[cm]?jsx?$/],

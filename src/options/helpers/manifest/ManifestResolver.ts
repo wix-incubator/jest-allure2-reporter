@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import _ from 'lodash';
 import pkgUp from 'pkg-up';
 import type { ManifestHelper, ManifestHelperExtractor } from 'jest-allure2-reporter';
 
+import { get } from '../../../utils';
 import { log } from '../../../logger';
 
 export type ImportModuleFunction = (
@@ -52,7 +52,7 @@ export class ManifestResolver {
       }
 
       if (typeof extractor === 'string' || Array.isArray(extractor)) {
-        return _.get(manifest, extractor, defaultValue);
+        return get(manifest, extractor, defaultValue);
       }
 
       return manifest;

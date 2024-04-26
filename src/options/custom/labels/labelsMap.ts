@@ -16,7 +16,7 @@ export function labelsMap<Context>(
   const customizerKeys = Object.keys(simplifiedCustomizer);
 
   return async (context) => {
-    return thruMaybePromise<Label[]>(context.value, (value) => {
+    return thruMaybePromise(context.value, (value) => {
       const labels = groupBy(value, 'name');
       const keys = uniq([...customizerKeys, ...Object.keys(labels)]);
       const batches: MaybePromise<Label[]>[] = keys.map((key) => {

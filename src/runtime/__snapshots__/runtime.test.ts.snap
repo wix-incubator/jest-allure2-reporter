@@ -43,6 +43,7 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
           "status": "failed",
           "statusDetails": {
             "message": "Error: Sync error",
+            "trace": "at innerStep1",
           },
           "stop": 2,
         },
@@ -73,6 +74,7 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
           "status": "broken",
           "statusDetails": {
             "message": "Error: Async error",
+            "trace": "at innerStep3",
           },
           "stop": 6,
         },

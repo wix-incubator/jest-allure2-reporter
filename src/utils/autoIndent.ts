@@ -9,9 +9,9 @@ export function autoIndent(text: string) {
 }
 
 function detectIndent(lines: string[]) {
-  const result = lines.reduce((indent, line) => {
-    const size = line.length - line.trimStart().length;
-    return size > 0 && size < indent ? size : indent;
+  const result = lines.reduce((min, line) => {
+    const indent = line.length - line.trimStart().length;
+    return Math.min(indent, min);
   }, Number.POSITIVE_INFINITY);
 
   return Number.isFinite(result) ? result : 0;
