@@ -114,7 +114,9 @@ export class MetadataSelector<Metadata, T extends AllureTestItemMetadata> {
   }
 
   testVertical(metadata: LikeTestInvocation<Metadata>): T {
-    return this.merge(this._ancestors(metadata), this.testDefinitionAndBelow(metadata));
+    const ancestors = this._ancestors(metadata);
+    const test_definition_and_below = this.testDefinitionAndBelow(metadata);
+    return this.merge(ancestors, test_definition_and_below);
   }
 
   steps(metadata: LikeTestInvocation<Metadata>): AllureTestStepMetadata[] {
