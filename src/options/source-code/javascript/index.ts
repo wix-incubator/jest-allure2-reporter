@@ -1,5 +1,5 @@
 import type { SourceCodePluginCustomizer } from 'jest-allure2-reporter';
-import { extract, parseWithComments, strip } from 'jest-docblock';
+import { extract, parseWithComments } from 'jest-docblock';
 
 import { autoIndent } from '../../../utils';
 import { detectJS } from '../common';
@@ -16,20 +16,18 @@ export const javascript: SourceCodePluginCustomizer = ({ $, value = {} }) => {
   return {
     name: 'javascript',
 
-    detectLanguage({ fileName }) {
-      return detectJS(fileName);
-    },
+    extractSourceCode: ({ fileName, transformedCode }) => {
+      if (options.extractTransformedCode && transformedCode) {
+        const code = autoIndent(transformedCode.trimStart());
 
-    extractSourceCode: ({ fileName, lineNumber, transformedCode }) => {
-      if (fileName && !lineNumber) {
-        return $.getFileNavigator(fileName).then((navigator) =>
-          navigator ? strip(navigator.getContent()).trimStart() : undefined,
-        );
+        return {
+          code,
+          language: 'javascript',
+          fileName,
+        };
       }
 
-      return options.extractTransformedCode && transformedCode
-        ? autoIndent(transformedCode.trimStart())
-        : undefined;
+      return;
     },
 
     extractDocblock: ({ fileName, lineNumber }) => {

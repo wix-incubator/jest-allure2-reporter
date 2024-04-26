@@ -25,7 +25,7 @@ export function Attachment(name: string | ContentAttachmentOptions, mimeType?: s
     typeAssertions.assertFunction(originalFunction, 'class method to decorate');
 
     const options = typeof name === 'string' ? { name, mimeType } : name;
-    const wrappedFunction = allure.createAttachment(descriptor.value!, options);
+    const wrappedFunction = allure.createAttachment(originalFunction, options);
 
     if (descriptor) {
       descriptor.value = wrappedFunction;

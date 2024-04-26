@@ -32,7 +32,19 @@ export const typescript: SourceCodePluginCustomizer = async ({ $ }) => {
               hast.getAST(context.fileName) ||
               hast.parseAST(context.fileName, navigator.getContent());
             const expression = hast.findNodeInAST(ast, context.lineNumber, context.columnNumber);
-            return autoIndent(ast.text.slice(expression.getStart(), expression.getEnd()));
+            const code = autoIndent(ast.text.slice(expression.getStart(), expression.getEnd()));
+            navigator.jumpToPosition(expression.getStart());
+            const [startLine] = navigator.getPosition();
+            navigator.jumpToPosition(expression.getEnd());
+            const [endLine] = navigator.getPosition();
+
+            return {
+              code,
+              language: 'typescript',
+              fileName: context.fileName,
+              startLine,
+              endLine,
+            };
           })
         : undefined;
     },

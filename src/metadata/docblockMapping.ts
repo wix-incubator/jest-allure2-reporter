@@ -83,11 +83,6 @@ export function mapTestCaseDocblock(context: AllureTestItemDocblock): AllureTest
     metadata.fullName = asSingle(pragmas.fullName);
   }
 
-  if (pragmas.threadId) {
-    // TODO: rename to threadId ?
-    metadata.workerId = asSingle(pragmas.threadId);
-  }
-
   return metadata;
 }
 

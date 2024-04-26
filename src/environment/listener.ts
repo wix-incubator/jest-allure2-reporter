@@ -74,7 +74,16 @@ function injectGlobals({ env }: TestEnvironmentSetupEvent) {
 }
 
 function setWorkerId() {
-  realm.runtimeContext.getFileMetadata().set('workerId', process.env.JEST_WORKER_ID);
+  if (process.env.JEST_WORKER_ID) {
+    realm.runtimeContext.getFileMetadata().push('labels', [
+      {
+        name: 'thread',
+        value: process.env.JEST_WORKER_ID.padStart(2, '0'),
+      },
+    ]);
+  } else {
+    // TODO: log a warning
+  }
 }
 
 function addHookType({ event }: TestEnvironmentCircusEvent<Circus.Event & { name: 'add_hook' }>) {

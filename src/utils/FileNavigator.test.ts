@@ -77,6 +77,46 @@ describe('FileNavigator', () => {
     });
   });
 
+  describe('jumpToPosition', () => {
+    it('should jump to the first line', () => {
+      expect(navigator.jumpToPosition(0)).toBe(true);
+      expect(navigator.readLine()).toBe('foo');
+      expect(navigator.jumpToPosition(2)).toBe(true);
+      expect(navigator.readLine()).toBe('foo');
+      expect(navigator.jumpToPosition(1)).toBe(true);
+      expect(navigator.readLine()).toBe('foo');
+      expect(navigator.jumpToPosition(3)).toBe(true);
+      expect(navigator.readLine()).toBe('foo');
+    });
+
+    it('should jump to the second line', () => {
+      expect(navigator.jumpToPosition(4)).toBe(true);
+      expect(navigator.readLine()).toBe('bar');
+      expect(navigator.jumpToPosition(6)).toBe(true);
+      expect(navigator.readLine()).toBe('bar');
+      expect(navigator.jumpToPosition(5)).toBe(true);
+      expect(navigator.readLine()).toBe('bar');
+      expect(navigator.jumpToPosition(7)).toBe(true);
+      expect(navigator.readLine()).toBe('bar');
+    });
+
+    it('should jump to the third line', () => {
+      expect(navigator.jumpToPosition(8)).toBe(true);
+      expect(navigator.readLine()).toBe('baz');
+      expect(navigator.jumpToPosition(10)).toBe(true);
+      expect(navigator.readLine()).toBe('baz');
+      expect(navigator.jumpToPosition(9)).toBe(true);
+      expect(navigator.readLine()).toBe('baz');
+    });
+
+    it('should handle out of bounds', () => {
+      expect(navigator.jumpToPosition(11)).toBe(false);
+      expect(navigator.readLine()).toBe('baz');
+      expect(navigator.jumpToPosition(-1)).toBe(false);
+      expect(navigator.readLine()).toBe('foo');
+    });
+  });
+
   describe('moveUp/moveDown', () => {
     beforeEach(() => navigator.jump(1));
 

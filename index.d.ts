@@ -14,7 +14,7 @@ declare module 'jest-allure2-reporter' {
     overwrite?: boolean;
     /**
      * Specify where to output test result files.
-     * Please note that the results directory is not a ready-to-use Allure report.
+     * Please note that the results directory is not a ready-to-view Allure report.
      * You'll need to generate the report using the `allure` CLI.
      *
      * @default 'allure-results'
@@ -135,9 +135,8 @@ declare module 'jest-allure2-reporter' {
   export interface SourceCodePlugin {
     readonly name: string;
 
-    detectLanguage?(context: Readonly<SourceCodeExtractionContext>): MaybePromise<string | undefined>;
     extractDocblock?(context: Readonly<SourceCodeExtractionContext>): MaybePromise<AllureTestItemDocblock | undefined>;
-    extractSourceCode?(context: Readonly<SourceCodeExtractionContext>): MaybePromise<string | undefined>;
+    extractSourceCode?(context: Readonly<SourceCodeExtractionContext>): MaybePromise<ExtractSourceCodeHelperResult | undefined>;
   }
 
   export interface SourceCodeExtractionContext extends AllureTestItemSourceLocation {
@@ -176,12 +175,12 @@ declare module 'jest-allure2-reporter' {
     stop?: PropertyCustomizer<Context, number>;
     /**
      * Extractor for the test case description.
-     * @example ({ testCaseMetadata }) => '```js\n' + testCaseMetadata.sourceCode + '\n```'
+     * @example ({ testCaseMetadata }) => '```js\n' + testCaseMetadata.transformedCode + '\n```'
      */
     description?: PropertyCustomizer<Context, string>;
     /**
      * Extractor for the test case description in HTML format.
-     * @example ({ testCaseMetadata }) => '<pre><code>' + testCaseMetadata.sourceCode + '</code></pre>'
+     * @example ({ testCaseMetadata }) => '<pre><code>' + testCaseMetadata.transformedCode + '</code></pre>'
      */
     descriptionHtml?: PropertyCustomizer<Context, string>;
     /**
@@ -256,7 +255,7 @@ declare module 'jest-allure2-reporter' {
     /**
      * Extractor for the test step stage.
      * @see https://wix-incubator.github.io/jest-allure2-reporter/docs/config/statuses/
-     * TODO: add example
+     * @example ({ value }) => value === 'running' ? 'pending' : value
      */
     stage?: PropertyCustomizer<Context, Stage>;
     /**
@@ -431,7 +430,7 @@ declare module 'jest-allure2-reporter' {
      */
     manifest: ManifestHelper;
     markdown2html(markdown: string): Promise<string>;
-    source2markdown(sourceCode: Partial<ExtractSourceCodeHelperResult> | undefined): string;
+    source2markdown(sourceCode: ExtractSourceCodeHelperResult | undefined): string;
     stripAnsi: StripAnsiHelper;
   }
 
@@ -441,6 +440,7 @@ declare module 'jest-allure2-reporter' {
     getLineCount(): number;
     getPosition(): [number, number, number];
     jump(lineNumber: number): boolean;
+    jumpToPosition(position: number): boolean;
     moveUp(countOfLines?: number): boolean;
     moveDown(countOfLines?: number): boolean;
     readLine(lineNumber?: number): string;
@@ -467,12 +467,53 @@ declare module 'jest-allure2-reporter' {
 
   export type ManifestHelperExtractor<T> = (manifest: Record<string, any>) => T;
 
+  /**
+   * Represents the result of extracting source code from a file.
+   * Can be used for reporting in HTML and Markdown formats.
+   */
   export interface ExtractSourceCodeHelperResult {
-    code: string;
+    /**
+     * The extracted source code.
+     */
+    code?: string;
+
+    /**
+     * The programming language of the source code, usually required for syntax highlighting.
+     */
     language?: string;
+
+    /**
+     * The name of the file from which the source code was extracted.
+     * Code preview components may use this property to display the file name.
+     */
     fileName?: string;
-    lineNumber?: number;
-    columnNumber?: number;
+
+    /**
+     * The starting line number of the extracted source code.
+     * Line numbers are 1-based, meaning the first line starts at 1.
+     * Code preview components may use this property to highlight the code.
+     */
+    startLine?: number;
+
+    /**
+     * The starting column number of the extracted source code.
+     * Column numbers are 1-based, meaning the first column starts at 1.
+     * Code preview components may use this property to put the cursor in the right place.
+     */
+    startColumn?: number;
+
+    /**
+     * The ending line number of the extracted source code.
+     * Line numbers are 1-based, meaning the first line starts at 1.
+     * Code preview components may use this property to highlight the code.
+     */
+    endLine?: number;
+
+    /**
+     * The ending column number of the extracted source code.
+     * Column numbers are 1-based, meaning the first column starts at 1.
+     */
+    endColumn?: number;
   }
 
   export interface StripAnsiHelper {
@@ -579,7 +620,6 @@ declare module 'jest-allure2-reporter' {
     fullName?: string;
     labels?: Label[];
     links?: Link[];
-    workerId?: string;
   }
 
   /** @inheritDoc */

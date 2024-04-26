@@ -13,11 +13,12 @@ export async function onTestFileStart(
 ) {
   const threadId = threadService.allocateThread(test.path);
 
-  testFileMetadata.assign({
-    sourceLocation: { fileName: test.path },
-    start: Date.now(),
-    workerId: String(1 + threadId),
-  });
+  testFileMetadata
+    .assign({
+      sourceLocation: { fileName: test.path },
+      start: Date.now(),
+    })
+    .push('labels', [{ name: 'thread', value: String(1 + threadId).padStart(2, '0') }]);
 }
 
 export async function onTestCaseResult(

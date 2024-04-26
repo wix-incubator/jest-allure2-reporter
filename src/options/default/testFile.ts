@@ -34,7 +34,6 @@ export const testFile: TestCaseCustomizer<TestFileExtractorContext> = {
   labels: compose2(
     custom.labels<TestFileExtractorContext>({
       suite: '(test file execution)',
-      thread: ({ testFileMetadata }) => testFileMetadata.workerId,
     }),
     ({ testFileMetadata }) => testFileMetadata.labels ?? [],
   ),

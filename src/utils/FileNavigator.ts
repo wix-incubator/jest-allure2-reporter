@@ -29,14 +29,18 @@ export class FileNavigator implements IFileNavigator {
 
   getLineCount(): number {
     if (Number.isNaN(this.#countOfLines)) {
-      let count = 1;
-      let index = 0;
-      while ((index = this.#content.indexOf('\n', index)) !== -1) {
-        count++;
-        index++;
-      }
+      if (this.#lines === null) {
+        let count = 1;
+        let index = 0;
+        while ((index = this.#content.indexOf('\n', index)) !== -1) {
+          count++;
+          index++;
+        }
 
-      this.#countOfLines = count;
+        this.#countOfLines = count;
+      } else {
+        this.#countOfLines = this.#lines.length;
+      }
     }
 
     return this.#countOfLines;
@@ -72,6 +76,18 @@ export class FileNavigator implements IFileNavigator {
     }
 
     return true;
+  }
+
+  jumpToPosition(position: number): boolean {
+    while (this.#cursor < position) {
+      if (!this.#next()) break;
+    }
+
+    while (this.#cursor > position) {
+      if (!this.#prev()) break;
+    }
+
+    return position >= 0 && position < this.#content.length && this.#cursor <= position;
   }
 
   readLine(lineNumber = this.#line): string {

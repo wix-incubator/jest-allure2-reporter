@@ -132,7 +132,6 @@ exports[`mergeTestCaseMetadata belowTestInvocation 1`] = `
   },
   "stop": 109,
   "transformedCode": "transformedCode:hook_invocation",
-  "workerId": "9",
 }
 `;
 
@@ -228,7 +227,6 @@ exports[`mergeTestCaseMetadata globalAndTestFile 1`] = `
   },
   "stop": 102,
   "transformedCode": "transformedCode:file",
-  "workerId": "2",
 }
 `;
 
@@ -344,7 +342,6 @@ exports[`mergeTestCaseMetadata globalAndTestFileAndTestInvocation 1`] = `
   },
   "stop": 107,
   "transformedCode": "transformedCode:test_invocation",
-  "workerId": "7",
 }
 `;
 
@@ -752,7 +749,6 @@ exports[`mergeTestCaseMetadata testDefinition 1`] = `
   },
   "stop": 106,
   "transformedCode": "transformedCode:test_definition",
-  "workerId": "6",
 }
 `;
 
@@ -948,7 +944,6 @@ exports[`mergeTestCaseMetadata testDefinitionAndBelow 1`] = `
   },
   "stop": 109,
   "transformedCode": "transformedCode:hook_invocation",
-  "workerId": "9",
 }
 `;
 
@@ -1064,7 +1059,6 @@ exports[`mergeTestCaseMetadata testDefinitionAndBelowDirect 1`] = `
   },
   "stop": 108,
   "transformedCode": "transformedCode:test_fn_invocation",
-  "workerId": "8",
 }
 `;
 
@@ -1120,7 +1114,6 @@ exports[`mergeTestCaseMetadata testInvocation 1`] = `
   },
   "stop": 107,
   "transformedCode": "transformedCode:test_invocation",
-  "workerId": "7",
 }
 `;
 
@@ -1276,7 +1269,6 @@ exports[`mergeTestCaseMetadata testInvocationAndBelow 1`] = `
   },
   "stop": 109,
   "transformedCode": "transformedCode:hook_invocation",
-  "workerId": "9",
 }
 `;
 
@@ -1352,7 +1344,6 @@ exports[`mergeTestCaseMetadata testInvocationAndBelowDirect 1`] = `
   },
   "stop": 108,
   "transformedCode": "transformedCode:test_fn_invocation",
-  "workerId": "8",
 }
 `;
 
@@ -1548,7 +1539,6 @@ exports[`mergeTestCaseMetadata testVertical (no overrides in step invocations) 1
   },
   "stop": 107,
   "transformedCode": "transformedCode:test_invocation",
-  "workerId": "7",
 }
 `;
 
@@ -1844,6 +1834,5 @@ exports[`mergeTestCaseMetadata testVertical 1`] = `
   },
   "stop": 109,
   "transformedCode": "transformedCode:hook_invocation",
-  "workerId": "9",
 }
 `;

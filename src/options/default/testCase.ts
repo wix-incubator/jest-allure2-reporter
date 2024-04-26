@@ -44,7 +44,6 @@ export const testCase: TestCaseCustomizer<TestCaseExtractorContext> = {
     custom.labels<TestCaseExtractorContext>({
       suite: ({ testCase, filePath }) => testCase.ancestorTitles[0] ?? filePath.at(-1),
       subSuite: ({ testCase }) => testCase.ancestorTitles.slice(1).join(' '),
-      thread: ({ testCaseMetadata }) => testCaseMetadata.workerId,
     }),
     ({ testCaseMetadata }): Label[] => testCaseMetadata.labels ?? [],
   ),

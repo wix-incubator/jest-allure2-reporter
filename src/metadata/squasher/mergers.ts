@@ -29,7 +29,6 @@ export function mergeTestCaseMetadata(
         fullName: b.fullName ?? a.fullName,
         labels: mergeArrays(a.labels, b.labels),
         links: mergeArrays(a.links, b.links),
-        workerId: b.workerId ?? a.workerId,
       }
     : a;
 }

@@ -59,12 +59,7 @@ export class MetadataSquasher {
     const test_definition_and_below = this._testSelector.testDefinitionAndBelow(invocation);
     const test_definition_and_below_direct =
       this._testSelector.testDefinitionAndBelowDirect(invocation);
-    const test_invocation = this._testSelector.testInvocation(invocation);
     const test_invocation_and_below = this._testSelector.testInvocationAndBelow(invocation);
-    const global_file_and_test_invocation = this._testSelector.merge(
-      this._testSelector.globalAndTestFileAndTestInvocation(invocation),
-      test_invocation,
-    );
 
     const result: AllureTestCaseMetadata = {
       attachments: test_definition_and_below_direct.attachments,
@@ -84,7 +79,6 @@ export class MetadataSquasher {
       steps: this._stepSelector.steps(invocation),
       stop: test_invocation_and_below.stop,
       transformedCode: test_definition_and_below_direct.transformedCode,
-      workerId: global_file_and_test_invocation.workerId,
     };
 
     return result;

@@ -100,7 +100,6 @@ export function createTestFileMetadata(
         type: scope,
       },
     ],
-    workerId: castWorkerId(scope),
     ...extra,
   };
 }
@@ -198,10 +197,6 @@ function castStage(scope: Scope): Stage {
 function castStatus(scope: Scope): Status {
   const index = toNumber(scope) % 5;
   return STATUSES[index];
-}
-
-function castWorkerId(scope: Scope): string {
-  return String(toNumber(scope));
 }
 
 function toNumber(scope: Scope): number {

@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import type {
   AllureTestItemMetadata,
   AllureNestedTestStepMetadata,
@@ -29,8 +30,7 @@ export const extractSourceCode: KeyedHelperCustomizer<'extractSourceCode'> = ({
   async function extractSingle(
     item: AllureTestItemMetadata,
   ): Promise<ExtractSourceCodeHelperResult | undefined> {
-    let code: string | undefined;
-    let language: string | undefined;
+    let result: ExtractSourceCodeHelperResult = {};
 
     const context = { ...item.sourceLocation, transformedCode: item.transformedCode };
     const plugins = config.sourceCode ? Object.values(config.sourceCode.plugins) : [];
@@ -38,28 +38,19 @@ export const extractSourceCode: KeyedHelperCustomizer<'extractSourceCode'> = ({
     log.trace(context, 'Extracting source code');
     for (const p of plugins) {
       try {
-        language ??= await p.detectLanguage?.(context);
-        code ??= await p.extractSourceCode?.(context);
+        result = _.defaults(result, await p.extractSourceCode?.(context));
       } catch (error: unknown) {
         log.warn(
           error,
           `Plugin "${p.name}" failed to extract source code for ${context.fileName}:${context.lineNumber}:${context.columnNumber}`,
         );
       }
-      if (language && code) {
+      if (result.code) {
         break;
       }
     }
 
-    return code
-      ? {
-          code,
-          language,
-          fileName: context.fileName,
-          lineNumber: context.lineNumber,
-          columnNumber: context.columnNumber,
-        }
-      : undefined;
+    return _.isEmpty(result) ? undefined : result;
   }
 
   function extractSourceCodeHelper(item: AllureTestItemMetadata, recursive?: boolean): any {
