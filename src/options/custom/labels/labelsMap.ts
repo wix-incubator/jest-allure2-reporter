@@ -5,7 +5,7 @@ import type {
   PropertyExtractor,
 } from 'jest-allure2-reporter';
 
-import { groupBy, maybePromiseAll, thruMaybePromise, uniq } from '../../../utils';
+import { asMaybeArray, groupBy, maybePromiseAll, thruMaybePromise, uniq } from '../../../utils';
 
 import { simplifyLabelsMap } from './simplifyLabelsMap';
 
@@ -20,7 +20,7 @@ export function labelsMap<Context>(
       const labels = groupBy(value, 'name');
       const keys = uniq([...customizerKeys, ...Object.keys(labels)]);
       const batches: MaybePromise<Label[]>[] = keys.map((key) => {
-        const keyedContext = { ...context, value: labels[key] ?? [] };
+        const keyedContext = { ...context, value: asMaybeArray(labels[key]) };
         const keyedCustomizer = simplifiedCustomizer[key];
         return keyedCustomizer ? keyedCustomizer(keyedContext) : keyedContext.value;
       });

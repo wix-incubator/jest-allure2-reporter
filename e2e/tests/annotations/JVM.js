@@ -1,4 +1,4 @@
-$Package('jest-allure2-reporter.e2e.annotations')
+$Package('e2e.annotations')
 describe('My service', () => {
   $TestMethod('JVM: My service should log a message')
   test('should log a message', () => {

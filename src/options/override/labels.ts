@@ -2,7 +2,7 @@ import type { LabelsCustomizer } from 'jest-allure2-reporter';
 
 import { last } from '../common';
 
-export const labels = {
+export const labels: LabelsCustomizer<{}> = {
   owner: last,
   package: last,
   parentSuite: last,
@@ -12,4 +12,4 @@ export const labels = {
   testClass: last,
   testMethod: last,
   thread: last,
-} as LabelsCustomizer<{}>;
+};

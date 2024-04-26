@@ -303,11 +303,14 @@ declare module 'jest-allure2-reporter' {
 
   export type KeyedLabelCustomizer<Context> =
     | MaybeNullish<MaybeArray<string>>
-    | PropertyExtractor<
-        Context,
-        string[],
-        MaybePromise<MaybeNullish<MaybeArray<string>>>
-      >;
+    | KeyedLabelExtractor<Context>
+
+  export type KeyedLabelExtractor<Context> =
+    PropertyExtractor<
+      Context,
+      MaybeNullish<MaybeArray<string>>,
+      MaybePromise<MaybeNullish<MaybeArray<string>>>
+    >;
 
   export type LinksCustomizer<Context> =
     | PropertyCustomizer<Context, Link[]>
@@ -315,11 +318,14 @@ declare module 'jest-allure2-reporter' {
 
   export type KeyedLinkCustomizer<Context> =
     | MaybeNullish<string | Link | Link[]>
-    | PropertyExtractor<
-        Context,
-        Link[],
-        MaybePromise<MaybeArray<Link>>
-      >;
+    | KeyedLinkExtractor<Context>;
+
+  export type KeyedLinkExtractor<Context> =
+    PropertyExtractor<
+      Context,
+      MaybeNullish<MaybeArray<Link>>,
+      MaybePromise<MaybeNullish<MaybeArray<Link>>>
+    >;
 
   export type ParametersCustomizer<Context> =
     | PropertyCustomizer<Context, Parameter[]>

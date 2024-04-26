@@ -1,5 +1,5 @@
 /**
- * @package jest-allure2-reporter.e2e.pragmas
+ * @package e2e.pragmas
  */
 
 describe('My service', () => {

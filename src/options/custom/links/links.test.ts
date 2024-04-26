@@ -1,5 +1,7 @@
 import type { LinksCustomizer } from 'jest-allure2-reporter';
 
+import { asArray } from '../../../utils';
+
 import { links } from './links';
 
 describe('links custom extractor', () => {
@@ -14,7 +16,7 @@ describe('links custom extractor', () => {
       null: null,
       issue: 'https://github.com/my-org/my-repo/issues/{{name}}',
       tms: ({ value }) =>
-        value.map((link) => ({
+        asArray(value).map((link) => ({
           url: `https://tms.com/${link.name}`,
           name: link.name?.toUpperCase(),
           type: 'override-should-not-work',
@@ -26,7 +28,10 @@ describe('links custom extractor', () => {
       ],
       createSync: () => ({ url: 'https://example.com/sync', name: 'Sync' }),
       createAsync: async () => ({ url: 'https://example.com/async', name: 'Async' }),
-      append: async ({ value }) => [...value, { url: 'https://example.com/new', name: 'Append' }],
+      append: async ({ value }) => [
+        ...asArray(value),
+        { url: 'https://example.com/new', name: 'Append' },
+      ],
     };
 
     const extractor = links(customizer)!;

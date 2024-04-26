@@ -1,5 +1,6 @@
 export * from './vendor';
 export * from './asArray';
+export * from './asMaybeArray';
 export * from './autoIndent';
 export * from './compactObject';
 export * from './FileNavigator';

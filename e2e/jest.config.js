@@ -36,10 +36,10 @@ const jestAllure2ReporterOptions = {
       return testCaseMetadata.historyId ?? `${filePath.join('/')}:${testCase.fullName}`;
     },
     labels: {
-      parentSuite: ({ value, filePath }) => value.length ? value : filePath.join('/'),
-      epic: ({ value }) => value.length ? value : 'Untitled epic',
-      feature: ({ value }) => value.length ? value : 'Untitled feature',
-      story: ({ value }) => value.length ? value : 'Untitled story',
+      parentSuite: ({ value, filePath }) => value ?? filePath.join('/'),
+      epic: 'Untitled epic',
+      feature: 'Untitled feature',
+      story: 'Untitled story',
     },
     links: {
       issue: 'https://issues.apache.org/jira/browse/{{name}}',

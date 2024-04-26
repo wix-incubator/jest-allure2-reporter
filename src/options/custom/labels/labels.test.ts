@@ -25,8 +25,8 @@ describe('labels custom extractor', () => {
       label1: 'value1',
       label2: () => 'value2',
       label3: async () => 'value3',
-      label4: async ({ value }): Promise<string[]> => (value.length > 0 ? value : ['fallback']),
-      label5: async ({ value }): Promise<string[]> => (value.length > 0 ? value : ['fallback']),
+      label4: async ({ value }) => value ?? 'fallback',
+      label5: async ({ value }) => value ?? ['fallback'],
     };
 
     const extractor = labels(customizer)!;
@@ -59,8 +59,9 @@ describe('labels custom extractor', () => {
 
   it('should extract labels from a keyed customizer and merge with existing labels', async () => {
     const customizer = {
-      label1: 'value1',
-      label2: 'value2',
+      label1: 'fallback1',
+      label2: ['value2'],
+      label3: 'fallback3',
     };
 
     const extractor = labels(customizer)!;
@@ -73,7 +74,8 @@ describe('labels custom extractor', () => {
     const result = await extractor(context);
 
     expect(result).toEqual([
-      { name: 'label1', value: 'value1' },
+      { name: 'label1', value: 'fallback1' },
+      { name: 'label2', value: 'original2' },
       { name: 'label2', value: 'value2' },
       { name: 'label3', value: 'value3' },
     ]);

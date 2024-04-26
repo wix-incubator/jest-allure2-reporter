@@ -1,8 +1,9 @@
 import type {
   KeyedLinkCustomizer,
+  KeyedLinkExtractor,
   Link,
-  MaybePromise,
-  PropertyExtractor,
+  MaybeArray,
+  MaybeNullish,
 } from 'jest-allure2-reporter';
 import Handlebars from 'handlebars';
 
@@ -12,37 +13,42 @@ import { asArray, thruMaybePromise } from '../../../utils';
 export function keyedLink<Context>(
   value: KeyedLinkCustomizer<Context>,
   type: string,
-): PropertyExtractor<Context, Link[], MaybePromise<Link[]>> | undefined {
+): KeyedLinkExtractor<Context> | undefined {
   if (value == null) {
     return;
   }
 
   if (typeof value === 'string') {
-    return linkFormatter(value);
+    return linkFormatter<Context>(value);
   }
 
   const overrideType = createTypeOverride(type);
 
   if (typeof value === 'function') {
     return compose2(({ value }) => {
-      return thruMaybePromise(thruMaybePromise(value, asArray), overrideType);
+      return thruMaybePromise(value, overrideType);
     }, value);
   }
 
-  const links: Link[] = overrideType(Array.isArray(value) ? value : [value]);
-
-  return appender(links);
+  const links = asArray(overrideType(value));
+  return compose2(appender(links), ({ value }) => asArray(value));
 }
 
-function createTypeOverride(type: string): (links: Link[]) => Link[] {
-  return (links) => links.map((link) => ({ ...link, type }));
+function createTypeOverride(type: string): (links: MaybeNullish<MaybeArray<Link>>) => typeof links {
+  return (links) => {
+    for (const link of asArray(links)) {
+      link.type = type;
+    }
+
+    return links;
+  };
 }
 
-function linkFormatter(format: string): PropertyExtractor<{}, Link[]> {
+function linkFormatter<Context>(format: string): KeyedLinkExtractor<Context> {
   const formatter = Handlebars.compile(format);
 
   return ({ value }) => {
-    return value.map((link) =>
+    return asArray(value).map((link) =>
       link.url
         ? link
         : {

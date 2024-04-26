@@ -1,11 +1,17 @@
 import type {
   KeyedLinkCustomizer,
+  KeyedLinkExtractor,
   Link,
+  MaybeArray,
+  MaybeNullish,
   MaybePromise,
+  PropertyExtractorContext,
   PropertyExtractor,
 } from 'jest-allure2-reporter';
 
 import {
+  asMaybeArray,
+  compactArray,
   compactObject,
   groupBy,
   mapValues,
@@ -22,23 +28,26 @@ export function linksMap<Context>(
   const simplifiedCustomizer = simplifyLinksMap(customizer);
   const customizerKeys = Object.keys(simplifiedCustomizer);
 
-  return async (context) => {
-    return thruMaybePromise<Link[]>(context.value, (value) => {
+  return async ({ value, ...context }) => {
+    return thruMaybePromise<Link[]>(value, (value): MaybePromise<Link[]> => {
       const links = groupBy(value, 'type');
       const keys = uniq([...customizerKeys, ...Object.keys(links)]);
-      const batches: MaybePromise<Link[]>[] = keys.map((key) => {
-        const keyedContext = { ...context, value: links[key] ?? [] };
+      const batches: MaybePromise<MaybeNullish<MaybeArray<Link>>>[] = keys.map((key) => {
+        const keyedContext = {
+          ...context,
+          value: asMaybeArray(links[key]),
+        } as PropertyExtractorContext<Context, MaybeNullish<MaybeArray<Link>>>;
         const keyedCustomizer = simplifiedCustomizer[key];
         return keyedCustomizer ? keyedCustomizer(keyedContext) : keyedContext.value;
       });
 
-      return maybePromiseAll<Link[], Link[]>(batches, (batches) => batches.flat());
+      return maybePromiseAll(batches, (batches) => compactArray(batches).flat());
     });
   };
 }
 
 function simplifyLinksMap<Context>(
   customizer: Record<string, KeyedLinkCustomizer<Context>>,
-): Record<string, PropertyExtractor<Context, Link[], MaybePromise<Link[]>>> {
+): Record<string, KeyedLinkExtractor<Context>> {
   return compactObject(mapValues(customizer, (value, key) => keyedLink<Context>(value, key)));
 }
