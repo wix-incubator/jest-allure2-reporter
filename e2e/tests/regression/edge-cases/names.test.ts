@@ -7,7 +7,7 @@
  * @tag fullName
  * @tag description
  */
-import { allure, $Description, $DisplayName, $FullName, $Link } from 'jest-allure2-reporter/api';
+import { allure, $Description, $DisplayName, $FullName, $Link } from '../../../../dist/api';
 
 describe('Names', () => {
   // Regular beforeAll

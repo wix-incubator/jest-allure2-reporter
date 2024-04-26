@@ -1,6 +1,7 @@
 {
   "extends": "..",
   "compilerOptions": {
+    "rootDir": ".",
     "module": "node16",
     "ignoreDeprecations": "5.0",
     "experimentalDecorators": false,

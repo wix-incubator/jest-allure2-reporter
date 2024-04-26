@@ -1,4 +1,4 @@
-import { allure } from 'jest-allure2-reporter/api';
+import { allure } from '../../../../dist/api';
 
 describe('History', () => {
   it.each([

@@ -53,7 +53,6 @@ const jestAllure2ReporterOptions = {
 
 /** @type {import('@jest/types').Config.InitialOptions} */
 module.exports = {
-  // eslint-disable-next-line node/no-unpublished-require,import/no-extraneous-dependencies
   moduleFileExtensions: ['js', 'ts', 'coffee'],
   preset: 'ts-jest',
   reporters: ['default', ['jest-allure2-reporter', jestAllure2ReporterOptions]],
@@ -61,7 +60,7 @@ module.exports = {
     '^.+\\.coffee$': path.join(__dirname, 'coffee-transformer.js'),
   },
   testEnvironment: 'jest-allure2-reporter/environment-node',
-  testMatch: ['<rootDir>/**/*.test.ts', '<rootDir>/tests/**/*.*'],
+  testMatch: ['<rootDir>/tests/**/*.js', '<rootDir>/tests/**/*.ts'],
 
   ...require(`./presets/${ALLURE_PRESET}`),
 };
