@@ -60,7 +60,7 @@ module.exports = {
     '^.+\\.coffee$': path.join(__dirname, 'coffee-transformer.js'),
   },
   testEnvironment: 'jest-allure2-reporter/environment-node',
-  testMatch: ['<rootDir>/tests/**/*.js', '<rootDir>/tests/**/*.ts'],
+  testMatch: ['<rootDir>/tests/**/*.js', '<rootDir>/tests/**/*.ts', '<rootDir>/tests/**/*.coffee'],
 
   ...require(`./presets/${ALLURE_PRESET}`),
 };
