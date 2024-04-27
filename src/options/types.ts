@@ -90,7 +90,7 @@ export type TestStepExtractor<Context, T = never> = PropertyExtractor<
 export type TestStepsExtractor<Context, T = never> = PropertyExtractor<
   Context,
   PromisedProperties<AllureTestStepResult>[] | T,
-  PromisedProperties<AllureTestStepResult>[]
+  PromisedProperties<AllureTestStepResult>[] | undefined
 >;
 
 export type TestCaseCompositeExtractor<Context> = CompositeExtractorLoose<

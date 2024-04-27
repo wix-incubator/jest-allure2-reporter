@@ -12,17 +12,19 @@ type HasMetadata<Context, Key extends keyof Context> = Context & {
 };
 
 export function testCaseSteps<
-  BaseContext extends Partial<Omit<TestStepExtractorContext, 'testStepMetadata'>>,
+  BaseContext extends Partial<TestStepExtractorContext>,
   Key extends keyof BaseContext,
   Context extends HasMetadata<BaseContext, Key>,
 >(
   testStep: TestStepExtractor<TestStepExtractorContext>,
   metadataKey: Key,
 ): TestStepsExtractor<Context, void> {
-  return (context): PromisedProperties<AllureTestStepResult>[] => {
+  const stepsExtractor: TestStepsExtractor<Context, void> = (
+    context,
+  ): PromisedProperties<AllureTestStepResult>[] | undefined => {
     const steps = context[metadataKey]?.steps;
     if (!steps || steps.length === 0) {
-      return [];
+      return;
     }
 
     return steps.map((testStepMetadata) => {
@@ -36,7 +38,21 @@ export function testCaseSteps<
       };
 
       testStepContext.result = testStep(testStepContext);
-      return testStep(testStepContext);
+
+      const promisedProperties = testStep(testStepContext);
+      Object.defineProperty(promisedProperties, 'steps', {
+        enumerable: true,
+        get: () => innerStepsExtractor(testStepContext),
+      });
+
+      return promisedProperties;
     });
   };
+
+  const innerStepsExtractor =
+    metadataKey === 'testStepMetadata'
+      ? stepsExtractor
+      : testCaseSteps(testStep, 'testStepMetadata');
+
+  return stepsExtractor;
 }
