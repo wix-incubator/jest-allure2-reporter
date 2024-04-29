@@ -130,7 +130,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
       JestAllure2Reporter.query.testCaseResult(testCaseResult).lastInvocation!,
     );
 
-    fallbacks.onTestCaseResult(testCaseMetadata);
+    fallbacks.onTestCaseResult(test, testCaseResult, testCaseMetadata);
   }
 
   async onTestFileResult(test: Test, testResult: TestResult, aggregatedResult: AggregatedResult) {
