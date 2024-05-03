@@ -20,7 +20,7 @@ export async function resolvePromisedTestCase<
       return;
     }
 
-    return resolvePromisedProperties(promisedItem);
+    return await resolvePromisedProperties(promisedItem);
   } catch (error: unknown) {
     log.error(error, 'Failed to report test case');
     return;
@@ -32,7 +32,9 @@ export async function resolvePromisedItem<Context, ResultKey extends keyof Conte
   extractor: PropertyExtractor<Context, PromisedProperties<Result>>,
   resultKey: ResultKey,
 ): Promise<Result> {
-  return resolvePromisedProperties<Result>(preparePromisedItem(context, extractor, resultKey));
+  return await resolvePromisedProperties<Result>(
+    preparePromisedItem(context, extractor, resultKey),
+  );
 }
 
 function preparePromisedItem<Context, ResultKey extends keyof Context, Result>(

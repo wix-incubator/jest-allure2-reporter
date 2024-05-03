@@ -17,9 +17,10 @@ const listener: EnvironmentListenerFn = (context) => {
     .on('test_environment_setup', setWorkerId)
     .on('add_hook', addHookType)
     .on('add_hook', addSourceLocation)
+    .on('add_hook', addSourceCode)
     .on('add_test', addSourceLocation)
+    .on('add_test', addSourceCode)
     .on('run_start', flush)
-    .on('hook_start', addSourceCode)
     .on('hook_start', executableStart)
     .on('hook_failure', executableFailure)
     .on('hook_failure', flush)
@@ -29,7 +30,6 @@ const listener: EnvironmentListenerFn = (context) => {
     .on('test_todo', testSkip)
     .on('test_skip', testSkip)
     .on('test_done', testDone)
-    .on('test_fn_start', addSourceCode)
     .on('test_fn_start', executableStart)
     .on('test_fn_success', executableSuccess)
     .on('test_fn_success', flush)
@@ -93,9 +93,9 @@ function addHookType({ event }: TestEnvironmentCircusEvent<Circus.Event & { name
 
 function addSourceCode({ event }: TestEnvironmentCircusEvent) {
   let code = '';
-  if (event.name === 'hook_start') {
-    const { type, fn } = event.hook;
-    code = `${type}(${fn});`;
+  if (event.name === 'add_hook') {
+    const { hookType, fn } = event;
+    code = `${hookType}(${fn});`;
 
     if (code.includes("during setup, this cannot be null (and it's fine to explode if it is)")) {
       code = '';
@@ -105,9 +105,9 @@ function addSourceCode({ event }: TestEnvironmentCircusEvent) {
     }
   }
 
-  if (event.name === 'test_fn_start') {
-    const { name, fn } = event.test;
-    code = `test(${JSON.stringify(name)}, ${fn});`;
+  if (event.name === 'add_test') {
+    const { testName, fn } = event;
+    code = `test(${JSON.stringify(testName)}, ${fn});`;
   }
 
   if (code) {
