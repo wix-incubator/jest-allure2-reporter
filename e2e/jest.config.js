@@ -63,6 +63,7 @@ module.exports = {
   transform: {
     '^.+\\.coffee$': path.join(__dirname, 'coffee-transformer.js'),
   },
-  testEnvironment: 'jest-allure2-reporter/environment-node',
+  setupFilesAfterEnv: process.env.JEST_ENVIRONMENT ? ['<rootDir>/setup.js'] : [],
+  testEnvironment: process.env.JEST_ENVIRONMENT ?? 'jest-allure2-reporter/environment-node',
   testMatch: ['<rootDir>/tests/**/*.js', '<rootDir>/tests/**/*.ts', '<rootDir>/tests/**/*.coffee'],
 };

@@ -1,6 +1,8 @@
-const descriptionHtml = async ({ $, result }) => {
+const descriptionHtml = async ({ $, value, result }) => {
   const description = await result.description;
-  return description ? $.markdown2html(description) : '';
+  const html = await value;
+  const markdown = description ? await $.markdown2html(description) : '';
+  return [html, markdown].filter(Boolean).join('\n\n');
 };
 
 /** @type {import('jest-allure2-reporter').ReporterOptions} */

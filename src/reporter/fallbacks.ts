@@ -1,4 +1,4 @@
-import type { Test } from '@jest/reporters';
+import type { Test, TestCaseResult } from '@jest/reporters';
 import type { AllureTestItemMetadata, AllureTestFileMetadata } from 'jest-allure2-reporter';
 
 import type { AllureMetadataProxy } from '../metadata';
@@ -7,7 +7,7 @@ import { ThreadService } from './ThreadService';
 
 const threadService = new ThreadService();
 
-export async function onTestFileStart(
+export function onTestFileStart(
   test: Test,
   testFileMetadata: AllureMetadataProxy<AllureTestFileMetadata>,
 ) {
@@ -21,16 +21,24 @@ export async function onTestFileStart(
     .push('labels', [{ name: 'thread', value: String(1 + threadId).padStart(2, '0') }]);
 }
 
-export async function onTestCaseResult(
+export function onTestCaseResult(
+  test: Test,
+  testCase: TestCaseResult,
   testCaseMetadata: AllureMetadataProxy<AllureTestItemMetadata>,
 ) {
-  const stop = testCaseMetadata.get('stop') ?? Number.NaN;
-  if (Number.isNaN(stop)) {
-    testCaseMetadata.set('stop', Date.now());
-  }
+  testCaseMetadata.defaults({
+    sourceLocation: testCase.location
+      ? {
+          fileName: test.path,
+          lineNumber: testCase.location.line,
+          columnNumber: testCase.location.column + 1,
+        }
+      : undefined,
+    stop: Date.now(),
+  });
 }
 
-export async function onTestFileResult(
+export function onTestFileResult(
   test: Test,
   testFileMetadata: AllureMetadataProxy<AllureTestFileMetadata>,
 ) {

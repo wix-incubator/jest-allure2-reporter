@@ -19,11 +19,18 @@ export async function postProcessMetadata(
   }
 
   const allDescribeBlocks = [...testFile.allDescribeBlocks()];
-  const allHooks = allDescribeBlocks.flatMap((describeBlock) => [
+  const allHookDefinitions = allDescribeBlocks.flatMap((describeBlock) => [
     ...describeBlock.hookDefinitions(),
   ]);
 
-  const batch = [testFile, ...allDescribeBlocks, ...allHooks, ...testFile.allTestEntries()];
+  const batch = [
+    testFile,
+    ...allDescribeBlocks,
+    ...allHookDefinitions,
+    ...testFile.allTestEntries(),
+    ...testFile.allTestInvocations(),
+    ...testFile.allInvocations(),
+  ];
 
   await Promise.all(
     batch.map(async (metadata) => {

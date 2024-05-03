@@ -1,8 +1,9 @@
 const path = require('node:path');
 
-const description = async ({ $, testCaseMetadata }) => {
-  const text = testCaseMetadata.description?.join('\n\n') ?? '';
-  const codes = await $.extractSourceCode(testCaseMetadata, true);
+const description = async ({ $, testRunMetadata, testFileMetadata, testCaseMetadata }) => {
+  const metadata = testCaseMetadata ?? testFileMetadata ?? testRunMetadata;
+  const text = metadata.description?.join('\n\n') ?? '';
+  const codes = await $.extractSourceCode(metadata, true);
   const snippets = codes.map($.source2markdown);
   return [text, ...snippets].filter(t => t != null).join('\n\n');
 };
