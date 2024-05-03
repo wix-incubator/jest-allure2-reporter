@@ -24,6 +24,14 @@ export function writeTest({ runtime, test, containerName }: CreateTestArguments)
 
   fillStep(allureTest, { ...test, steps });
 
+  // TODO: migrate to own serialization
+  // if (test.uuid) {
+  //   Object.assign(allureTest.wrappedItem, { uuid: test.uuid });
+  //   merge(allureGroup, {
+  //     testResultContainer: { uuid: v5(test.uuid, '6ba7b810-9dad-11d1-80b4-00c04fd430c8') },
+  //   });
+  // }
+
   if (test.historyId) {
     // The string casting + MD5 hashing hould happen in options/override/historyId.ts
     allureTest.historyId = test.historyId as string;

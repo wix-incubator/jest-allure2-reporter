@@ -8,6 +8,11 @@ declare module 'jest-allure2-reporter' {
 
   export interface ReporterOptions {
     /**
+     * Extend the base configuration with custom options.
+     * You can apply multiple extensions in a chain.
+     */
+    extends?: MaybeArray<string | ReporterOptions>;
+    /**
      * Overwrite the results directory if it already exists.
      * @default true
      */
@@ -144,6 +149,11 @@ declare module 'jest-allure2-reporter' {
   }
 
   export interface TestCaseCustomizer<Context = {}> {
+    /**
+     * Extractor to generate a unique identifier for the test case file.
+     * Do not use it unless you need predictable JSON paths for some demo purposes.
+     */
+    uuid?: PropertyCustomizer<Context, string>;
     /**
      * Extractor to omit test cases from the report.
      */
@@ -662,6 +672,7 @@ declare module 'jest-allure2-reporter' {
   // region Allure Test Data
 
   export interface AllureTestCaseResult {
+    uuid: string;
     ignored: boolean;
     historyId: Primitive;
     displayName: string;

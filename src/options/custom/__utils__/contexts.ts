@@ -55,6 +55,7 @@ export const createTestCaseContext = (
   globalConfig: {} as any,
   reporterConfig: {} as any,
   value: {
+    uuid: '',
     ignored: false,
     historyId: '',
     displayName: '',

@@ -1,6 +1,8 @@
 // eslint-disable-next-line node/no-extraneous-require,@typescript-eslint/no-var-requires,import/no-extraneous-dependencies
 const path = require('node:path');
 
+const uuid = require('uuid');
+
 const ALLURE_PRESET = process.env.ALLURE_PRESET ?? 'default';
 
 /** @type {import('jest-allure2-reporter').ReporterOptions} */
@@ -32,6 +34,7 @@ const jestAllure2ReporterOptions = {
     },
   },
   testCase: {
+    uuid: ({ filePath, testCase }) => uuid.v5(`${filePath.join('/')}:${testCase.fullName}`, '6ba7b810-9dad-11d1-80b4-00c04fd430c8'),
     historyId: ({ testCaseMetadata, filePath, testCase }) => {
       return testCaseMetadata.historyId ?? `${filePath.join('/')}:${testCase.fullName}`;
     },

@@ -9,24 +9,15 @@ import type {
 
 import { compose2 } from '../common';
 import * as custom from '../custom';
-import { getStatusDetails, isNonNullish } from '../../utils';
+import { getStatusDetails } from '../../utils';
 
 export const testCase: TestCaseCustomizer<TestCaseExtractorContext> = {
   ignored: () => false,
   historyId: ({ testCaseMetadata, result }) => testCaseMetadata.historyId ?? result.fullName,
   displayName: ({ testCase, testCaseMetadata }) => testCaseMetadata.displayName ?? testCase.title,
   fullName: ({ testCase, testCaseMetadata }) => testCaseMetadata.fullName ?? testCase.fullName,
-  description: async ({ $, testCaseMetadata }) => {
-    const text = testCaseMetadata.description?.join('\n\n') ?? '';
-    const codes = await $.extractSourceCode(testCaseMetadata, true);
-    const snippets = codes.map($.source2markdown);
-    return [text, ...snippets].filter(isNonNullish).join('\n\n');
-  },
-  descriptionHtml: async ({ $, testCaseMetadata, result }) => {
-    const html = testCaseMetadata.descriptionHtml?.join('\n\n') ?? '';
-    const md2html = (await $.markdown2html?.((await result.description) ?? '')) ?? '';
-    return [html, md2html].filter(isNonNullish).join('\n\n');
-  },
+  description: ({ testCaseMetadata }) => testCaseMetadata.description?.join('\n\n') ?? '',
+  descriptionHtml: ({ testCaseMetadata }) => testCaseMetadata.descriptionHtml?.join('\n') ?? '',
   start: ({ testCase, testCaseMetadata }) =>
     testCaseMetadata.start ?? (testCaseMetadata.stop ?? Date.now()) - (testCase.duration ?? 0),
   stop: ({ testCaseMetadata }) => testCaseMetadata.stop ?? Date.now(),

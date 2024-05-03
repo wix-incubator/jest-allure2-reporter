@@ -2,7 +2,7 @@ import path from 'node:path';
 
 import type { TestCaseCustomizer, TestFileExtractorContext } from 'jest-allure2-reporter';
 
-import { getStatusDetails, isNonNullish } from '../../utils';
+import { getStatusDetails } from '../../utils';
 import * as custom from '../custom';
 import { compose2 } from '../common';
 
@@ -12,16 +12,8 @@ export const testFile: TestCaseCustomizer<TestFileExtractorContext> = {
   displayName: ({ testFileMetadata, filePath }) =>
     testFileMetadata.displayName ?? filePath.join(path.sep),
   fullName: ({ filePath }) => filePath.join('/'),
-  description: async ({ $, testFileMetadata }) => {
-    const text = testFileMetadata.description?.join('\n') ?? '';
-    const code = await $.extractSourceCode(testFileMetadata);
-    return [text, $.source2markdown(code)].filter(isNonNullish).join('\n\n');
-  },
-  descriptionHtml: async ({ $, testFileMetadata, result }) => {
-    const html = testFileMetadata.descriptionHtml?.join('\n\n') ?? '';
-    const md2html = (await $.markdown2html?.((await result.description) ?? '')) ?? '';
-    return [html, md2html].filter(isNonNullish).join('\n\n');
-  },
+  description: ({ testFileMetadata }) => testFileMetadata.description?.join('\n\n') ?? '',
+  descriptionHtml: ({ testFileMetadata }) => testFileMetadata.descriptionHtml?.join('\n') ?? '',
   start: ({ testFileMetadata }) => testFileMetadata.start!,
   stop: ({ testFileMetadata }) => testFileMetadata.stop!,
   stage: ({ testFileMetadata, testFile }) =>

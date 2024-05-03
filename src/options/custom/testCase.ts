@@ -27,6 +27,7 @@ export function testCase<Context extends TestCaseExtractorContext>(
   }
 
   return extractors.composite({
+    uuid: extractors.constant(customizer.uuid) ?? fallback,
     ignored: extractors.constant(customizer.ignored) ?? fallback,
     historyId: extractors.constant(customizer.historyId) ?? fallback,
     displayName: extractors.constant(customizer.displayName) ?? fallback,
