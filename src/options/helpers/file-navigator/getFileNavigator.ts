@@ -31,5 +31,11 @@ class FileNavigatorCache {
 
 export const getFileNavigator: KeyedHelperCustomizer<'getFileNavigator'> = () => {
   const cache = new FileNavigatorCache();
-  return (filePath) => cache.resolve(filePath);
+  return (maybeSegmentedFilePath) => {
+    const filePath = Array.isArray(maybeSegmentedFilePath)
+      ? maybeSegmentedFilePath.join(path.sep)
+      : maybeSegmentedFilePath;
+
+    return cache.resolve(filePath);
+  };
 };

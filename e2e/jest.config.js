@@ -3,11 +3,12 @@ const path = require('node:path');
 
 const uuid = require('uuid');
 
-const ALLURE_PRESET = process.env.ALLURE_PRESET ?? 'default';
-
 /** @type {import('jest-allure2-reporter').ReporterOptions} */
 const jestAllure2ReporterOptions = {
-  resultsDir: `allure-results`,
+  extends: [
+    './presets/code-snippets',
+    './presets/remark',
+  ],
   categories: [
     {
       name: 'Snapshot mismatches',
@@ -64,6 +65,4 @@ module.exports = {
   },
   testEnvironment: 'jest-allure2-reporter/environment-node',
   testMatch: ['<rootDir>/tests/**/*.js', '<rootDir>/tests/**/*.ts', '<rootDir>/tests/**/*.coffee'],
-
-  ...require(`./presets/${ALLURE_PRESET}`),
 };

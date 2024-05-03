@@ -407,9 +407,10 @@ declare module 'jest-allure2-reporter' {
   export interface Helpers extends HelpersAugmentation {
     /**
      * Provides an optimized way to navigate through the test file content.
+     * Accepts a file path in a string or a split array format.
      * Returns undefined if the file is not found or cannot be read.
      */
-    getFileNavigator(filePath: string): Promise<FileNavigator | undefined>;
+    getFileNavigator(filePath: string | string[]): Promise<FileNavigator | undefined>;
     /**
       * Extracts the source code of the current test case, test step or a test file.
       * Pass `true` as the second argument to extract source code recursively from all steps.
@@ -445,8 +446,6 @@ declare module 'jest-allure2-reporter' {
      * ({ $ }) => (await $.manifest('jest')).version
      */
     manifest: ManifestHelper;
-    markdown2html(markdown: string): Promise<string>;
-    source2markdown(sourceCode: ExtractSourceCodeHelperResult | undefined): string;
     stripAnsi: StripAnsiHelper;
   }
 
@@ -672,15 +671,15 @@ declare module 'jest-allure2-reporter' {
   // region Allure Test Data
 
   export interface AllureTestCaseResult {
-    uuid: string;
+    uuid?: string;
     ignored: boolean;
     historyId: Primitive;
     displayName: string;
     fullName: string;
     start: number;
     stop: number;
-    description: string;
-    descriptionHtml: string;
+    description?: string;
+    descriptionHtml?: string;
     stage: Stage;
     status: Status;
     statusDetails?: StatusDetails;

@@ -1,122 +1,133 @@
-import type { AllureTestStepResult, AllureTestCaseResult, Parameter } from 'jest-allure2-reporter';
-import type {
-  AllureGroup,
-  AllureRuntime,
-  Parameter as AllureParameter,
-  ExecutableItemWrapper,
-  Stage,
-  Status,
-} from '@noomorph/allure-js-commons';
+import { randomBytes } from 'node:crypto';
+import path from 'node:path';
 
-import { AllureReporterError } from '../errors';
+import type { AllureTestCaseResult, AllureTestStepResult } from 'jest-allure2-reporter';
+import { v4, v5, validate } from 'uuid';
+
+import type { AllureTestResult, AllureTestResultContainer, AllureWriter } from '../serialization';
+import { log } from '../logger';
+import { md5 } from '../utils';
 
 type CreateTestArguments = {
-  runtime: AllureRuntime;
+  resultsDir: string;
+  writer: AllureWriter;
   containerName: string;
   test: AllureTestCaseResult;
 };
 
-export function writeTest({ runtime, test, containerName }: CreateTestArguments) {
-  const allureGroup = runtime.startGroup(containerName);
-  const allureTest = allureGroup.startTest();
-  const hooks = test.steps?.filter((step) => step.hookType !== undefined);
-  const steps = test.steps?.filter((step) => step.hookType === undefined);
+export async function writeTest({ resultsDir, writer, test, containerName }: CreateTestArguments) {
+  const testResult: AllureTestResult = {
+    uuid: test.uuid,
+    historyId: test.historyId,
+    displayName: test.displayName,
+    fullName: test.fullName,
+    start: test.start,
+    stop: test.stop,
+    description: test.description,
+    descriptionHtml: test.descriptionHtml,
+    stage: test.stage,
+    status: test.status,
+    statusDetails: test.statusDetails,
+    labels: test.labels,
+    links: test.links,
+    steps: [],
+    attachments: test.attachments,
+    parameters: test.parameters,
+  };
 
-  fillStep(allureTest, { ...test, steps });
+  const testUUID = ensureUUID(testResult);
+  hashHistoryId(testResult);
+  normalizeDisplayName(testResult);
+  normalizeAttachments(resultsDir, testResult);
+  normalizeParameters(testResult);
+  normalizeDescription(testResult);
 
-  // TODO: migrate to own serialization
-  // if (test.uuid) {
-  //   Object.assign(allureTest.wrappedItem, { uuid: test.uuid });
-  //   merge(allureGroup, {
-  //     testResultContainer: { uuid: v5(test.uuid, '6ba7b810-9dad-11d1-80b4-00c04fd430c8') },
-  //   });
-  // }
+  const testContainer: AllureTestResultContainer = {
+    uuid: v5(testUUID, '6ba7b810-9dad-11d1-80b4-00c04fd430c8'),
+    name: containerName,
+    children: [testUUID],
+    befores: [],
+    afters: [],
+  };
 
-  if (test.historyId) {
-    // The string casting + MD5 hashing hould happen in options/override/historyId.ts
-    allureTest.historyId = test.historyId as string;
-  }
-  if (test.fullName) {
-    allureTest.fullName = test.fullName;
-  }
-  if (test.description) {
-    allureTest.description = test.description;
-  }
-  if (test.descriptionHtml) {
-    allureTest.descriptionHtml = test.descriptionHtml;
-  }
-  if (test.links) {
-    for (const link of test.links) {
-      allureTest.addLink(link.url, link.name, link.type);
+  if (test.steps && testResult.steps) {
+    for (const step of test.steps) {
+      normalizeDisplayName(step);
+      normalizeAttachments(resultsDir, step);
+      normalizeParameters(step);
+
+      if (!step.hookType) {
+        testResult.steps.push(step);
+      } else if (step.hookType.startsWith('before')) {
+        testContainer.befores.push(step);
+      } else if (step.hookType.startsWith('after')) {
+        testContainer.afters.push(step);
+      } else {
+        log.warn({ data: step }, `Unknown hook type: ${step.hookType}`);
+      }
     }
   }
-  if (test.labels) {
-    for (const label of test.labels) {
-      allureTest.addLabel(label.name, label.value);
-    }
-  }
-  if (hooks) {
-    for (const step of hooks) {
-      const executable = createStepExecutable(allureGroup, step.hookType);
-      fillStep(executable, step);
-    }
-  }
 
-  allureTest.endTest(test.stop);
-  allureGroup.endGroup();
+  await writer.writeContainer(testContainer);
+  await writer.writeResult(testResult);
 }
 
-function fillStep(
-  executable: ExecutableItemWrapper,
-  step: AllureTestCaseResult | AllureTestStepResult,
+function ensureUUID(result: AllureTestResult) {
+  const { uuid, fullName } = result;
+  if (uuid && !validate(uuid)) {
+    log.warn(`Detected invalid "uuid" (${uuid}) in test: ${fullName}`);
+    return (result.uuid = v4());
+  }
+
+  if (!uuid) {
+    return (result.uuid = v4());
+  }
+
+  return uuid;
+}
+
+function hashHistoryId(result: AllureTestResult) {
+  const { fullName, historyId } = result;
+  if (!historyId) {
+    log.warn(`Detected empty "historyId" in test: ${fullName}`);
+    result.historyId = md5(randomBytes(16));
+  }
+
+  result.historyId = md5(String(historyId));
+}
+
+function normalizeParameters(result: AllureTestResult | AllureTestStepResult) {
+  if (result.parameters) {
+    for (const parameter of result.parameters) {
+      parameter.value = String(parameter.value);
+    }
+  }
+}
+
+function normalizeAttachments(
+  rootDirectory: string,
+  result: AllureTestResult | AllureTestStepResult,
 ) {
-  if (step.displayName !== undefined) {
-    executable.name = step.displayName;
-  }
-  if (step.start !== undefined) {
-    executable.wrappedItem.start = step.start;
-  }
-  if (step.stop !== undefined) {
-    executable.wrappedItem.stop = step.stop;
-  }
-  if (step.stage !== undefined) {
-    executable.stage = step.stage as string as Stage;
-  }
-  if (step.status !== undefined) {
-    executable.status = step.status as string as Status;
-  }
-  if (step.statusDetails !== undefined) {
-    executable.statusDetails = step.statusDetails;
-  }
-  if (step.attachments !== undefined) {
-    executable.wrappedItem.attachments = step.attachments;
-  }
-  if (step.parameters) {
-    executable.wrappedItem.parameters = step.parameters.map(stringifyParameter);
-  }
-  if (step.steps) {
-    for (const innerStep of step.steps) {
-      fillStep(executable.startStep(innerStep.displayName ?? '', innerStep.start), innerStep);
+  if (result.attachments) {
+    for (const attachment of result.attachments) {
+      const source = path.relative(rootDirectory, attachment.source);
+      if (!source.startsWith('..')) {
+        attachment.source = source;
+      }
     }
   }
 }
 
-function stringifyParameter(parameter: Parameter): AllureParameter {
-  return { ...parameter, value: String(parameter.value) };
+function normalizeDescription(result: AllureTestResult) {
+  if (result.descriptionHtml) {
+    delete result.description;
+  }
 }
 
-function createStepExecutable(parent: AllureGroup, hookType: AllureTestStepResult['hookType']) {
-  switch (hookType) {
-    case 'beforeAll':
-    case 'beforeEach': {
-      return parent.addBefore();
-    }
-    case 'afterEach':
-    case 'afterAll': {
-      return parent.addAfter();
-    }
-    default: {
-      throw new AllureReporterError(`Unknown hook type: ${hookType}`);
-    }
+function normalizeDisplayName(result: AllureTestResult | AllureTestStepResult) {
+  if (result.displayName) {
+    const violation: any = result;
+    violation.name = result.displayName;
+    delete violation.displayName;
   }
 }

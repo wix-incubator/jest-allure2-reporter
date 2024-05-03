@@ -6,9 +6,9 @@ import type {
   ExtractSourceCodeHelper,
 } from 'jest-allure2-reporter';
 
-import { log } from '../../../logger';
-import { compactArray, defaults, isEmpty } from '../../../utils';
-import type { ReporterConfig } from '../../types';
+import { log } from '../../logger';
+import { compactArray, defaults, isEmpty } from '../../utils';
+import type { ReporterConfig } from '../types';
 
 export const extractSourceCode: KeyedHelperCustomizer<'extractSourceCode'> = ({
   reporterConfig,

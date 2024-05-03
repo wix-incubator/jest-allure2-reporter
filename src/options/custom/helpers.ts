@@ -1,13 +1,6 @@
-import type {
-  GlobalExtractorContext,
-  Helpers,
-  HelpersCustomizer,
-  KeyedHelperCustomizer,
-  PromisedProperties,
-} from 'jest-allure2-reporter';
+import type { Helpers, HelpersCustomizer } from 'jest-allure2-reporter';
 
 import type { HelpersExtractor } from '../types';
-import { compactObject, mapValues } from '../../utils';
 
 export function helpers(customizer: HelpersCustomizer | undefined): HelpersExtractor | undefined {
   if (customizer == null) {
@@ -18,14 +11,19 @@ export function helpers(customizer: HelpersCustomizer | undefined): HelpersExtra
     return customizer;
   }
 
-  return (context: GlobalExtractorContext) => {
-    function getProperty<K extends keyof Helpers>(factory: KeyedHelperCustomizer<K>, key: K) {
-      return factory({ ...context, value: context.$[key] });
+  const customizedKeys = Object.keys(customizer) as (keyof Helpers)[];
+
+  return (context) => {
+    const base = { ...context.value };
+    const baseKeys = Object.keys(base) as (keyof Helpers)[];
+    const allKeys = new Set([...baseKeys, ...customizedKeys]);
+    for (const key of allKeys) {
+      if (customizer[key]) {
+        const factory = customizer[key] as any;
+        base[key] = factory({ ...context, value: context.$[key] });
+      }
     }
 
-    return mapValues(
-      compactObject(customizer),
-      getProperty,
-    ) as unknown as PromisedProperties<Helpers>;
+    return base;
   };
 }
