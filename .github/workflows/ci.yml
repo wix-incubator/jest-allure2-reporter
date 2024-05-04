@@ -45,6 +45,7 @@ jobs:
           path: e2e/allure-results
 
   publish:
+    if: github.event_name == 'push'
     name: Publish
     needs: [sanity]
     runs-on: ubuntu-latest
