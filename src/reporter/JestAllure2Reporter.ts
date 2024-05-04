@@ -100,11 +100,10 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     options: ReporterOnStartOptions,
   ): Promise<void> {
     await super.onRunStart(aggregatedResult, options);
-    const attemptInit = this.#attempt.bind(this, 'onRunStart#init()', this.#init);
     const attemptRunStart = this.#attempt.bind(this, 'onRunStart()', this.#onRunStart);
 
     await log.trace.begin(__TID(), 'jest-allure2-reporter');
-    await log.trace.complete(__TID(), 'init', attemptInit);
+    await log.trace.complete(__TID(), 'init', this.#init.bind(this));
     await log.trace.complete(__TID(), 'onRunStart', attemptRunStart);
   }
 
