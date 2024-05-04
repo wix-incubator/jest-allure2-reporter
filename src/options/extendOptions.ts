@@ -19,12 +19,6 @@ export function extendOptions(
       contentHandler: custom?.attachments?.contentHandler ?? base.attachments.contentHandler,
       fileHandler: custom?.attachments?.fileHandler ?? base.attachments.fileHandler,
     },
-    markdown: {
-      enabled: custom?.markdown?.enabled ?? base.markdown.enabled,
-      keepSource: custom?.markdown?.keepSource ?? base.markdown.keepSource,
-      remarkPlugins: [...base.markdown.remarkPlugins, ...(custom?.markdown?.remarkPlugins ?? [])],
-      rehypePlugins: [...base.markdown.rehypePlugins, ...(custom?.markdown?.rehypePlugins ?? [])],
-    },
     sourceCode: custom?.sourceCode
       ? mergeSourceCodeConfigs(base.sourceCode, customizers.sourceCode(custom.sourceCode))
       : base.sourceCode,

@@ -1,17 +1,6 @@
 # Test Plan
 
 1. Test cases:
-  * by **status**:
-     * passed
-     * failed
-     * broken
-     * skipped
-     * unknown
-  * by **severity**:
-    * default
-    * custom
-      * for an individual test
-      * for a test suite
   * by **category**:
     * Product defect
     * Test defect
@@ -26,19 +15,6 @@
     * from a broken "afterAll" hook
     * from broken test suite files
     * broken due to a failed test environment setup
-  * with **labels**:
-    * flaky
-    * custom tag (value)
-    * custom label (key=value)
-    * maintainer?
-    * lead?
-    * JIRA
-    * TMS
-    * custom
-  * with **Description**
-  * with **Parameters**
-  * with **Links**
-  * with **Environment**
   * with **Execution**:
     * Set up
     * Test body
@@ -66,11 +42,6 @@
      * Package
      * ...
 3. Report-scoped features:
-   * Environment
-     * Full
-     * Zero
-     * Filtered (strings)
-     * Filtered (callback)
     * Executor (build agent name)
 4. Test run history
    * Duration

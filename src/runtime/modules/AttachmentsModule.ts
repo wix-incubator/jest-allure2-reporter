@@ -1,4 +1,5 @@
 import path from 'node:path';
+import util from 'node:util';
 
 import type { MaybePromise } from 'jest-allure2-reporter';
 
@@ -185,7 +186,11 @@ export class ContentAttachmentsModule extends AttachmentsModule<
   }
 
   protected _createMimeContext(name: string, content: AttachmentContent) {
-    return { sourcePath: name, content };
+    let value = content;
+    if (typeof content !== 'string' && !Buffer.isBuffer(content) && !ArrayBuffer.isView(content)) {
+      value = util.inspect(content);
+    }
+    return { sourcePath: name, content: value };
   }
 
   protected _createAttachmentContext(context: AttachmentContext) {

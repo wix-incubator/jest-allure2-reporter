@@ -1,13 +1,14 @@
 import type {
   AllureTestItemMetadata,
   GlobalExtractorContext,
-  SourceCodeExtractionContext,
+  DocblockExtractionContext,
 } from 'jest-allure2-reporter';
 import type { TestFileMetadata } from 'jest-metadata';
 
 import { AllureMetadataProxy } from '../metadata';
 import type { ReporterConfig } from '../options';
 import { log } from '../logger';
+import { compactObject, isEmpty } from '../utils';
 
 export async function postProcessMetadata(
   globalContext: GlobalExtractorContext,
@@ -35,22 +36,25 @@ export async function postProcessMetadata(
   await Promise.all(
     batch.map(async (metadata) => {
       const allureProxy = new AllureMetadataProxy<AllureTestItemMetadata>(metadata);
-      const context: SourceCodeExtractionContext = {
+      const context: DocblockExtractionContext = compactObject({
         ...allureProxy.get('sourceLocation'),
         transformedCode: allureProxy.get('transformedCode'),
-      };
-      for (const p of config.sourceCode.plugins) {
-        try {
-          const docblock = await p.extractDocblock?.(context);
-          if (docblock) {
-            allureProxy.assign({ docblock });
-            break;
+      });
+
+      if (!isEmpty(context)) {
+        for (const p of config.sourceCode.plugins) {
+          try {
+            const docblock = await p.extractDocblock?.(context);
+            if (docblock) {
+              allureProxy.assign({ docblock });
+              break;
+            }
+          } catch (error: unknown) {
+            log.warn(
+              error,
+              `Plugin "${p.name}" failed to extract docblock for ${context.fileName}:${context.lineNumber}:${context.columnNumber}`,
+            );
           }
-        } catch (error: unknown) {
-          log.warn(
-            error,
-            `Plugin "${p.name}" failed to extract docblock for ${context.fileName}:${context.lineNumber}:${context.columnNumber}`,
-          );
         }
       }
     }),

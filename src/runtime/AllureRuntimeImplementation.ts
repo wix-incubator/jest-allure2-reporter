@@ -137,6 +137,7 @@ export class AllureRuntimeImplementation implements AllureRuntime {
 
   attachment: AllureRuntime['attachment'] = (name, content, maybeOptions) => {
     typeAssertions.assertString(name, 'name');
+    typeAssertions.assertAttachmentContent(content, 'content');
 
     const options = typeof maybeOptions === 'string' ? { mimeType: maybeOptions } : maybeOptions;
 

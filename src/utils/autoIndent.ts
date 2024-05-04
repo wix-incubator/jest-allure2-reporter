@@ -10,7 +10,8 @@ export function autoIndent(text: string) {
 
 function detectIndent(lines: string[]) {
   const result = lines.reduce((min, line) => {
-    const indent = line.length - line.trimStart().length;
+    const trimmed = line.trimStart();
+    const indent = trimmed === '' ? min : line.length - trimmed.length;
     return Math.min(indent, min);
   }, Number.POSITIVE_INFINITY);
 

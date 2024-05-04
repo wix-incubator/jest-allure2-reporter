@@ -27,20 +27,31 @@ import { type ReporterConfig, resolveOptions } from '../options';
 import { AllureMetadataProxy, MetadataSquasher } from '../metadata';
 import { compactArray, stringifyValues } from '../utils';
 import { type AllureWriter, FileAllureWriter } from '../serialization';
+import { log, optimizeForTracing } from '../logger';
 
 import * as fallbacks from './fallbacks';
-import { overwriteDirectory } from './overwriteDirectory';
 import { postProcessMetadata } from './postProcessMetadata';
 import { writeTest } from './allureCommons';
 import { resolvePromisedItem, resolvePromisedTestCase } from './resolveTestItem';
 
+const NOT_INITIALIZED = null as any;
+
+const __TID = optimizeForTracing((test?: Test) => ({
+  tid: ['jest-allure2-reporter', test ? test.path : 'run'],
+}));
+
+const __TID_NAME = optimizeForTracing((test: Test, testCaseResult: TestCaseResult) => ({
+  tid: ['jest-allure2-reporter', test.path],
+  fullName: testCaseResult.fullName,
+}));
+
 export class JestAllure2Reporter extends JestMetadataReporter {
   private readonly _globalConfig: Config.GlobalConfig;
   private readonly _options: ReporterOptions;
-  private _globalContext?: GlobalExtractorContext;
-  private _writer?: AllureWriter;
-  private _config?: ReporterConfig<void>;
-  private _globalMetadataProxy?: AllureMetadataProxy<AllureTestRunMetadata>;
+  private _globalContext: GlobalExtractorContext = NOT_INITIALIZED;
+  private _writer: AllureWriter = NOT_INITIALIZED;
+  private _config: ReporterConfig<void> = NOT_INITIALIZED;
+  private _globalMetadataProxy: AllureMetadataProxy<AllureTestRunMetadata> = NOT_INITIALIZED;
 
   constructor(globalConfig: Config.GlobalConfig, options: ReporterOptions) {
     super(globalConfig);
@@ -50,10 +61,13 @@ export class JestAllure2Reporter extends JestMetadataReporter {
   }
 
   async #init() {
-    this._config = await resolveOptions(this._options);
+    this._config = await resolveOptions(this._globalConfig.rootDir, this._options);
     this._writer = new FileAllureWriter({
       resultsDir: this._config.resultsDir,
+      overwrite: this._config.overwrite,
     });
+
+    await this._writer.init?.();
 
     const testRunMetadata = JestAllure2Reporter.query.globalMetadata();
     this._globalMetadataProxy = new AllureMetadataProxy<AllureTestRunMetadata>(testRunMetadata);
@@ -65,15 +79,38 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     });
   }
 
+  async #attempt(name: string, function_: () => unknown) {
+    try {
+      await function_.call(this);
+    } catch (error: unknown) {
+      log.error(error, `Caught unhandled error in JestAllure2Reporter#${name}`);
+    }
+  }
+
+  async #attemptSync(name: string, function_: () => unknown) {
+    try {
+      function_.call(this);
+    } catch (error: unknown) {
+      log.error(error, `Caught unhandled error in JestAllure2Reporter#${name}`);
+    }
+  }
+
   async onRunStart(
     aggregatedResult: AggregatedResult,
     options: ReporterOnStartOptions,
   ): Promise<void> {
     await super.onRunStart(aggregatedResult, options);
-    await this.#init();
+    const attemptInit = this.#attempt.bind(this, 'onRunStart#init()', this.#init);
+    const attemptRunStart = this.#attempt.bind(this, 'onRunStart()', this.#onRunStart);
 
-    const reporterConfig = this._config!;
-    const allureWriter = this._writer!;
+    await log.trace.begin(__TID(), 'jest-allure2-reporter');
+    await log.trace.complete(__TID(), 'init', attemptInit);
+    await log.trace.complete(__TID(), 'onRunStart', attemptRunStart);
+  }
+
+  async #onRunStart() {
+    const reporterConfig = this._config;
+    const allureWriter = this._writer;
 
     const globalContext = {
       $: {} as Helpers,
@@ -100,29 +137,33 @@ export class JestAllure2Reporter extends JestMetadataReporter {
 
     this._globalContext = globalContext;
 
-    if (reporterConfig.overwrite) {
-      await overwriteDirectory(reporterConfig.resultsDir);
-    }
-
     const environment = await reporterConfig.environment(globalContext);
     if (environment) {
-      allureWriter.writeEnvironmentInfo(stringifyValues(environment));
+      await allureWriter.writeEnvironmentInfo(stringifyValues(environment));
     }
 
     const executor = await reporterConfig.executor(globalContext);
     if (executor) {
-      allureWriter.writeExecutorInfo(executor);
+      await allureWriter.writeExecutorInfo(executor);
     }
 
     const categories = await reporterConfig.categories(globalContext);
     if (categories) {
-      allureWriter.writeCategories(categories);
+      await allureWriter.writeCategories(categories);
     }
   }
 
   async onTestFileStart(test: Test) {
     super.onTestFileStart(test);
 
+    const execute = this.#onTestFileStart.bind(this, test);
+    const attempt = this.#attemptSync.bind(this, 'onTestFileStart()', execute);
+    const testPath = path.relative(this._globalConfig.rootDir, test.path);
+    log.trace.begin(__TID(test), testPath);
+    log.trace.complete(__TID(test), 'onTestFileStart', attempt);
+  }
+
+  #onTestFileStart(test: Test) {
     const rawMetadata = JestAllure2Reporter.query.test(test);
     const testFileMetadata = new AllureMetadataProxy<AllureTestFileMetadata>(rawMetadata);
 
@@ -132,6 +173,12 @@ export class JestAllure2Reporter extends JestMetadataReporter {
   async onTestCaseResult(test: Test, testCaseResult: TestCaseResult) {
     super.onTestCaseResult(test, testCaseResult);
 
+    const execute = this.#onTestCaseResult.bind(this, test, testCaseResult);
+    const attempt = this.#attempt.bind(this, 'onTestCaseResult()', execute);
+    log.trace.complete(__TID_NAME(test, testCaseResult), testCaseResult.title, attempt);
+  }
+
+  #onTestCaseResult(test: Test, testCaseResult: TestCaseResult) {
     const testCaseMetadata = new AllureMetadataProxy<AllureTestCaseMetadata>(
       JestAllure2Reporter.query.testCaseResult(testCaseResult).lastInvocation!,
     );
@@ -142,21 +189,28 @@ export class JestAllure2Reporter extends JestMetadataReporter {
   async onTestFileResult(test: Test, testResult: TestResult, aggregatedResult: AggregatedResult) {
     await super.onTestFileResult(test, testResult, aggregatedResult);
 
+    const execute = this.#onTestFileResult.bind(this, test, testResult);
+    const attempt = this.#attempt.bind(this, 'onTestFileResult()', execute);
+    await log.trace.complete(__TID(test), 'onTestFileResult', attempt);
+    log.trace.end(__TID(test));
+  }
+
+  async #onTestFileResult(test: Test, testResult: TestResult) {
     const rawMetadata = JestAllure2Reporter.query.test(test);
     const testFileMetadata = new AllureMetadataProxy<AllureTestFileMetadata>(rawMetadata);
-    const globalMetadataProxy = this._globalMetadataProxy!;
-    const allureWriter = this._writer!;
+    const globalMetadataProxy = this._globalMetadataProxy;
+    const allureWriter = this._writer;
 
     fallbacks.onTestFileResult(test, testFileMetadata);
-    await postProcessMetadata(this._globalContext!, rawMetadata);
+    await postProcessMetadata(this._globalContext, rawMetadata);
 
     // ---
 
-    const config = this._config!;
+    const config = this._config;
     const squasher = new MetadataSquasher();
 
     const testFileContext: PropertyExtractorContext<TestFileExtractorContext, void> = {
-      ...this._globalContext!,
+      ...this._globalContext,
 
       filePath: path.relative(this._globalConfig.rootDir, testResult.testFilePath).split(path.sep),
       result: {},
@@ -168,7 +222,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
 
     const allureFileTest = await resolvePromisedTestCase(testFileContext, config.testFile);
     if (allureFileTest) {
-      writeTest({
+      await writeTest({
         resultsDir: config.resultsDir,
         containerName: `${testResult.testFilePath}`,
         writer: allureWriter,
@@ -196,7 +250,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
 
         const invocationIndex = allInvocations.indexOf(testInvocationMetadata);
 
-        writeTest({
+        await writeTest({
           resultsDir: config.resultsDir,
           containerName: `${testCaseResult.fullName} (${invocationIndex})`,
           writer: allureWriter,
@@ -212,12 +266,19 @@ export class JestAllure2Reporter extends JestMetadataReporter {
   ): Promise<void> {
     await super.onRunComplete(testContexts, aggregatedResult);
 
-    const globalMetadataProxy = this._globalMetadataProxy!;
+    const execute = this.#onRunComplete.bind(this, aggregatedResult);
+    const attempt = this.#attempt.bind(this, 'onRunComplete()', execute);
+    await log.trace.complete(__TID(), 'onRunComplete', attempt);
+    await log.trace.end(__TID());
+  }
+
+  async #onRunComplete(aggregatedResult: AggregatedResult) {
+    const globalMetadataProxy = this._globalMetadataProxy;
     globalMetadataProxy.set('stop', Date.now());
 
-    const allureWriter = this._writer!;
-    const config = this._config!;
-    const globalContext = this._globalContext!;
+    const allureWriter = this._writer;
+    const config = this._config;
+    const globalContext = this._globalContext;
     const testRunContext: PropertyExtractorContext<TestRunExtractorContext, void> = {
       ...globalContext,
       aggregatedResult,
@@ -228,12 +289,14 @@ export class JestAllure2Reporter extends JestMetadataReporter {
 
     const allureRunTest = await resolvePromisedTestCase(testRunContext, config.testRun);
     if (allureRunTest) {
-      writeTest({
+      await writeTest({
         resultsDir: config.resultsDir,
         containerName: `Test Run (${process.pid})`,
         writer: allureWriter,
         test: allureRunTest,
       });
     }
+
+    await allureWriter.cleanup?.();
   }
 }

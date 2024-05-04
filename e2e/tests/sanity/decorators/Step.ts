@@ -1,4 +1,4 @@
-import { Step } from '../../../../dist/api';
+import { Step } from 'jest-allure2-reporter/api';
 
 describe('Step', () => {
   class FactorialCalculator {

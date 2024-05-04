@@ -50,6 +50,12 @@ const jestAllure2ReporterOptions = {
       tms: 'https://test.testrail.io/index.php?/cases/view/{{name}}',
     },
   },
+  testRun: {
+    ignored: false,
+  },
+  testFile: {
+    ignored: false,
+  },
   testStep: {
     ignored: ({ testStepMetadata }) => testStepMetadata.displayName?.includes('(Jest)'),
   },

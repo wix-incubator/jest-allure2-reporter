@@ -38,11 +38,6 @@ declare module 'jest-allure2-reporter' {
      */
     attachments?: AttachmentsOptions;
     /**
-     * Tweak the way markdown is processed.
-     * You can enable or disable the processor, add remark plugins, etc.
-     */
-    markdown?: MarkdownProcessorOptions;
-    /**
      * Tweak the way source code and docblocks are extracted from test files.
      */
     sourceCode?: SourceCodeProcessorOptions;
@@ -119,13 +114,6 @@ declare module 'jest-allure2-reporter' {
   /** @see {@link AttachmentsOptions#contentHandler} */
   export type BuiltinContentAttachmentHandler = 'write';
 
-  export interface MarkdownProcessorOptions {
-    enabled?: boolean;
-    keepSource?: boolean;
-    remarkPlugins?: MaybeWithOptions<unknown>[];
-    rehypePlugins?: MaybeWithOptions<unknown>[];
-  }
-
   export interface SourceCodeProcessorOptions {
     enabled?: boolean;
     plugins?: Record<string, SourceCodePluginCustomizer | unknown | [SourceCodePluginCustomizer, unknown?]>;
@@ -140,11 +128,11 @@ declare module 'jest-allure2-reporter' {
   export interface SourceCodePlugin {
     readonly name: string;
 
-    extractDocblock?(context: Readonly<SourceCodeExtractionContext>): MaybePromise<AllureTestItemDocblock | undefined>;
-    extractSourceCode?(context: Readonly<SourceCodeExtractionContext>): MaybePromise<ExtractSourceCodeHelperResult | undefined>;
+    extractDocblock?(context: Readonly<DocblockExtractionContext>): MaybePromise<AllureTestItemDocblock | undefined>;
+    extractSourceCode?(location: Readonly<AllureTestItemSourceLocation>, includeComments: boolean): MaybePromise<ExtractSourceCodeHelperResult | undefined>;
   }
 
-  export interface SourceCodeExtractionContext extends AllureTestItemSourceLocation {
+  export interface DocblockExtractionContext extends AllureTestItemSourceLocation {
     transformedCode?: string;
   }
 
@@ -408,30 +396,19 @@ declare module 'jest-allure2-reporter' {
     /**
      * Provides an optimized way to navigate through the test file content.
      * Accepts a file path in a string or a split array format.
-     * Returns undefined if the file is not found or cannot be read.
+     * @param filePath - the path to the file to navigate, split by directory separators or as a single string.
+     * @returns a file navigator object or undefined if the file is not found or cannot be read.
      */
     getFileNavigator(filePath: string | string[]): Promise<FileNavigator | undefined>;
     /**
-      * Extracts the source code of the current test case, test step or a test file.
-      * Pass `true` as the second argument to extract source code recursively from all steps.
-      *
+      * Extracts the source code of the current test case or step.
+      * @param metadata - the metadata object of the test case or step.
+      * @param includeComments - whether to include comments before the actual code.
+      * @returns the extracted source code or undefined if the source code is not found.
       * @example
       * ({ $, testFileMetadata }) => $.extractSourceCode(testFileMetadata)
-      * @example
-      * ({ $, testCaseMetadata }) => $.extractSourceCode(testCaseMetadata, true)
       */
-    extractSourceCode: ExtractSourceCodeHelper;
-    /**
-     * Extracts the executor information from the current environment.
-     * Pass `true` as the argument to include local executor information.
-     * By default, supports GitHub Actions and Buildkite.
-     *
-     * @example
-     * ({ $ }) => $.getExecutorInfo()
-     * @example
-     * ({ $ }) => $.getExecutorInfo(true)
-     */
-    getExecutorInfo: GetExecutorInfoHelper;
+    extractSourceCode(metadata: AllureTestItemMetadata, includeComments?: boolean): Promise<ExtractSourceCodeHelperResult | undefined>;
     /**
      * Extracts the manifest of the current project or a specific package.
      * Pass a callback to extract specific data from the manifest – this way you can omit async/await.
@@ -446,6 +423,13 @@ declare module 'jest-allure2-reporter' {
      * ({ $ }) => (await $.manifest('jest')).version
      */
     manifest: ManifestHelper;
+    /**
+      * Strips ANSI escape codes from the given string or object.
+      * @example
+      * $.stripAnsi('Hello, \u001b[31mworld\u001b[0m!')
+      * @example
+      * $.stripAnsi({ message: 'Hello, \u001b[31mworld\u001b[0m!' })
+      */
     stripAnsi: StripAnsiHelper;
   }
 
@@ -459,17 +443,6 @@ declare module 'jest-allure2-reporter' {
     moveUp(countOfLines?: number): boolean;
     moveDown(countOfLines?: number): boolean;
     readLine(lineNumber?: number): string;
-  }
-
-  export interface ExtractSourceCodeHelper {
-    (metadata: AllureTestItemMetadata, recursive?: false): Promise<ExtractSourceCodeHelperResult | undefined>;
-    (metadata: AllureTestItemMetadata, recursive: true): Promise<ExtractSourceCodeHelperResult[]>;
-    (metadata: AllureTestItemMetadata, recursive: boolean): Promise<MaybeArray<ExtractSourceCodeHelperResult> | undefined>;
-  }
-
-  export interface GetExecutorInfoHelper {
-    (): MaybePromise<ExecutorInfo | undefined>;
-    (includeLocal: true): MaybePromise<ExecutorInfo>;
   }
 
   export interface ManifestHelper {
@@ -672,7 +645,7 @@ declare module 'jest-allure2-reporter' {
 
   export interface AllureTestCaseResult {
     uuid?: string;
-    ignored: boolean;
+    ignored?: boolean;
     historyId: Primitive;
     displayName: string;
     fullName: string;
@@ -691,7 +664,7 @@ declare module 'jest-allure2-reporter' {
   }
 
   export interface AllureTestStepResult {
-    ignored: boolean;
+    ignored?: boolean;
     hookType?: AllureTestStepMetadata['hookType'];
     displayName: string;
     start: number;

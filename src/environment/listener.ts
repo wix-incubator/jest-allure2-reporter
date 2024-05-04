@@ -95,19 +95,23 @@ function addSourceCode({ event }: TestEnvironmentCircusEvent) {
   let code = '';
   if (event.name === 'add_hook') {
     const { hookType, fn } = event;
-    code = `${hookType}(${fn});`;
+    const functionCode = String(fn);
 
-    if (code.includes("during setup, this cannot be null (and it's fine to explode if it is)")) {
+    if (
+      functionCode.includes("during setup, this cannot be null (and it's fine to explode if it is)")
+    ) {
       code = '';
       realm.runtimeContext
         .getCurrentMetadata()
         .set('displayName', 'Reset mocks, modules and timers (Jest)');
+    } else {
+      code = `${hookType}(${autoIndent(functionCode)});`;
     }
   }
 
   if (event.name === 'add_test') {
     const { testName, fn } = event;
-    code = `test(${JSON.stringify(testName)}, ${fn});`;
+    code = `test(${JSON.stringify(testName)}, ${autoIndent(String(fn))});`;
   }
 
   if (code) {

@@ -1,8 +1,8 @@
+import * as sourceCode from '../../source-code';
 import type { ReporterConfig } from '../types';
 import * as common from '../common';
 import * as custom from '../custom';
 import * as helpers from '../helpers';
-import * as sourceCode from '../source-code';
 
 import { categories } from './categories';
 import { testRun } from './testRun';
@@ -24,12 +24,6 @@ export function defaultOptions(): ReporterConfig {
       enabled: true,
       plugins: sourceCode,
     }),
-    markdown: {
-      enabled: true,
-      keepSource: true,
-      remarkPlugins: ['remark-gfm'],
-      rehypePlugins: ['rehype-highlight'],
-    },
     helpers: custom.helpers(helpers)!,
     testRun: custom.testCase(testRun),
     testFile: custom.testCase(testFile),
@@ -37,6 +31,6 @@ export function defaultOptions(): ReporterConfig {
     testStep: custom.testStep(testStep),
     categories: common.constant(categories),
     environment: () => ({}),
-    executor: ({ $ }) => $.getExecutorInfo(true),
+    executor: () => ({}),
   };
 }

@@ -12,7 +12,6 @@ import type {
   TestRunExtractorContext,
   Primitive,
   PromisedProperties,
-  MarkdownProcessorOptions,
   MaybePromise,
   TestStepExtractorContext,
   SourceCodePluginCustomizer,
@@ -32,7 +31,6 @@ export interface ReporterConfig<O = never> {
   resultsDir: string;
   injectGlobals: boolean;
   attachments: Required<AttachmentsOptions>;
-  markdown: Required<MarkdownProcessorOptions>;
   sourceCode: SourceCodeProcessorConfig;
   categories: CategoriesExtractor<O>;
   environment: EnvironmentExtractor<O>;

@@ -1,34 +1,22 @@
 import type { SourceCodePluginCustomizer } from 'jest-allure2-reporter';
 import { extract, parseWithComments } from 'jest-docblock';
 
-import { autoIndent } from '../../../utils';
 import { detectJS } from '../common';
+import { AllureRuntimeError } from '../../errors';
 
 import { extractDocblockAbove } from './extractDocblockAbove';
 
-export type JavaScriptSourceCodePluginOptions = {
-  extractTransformedCode?: boolean;
-};
+export interface JavaScriptSourceCodePluginOptions {
+  docblockPosition?: 'inside' | 'outside';
+}
 
 export const javascript: SourceCodePluginCustomizer = ({ $, value = {} }) => {
   const options = value as JavaScriptSourceCodePluginOptions;
+  const extractDocblockFromLine =
+    options.docblockPosition === 'inside' ? notImplemented : extractDocblockAbove;
 
   return {
     name: 'javascript',
-
-    extractSourceCode: ({ fileName, transformedCode }) => {
-      if (options.extractTransformedCode && transformedCode) {
-        const code = autoIndent(transformedCode.trimStart());
-
-        return {
-          code,
-          language: 'javascript',
-          fileName,
-        };
-      }
-
-      return;
-    },
 
     extractDocblock: ({ fileName, lineNumber }) => {
       if (fileName && detectJS(fileName)) {
@@ -36,7 +24,7 @@ export const javascript: SourceCodePluginCustomizer = ({ $, value = {} }) => {
           if (!navigator) return;
 
           let docblock = lineNumber
-            ? extractDocblockAbove(navigator, lineNumber)
+            ? extractDocblockFromLine(navigator, lineNumber)
             : extract(navigator.getContent());
           docblock = docblock.trim();
 
@@ -48,3 +36,9 @@ export const javascript: SourceCodePluginCustomizer = ({ $, value = {} }) => {
     },
   };
 };
+
+function notImplemented(): string {
+  throw new AllureRuntimeError(
+    'Extracting docblock inside JavaScript source code is not implemented yet',
+  );
+}

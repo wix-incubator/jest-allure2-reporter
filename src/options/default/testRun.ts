@@ -6,7 +6,7 @@ import { compose2 } from '../common';
 export const testRun: TestCaseCustomizer<TestRunExtractorContext> = {
   ignored: true,
   historyId: ({ testRunMetadata, result }) => testRunMetadata.historyId ?? result.fullName,
-  fullName: async ({ $, testRunMetadata }) =>
+  fullName: ({ $, testRunMetadata }) =>
     testRunMetadata.fullName ?? $.manifest(['name'], 'untitled project'),
   displayName: ({ testRunMetadata }) => testRunMetadata.displayName ?? '(test run)',
   description: ({ testRunMetadata }) => testRunMetadata.description?.join('\n\n') ?? '',

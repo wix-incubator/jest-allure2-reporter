@@ -4,13 +4,14 @@ import path from 'node:path';
 import { stringify } from 'properties';
 import type { Category, ExecutorInfo } from 'jest-allure2-reporter';
 
-import type { AllureTestResult, AllureTestResultContainer, AllureWriter } from './AllureWriter';
+import type { AllureResult, AllureContainer, AllureWriter } from './AllureWriter';
 
 async function writeJson(path: string, data: unknown) {
   await fs.writeFile(path, JSON.stringify(data) + '\n');
 }
 
 export interface FileSystemAllureWriterConfig {
+  overwrite: boolean;
   resultsDir: string;
 }
 
@@ -22,9 +23,16 @@ export class FileAllureWriter implements AllureWriter {
   }
 
   async init() {
-    await fs.mkdir(this.#config.resultsDir, {
-      recursive: true,
-    });
+    const { resultsDir, overwrite } = this.#config;
+    const directoryExists = await fs.access(resultsDir).then(
+      () => true,
+      () => false,
+    );
+    if (overwrite && directoryExists) {
+      await fs.rm(resultsDir, { recursive: true });
+    }
+
+    await fs.mkdir(resultsDir, { recursive: true });
   }
 
   async writeCategories(categories: Category[]) {
@@ -32,7 +40,7 @@ export class FileAllureWriter implements AllureWriter {
     await writeJson(path, categories);
   }
 
-  async writeContainer(result: AllureTestResultContainer) {
+  async writeContainer(result: AllureContainer) {
     const path = this.#buildPath(`${result.uuid}-container.json`);
     await writeJson(path, result);
   }
@@ -49,7 +57,7 @@ export class FileAllureWriter implements AllureWriter {
     await writeJson(path, info);
   }
 
-  async writeResult(result: AllureTestResult) {
+  async writeResult(result: AllureResult) {
     const path = this.#buildPath(`${result.uuid}-result.json`);
     await writeJson(path, result);
   }

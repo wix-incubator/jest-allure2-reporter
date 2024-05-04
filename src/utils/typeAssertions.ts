@@ -2,6 +2,8 @@ import util from 'node:util';
 
 import type { Primitive, Stage, Status, Severity } from 'jest-allure2-reporter';
 
+import { isPromiseLike } from './isPromiseLike';
+
 const SEVERITY_VALUES = new Set<Severity>(['blocker', 'critical', 'normal', 'minor', 'trivial']);
 const STATUS_VALUES = new Set<Status>(['failed', 'broken', 'passed', 'skipped', 'unknown']);
 const STAGE_VALUES = new Set<Stage>(['scheduled', 'running', 'finished', 'pending', 'interrupted']);
@@ -15,6 +17,18 @@ export function assertNotNullish(value: unknown, name = 'value'): asserts value 
 export function assertString(value: unknown, name = 'value'): asserts value is string {
   if (typeof value !== 'string') {
     throw new TypeError(`Expected a string ${name}, got instead: ${util.inspect(value)}`);
+  }
+}
+
+export function assertAttachmentContent(value: unknown, name = 'value'): asserts value is string {
+  if (isPromiseLike(value)) {
+    return;
+  }
+
+  if (typeof value !== 'string' && !Buffer.isBuffer(value) && !ArrayBuffer.isView(value)) {
+    throw new TypeError(
+      `Expected a string or a buffer "${name}, got instead: ${util.inspect(value)}`,
+    );
   }
 }
 

@@ -6,7 +6,7 @@ export * from './compactObject';
 export * from './FileNavigator';
 export * from './getStatusDetails';
 export * from './hijackFunction';
-export * from './importCwd';
+export * from './importFrom';
 export * from './isNonNullish';
 export * from './isJestAssertionError';
 export * from './isLibraryPath';
