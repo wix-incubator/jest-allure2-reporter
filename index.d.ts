@@ -402,13 +402,13 @@ declare module 'jest-allure2-reporter' {
     getFileNavigator(filePath: string | string[]): Promise<FileNavigator | undefined>;
     /**
       * Extracts the source code of the current test case or step.
-      * @param metadata - the metadata object of the test case or step.
+      * @param location - the location of the source code to extract.
       * @param includeComments - whether to include comments before the actual code.
       * @returns the extracted source code or undefined if the source code is not found.
       * @example
-      * ({ $, testFileMetadata }) => $.extractSourceCode(testFileMetadata)
+      * ({ $, testFileMetadata }) => $.extractSourceCode(testFileMetadata.sourceLocation)
       */
-    extractSourceCode(metadata: AllureTestItemMetadata, includeComments?: boolean): Promise<ExtractSourceCodeHelperResult | undefined>;
+    extractSourceCode(location: AllureTestItemSourceLocation | undefined, includeComments?: boolean): Promise<ExtractSourceCodeHelperResult | undefined>;
     /**
      * Extracts the manifest of the current project or a specific package.
      * Pass a callback to extract specific data from the manifest – this way you can omit async/await.

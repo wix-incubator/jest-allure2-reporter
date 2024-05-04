@@ -1,5 +1,5 @@
 import type {
-  AllureTestItemMetadata,
+  AllureTestItemSourceLocation,
   ExtractSourceCodeHelperResult,
   KeyedHelperCustomizer,
 } from 'jest-allure2-reporter';
@@ -14,25 +14,24 @@ export const extractSourceCode: KeyedHelperCustomizer<'extractSourceCode'> = ({
   const config = reporterConfig as ReporterConfig;
 
   return async function extractSourceCodeHelper(
-    item: AllureTestItemMetadata,
+    location: AllureTestItemSourceLocation,
     includeComments = false,
   ): Promise<ExtractSourceCodeHelperResult | undefined> {
-    let result: ExtractSourceCodeHelperResult = {};
-
-    const context = item.sourceLocation;
-    const plugins = config.sourceCode ? Object.values(config.sourceCode.plugins) : [];
-
-    if (isEmpty(context)) {
+    if (isEmpty(location)) {
       return undefined;
     }
 
+    const plugins = config.sourceCode ? Object.values(config.sourceCode.plugins) : [];
+
+    let result: ExtractSourceCodeHelperResult = {};
+
     for (const p of plugins) {
       try {
-        result = defaults(result, await p.extractSourceCode?.(context, includeComments));
+        result = defaults(result, await p.extractSourceCode?.(location, includeComments));
       } catch (error: unknown) {
         log.warn(
           error,
-          `Plugin "${p.name}" failed to extract source code for ${context.fileName}:${context.lineNumber}:${context.columnNumber}`,
+          `Plugin "${p.name}" failed to extract source code for ${location.fileName}:${location.lineNumber}:${location.columnNumber}`,
         );
       }
       if (result?.code) {

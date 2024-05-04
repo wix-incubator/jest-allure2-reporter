@@ -6,8 +6,8 @@ const description = async ({ $, testRunMetadata, testFileMetadata, testCaseMetad
   const steps = metadata.steps || [];
   const before = steps.filter(s => s.hookType?.startsWith('before'));
   const after = steps.filter(s => s.hookType?.startsWith('after'));
-  const allMetadata = [...before, metadata, ...after];
-  const codes = await Promise.all(allMetadata.map(m => $.extractSourceCode(m, true)));
+  const locations = [...before, metadata, ...after].map(m => m.sourceLocation);
+  const codes = await Promise.all(locations.map(loc => $.extractSourceCode(loc, true)));
   const snippets = codes.filter(Boolean).map($.source2markdown);
   return [text, ...snippets].filter(t => t != null).join('\n\n');
 };
