@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Status tests Simple failed snapshot 1`] = `
+{
+  "seed": 0.831296394914633,
+}
+`;
+
+exports[`Status tests Simple failed timeout 1`] = `
+{
+  "seed": 0.3646202773486069,
+}
+`;
+
+exports[`Status tests Status override in a failed snapshot in a  afterEach hook  1`] = `
+{
+  "seed": 0.5996337738043038,
+}
+`;
+
+exports[`Status tests Status override in a failed snapshot in a  beforeEach hook  1`] = `
+{
+  "seed": 0.928365985442531,
+}
+`;
+
+exports[`Status tests Status override in a failed snapshot in a  test  1`] = `
+{
+  "seed": 0.37722393964358303,
+}
+`;
+
+exports[`Status tests Status override in a failed snapshot in a  test step  1`] = `
+{
+  "seed": 0.8442442168520534,
+}
+`;
+
+exports[`Status tests Status override while timing out test 1`] = `
+{
+  "seed": 0.13785771624386745,
+}
+`;

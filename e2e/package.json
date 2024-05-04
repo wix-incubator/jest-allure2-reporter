@@ -5,13 +5,14 @@
   "scripts": {
     "test": "jest || true",
     "build": ":",
-    "start": "ALLURE_NO_ANALYTICS=1 allure serve allure-results/default",
+    "start": "ALLURE_NO_ANALYTICS=1 allure serve allure-results",
     "start:dev": "npm run build --workspace=jest-allure2-reporter && npm test && npm start"
   },
   "devDependencies": {
     "jest": "29.x.x",
     "jest-jasmine2": "29.x.x",
     "jest-allure2-reporter": "..",
+    "coffeescript": "^2.7.0",
     "ts-jest": "29.x.x",
     "typescript": "5.x.x"
   }

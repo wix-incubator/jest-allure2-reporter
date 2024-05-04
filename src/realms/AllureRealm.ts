@@ -2,10 +2,10 @@ import path from 'node:path';
 import os from 'node:os';
 
 import { state } from 'jest-metadata';
-import type { AllureGlobalMetadata } from 'jest-allure2-reporter';
+import type { AllureTestRunMetadata } from 'jest-allure2-reporter';
 
 import type { SharedReporterConfig } from '../runtime';
-import { AllureRuntime, AllureRuntimeContext } from '../runtime';
+import { AllureRuntimeImplementation, AllureRuntimeContext } from '../runtime';
 import { AllureMetadataProxy } from '../metadata';
 
 export class AllureRealm {
@@ -15,9 +15,7 @@ export class AllureRealm {
     getGlobalMetadata: () => state,
     getNow: () => Date.now(),
     getReporterConfig() {
-      let config = new AllureMetadataProxy<AllureGlobalMetadata>(state).get(
-        'config',
-      );
+      let config = new AllureMetadataProxy<AllureTestRunMetadata>(state).get('config');
       if (!config) {
         console.warn(
           "Cannot receive jest-allure2-reporter's config from the parent process. Have you set up Jest test environment correctly?",
@@ -39,5 +37,5 @@ export class AllureRealm {
     },
   });
 
-  runtime = new AllureRuntime(this.runtimeContext);
+  runtime = new AllureRuntimeImplementation(this.runtimeContext);
 }

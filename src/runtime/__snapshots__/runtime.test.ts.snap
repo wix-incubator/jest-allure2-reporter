@@ -1,0 +1,86 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AllureRuntime should add attachments within the steps 1`] = `
+{
+  "attachments": [
+    {
+      "name": "attachment1",
+      "source": "/attachments/first",
+      "type": "text/plain",
+    },
+    {
+      "name": "attachment5",
+      "source": "/attachments/fifth",
+      "type": "text/plain",
+    },
+  ],
+  "currentStep": [],
+  "steps": [
+    {
+      "attachments": [
+        {
+          "name": "attachment3",
+          "source": "/attachments/third",
+          "type": "text/plain",
+        },
+      ],
+      "displayName": "outer step",
+      "stage": "finished",
+      "start": 0,
+      "status": "passed",
+      "steps": [
+        {
+          "attachments": [
+            {
+              "name": "attachment2",
+              "source": "/attachments/second",
+              "type": "text/plain",
+            },
+          ],
+          "displayName": "inner step 1",
+          "stage": "interrupted",
+          "start": 1,
+          "status": "failed",
+          "statusDetails": {
+            "message": "Error: Sync error",
+            "trace": "at innerStep1",
+          },
+          "stop": 2,
+        },
+        {
+          "displayName": "inner step 2",
+          "stage": "finished",
+          "start": 3,
+          "status": "passed",
+          "stop": 4,
+        },
+        {
+          "attachments": [
+            {
+              "name": "attachment4",
+              "source": "/attachments/fourth",
+              "type": "text/plain",
+            },
+          ],
+          "displayName": "inner step 3 (fourth)",
+          "parameters": [
+            {
+              "name": "0",
+              "value": "fourth",
+            },
+          ],
+          "stage": "interrupted",
+          "start": 5,
+          "status": "broken",
+          "statusDetails": {
+            "message": "Error: Async error",
+            "trace": "at innerStep3",
+          },
+          "stop": 6,
+        },
+      ],
+      "stop": 7,
+    },
+  ],
+}
+`;

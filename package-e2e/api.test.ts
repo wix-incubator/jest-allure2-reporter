@@ -29,7 +29,7 @@ import type {
   IAllureRuntime,
   MIMEInferer,
   MIMEInfererContext,
-  ParameterOrString,
+  UserParameter,
 } from 'jest-allure2-reporter/api';
 
 enablePlugins();
@@ -57,6 +57,8 @@ test('typings of jest-allure2-reporter/api', async () => {
   allure.description('This is a _description_ generated in runtime');
   allure.descriptionHtml('This is a <i>description</i> generated in runtime');
   allure.historyId('00-11-22-33-44-55');
+  allure.displayName('Custom test case name');
+  allure.fullName('Custom full name');
   allure.status('failed');
   allure.status('passed');
   allure.status('broken');
@@ -133,8 +135,8 @@ test('typings of jest-allure2-reporter/api', async () => {
   });
 
   const login2 = allure.createStep('Login', [
-    assertType<ParameterOrString>('username'),
-    assertType<ParameterOrString>({ name: 'password', mode: 'masked'}),
+    assertType<UserParameter>('username'),
+    assertType<UserParameter>({ name: 'password', mode: 'masked'}),
   ], async (username: string, password: string) => {
     console.log('Login executed via %s and %s', username, password);
   });

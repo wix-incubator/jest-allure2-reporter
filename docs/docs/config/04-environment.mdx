@@ -7,13 +7,6 @@ import TabItem from '@theme/TabItem';
 
 # Environment
 
-:::caution
-
-This website version refers to the unreleased version of `jest-allure2-reporter`, partially available as `2.0.0-beta.3` release.
-Please use GitHub docs for the latest stable version, `1.x.x`.
-
-:::
-
 **Environment** is a feature that allows you to capture and display specific details related to the test execution environment, such as the operating system, browser version, device information, or any other global information that is relevant to the entire test run.
 
 Such information can be especially insightful when you're troubleshooting test failures in a heterogeneous environment, e.g. when tests fail on CI but pass locally, or when you're trying to pinpoint the cause of a test failure on a specific platform or a version of some software.
@@ -39,9 +32,9 @@ module.exports = {
   reporters: [
     // ...
     ['jest-allure2-reporter', {
-      environment: ({ _, package }) => ({
-        'package.name': package.name,
-        'package.version': package.version,
+      environment: async ({ manifest }) => ({
+        'package.name': await manifest((p) => p.name),
+        'package.version': await manifest((p) => p.version),
         'os.type': os.type(),
 
         ..._

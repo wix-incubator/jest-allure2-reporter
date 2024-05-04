@@ -1,3 +1,4 @@
+import type { AllureTestItemSourceLocation } from 'jest-allure2-reporter';
 import type { Circus } from '@jest/types';
 import type {
   EnvironmentListenerFn,
@@ -8,38 +9,27 @@ import * as StackTrace from 'stacktrace-js';
 
 import * as api from '../api';
 import realm from '../realms';
-import { getStatusDetails, isJestAssertionError } from '../utils';
+import { autoIndent, getStatusDetails, isJestAssertionError, isLibraryPath } from '../utils';
 
 const listener: EnvironmentListenerFn = (context) => {
   context.testEvents
-    .on(
-      'test_environment_setup',
-      function ({ env }: TestEnvironmentSetupEvent) {
-        env.global.__ALLURE__ = realm;
-        const { injectGlobals } = realm.runtimeContext.getReporterConfig();
-        if (injectGlobals) {
-          Object.assign(env.global, api);
-        }
-
-        realm.runtimeContext
-          .getFileMetadata()
-          .set('workerId', process.env.JEST_WORKER_ID);
-      },
-    )
-    .on('add_hook', addSourceLocation)
+    .on('test_environment_setup', injectGlobals)
+    .on('test_environment_setup', setWorkerId)
     .on('add_hook', addHookType)
+    .on('add_hook', addSourceLocation)
+    .on('add_hook', addSourceCode)
     .on('add_test', addSourceLocation)
-    .on('test_start', testStart)
-    .on('test_todo', testSkip)
-    .on('test_skip', testSkip)
-    .on('test_done', testDone)
-    .on('hook_start', addSourceCode)
+    .on('add_test', addSourceCode)
+    .on('run_start', flush)
     .on('hook_start', executableStart)
     .on('hook_failure', executableFailure)
     .on('hook_failure', flush)
     .on('hook_success', executableSuccess)
     .on('hook_success', flush)
-    .on('test_fn_start', addSourceCode)
+    .on('test_start', testStart)
+    .on('test_todo', testSkip)
+    .on('test_skip', testSkip)
+    .on('test_done', testDone)
     .on('test_fn_start', executableStart)
     .on('test_fn_success', executableSuccess)
     .on('test_fn_success', flush)
@@ -54,63 +44,84 @@ async function flush() {
 
 function addSourceLocation({
   event,
-}: TestEnvironmentCircusEvent<
-  Circus.Event & { name: 'add_hook' | 'add_test' }
->) {
+}: TestEnvironmentCircusEvent<Circus.Event & { name: 'add_hook' | 'add_test' }>) {
   const metadata = realm.runtimeContext.getCurrentMetadata();
-  const task = StackTrace.fromError(event.asyncError).then(([frame]) => {
-    if (frame) {
-      metadata.set('sourceLocation', {
-        fileName: frame.fileName,
-        lineNumber: frame.lineNumber,
-        columnNumber: frame.columnNumber,
-      });
+  const task = StackTrace.fromError(event.asyncError).then((stackFrames) => {
+    const first = stackFrames.find((s) => !isLibraryPath(s.fileName));
+    if (!first) {
+      return;
     }
+
+    const sourceLocation: AllureTestItemSourceLocation = {
+      fileName: first.fileName,
+      lineNumber: first.lineNumber,
+      columnNumber: first.columnNumber,
+    };
+
+    metadata.set('sourceLocation', sourceLocation);
   });
 
   realm.runtimeContext.enqueueTask(task);
 }
 
-function addHookType({
-  event,
-}: TestEnvironmentCircusEvent<Circus.Event & { name: 'add_hook' }>) {
+function injectGlobals({ env }: TestEnvironmentSetupEvent) {
+  env.global.__ALLURE__ = realm;
+
+  const { injectGlobals } = realm.runtimeContext.getReporterConfig();
+  if (injectGlobals) {
+    Object.assign(env.global, api);
+  }
+}
+
+function setWorkerId() {
+  if (process.env.JEST_WORKER_ID) {
+    realm.runtimeContext.getFileMetadata().push('labels', [
+      {
+        name: 'thread',
+        value: process.env.JEST_WORKER_ID.padStart(2, '0'),
+      },
+    ]);
+  } else {
+    // TODO: log a warning
+  }
+}
+
+function addHookType({ event }: TestEnvironmentCircusEvent<Circus.Event & { name: 'add_hook' }>) {
   const metadata = realm.runtimeContext.getCurrentMetadata();
   metadata.set('hookType', event.hookType);
 }
 
 function addSourceCode({ event }: TestEnvironmentCircusEvent) {
   let code = '';
-  if (event.name === 'hook_start') {
-    const { type, fn } = event.hook;
-    code = `${type}(${fn});`;
+  if (event.name === 'add_hook') {
+    const { hookType, fn } = event;
+    const functionCode = String(fn);
 
     if (
-      code.includes(
-        "during setup, this cannot be null (and it's fine to explode if it is)",
-      )
+      functionCode.includes("during setup, this cannot be null (and it's fine to explode if it is)")
     ) {
       code = '';
       realm.runtimeContext
         .getCurrentMetadata()
-        .push('description', ['Reset mocks, modules and timers (Jest)']);
+        .set('displayName', 'Reset mocks, modules and timers (Jest)');
+    } else {
+      code = `${hookType}(${autoIndent(functionCode)});`;
     }
   }
 
-  if (event.name === 'test_fn_start') {
-    const { name, fn } = event.test;
-    code = `test(${JSON.stringify(name)}, ${fn});`;
+  if (event.name === 'add_test') {
+    const { testName, fn } = event;
+    code = `test(${JSON.stringify(testName)}, ${autoIndent(String(fn))});`;
   }
 
   if (code) {
-    realm.runtimeContext.getCurrentMetadata().set('sourceCode', code);
+    realm.runtimeContext.getCurrentMetadata().set('transformedCode', autoIndent(code));
   }
 }
 
 // eslint-disable-next-line no-empty-pattern
 function executableStart(
-  _event: TestEnvironmentCircusEvent<
-    Circus.Event & { name: 'hook_start' | 'test_fn_start' }
-  >,
+  _event: TestEnvironmentCircusEvent<Circus.Event & { name: 'hook_start' | 'test_fn_start' }>,
 ) {
   realm.runtimeContext.getCurrentMetadata().assign({
     stage: 'running',
@@ -120,9 +131,7 @@ function executableStart(
 
 function executableFailure({
   event: { error },
-}: TestEnvironmentCircusEvent<
-  Circus.Event & { name: 'test_fn_failure' | 'hook_failure' }
->) {
+}: TestEnvironmentCircusEvent<Circus.Event & { name: 'test_fn_failure' | 'hook_failure' }>) {
   realm.runtimeContext.getCurrentMetadata().assign({
     stage: 'interrupted',
     status: isJestAssertionError(error) ? 'failed' : 'broken',
@@ -132,9 +141,7 @@ function executableFailure({
 }
 
 function executableSuccess(
-  _event: TestEnvironmentCircusEvent<
-    Circus.Event & { name: 'test_fn_success' | 'hook_success' }
-  >,
+  _event: TestEnvironmentCircusEvent<Circus.Event & { name: 'test_fn_success' | 'hook_success' }>,
 ) {
   realm.runtimeContext.getCurrentMetadata().assign({
     stage: 'finished',
@@ -142,27 +149,21 @@ function executableSuccess(
   });
 }
 
-function testStart(
-  _event: TestEnvironmentCircusEvent<Circus.Event & { name: 'test_start' }>,
-) {
+function testStart(_event: TestEnvironmentCircusEvent<Circus.Event & { name: 'test_start' }>) {
   realm.runtimeContext.getCurrentMetadata().assign({
     start: Date.now(),
   });
 }
 
 function testSkip(
-  _event: TestEnvironmentCircusEvent<
-    Circus.Event & { name: 'test_skip' | 'test_todo' }
-  >,
+  _event: TestEnvironmentCircusEvent<Circus.Event & { name: 'test_skip' | 'test_todo' }>,
 ) {
   realm.runtimeContext.getCurrentMetadata().assign({
     stop: Date.now(),
   });
 }
 
-function testDone({
-  event,
-}: TestEnvironmentCircusEvent<Circus.Event & { name: 'test_done' }>) {
+function testDone({ event }: TestEnvironmentCircusEvent<Circus.Event & { name: 'test_done' }>) {
   const current = realm.runtimeContext.getCurrentMetadata();
 
   if (event.test.errors.length > 0) {

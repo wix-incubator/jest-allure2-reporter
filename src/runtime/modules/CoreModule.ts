@@ -2,6 +2,7 @@ import type {
   LabelName,
   Link,
   Parameter,
+  Primitive,
   Status,
   StatusDetails,
 } from 'jest-allure2-reporter';
@@ -24,24 +25,10 @@ export class CoreModule {
     });
   }
 
-  description(value: string) {
-    this.context.metadata.push('description', [value]);
-  }
+  // region Universal (test, hook, step) metadata
 
-  descriptionHtml(value: string) {
-    this.context.metadata.push('descriptionHtml', [value]);
-  }
-
-  historyId(value: string) {
-    this.context.metadata.set('historyId', value);
-  }
-
-  label(name: LabelName | string, value: string) {
-    this.context.metadata.push('labels', [{ name, value }]);
-  }
-
-  link(link: Link) {
-    this.context.metadata.push('links', [link]);
+  displayName(value: string) {
+    this.context.metadata.set('displayName', value);
   }
 
   parameter(parameter: Parameter) {
@@ -55,4 +42,34 @@ export class CoreModule {
   statusDetails(statusDetails: StatusDetails) {
     this.context.metadata.set('statusDetails', statusDetails);
   }
+
+  // endregion
+
+  // region Test-only metadata
+
+  description(value: string) {
+    this.context.metadata.$bind(null).push('description', [value]);
+  }
+
+  descriptionHtml(value: string) {
+    this.context.metadata.$bind(null).push('descriptionHtml', [value]);
+  }
+
+  fullName(value: string) {
+    this.context.metadata.$bind(null).set('fullName', value);
+  }
+
+  historyId(value: Primitive) {
+    this.context.metadata.$bind(null).set('historyId', value);
+  }
+
+  label(name: LabelName | string, value: string) {
+    this.context.metadata.$bind(null).push('labels', [{ name, value }]);
+  }
+
+  link(link: Link) {
+    this.context.metadata.$bind(null).push('links', [link]);
+  }
+
+  // endregion
 }

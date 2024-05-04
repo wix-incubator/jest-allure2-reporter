@@ -1,15 +1,9 @@
 ---
 slug: /docs/usage
+verified: true
 ---
 
 # Usage
-
-:::caution
-
-This website version refers to the unreleased version of `jest-allure2-reporter`, partially available as `2.0.0-beta.3` release.
-Please use GitHub docs for the latest stable version, `1.x.x`.
-
-:::
 
 Assuming you have already [installed the reporter][installation], run your tests with `jest` as usual, e.g.:
 
@@ -17,6 +11,18 @@ Assuming you have already [installed the reporter][installation], run your tests
 npm test
 # jest ...
 # PASS  ./my.test.js
+```
+
+Upon the test completion, you will see the `allure-results` directory generated in the root of your project.
+
+To see the HTML report, serve it with Allure CLI:
+
+```bash
+allure serve
+# Generating report to temp directory...
+# Report successfully generated to /var/folders/lm/thz8hdxs4v3fppjh0fjc2twhfl_3x2/T/14940417964840933584/allure-report
+# Starting web server...
+# Server started at <http://192.168.0.43:56073/>. Press <Ctrl+C> to exit
 ```
 
 and then browse the results stored in the `allure-results` directory via:
@@ -31,6 +37,6 @@ If you want to generate a static report, e.g., for CI, run:
 allure generate
 ```
 
-For more information on `allure` CLI itself, see the documentation on its [official website](https://docs.qameta.io/allure/#_get_started).
+Congratulations! Now, when you are looking at your report, let's learn more about it and how to customize it.
 
 [installation]: 01-installation.mdx

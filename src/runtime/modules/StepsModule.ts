@@ -1,8 +1,4 @@
-import {
-  isPromiseLike,
-  isJestAssertionError,
-  getStatusDetails,
-} from '../../utils';
+import { isPromiseLike, isJestAssertionError, getStatusDetails } from '../../utils';
 import type { AllureTestItemMetadataProxy } from '../../metadata';
 import type { AllureRuntimeContext } from '../AllureRuntimeContext';
 
@@ -51,11 +47,11 @@ export class StepsModule {
     }
   }
 
-  #startStep = (name: string) => {
+  #startStep = (displayName: string) => {
     this.context.metadata.$startStep().assign({
       stage: 'scheduled',
       start: this.context.now,
-      description: [name],
+      displayName,
     });
   };
 

@@ -1,10 +1,13 @@
 import type {
-  AllureGlobalMetadata,
+  AllureTestRunMetadata,
   AllureTestFileMetadata,
+  MaybeFunction,
 } from 'jest-allure2-reporter';
+import Handlebars from 'handlebars';
 
-import { type MaybeFunction, once } from '../utils';
+import { once, TaskQueue } from '../utils';
 import { AllureMetadataProxy, AllureTestItemMetadataProxy } from '../metadata';
+import { log } from '../logger';
 
 import type { AllureRuntimeConfig } from './AllureRuntimeConfig';
 import * as attachmentHandlers from './attachment-handlers';
@@ -18,15 +21,16 @@ import type {
 export class AllureRuntimeContext {
   readonly contentAttachmentHandlers: Record<string, ContentAttachmentHandler>;
   readonly fileAttachmentHandlers: Record<string, FileAttachmentHandler>;
+  readonly handlebars = Handlebars.create();
   readonly inferMimeType: MIMEInferer;
   readonly getReporterConfig: () => SharedReporterConfig;
   readonly getFileMetadata: () => AllureMetadataProxy<AllureTestFileMetadata>;
-  readonly getGlobalMetadata: () => AllureMetadataProxy<AllureGlobalMetadata>;
+  readonly getGlobalMetadata: () => AllureMetadataProxy<AllureTestRunMetadata>;
   readonly getCurrentMetadata: () => AllureTestItemMetadataProxy;
   readonly getNow: () => number;
 
   readonly flush: () => Promise<unknown>;
-  readonly enqueueTask: (task: MaybeFunction<Promise<unknown>>) => void;
+  readonly enqueueTask: <T>(task: MaybeFunction<Promise<T>>) => Promise<T>;
 
   constructor(config: AllureRuntimeConfig) {
     this.contentAttachmentHandlers = config.contentAttachmentHandlers ?? {
@@ -37,23 +41,21 @@ export class AllureRuntimeContext {
       move: attachmentHandlers.moveHandler,
       ref: attachmentHandlers.referenceHandler,
     };
-    this.inferMimeType =
-      config.inferMimeType ?? attachmentHandlers.inferMimeType;
+    this.inferMimeType = config.inferMimeType ?? attachmentHandlers.inferMimeType;
     this.getNow = config.getNow;
     this.getReporterConfig = once(config.getReporterConfig);
-    this.getCurrentMetadata = () =>
-      new AllureTestItemMetadataProxy(config.getCurrentMetadata());
-    this.getFileMetadata = () =>
-      new AllureMetadataProxy(config.getFileMetadata());
-    this.getGlobalMetadata = () =>
-      new AllureMetadataProxy(config.getGlobalMetadata());
+    this.getCurrentMetadata = () => new AllureTestItemMetadataProxy(config.getCurrentMetadata());
+    this.getFileMetadata = () => new AllureMetadataProxy(config.getFileMetadata());
+    this.getGlobalMetadata = () => new AllureMetadataProxy(config.getGlobalMetadata());
 
-    let idle: Promise<unknown> = Promise.resolve();
-    this.flush = () => idle;
-    this.enqueueTask = (task) => {
-      idle =
-        typeof task === 'function' ? idle.then(task) : idle.then(() => task);
-    };
+    const taskQueue = new TaskQueue({
+      logError(error) {
+        log.error(error, 'Allure Runtime Task Queue Error');
+      },
+    });
+
+    this.flush = taskQueue.flush;
+    this.enqueueTask = taskQueue.enqueueTask;
 
     Object.defineProperty(this.contentAttachmentHandlers, 'default', {
       get: () => {

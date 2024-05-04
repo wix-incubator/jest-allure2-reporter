@@ -1,24 +1,13 @@
 ---
 slug: /docs/installation
+verified: true
 ---
 
 # Installation
 
-:::caution
-
-This website version refers to the unreleased version of `jest-allure2-reporter`, partially available as `2.0.0-beta.3` release.
-Please use GitHub docs for the latest stable version, `1.x.x`.
-
-:::
-
 ## Prerequisites
 
-Before you start, make sure you have [Allure CLI](https://docs.qameta.io/allure/#_get_started) installed globally:
-
-```bash
-$ allure --version
-2.22.1
-```
+### Jest
 
 To use `jest-allure2-reporter` in your project, you have to be using
 [`jest`](https://jestjs.io) as your test runner. The minimum supported version is `27.x`.
@@ -29,15 +18,55 @@ Use Jest's default `jest-circus` runner for the full reporting functionality. Re
 
 :::
 
-## Setup
+### Allure CLI
 
-Run in your project:
+In the most cases, you'd like to serve or generate HTML reports from the generated JSON files in `allure-results` directory.
+
+To do so, make sure you have [`allure-commandline`](https://www.npmjs.com/package/allure-commandline) installed:
 
 ```bash
+$ allure --version
+2.27.0
+```
+
+:::details
+
+::summary[If you don't have Allure CLI installed]
+
+First of all, make sure you have Java 17 installed on your machine:
+
+```bash
+java -version
+# openjdk version "17.0.1" 2024-01-16
+# OpenJDK Runtime Environment (build 17.0.10+0)
+```
+
+To install Allure CLI globally, run:
+
+```bash npm2yarn
+npm install -g allure-commandline
+```
+
+To install Allure CLI locally (per project), run:
+
+```bash npm2yarn
+npm install --save-dev allure-commandline
+```
+
+:::
+
+However, if you generate the HTML reports elsewhere, you can skip this step.
+
+
+## Setup
+
+Use your package manager to add `jest-allure2-reporter` to the project:
+
+```bash npm2yarn
 npm install --save-dev jest-allure2-reporter
 ```
 
-Edit your Jest configuration file, e.g.:
+Edit your Jest configuration file this way:
 
 ```js title="jest.config.js"
  /** @type {import('@jest/types').Config.InitialOptions} */
@@ -53,3 +82,5 @@ Edit your Jest configuration file, e.g.:
    // …
  };
 ```
+
+At this point, you are ready to run your tests with the reporter.

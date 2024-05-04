@@ -1,18 +1,9 @@
 ---
 description: Have an informative overview of your test results.
+verified: true
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
-
 # Statuses
-
-:::caution
-
-This website version refers to the unreleased version of `jest-allure2-reporter`, partially available as `2.0.0-beta.3` release.
-Please use GitHub docs for the latest stable version, `1.x.x`.
-
-:::
 
 Jest Allure 2 Reporter supports all the standard statuses defined by the Allure Framework.
 
@@ -71,8 +62,10 @@ module.exports = {
   reporters: [
     // ...
     ['jest-allure2-reporter', {
-// highlight-next-line
-      status: ({ value }) => value === 'broken' ? 'failed' : value,
+      testCase: {
+        // highlight-next-line
+        status: ({ value }) => value === 'broken' ? 'failed' : value,
+      },
     }],
   ],
 };

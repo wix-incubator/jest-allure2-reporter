@@ -1,19 +1,54 @@
-import path from 'node:path';
+import type { ReporterOptions } from 'jest-allure2-reporter';
 
-import type {
-  PluginContext,
-  ReporterOptions,
-  ReporterConfig,
-} from 'jest-allure2-reporter';
+import { asArray, importFrom } from '../utils';
 
-import { composeOptions } from './compose-options';
-import { defaultOptions } from './default-options';
+import { testCaseSteps } from './custom';
+import { defaultOptions } from './default';
+import { extendOptions } from './extendOptions';
+import type { ReporterConfig } from './types';
+import { combineTestCaseAndSteps } from './combineTestCaseAndSteps';
 
-export function resolveOptions(
-  context: PluginContext,
-  options?: ReporterOptions | undefined,
-): ReporterConfig {
-  const result = composeOptions(context, defaultOptions(context), options);
-  result.resultsDir = path.resolve(result.resultsDir);
-  return result;
+export async function resolveOptions(rootDirectory: string, custom?: ReporterOptions | undefined) {
+  const extensions = custom ? await resolveExtendsChain(rootDirectory, custom) : [];
+
+  let config: ReporterConfig = defaultOptions();
+  for (const extension of extensions) {
+    config = extendOptions(config, extension);
+  }
+
+  config.testFile = combineTestCaseAndSteps(
+    config.testFile,
+    testCaseSteps(config.testStep, 'testFileMetadata'),
+  );
+  config.testCase = combineTestCaseAndSteps(
+    config.testCase,
+    testCaseSteps(config.testStep, 'testCaseMetadata'),
+  );
+  config.testRun = combineTestCaseAndSteps(
+    config.testRun,
+    testCaseSteps(config.testStep, 'testRunMetadata'),
+  );
+
+  return config as ReporterConfig<void>;
 }
+
+export async function resolveExtendsChain(
+  rootDirectory: string,
+  custom: ReporterOptions | undefined,
+): Promise<ReporterOptions[]> {
+  if (custom) {
+    const chain: ReporterOptions[] = [custom];
+    for (const reference of asArray(custom.extends)) {
+      const resolution =
+        typeof reference === 'string'
+          ? await importFrom(reference, rootDirectory)
+          : { dirname: rootDirectory, exports: reference };
+      chain.unshift(...(await resolveExtendsChain(resolution.dirname, resolution.exports)));
+    }
+    return chain;
+  }
+
+  return [];
+}
+
+export { ReporterConfig } from './types';

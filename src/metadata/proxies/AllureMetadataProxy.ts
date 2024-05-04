@@ -24,9 +24,9 @@ export class AllureMetadataProxy<T = unknown> {
     return this;
   }
 
-  push(key: keyof T, values: unknown[]): this {
+  push<K extends keyof T>(key: K, values: Required<T>[K]): this {
     const path = this.$localPath(key);
-    this.$metadata.push(path, values);
+    this.$metadata.push(path, values as unknown[]);
     return this;
   }
 

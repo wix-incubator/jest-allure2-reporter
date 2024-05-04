@@ -1,12 +1,13 @@
 import realm from '../realms';
-import type { IAllureRuntime } from '../runtime';
+import type { AllureRuntime } from '../runtime';
 
 export * from './annotations';
 export * from './decorators';
 
-export const allure = realm.runtime as IAllureRuntime;
+export const allure = realm.runtime as AllureRuntime;
 
 export type {
+  AllureRuntime,
   AllureRuntimePluginCallback,
   AllureRuntimePluginContext,
   AttachmentContent,
@@ -18,8 +19,8 @@ export type {
   FileAttachmentContext,
   FileAttachmentHandler,
   FileAttachmentOptions,
-  IAllureRuntime,
   MIMEInferer,
   MIMEInfererContext,
-  ParameterOrString,
+  ParameterOptions,
+  UserParameter,
 } from '../runtime';

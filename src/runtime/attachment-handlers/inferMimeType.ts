@@ -3,9 +3,7 @@ import { extname } from 'node:path';
 import type { MIMEInferer } from '../types';
 
 export const inferMimeType: MIMEInferer = (context) => {
-  return context.sourcePath
-    ? mimeTypes[extname(context.sourcePath)]
-    : undefined;
+  return context.sourcePath ? mimeTypes[extname(context.sourcePath)] : undefined;
 };
 
 const mimeTypes: Record<string, string> = {

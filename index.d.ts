@@ -1,47 +1,25 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
-import type { Config, TestCaseResult, TestResult } from '@jest/reporters';
+import type {AggregatedResult, Config, TestCaseResult, TestResult} from '@jest/reporters';
 import JestMetadataReporter from 'jest-metadata/reporter';
 
 declare module 'jest-allure2-reporter' {
-  /**
-   * Configuration options for the `jest-allure2-reporter` package.
-   * These options are used in your Jest config.
-   *
-   * @example
-   * /** @type {import('@jest/types').Config.InitialOptions} *\/
-   * module.exports = {
-   *   // ...
-   *   reporters: [
-   *     'default',
-   *     ['jest-allure2-reporter', {
-   *       resultsDir: 'allure-results',
-   *       testCase: {},
-   *       environment: () => process.env,
-   *       executor: ({ value }) => value ?? ({
-   *         type: process.platform,
-   *         name: require('os').hostname()
-   *       }),
-   *       categories: ({ value }) => [
-   *         ...value,
-   *         {
-   *           name: 'Custom defect category',
-   *           messageRegex: '.*Custom defect message.*',
-   *         },
-   *       ],
-   *     }],
-   *   ],
-   * };
-   */
-  export type ReporterOptions = {
+  // region Options
+
+  export interface ReporterOptions {
+    /**
+     * Extend the base configuration with custom options.
+     * You can apply multiple extensions in a chain.
+     */
+    extends?: MaybeArray<string | ReporterOptions>;
     /**
      * Overwrite the results directory if it already exists.
      * @default true
      */
     overwrite?: boolean;
     /**
-     * Specifies where to output test result files.
-     * Please note that the results directory is not a ready-to-use Allure report.
+     * Specify where to output test result files.
+     * Please note that the results directory is not a ready-to-view Allure report.
      * You'll need to generate the report using the `allure` CLI.
      *
      * @default 'allure-results'
@@ -56,9 +34,13 @@ declare module 'jest-allure2-reporter' {
      */
     injectGlobals?: boolean;
     /**
-     * Configures how external attachments are attached to the report.
+     * Configure how external attachments are attached to the report.
      */
     attachments?: AttachmentsOptions;
+    /**
+     * Tweak the way source code and docblocks are extracted from test files.
+     */
+    sourceCode?: SourceCodeProcessorOptions;
     /**
      * Configures the defect categories for the report.
      *
@@ -66,53 +48,45 @@ declare module 'jest-allure2-reporter' {
      * `Product defects`, `Test defects` based on the test case status:
      * `failed` and `broken` respectively.
      */
-    categories?: Category[] | CategoriesCustomizer;
+    categories?: CategoriesCustomizer;
     /**
      * Configures the environment information that will be reported.
      */
-    environment?: Record<string, string> | EnvironmentCustomizer;
+    environment?: EnvironmentCustomizer;
     /**
      * Configures the executor information that will be reported.
      */
-    executor?: ExecutorInfo | ExecutorCustomizer;
+    executor?: ExecutorCustomizer;
+    /**
+     * Customize extractor helpers object to use later in the customizers.
+     */
+    helpers?: HelpersCustomizer;
+    /**
+     * Customize how to report test runs (sessions) as pseudo-test cases.
+     * This is normally used to report broken global setup and teardown hooks,
+     * and to provide additional information about the test run.
+     */
+    testRun?: TestCaseCustomizer<TestRunExtractorContext>;
     /**
      * Customize how to report test files as pseudo-test cases.
      * This is normally used to report broken test files, so that you can be aware of them,
      * but advanced users may find other use cases.
      */
-    testFile?: Partial<TestFileCustomizer>;
+    testFile?: TestCaseCustomizer<TestFileExtractorContext>;
     /**
      * Customize how test cases are reported: names, descriptions, labels, status, etc.
      */
-    testCase?: Partial<TestCaseCustomizer>;
+    testCase?: TestCaseCustomizer<TestCaseExtractorContext>;
     /**
      * Customize how individual test steps are reported.
      */
-    testStep?: Partial<TestStepCustomizer>;
-    /**
-     * Plugins to extend the reporter functionality.
-     * Via plugins, you can extend the context used by customizers.
-     */
-    plugins?: PluginDeclaration[];
-  };
+    testStep?: TestStepCustomizer;
+  }
 
-  export type ReporterConfig = {
-    overwrite: boolean;
-    resultsDir: string;
-    injectGlobals: boolean;
-    attachments: Required<AttachmentsOptions>;
-    categories: CategoriesCustomizer;
-    environment: EnvironmentCustomizer;
-    executor: ExecutorCustomizer;
-    testFile: ResolvedTestFileCustomizer;
-    testCase: ResolvedTestCaseCustomizer;
-    testStep: ResolvedTestStepCustomizer;
-    plugins: Promise<Plugin[]>;
-  };
-
-  export type AttachmentsOptions = {
+  export interface AttachmentsOptions {
     /**
      * Defines a subdirectory within the {@link ReporterOptions#resultsDir} where attachments will be stored.
+     * Use absolute path if you want to store attachments outside the {@link ReporterOptions#resultsDir} directory.
      * @default 'attachments'
      */
     subDir?: string;
@@ -128,9 +102,11 @@ declare module 'jest-allure2-reporter' {
     /**
      * Specifies default strategy for attaching dynamic content to the report.
      * Uses simple file writing by default.
+     * @default 'write'
+     * @see {@link AllureRuntime#createContentAttachment}
      */
     contentHandler?: BuiltinContentAttachmentHandler | string;
-  };
+  }
 
   /** @see {@link AttachmentsOptions#fileHandler} */
   export type BuiltinFileAttachmentHandler = 'copy' | 'move' | 'ref';
@@ -138,63 +114,87 @@ declare module 'jest-allure2-reporter' {
   /** @see {@link AttachmentsOptions#contentHandler} */
   export type BuiltinContentAttachmentHandler = 'write';
 
-  /**
-   * Global customizations for how test cases are reported
-   */
-  export interface TestCaseCustomizer {
+  export interface SourceCodeProcessorOptions {
+    enabled?: boolean;
+    plugins?: Record<string, SourceCodePluginCustomizer | unknown | [SourceCodePluginCustomizer, unknown?]>;
+  }
+
+  // endregion
+
+  // region Customizers
+
+  export type SourceCodePluginCustomizer = PropertyExtractor<GlobalExtractorContext, unknown, MaybePromise<SourceCodePlugin | undefined>>;
+
+  export interface SourceCodePlugin {
+    readonly name: string;
+
+    extractDocblock?(context: Readonly<DocblockExtractionContext>): MaybePromise<AllureTestItemDocblock | undefined>;
+    extractSourceCode?(location: Readonly<AllureTestItemSourceLocation>, includeComments: boolean): MaybePromise<ExtractSourceCodeHelperResult | undefined>;
+  }
+
+  export interface DocblockExtractionContext extends AllureTestItemSourceLocation {
+    transformedCode?: string;
+  }
+
+  export interface TestCaseCustomizer<Context = {}> {
     /**
-     * Extractor to omit test file cases from the report.
+     * Extractor to generate a unique identifier for the test case file.
+     * Do not use it unless you need predictable JSON paths for some demo purposes.
      */
-    hidden: TestCaseExtractor<boolean>;
+    uuid?: PropertyCustomizer<Context, string>;
+    /**
+     * Extractor to omit test cases from the report.
+     */
+    ignored?: PropertyCustomizer<Context, boolean>;
     /**
      * Test case ID extractor to fine-tune Allure's history feature.
      * @example ({ package, file, test }) => `${package.name}:${file.path}:${test.fullName}`
      * @example ({ test }) => `${test.identifier}:${test.title}`
      * @see https://wix-incubator.github.io/jest-allure2-reporter/docs/config/history/#test-case-id
      */
-    historyId: TestCaseExtractor<string>;
+    historyId?: PropertyCustomizer<Context, Primitive>;
     /**
      * Extractor for the default test or step name.
      * @default ({ test }) => test.title
      */
-    name: TestCaseExtractor<string>;
+    displayName?: PropertyCustomizer<Context, string>;
     /**
      * Extractor for the full test case name.
      * @default ({ test }) => test.fullName
      */
-    fullName: TestCaseExtractor<string>;
+    fullName?: PropertyCustomizer<Context, string>;
     /**
      * Extractor for the test case start timestamp.
      */
-    start: TestCaseExtractor<number>;
+    start?: PropertyCustomizer<Context, number>;
     /**
      * Extractor for the test case stop timestamp.
      */
-    stop: TestCaseExtractor<number>;
+    stop?: PropertyCustomizer<Context, number>;
     /**
      * Extractor for the test case description.
-     * @example ({ testCaseMetadata }) => '```js\n' + testCaseMetadata.code + '\n```'
+     * @example ({ testCaseMetadata }) => '```js\n' + testCaseMetadata.transformedCode + '\n```'
      */
-    description: TestCaseExtractor<string>;
+    description?: PropertyCustomizer<Context, string>;
     /**
      * Extractor for the test case description in HTML format.
-     * @example ({ testCaseMetadata }) => '<pre><code>' + testCaseMetadata.code + '</code></pre>'
+     * @example ({ testCaseMetadata }) => '<pre><code>' + testCaseMetadata.transformedCode + '</code></pre>'
      */
-    descriptionHtml: TestCaseExtractor<string>;
+    descriptionHtml?: PropertyCustomizer<Context, string>;
     /**
      * Extractor for the test case stage.
      */
-    stage: TestCaseExtractor<Stage>;
+    stage?: PropertyCustomizer<Context, Stage>;
     /**
      * Extractor for the test case status.
      * @see https://wix-incubator.github.io/jest-allure2-reporter/docs/config/statuses/
      * @example ({ value }) => value === 'broken' ? 'failed' : value
      */
-    status: TestCaseExtractor<Status>;
+    status?: PropertyCustomizer<Context, Status>;
     /**
      * Extractor for the test case status details.
      */
-    statusDetails: TestCaseExtractor<StatusDetails>;
+    statusDetails?: PropertyCustomizer<Context, MaybeNullish<StatusDetails>>;
     /**
      * Customize Allure labels for the test case.
      *
@@ -204,12 +204,7 @@ declare module 'jest-allure2-reporter' {
      *   subSuite: ({ test }) => test.ancestorTitles[0],
      * }
      */
-    labels:
-      | TestCaseExtractor<Label[]>
-      | Record<
-          LabelName | string,
-          string | string[] | TestCaseExtractor<string[], string | string[]>
-        >;
+    labels?: LabelsCustomizer<Context>;
     /**
      * Resolve issue links for the test case.
      *
@@ -222,248 +217,309 @@ declare module 'jest-allure2-reporter' {
      *   }),
      * }
      */
-    links:
-      | TestCaseExtractor<Link[]>
-      | Record<LinkType | string, TestCaseExtractor<Link>>;
+    links?: LinksCustomizer<Context>;
     /**
      * Customize step or test case attachments.
      */
-    attachments: TestCaseExtractor<Attachment[]>;
+    attachments?: AttachmentsCustomizer<Context>;
     /**
      * Customize step or test case parameters.
      */
-    parameters: TestCaseExtractor<Parameter[]>;
+    parameters?: ParametersCustomizer<Context>;
   }
 
   /**
-   * Global customizations for how test files are reported (as pseudo-test cases).
+   * Global customizations for how test steps are reported, e.g.
+   * beforeAll, beforeEach, afterEach, afterAll hooks and custom steps.
    */
-  export interface TestFileCustomizer {
-    /**
-     * Extractor to omit test file cases from the report.
-     */
-    hidden: TestFileExtractor<boolean>;
-    /**
-     * Test file ID extractor to fine-tune Allure's history feature.
-     * @default ({ filePath }) => filePath.join('/')
-     * @example ({ package, filePath }) => `${package.name}:${filePath.join('/')}`
-     * @see https://wix-incubator.github.io/jest-allure2-reporter/docs/config/history/#test-case-id
-     */
-    historyId: TestFileExtractor<string>;
-    /**
-     * Extractor for test file name
-     * @default ({ filePath }) => filePath.at(-1)
-     */
-    name: TestFileExtractor<string>;
-    /**
-     * Extractor for the full test file name
-     * @default ({ testFile }) => testFile.testFilePath
-     */
-    fullName: TestFileExtractor<string>;
-    /**
-     * Extractor for the test file start timestamp.
-     */
-    start: TestFileExtractor<number>;
-    /**
-     * Extractor for the test file stop timestamp.
-     */
-    stop: TestFileExtractor<number>;
-    /**
-     * Extractor for the test file description.
-     */
-    description: TestFileExtractor<string>;
-    /**
-     * Extractor for the test file description in HTML format.
-     */
-    descriptionHtml: TestFileExtractor<string>;
-    /**
-     * Extractor for the test file stage.
-     */
-    stage: TestFileExtractor<Stage>;
-    /**
-     * Extractor for the test file status.
-     * @see https://wix-incubator.github.io/jest-allure2-reporter/docs/config/statuses/
-     * @example ({ value }) => value === 'broken' ? 'failed' : value
-     */
-    status: TestFileExtractor<Status>;
-    /**
-     * Extractor for the test file status details.
-     */
-    statusDetails: TestFileExtractor<StatusDetails>;
-    /**
-     * Customize Allure labels for the test file.
-     *
-     * @example
-     * {
-     *   suite: ({ file }) => file.path,
-     *   subSuite: ({ test }) => test.ancestorTitles[0],
-     * }
-     */
-    labels:
-      | TestFileExtractor<Label[]>
-      | Record<
-          LabelName | string,
-          string | string[] | TestFileExtractor<string[], string | string[]>
-        >;
-    /**
-     * Resolve issue links for the test file.
-     *
-     * @example
-     * {
-     *   issue: ({ value }) => ({
-     *     type: 'issue',
-     *     name: value.name ?? `Open ${value.url} in JIRA`,
-     *     url: `https://jira.company.com/${value.url}`,
-     *   }),
-     * }
-     */
-    links:
-      | TestFileExtractor<Link[]>
-      | Record<LinkType | string, TestFileExtractor<Link>>;
-    /**
-     * Customize test file attachments.
-     */
-    attachments: TestFileExtractor<Attachment[]>;
-    /**
-     * Customize test case parameters.
-     */
-    parameters: TestFileExtractor<Parameter[]>;
-  }
-
-  export type ResolvedTestFileCustomizer = Required<TestFileCustomizer> & {
-    labels: TestFileExtractor<Label[]>;
-    links: TestFileExtractor<Link[]>;
-  };
-
-  export type ResolvedTestCaseCustomizer = Required<TestCaseCustomizer> & {
-    labels: TestCaseExtractor<Label[]>;
-    links: TestCaseExtractor<Link[]>;
-  };
-
-  export type ResolvedTestStepCustomizer = Required<TestStepCustomizer>;
-
-  export interface TestStepCustomizer {
+  export interface TestStepCustomizer<Context =  TestStepExtractorContext> {
     /**
      * Extractor to omit test steps from the report.
      */
-    hidden: TestStepExtractor<boolean>;
+    ignored?: PropertyCustomizer<Context, boolean>;
     /**
      * Extractor for the step name.
      * @example ({ value }) => value.replace(/(before|after)(Each|All)/, (_, p1, p2) => p1 + ' ' + p2.toLowerCase())
      */
-    name: TestStepExtractor<string>;
+    displayName?: PropertyCustomizer<Context, string>;
     /**
      * Extractor for the test step start timestamp.
      */
-    start: TestStepExtractor<number>;
+    start?: PropertyCustomizer<Context, number>;
     /**
      * Extractor for the test step stop timestamp.
      */
-    stop: TestStepExtractor<number>;
+    stop?: PropertyCustomizer<Context, number>;
     /**
      * Extractor for the test step stage.
      * @see https://wix-incubator.github.io/jest-allure2-reporter/docs/config/statuses/
-     * TODO: add example
+     * @example ({ value }) => value === 'running' ? 'pending' : value
      */
-    stage: TestStepExtractor<Stage>;
+    stage?: PropertyCustomizer<Context, Stage>;
     /**
      * Extractor for the test step status.
      * @see https://wix-incubator.github.io/jest-allure2-reporter/docs/config/statuses/
      * @example ({ value }) => value === 'broken' ? 'failed' : value
      */
-    status: TestStepExtractor<Status>;
+    status?: PropertyCustomizer<Context, Status>;
     /**
      * Extractor for the test step status details.
      */
-    statusDetails: TestStepExtractor<StatusDetails>;
+    statusDetails?: PropertyCustomizer<Context, MaybeNullish<StatusDetails>>;
     /**
      * Customize step or test step attachments.
      */
-    attachments: TestStepExtractor<Attachment[]>;
+    attachments?: AttachmentsCustomizer<Context>;
     /**
      * Customize step or test step parameters.
      */
-    parameters: TestStepExtractor<Parameter[]>;
+    parameters?: ParametersCustomizer<Context>;
   }
 
-  export type EnvironmentCustomizer = GlobalExtractor<Record<string, string>>;
+  export type CategoriesCustomizer = PropertyCustomizer<GlobalExtractorContext, Category[]>;
 
-  export type ExecutorCustomizer = GlobalExtractor<ExecutorInfo>;
+  export type EnvironmentCustomizer = PropertyCustomizer<GlobalExtractorContext, Record<string, Primitive>>;
 
-  export type CategoriesCustomizer = GlobalExtractor<Category[]>;
+  export type ExecutorCustomizer = PropertyCustomizer<GlobalExtractorContext, ExecutorInfo>;
 
-  export type Extractor<
-    T = unknown,
-    C extends ExtractorContext<T> = ExtractorContext<T>,
-    R = T,
-  > = (context: Readonly<C>) => R | undefined;
+  export type HelpersCustomizer =
+    | PropertyExtractor<GlobalExtractorContext, PromisedProperties<Helpers>>
+    | HelperCustomizersMap;
 
-  export type GlobalExtractor<T, R = T> = Extractor<
-    T,
-    GlobalExtractorContext<T>,
-    R
+  export type HelperCustomizersMap = {
+    [K in keyof Helpers]?: KeyedHelperCustomizer<K>;
+  };
+
+  export type KeyedHelperCustomizer<K extends keyof Helpers> =
+    PropertyExtractor<GlobalExtractorContext, MaybePromise<Helpers[K]>>;
+
+  export type AttachmentsCustomizer<Context> = PropertyCustomizer<Context, Attachment[]>;
+
+  export type LabelsCustomizer<Context> =
+    | PropertyCustomizer<Context, Label[]>
+    | Record<LabelName | string, KeyedLabelCustomizer<Context>>;
+
+  export type KeyedLabelCustomizer<Context> =
+    | MaybeNullish<MaybeArray<string>>
+    | KeyedLabelExtractor<Context>
+
+  export type KeyedLabelExtractor<Context> =
+    PropertyExtractor<
+      Context,
+      MaybeNullish<MaybeArray<string>>,
+      MaybePromise<MaybeNullish<MaybeArray<string>>>
+    >;
+
+  export type LinksCustomizer<Context> =
+    | PropertyCustomizer<Context, Link[]>
+    | Record<LinkType | string, KeyedLinkCustomizer<Context>>;
+
+  export type KeyedLinkCustomizer<Context> =
+    | MaybeNullish<string | Link | Link[]>
+    | KeyedLinkExtractor<Context>;
+
+  export type KeyedLinkExtractor<Context> =
+    PropertyExtractor<
+      Context,
+      MaybeNullish<MaybeArray<Link>>,
+      MaybePromise<MaybeNullish<MaybeArray<Link>>>
+    >;
+
+  export type ParametersCustomizer<Context> =
+    | PropertyCustomizer<Context, Parameter[]>
+    | Record<string, KeyedParameterCustomizer<Context>>;
+
+  export type KeyedParameterCustomizer<Context> = PropertyCustomizer<
+    Context,
+    Parameter,
+    Primitive | Partial<Parameter>
   >;
 
-  export type TestFileExtractor<T, R = T> = Extractor<
-    T,
-    TestFileExtractorContext<T>,
-    R
-  >;
+  export type PropertyCustomizer<Context, Value, Result = Value> = Result | PropertyExtractor<Context, MaybePromise<Value>, MaybePromise<Result>>;
 
-  export type TestCaseExtractor<T, R = T> = Extractor<
-    T,
-    TestCaseExtractorContext<T>,
-    R
-  >;
+  // endregion
 
-  export type TestStepExtractor<T, R = T> = Extractor<
-    T,
-    TestStepExtractorContext<T>,
-    R
-  >;
+  // region Extractors
 
-  export interface ExtractorContext<T> {
-    value: T | undefined;
-  }
+  export type PropertyExtractor<
+    Context,
+    Value,
+    Result = Value,
+  > = (context: PropertyExtractorContext<Context, Value>) => Result;
 
-  export interface GlobalExtractorContext<T = any>
-    extends ExtractorContext<T>,
-      GlobalExtractorContextAugmentation {
+  export type PropertyExtractorContext<Context, Value> = Readonly<Context & { value: Value }>;
+
+  export type PromisedProperties<T> = {
+    readonly [K in keyof T]: MaybePromise<T[K]>;
+  };
+
+  export interface GlobalExtractorContext {
+    $: Helpers;
     globalConfig: Config.GlobalConfig;
-    config: ReporterConfig;
+    reporterConfig: unknown;
   }
 
-  export interface TestFileExtractorContext<T = any>
-    extends GlobalExtractorContext<T>,
-      TestFileExtractorContextAugmentation {
+  export interface TestItemExtractorContext<Value> extends GlobalExtractorContext {
+    result: Partial<PromisedProperties<Value>>;
+    testRunMetadata: AllureTestRunMetadata;
+  }
+
+  export interface TestRunExtractorContext extends TestItemExtractorContext<AllureTestCaseResult> {
+    aggregatedResult: AggregatedResult;
+  }
+
+  export interface TestFileExtractorContext extends TestItemExtractorContext<AllureTestCaseResult> {
     filePath: string[];
     testFile: TestResult;
-    testFileDocblock?: DocblockContext;
     testFileMetadata: AllureTestFileMetadata;
   }
 
-  export interface TestCaseExtractorContext<T = any>
-    extends TestFileExtractorContext<T>,
-      TestCaseExtractorContextAugmentation {
+  export interface TestCaseExtractorContext extends TestItemExtractorContext<AllureTestCaseResult> {
+    filePath: string[];
     testCase: TestCaseResult;
-    testCaseDocblock?: DocblockContext;
     testCaseMetadata: AllureTestCaseMetadata;
+    testFileMetadata: AllureTestFileMetadata;
   }
 
-  export interface TestStepExtractorContext<T = any>
-    extends TestCaseExtractorContext<T>,
-      TestStepExtractorContextAugmentation {
-    testStepDocblock?: DocblockContext;
+  export interface TestStepExtractorContext extends TestItemExtractorContext<AllureTestStepResult> {
+    aggregatedResult?: AggregatedResult;
+
+    filePath?: string[];
+    testCase?: TestCaseResult;
+    testCaseMetadata?: AllureTestCaseMetadata;
+    testFile?: TestResult;
+    testFileMetadata?: AllureTestFileMetadata;
     testStepMetadata: AllureTestStepMetadata;
   }
 
-  export interface AllureTestItemSourceLocation {
-    fileName?: string;
-    lineNumber?: number;
-    columnNumber?: number;
+  export interface Helpers extends HelpersAugmentation {
+    /**
+     * Provides an optimized way to navigate through the test file content.
+     * Accepts a file path in a string or a split array format.
+     * @param filePath - the path to the file to navigate, split by directory separators or as a single string.
+     * @returns a file navigator object or undefined if the file is not found or cannot be read.
+     */
+    getFileNavigator(filePath: string | string[]): Promise<FileNavigator | undefined>;
+    /**
+      * Extracts the source code of the current test case or step.
+      * @param metadata - the metadata object of the test case or step.
+      * @param includeComments - whether to include comments before the actual code.
+      * @returns the extracted source code or undefined if the source code is not found.
+      * @example
+      * ({ $, testFileMetadata }) => $.extractSourceCode(testFileMetadata)
+      */
+    extractSourceCode(metadata: AllureTestItemMetadata, includeComments?: boolean): Promise<ExtractSourceCodeHelperResult | undefined>;
+    /**
+     * Extracts the manifest of the current project or a specific package.
+     * Pass a callback to extract specific data from the manifest – this way you can omit async/await.
+     *
+     * @example
+     * ({ $ }) => $.manifest('', m => m.version)
+     * @example
+     * ({ $ }) => $.manifest('jest', jest => jest.version)
+     * @example
+     * ({ $ }) => (await $.manifest()).version
+     * @example
+     * ({ $ }) => (await $.manifest('jest')).version
+     */
+    manifest: ManifestHelper;
+    /**
+      * Strips ANSI escape codes from the given string or object.
+      * @example
+      * $.stripAnsi('Hello, \u001b[31mworld\u001b[0m!')
+      * @example
+      * $.stripAnsi({ message: 'Hello, \u001b[31mworld\u001b[0m!' })
+      */
+    stripAnsi: StripAnsiHelper;
   }
 
-  export type AllureTestStepPath = string[];
+  export interface FileNavigator {
+    getContent(): string;
+    getLines(): string[];
+    getLineCount(): number;
+    getPosition(): [number, number, number];
+    jump(lineNumber: number): boolean;
+    jumpToPosition(position: number): boolean;
+    moveUp(countOfLines?: number): boolean;
+    moveDown(countOfLines?: number): boolean;
+    readLine(lineNumber?: number): string;
+  }
+
+  export interface ManifestHelper {
+    (packageName?: string): Promise<Record<string, any> | undefined>;
+    <T>(extractor: string[] | ManifestHelperExtractor<T>): Promise<T | undefined>;
+    <T>(extractor: string[] | ManifestHelperExtractor<T>, defaultValue: T): Promise<T>;
+    <T>(packageName: string, extractor: MaybeArray<string> | ManifestHelperExtractor<T>): Promise<T | undefined>;
+    <T>(packageName: string, extractor: MaybeArray<string> | ManifestHelperExtractor<T>, defaultValue: T): Promise<T>;
+  }
+
+  export type ManifestHelperExtractor<T> = (manifest: Record<string, any>) => T;
+
+  /**
+   * Represents the result of extracting source code from a file.
+   * Can be used for reporting in HTML and Markdown formats.
+   */
+  export interface ExtractSourceCodeHelperResult {
+    /**
+     * The extracted source code.
+     */
+    code?: string;
+
+    /**
+     * The programming language of the source code, usually required for syntax highlighting.
+     */
+    language?: string;
+
+    /**
+     * The name of the file from which the source code was extracted.
+     * Code preview components may use this property to display the file name.
+     */
+    fileName?: string;
+
+    /**
+     * The starting line number of the extracted source code.
+     * Line numbers are 1-based, meaning the first line starts at 1.
+     * Code preview components may use this property to highlight the code.
+     */
+    startLine?: number;
+
+    /**
+     * The starting column number of the extracted source code.
+     * Column numbers are 1-based, meaning the first column starts at 1.
+     * Code preview components may use this property to put the cursor in the right place.
+     */
+    startColumn?: number;
+
+    /**
+     * The ending line number of the extracted source code.
+     * Line numbers are 1-based, meaning the first line starts at 1.
+     * Code preview components may use this property to highlight the code.
+     */
+    endLine?: number;
+
+    /**
+     * The ending column number of the extracted source code.
+     * Column numbers are 1-based, meaning the first column starts at 1.
+     */
+    endColumn?: number;
+  }
+
+  export interface StripAnsiHelper {
+    /**
+      * Strips ANSI escape codes from the given string or object.
+      *
+      * @example
+      * $.stripAnsi('Hello, \u001b[31mworld\u001b[0m!')
+      *
+      * @example
+      * $.stripAnsi({ message: 'Hello, \u001b[31mworld\u001b[0m!' })
+      */
+    <R>(textOrObject: R): R;
+  }
+
+  // endregion
+
+  // region Custom Metadata
 
   export interface AllureTestItemMetadata {
     /**
@@ -477,21 +533,21 @@ declare module 'jest-allure2-reporter' {
      */
     currentStep?: AllureTestStepPath;
     /**
-     * Markdown description of the test case or test file, or plain text description of a test step.
+     * Parsed docblock: comments and pragmas.
      */
-    description?: string[];
+    docblock?: AllureTestItemDocblock;
+    /**
+     * Title of the test case or test step.
+     */
+    displayName?: string;
     /**
      * Custom history ID to distinguish between tests and their retry attempts.
      */
-    historyId?: string;
+    historyId?: Primitive;
     /**
      * Key-value pairs to disambiguate test cases or to provide additional information.
      */
     parameters?: Parameter[];
-    /**
-     * Source code of the test case, test step or a hook.
-     */
-    sourceCode?: string;
     /**
      * Location (file, line, column) of the test case, test step or a hook.
      */
@@ -515,12 +571,20 @@ declare module 'jest-allure2-reporter' {
     /**
      * Recursive data structure to represent test steps for more granular reporting.
      */
-    steps?: Omit<AllureTestStepMetadata, 'currentStep'>[];
+    steps?: AllureNestedTestStepMetadata[];
     /**
      * Stop timestamp in milliseconds.
      */
     stop?: number;
+    /**
+     * Transformed code of the test case, test step or a hook.
+     */
+    transformedCode?: string;
   }
+
+  export type AllureTestStepPath = string[];
+
+  export type AllureNestedTestStepMetadata = Omit<AllureTestStepMetadata, 'currentStep'>;
 
   /** @inheritDoc */
   export interface AllureTestStepMetadata extends AllureTestItemMetadata {
@@ -533,89 +597,89 @@ declare module 'jest-allure2-reporter' {
 
   /** @inheritDoc */
   export interface AllureTestCaseMetadata extends AllureTestItemMetadata {
+    /**
+     * Markdown description of the test case or test file.
+     */
+    description?: string[];
+    /**
+     * Raw HTML description of the test case or test file.
+     */
     descriptionHtml?: string[];
+    fullName?: string;
     labels?: Label[];
     links?: Link[];
-    workerId?: string;
   }
 
   /** @inheritDoc */
-  export interface AllureTestFileMetadata extends AllureTestCaseMetadata {
-    code?: never;
-    steps?: never;
+  export interface AllureTestFileMetadata extends AllureTestCaseMetadata {}
+
+  /** @inheritDoc */
+  export interface AllureTestRunMetadata extends AllureTestCaseMetadata {
+    config: unknown;
+    sourceLocation?: never;
+    transformedCode?: never;
   }
 
-  export interface AllureGlobalMetadata {
-    config: Pick<ReporterConfig, 'resultsDir' | 'overwrite' | 'attachments' | 'injectGlobals'>;
+  export interface AllureTestItemSourceLocation {
+    fileName?: string;
+    lineNumber?: number;
+    columnNumber?: number;
   }
 
-  export interface DocblockContext {
-    comments: string;
-    pragmas: Record<string, string[]>;
-    raw: string;
+  export interface AllureTestItemDocblock {
+    comments?: string;
+    pragmas?: Record<string, string | string[]>;
   }
 
-  export interface GlobalExtractorContextAugmentation {
-    detectLanguage?(contents: string, filePath?: string): string | undefined;
-    processMarkdown?(markdown: string): Promise<string>;
+  // endregion
 
-    // This may be extended by plugins
+  // region Extensibility
+
+  export interface HelpersAugmentation {
+    // Use to extend Helpers
   }
 
-  export interface TestFileExtractorContextAugmentation {
-    // This may be extended by plugins
+  // endregion
+
+  // region Allure Test Data
+
+  export interface AllureTestCaseResult {
+    uuid?: string;
+    ignored?: boolean;
+    historyId: Primitive;
+    displayName: string;
+    fullName: string;
+    start: number;
+    stop: number;
+    description?: string;
+    descriptionHtml?: string;
+    stage: Stage;
+    status: Status;
+    statusDetails?: StatusDetails;
+    steps?: AllureTestStepResult[];
+    labels?: Label[];
+    links?: Link[];
+    attachments?: Attachment[];
+    parameters?: Parameter[];
   }
 
-  export interface TestCaseExtractorContextAugmentation {
-    // This may be extended by plugins
+  export interface AllureTestStepResult {
+    ignored?: boolean;
+    hookType?: AllureTestStepMetadata['hookType'];
+    displayName: string;
+    start: number;
+    stop: number;
+    stage: Stage;
+    status: Status;
+    statusDetails?: StatusDetails;
+    steps?: AllureTestStepResult[];
+    attachments?: Attachment[];
+    parameters?: Parameter[];
   }
 
-  export interface TestStepExtractorContextAugmentation {
-    // This may be extended by plugins
-  }
+  // endregion
 
-  export type PluginDeclaration =
-    | PluginReference
-    | [PluginReference, Record<string, unknown>];
-
-  export type PluginReference = string | PluginConstructor;
-
-  export type PluginConstructor = (
-    options: Record<string, unknown>,
-    context: PluginContext,
-  ) => Plugin;
-
-  export type PluginContext = Readonly<{
-    globalConfig: Config.GlobalConfig;
-  }>;
-
-  export interface Plugin {
-    /** Also used to deduplicate plugins if they are declared multiple times. */
-    readonly name: string;
-
-    /** Optional method for deduplicating plugins. Return the instance which you want to keep. */
-    extend?(previous: Plugin): Plugin;
-
-    /** Method to extend global context. */
-    globalContext?(context: GlobalExtractorContext): void | Promise<void>;
-
-    /** Method to extend test file context. */
-    testFileContext?(context: TestFileExtractorContext): void | Promise<void>;
-
-    /** Method to extend test entry context. */
-    testCaseContext?(context: TestCaseExtractorContext): void | Promise<void>;
-
-    /** Method to extend test step context. */
-    testStepContext?(context: TestStepExtractorContext): void | Promise<void>;
-  }
-
-  export type PluginHookName =
-    | 'globalContext'
-    | 'testFileContext'
-    | 'testCaseContext'
-    | 'testStepContext';
-
-  //region Allure types
+  //region Allure Vendor types
 
   export interface Attachment {
     name: string;
@@ -681,7 +745,7 @@ declare module 'jest-allure2-reporter' {
 
   export interface Parameter {
     name: string;
-    value: string;
+    value: Primitive;
     excluded?: boolean;
     mode?: 'hidden' | 'masked' | 'default';
   }
@@ -696,6 +760,18 @@ declare module 'jest-allure2-reporter' {
   }
 
   //endregion
+
+  export type Primitive = string | number | boolean | null | undefined;
+
+  export type MaybePromise<T> = T | Promise<T>;
+
+  export type MaybeArray<T> = T | T[];
+
+  export type MaybeNullish<T> = T | null | undefined;
+
+  export type MaybeFunction<T> = T | ((...args: any[]) => T);
+
+  export type MaybeWithOptions<T> = T | [T, unknown?];
 }
 
 export default class JestAllure2Reporter extends JestMetadataReporter {

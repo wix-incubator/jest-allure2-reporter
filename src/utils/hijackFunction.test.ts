@@ -23,11 +23,7 @@ describe('hijackFunction', () => {
 
   // Test: Ensuring `this` and arguments are preserved in function hijack
   it('should preserve `this` context and arguments in hijacked function', () => {
-    const function_ = function (
-      this: { multiplier: number },
-      a: number,
-      b: number,
-    ) {
+    const function_ = function (this: { multiplier: number }, a: number, b: number) {
       return (a + b) * this.multiplier;
     };
     const wrapper = hijackFunction(function_, (x) => x).bind({ multiplier: 3 });

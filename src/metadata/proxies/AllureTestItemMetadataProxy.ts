@@ -10,8 +10,7 @@ import { CURRENT_STEP, PREFIX } from '../constants';
 import { AllureMetadataProxy } from './AllureMetadataProxy';
 
 export class AllureTestItemMetadataProxy<
-  T extends AllureTestItemMetadata = AllureTestStepMetadata &
-    AllureTestCaseMetadata,
+  T extends AllureTestItemMetadata = AllureTestStepMetadata & AllureTestCaseMetadata,
 > extends AllureMetadataProxy<T> {
   protected readonly $boundPath?: string[];
 
@@ -25,10 +24,11 @@ export class AllureTestItemMetadataProxy<
     return localPath ? `${this.$metadata.id}:${localPath}` : this.$metadata.id;
   }
 
-  $bind(): AllureTestItemMetadataProxy<T> {
-    return new AllureTestItemMetadataProxy(this.$metadata, [
-      ...this.$metadata.get(CURRENT_STEP, []),
-    ]);
+  $bind(step?: null): AllureTestItemMetadataProxy<T> {
+    return new AllureTestItemMetadataProxy(
+      this.$metadata,
+      step === null ? [] : [...this.$metadata.get(CURRENT_STEP, [])],
+    );
   }
 
   $startStep(): this {
