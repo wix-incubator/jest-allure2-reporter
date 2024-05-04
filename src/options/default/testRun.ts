@@ -31,6 +31,7 @@ export const testRun: TestCaseCustomizer<TestRunExtractorContext> = {
   ),
   labels: compose2(
     custom.labels<TestRunExtractorContext>({
+      thread: '00',
       suite: '(test file execution)',
     }),
     ({ testRunMetadata }) => testRunMetadata.labels ?? [],
