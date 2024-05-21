@@ -63,8 +63,15 @@ export class ManifestResolver {
   };
 
   private async resolveManifestPath(packageName?: string) {
-    return packageName
-      ? require.resolve(packageName + '/package.json')
-      : await pkgUp({ cwd: this.cwd });
+    return packageName ? this.resolveCJS(packageName) : await pkgUp({ cwd: this.cwd });
+  }
+
+  private resolveCJS(packageName: string) {
+    try {
+      return require.resolve(packageName + '/package.json');
+    } catch (error: unknown) {
+      log.debug(error, `Failed to resolve package.json for "${packageName}"`);
+      return;
+    }
   }
 }
