@@ -6,8 +6,16 @@ import type { Category, ExecutorInfo } from 'jest-allure2-reporter';
 
 import type { AllureResult, AllureContainer, AllureWriter } from './AllureWriter';
 
-async function writeJson(path: string, data: unknown) {
-  await fs.writeFile(path, JSON.stringify(data) + '\n');
+async function writeJson(
+  path: string,
+  data: unknown,
+  stringifier?: (key: string, value: unknown) => unknown,
+) {
+  await fs.writeFile(path, JSON.stringify(data, stringifier) + '\n');
+}
+
+function regexpAwareStringifier(_key: string, value: unknown) {
+  return value instanceof RegExp ? value.source : value;
 }
 
 export interface FileSystemAllureWriterConfig {
@@ -37,7 +45,7 @@ export class FileAllureWriter implements AllureWriter {
 
   async writeCategories(categories: Category[]) {
     const path = this.#buildPath('categories.json');
-    await writeJson(path, categories);
+    await writeJson(path, categories, regexpAwareStringifier);
   }
 
   async writeContainer(result: AllureContainer) {
