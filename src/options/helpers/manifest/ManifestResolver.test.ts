@@ -22,6 +22,11 @@ describe('manifest', () => {
     expect(typeof version).toBe('string');
   });
 
+  it('should return a fallback if the specified property is not found in the current package', async () => {
+    const value = await manifest((m) => m.someProperty, 'fallback');
+    expect(value).toBe('fallback');
+  });
+
   it('should return a specific property of the package.json content of the specified package', async () => {
     const version = await manifest('lodash', (m) => m.version);
     expect(typeof version).toBe('string');
@@ -33,6 +38,11 @@ describe('manifest', () => {
     expect(name1).toBe(name2);
   });
 
+  it('should return a fallback if the specified property is not found in the specified package', async () => {
+    const value = await manifest('lodash', 'someProperty', 'fallback');
+    expect(value).toBe('fallback');
+  });
+
   it('should provide more convenient access to other manifest properties', async () => {
     const name1 = await manifest('lodash', 'name');
     const name2 = await manifest('lodash', ['name']);
@@ -40,5 +50,10 @@ describe('manifest', () => {
 
     expect(name1).toBe(name2);
     expect(name2).toBe(name3);
+  });
+
+  it('should use a fallback value if the manifest is not found', async () => {
+    const result = await manifest('non-existing-package', ['name'], '-');
+    expect(result).toBe('-');
   });
 });
