@@ -43,5 +43,6 @@ function mergeSourceCodeConfigs(
     options: { ...base.options, ...custom.options },
     // This field is populated by the reporter itself
     plugins: base.plugins,
+    sourceMaps: [...base.sourceMaps, ...custom.sourceMaps],
   };
 }

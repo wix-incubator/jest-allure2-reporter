@@ -47,6 +47,7 @@ export interface SourceCodeProcessorConfig {
   factories: Record<string, SourceCodePluginCustomizer>;
   options: Record<string, unknown>;
   plugins: SourceCodePlugin[];
+  sourceMaps: string[];
 }
 
 export type ExecutorExtractor<T = never> = PropertyExtractor<

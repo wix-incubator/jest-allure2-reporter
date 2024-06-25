@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-export function weakMemoize<F extends (argument: any) => any>(function_: F): F {
+export function weakMemoize<F extends (argument: any, ...rest: any[]) => any>(function_: F): F {
   const nullCache = new Map<any, any>();
   const weakCache = new WeakMap<object, any>();
 

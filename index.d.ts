@@ -117,6 +117,8 @@ declare module 'jest-allure2-reporter' {
   export interface SourceCodeProcessorOptions {
     enabled?: boolean;
     plugins?: Record<string, SourceCodePluginCustomizer | unknown | [SourceCodePluginCustomizer, unknown?]>;
+    /** Array of glob patterns to include source maps when extracting source code. */
+    sourceMaps?: string[];
   }
 
   // endregion

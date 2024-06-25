@@ -24,5 +24,6 @@ export function sourceCode(user: SourceCodeProcessorOptions): SourceCodeProcesso
     factories,
     options,
     plugins: [],
+    sourceMaps: user.sourceMaps ?? [],
   };
 }
