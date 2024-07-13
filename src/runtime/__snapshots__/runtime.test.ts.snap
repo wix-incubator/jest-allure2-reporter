@@ -68,6 +68,10 @@ exports[`AllureRuntime should add attachments within the steps 1`] = `
               "name": "0",
               "value": "fourth",
             },
+            {
+              "name": "1",
+              "value": "{ key: 'value' }",
+            },
           ],
           "stage": "interrupted",
           "start": 5,

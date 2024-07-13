@@ -1,9 +1,13 @@
 import type { AllureTestCaseResult, AllureTestStepResult, Parameter } from 'jest-allure2-reporter';
 
 export function normalizeParameters(result: AllureTestCaseResult | AllureTestStepResult) {
-  return result.parameters?.map(stringifyParameter);
+  return result.parameters?.filter(excludeParameters).map(stringifyParameter);
 }
 
-function stringifyParameter({ name, value }: Parameter) {
-  return { name, value: String(value) };
+function excludeParameters({ excluded }: Parameter) {
+  return !excluded;
+}
+
+function stringifyParameter(parameter: Parameter) {
+  return { ...parameter, value: String(parameter.value) };
 }

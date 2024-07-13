@@ -44,7 +44,7 @@ export interface AllureRuntime {
 
   parameter(name: string, value: unknown, options?: ParameterOptions): void;
 
-  parameters(parameters: Record<string, unknown>): void;
+  parameters(parameters: object): void;
 
   status(status: Status, statusDetails?: StatusDetails): void;
 
