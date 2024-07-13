@@ -3,6 +3,8 @@ import type { StatusDetails } from 'jest-allure2-reporter';
 import { autoIndent } from './autoIndent';
 import { isError } from './vendor';
 
+const HAS_EMPTY_FIRST_LINE = /^\s*\n/;
+
 export function getStatusDetails(maybeError: unknown): StatusDetails | undefined {
   if (!maybeError) {
     return;
@@ -35,7 +37,7 @@ function getTrace(maybeError: unknown): string {
 
 function restoreStack(error: Error): string {
   const { message, name, stack } = error;
-  if (stack && message && hasEmptyFirstLine(stack)) {
+  if (stack && message && hasEmptyFirstLine(stack) && !HAS_EMPTY_FIRST_LINE.test(message)) {
     return `${name}: ${message}${stack.slice(stack.indexOf('\n'))}`;
   }
 
