@@ -100,11 +100,10 @@ export class AllureRuntimeImplementation implements AllureRuntime {
 
   parameter: AllureRuntime['parameter'] = (name, value, options) => {
     typeAssertions.assertString(name, 'name');
-    typeAssertions.assertPrimitive(value, 'value');
 
     this.#coreModule.parameter({
       name,
-      value: String(value),
+      value: typeof value === 'string' ? value : util.inspect(value),
       ...options,
     });
   };

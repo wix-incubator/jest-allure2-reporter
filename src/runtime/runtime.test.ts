@@ -43,13 +43,16 @@ describe('AllureRuntime', () => {
 
     expect(resultingPath).toBe('/attachments/first');
 
-    const innerStep3 = runtime.createStep('inner step 3 ({{0}})', async (message: string) => {
-      runtime.attachment('attachment4', message, 'text/plain');
+    const innerStep3 = runtime.createStep(
+      'inner step 3 ({{0}})',
+      async (message: string, _extra: object) => {
+        runtime.attachment('attachment4', message, 'text/plain');
 
-      const error = new Error('Async error');
-      error.stack = 'Error: Async error\n    at innerStep3';
-      throw error;
-    });
+        const error = new Error('Async error');
+        error.stack = 'Error: Async error\n    at innerStep3';
+        throw error;
+      },
+    );
 
     await runtime.step('outer step', async () => {
       try {
@@ -68,7 +71,7 @@ describe('AllureRuntime', () => {
         /* empty */
       });
       runtime.attachment('attachment3', 'third', 'text/plain');
-      await innerStep3('fourth').catch(() => {
+      await innerStep3('fourth', { key: 'value' }).catch(() => {
         /* empty */
       });
     });
