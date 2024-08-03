@@ -25,7 +25,7 @@ import type {
 
 import { type ReporterConfig, resolveOptions } from '../options';
 import { AllureMetadataProxy, MetadataSquasher } from '../metadata';
-import { compactArray, stringifyValues } from '../utils';
+import { compactArray, FileNavigatorCache, stringifyValues } from '../utils';
 import { type AllureWriter, FileAllureWriter } from '../serialization';
 import { log, optimizeForTracing } from '../logger';
 
@@ -155,6 +155,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
   async onTestFileStart(test: Test) {
     super.onTestFileStart(test);
 
+    await FileNavigatorCache.instance.scanSourcemap(test.path);
     const execute = this.#onTestFileStart.bind(this, test);
     const attempt = this.#attemptSync.bind(this, 'onTestFileStart()', execute);
     const testPath = path.relative(this._globalConfig.rootDir, test.path);

@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "sourcemap.test.js",
+  "sourceRoot": "",
+  "sources": [
+    "sourcemap.test.ts"
+  ],
+  "sourcesContent": [
+    "/* Sourcemap test suite\n * --------------------\n *\n * Make sure you can see this comment in Allure Report\n * @tag sourcemap\n */\n\ndescribe('Sourcemap support', () => {\n  /**\n   * Compiled test should retain docblocks\n   * thanks to source map alongside the file.\n   */\n  test('should have comments and tags', () => {\n    // Check that this comment is shown in the test source code\n    expect(2 + 2).toBe(4);\n  });\n});\n"
+  ],
+  "names": [],
+  "mappings": ";AAOA,QAAQ,CAAC,mBAAmB,EAAE,GAAG,EAAE;IAKjC,IAAI,CAAC,+BAA+B,EAAE,GAAG,EAAE;QAEzC,MAAM,CAAC,CAAC,GAAG,CAAC,CAAC,CAAC,IAAI,CAAC,CAAC,CAAC,CAAC;IACxB,CAAC,CAAC,CAAC;AACL,CAAC,CAAC,CAAC"
+}
