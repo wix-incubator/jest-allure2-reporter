@@ -1,0 +1,5 @@
+{
+  "sources": ["test.ts"],
+  "sourceRoot": "/home/user/project",
+  "sourcesContent": ["export default 42;"]
+}

@@ -61,7 +61,7 @@ export class StepsDecorator {
 
 function resolveParameter(this: unknown[], parameter: UserParameter, index: number) {
   const { name = `${index}`, ...options } =
-    typeof parameter === 'string' ? { name: parameter } : parameter ?? {};
+    typeof parameter === 'string' ? { name: parameter } : (parameter ?? {});
 
   return [name, index, this[index], options, parameter] as ResolvedParameter;
 }

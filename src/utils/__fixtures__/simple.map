@@ -1,0 +1,4 @@
+{
+  "sources": ["test.ts"],
+  "sourcesContent": ["export default 42;"]
+}

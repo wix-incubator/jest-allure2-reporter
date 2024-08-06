@@ -5,6 +5,7 @@ export * from './autoIndent';
 export * from './compactObject';
 export * from './fastMove';
 export * from './FileNavigator';
+export * from './FileNavigatorCache';
 export * from './getFullExtension';
 export * from './getStatusDetails';
 export * from './hijackFunction';
