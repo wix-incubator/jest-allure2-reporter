@@ -616,6 +616,7 @@ declare module 'jest-allure2-reporter' {
   /** @inheritDoc */
   export interface AllureTestRunMetadata extends AllureTestCaseMetadata {
     config: unknown;
+    loadedFiles: string[];
     sourceLocation?: never;
     transformedCode?: never;
   }

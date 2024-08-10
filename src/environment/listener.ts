@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import type { AllureTestItemSourceLocation } from 'jest-allure2-reporter';
 import type { Circus } from '@jest/types';
 import type {
@@ -6,6 +7,7 @@ import type {
   TestEnvironmentSetupEvent,
 } from 'jest-environment-emit';
 import * as StackTrace from 'stacktrace-js';
+import type { JestEnvironmentConfig } from '@jest/environment';
 
 import * as api from '../api';
 import realm from '../realms';
@@ -13,8 +15,9 @@ import { autoIndent, getStatusDetails, isJestAssertionError, isLibraryPath } fro
 
 const listener: EnvironmentListenerFn = (context) => {
   context.testEvents
-    .on('test_environment_setup', injectGlobals)
-    .on('test_environment_setup', setWorkerId)
+    .once('test_environment_setup', injectGlobals)
+    .once('test_environment_setup', setWorkerId)
+    .once('test_environment_setup', reportSetupFiles(context.config))
     .on('add_hook', addHookType)
     .on('add_hook', addSourceLocation)
     .on('add_hook', addSourceCode)
@@ -84,6 +87,16 @@ function setWorkerId() {
   } else {
     // TODO: log a warning
   }
+}
+
+function reportSetupFiles(config: JestEnvironmentConfig) {
+  return () => {
+    const { setupFilesAfterEnv = [], setupFiles = [] } = config.projectConfig ?? {};
+    const globalMetadata = realm.runtimeContext.getGlobalMetadata();
+    const loadedFiles = globalMetadata.get('loadedFiles', []);
+    const files = _.difference([...setupFiles, ...setupFilesAfterEnv], loadedFiles);
+    globalMetadata.push('loadedFiles', files);
+  };
 }
 
 function addHookType({ event }: TestEnvironmentCircusEvent<Circus.Event & { name: 'add_hook' }>) {

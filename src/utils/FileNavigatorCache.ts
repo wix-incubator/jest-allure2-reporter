@@ -8,6 +8,7 @@ import { FileNavigator } from './index';
 
 export class FileNavigatorCache {
   #cache = new Map<string, Promise<FileNavigator | undefined>>();
+  #scannedSourcemaps = new Set<string>();
 
   resolve(filePath: string): Promise<FileNavigator | undefined> {
     const absolutePath = path.isAbsolute(filePath) ? filePath : path.resolve(filePath);
@@ -20,6 +21,9 @@ export class FileNavigatorCache {
 
   async scanSourcemap(filePath: string): Promise<void> {
     const sourceMapPath = `${filePath}.map`;
+
+    if (this.#scannedSourcemaps.has(sourceMapPath)) return;
+    this.#scannedSourcemaps.add(sourceMapPath);
 
     const doesNotExist = await fs.access(sourceMapPath).catch(() => true);
     if (doesNotExist) return;

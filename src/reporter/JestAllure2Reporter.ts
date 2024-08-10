@@ -155,15 +155,16 @@ export class JestAllure2Reporter extends JestMetadataReporter {
   async onTestFileStart(test: Test) {
     super.onTestFileStart(test);
 
-    await FileNavigatorCache.instance.scanSourcemap(test.path);
     const execute = this.#onTestFileStart.bind(this, test);
     const attempt = this.#attemptSync.bind(this, 'onTestFileStart()', execute);
     const testPath = path.relative(this._globalConfig.rootDir, test.path);
     log.trace.begin(__TID(test), testPath);
-    log.trace.complete(__TID(test), 'onTestFileStart', attempt);
+    await log.trace.complete(__TID(test), 'onTestFileStart', attempt);
   }
 
-  #onTestFileStart(test: Test) {
+  async #onTestFileStart(test: Test) {
+    await FileNavigatorCache.instance.scanSourcemap(test.path);
+
     const rawMetadata = JestAllure2Reporter.query.test(test);
     const testFileMetadata = new AllureMetadataProxy<AllureTestFileMetadata>(rawMetadata);
 
@@ -199,6 +200,11 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     const rawMetadata = JestAllure2Reporter.query.test(test);
     const testFileMetadata = new AllureMetadataProxy<AllureTestFileMetadata>(rawMetadata);
     const globalMetadataProxy = this._globalMetadataProxy;
+
+    for (const loadedFile of globalMetadataProxy.get('loadedFiles', [])) {
+      await FileNavigatorCache.instance.scanSourcemap(loadedFile);
+    }
+
     const allureWriter = this._writer;
 
     fallbacks.onTestFileResult(test, testFileMetadata);
