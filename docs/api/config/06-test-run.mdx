@@ -1,0 +1,94 @@
+# Test Run
+
+In `jest-allure2-reporter`, the `testRun` configuration object allows you to customize how the overall test run is reported in Allure.
+This feature serves several important purposes:
+
+1. Providing a high-level summary of the entire test execution.
+2. Adding global metadata about the test environment including attachments, parameters, and links.
+
+## Default Configuration
+
+The `testRun` configuration comes with sensible defaults:
+
+```javascript
+/** @type {import('jest-allure2-reporter').ReporterOptions} */
+const defaultTestRunConfig = {
+  ignored: true,
+  historyId: (context) => /* package.json "name" */,
+  fullName: (context) =>  /* package.json "name" */,
+  displayName: '(test run)',
+  stage: ({ aggregatedResult }) => (aggregatedResult.wasInterrupted ? 'interrupted' : 'finished'),
+  status: ({ aggregatedResult }) => (aggregatedResult.numFailedTestSuites > 0 ? 'failed' : 'passed'),
+  parameters: {
+    'a) Suites passed': ({ aggregatedResult }) => aggregatedResult.numPassedTestSuites,
+    'b) Suites failed': ({ aggregatedResult }) => aggregatedResult.numFailedTestSuites,
+    'c) Suites broken': ({ aggregatedResult }) => aggregatedResult.numRuntimeErrorTestSuites,
+    'd) Suites pending': ({ aggregatedResult }) => aggregatedResult.numPendingTestSuites,
+  },
+  labels: {
+    thread: '00',
+  },
+};
+```
+
+The `testRun` configuration object supports many of the same properties as `testCase` and `testFile`, but in the context of the entire test execution.
+
+By default, the test run is not reported as a test case, but if you want to report it, you can set `ignored` to `false`.
+
+## Configuration Options
+
+Here's an example of how you might customize the `testRun` configuration:
+
+```javascript
+/** @type {import('jest-allure2-reporter').ReporterOptions} */
+const jestAllure2ReporterOptions = {
+  testRun: {
+    displayName: ({ globalConfig }) => `Jest Run: ${path.basename(globalConfig.rootDir)}`,
+    parameters: {
+      'Node Version': process.version,
+      'OS': process.platform,
+    },
+    description: ({ aggregatedResult }) => {
+      const { numTotalTests, numPassedTests, numFailedTests, numPendingTests } = aggregatedResult;
+      return `
+        ## Test Run Summary
+        - **Total Tests**: ${numTotalTests}
+        - **Passed**: ${numPassedTests}
+        - **Failed**: ${numFailedTests}
+        - **Pending**: ${numPendingTests}
+        - **Duration**: ${(aggregatedResult.startTime - aggregatedResult.endTime) / 1000}s
+      `;
+    },
+    links: process.env.CI_BUILD_URL ? [
+      {
+        name: 'CI Build',
+        url: process.env.CI_BUILD_URL,
+      }
+    ] : [],
+    attachments: [
+      {
+        name: 'jest-config.json',
+        type: 'application/json',
+        content: JSON.stringify(globalConfig, null, 2),
+      },
+    ],
+  }
+};
+```
+
+This configuration:
+
+- Customizes the display name to show only the base directory name
+- Adds parameters for Node version and OS.
+- Provides a detailed summary of test results in the description
+- Adds links to CI build and Git commit (if available)
+- Attaches the Jest configuration as a JSON file
+
+## Use Cases
+
+1. **Global Summary**: The test run configuration allows you to provide a high-level overview of all tests executed, including total counts, pass/fail ratios, and overall duration.
+
+2. **Environment Information**: You can include details about the test environment, such as Node.js version, operating system, or any relevant environment variables.
+The format of a pseudo-test case allows you to attach files, add parameters, and include links to external resources.
+
+By leveraging the `testRun` configuration, you can provide valuable context and metadata for your entire test suite execution, making it easier to understand overall test results, troubleshoot issues, and maintain a clear picture of your testing process over time.

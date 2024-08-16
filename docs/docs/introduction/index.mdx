@@ -11,63 +11,30 @@ Thanks for choosing `jest-allure2-reporter` !
 Whether you're a developer, QA professional, or someone involved in unit, integration, or end-to-end testing, this tool will make your testing process more efficient, organized, and insightful.
 
 <div className="text--center">
-  <iframe width="560" height="315" src="https://www.youtube.com/embed/NpEaa2P7qZI" title="YouTube video player" frameBorder={0} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen></iframe>
+  <iframe width="560" height="315" src="https://www.youtube.com/embed/RkLAB1nfAOY" title="Introduction to `jest-allure2-reporter`" frameBorder={0} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen></iframe>
 </div>
 
 ## What is `jest-allure2-reporter`?
 
-[`jest-allure2-reporter`](https://www.npmjs.com/package/jest-allure2-reporter) is a reporting toolkit for [Jest](https://jestjs.io/), a widely popular testing framework in the JavaScript ecosystem.
+[`jest-allure2-reporter`](https://www.npmjs.com/package/jest-allure2-reporter) is a highly configurable reporter for [Jest](https://jestjs.io/), a widely popular testing framework in the JavaScript ecosystem.
 
-The produced reports look like directories with multiple JSON files.
-They can be viewed using the [`allure` command-line tool][allure-cli], a flexible, feature-rich reporting tool that provides clear and concise test result representation.
-
-It provides several **entry points**:
-
-<dl>
-  <dt><code>jest-allure2-reporter</code></dt>
-  <dd>The reporter itself, which is responsible for collecting test results and generating a report.</dd>
-  <dt><code>jest-allure2-reporter/api</code></dt>
-  <dd>DSL to add additional metadata to your test definitions: <code>$Link</code>, <code>$Owner</code>.</dd>
-  <dd>`allure` runtime API to use inside your tests: <code>allure.step</code>, <code>allure.attachment</code>.</dd>
-  <dt>
-    <b>Environment packages</b>, to enable the annotations, media attachments and provide additional test data:
-  </dt>
-  <dd>
-    <dl>
-      <dt><code>jest-allure2-reporter/environment-node</code></dt>
-      <dd>For Node.js tests.</dd>
-      <dt><code>jest-allure2-reporter/environment-jsdom</code></dt>
-      <dd>For browser tests.</dd>
-      <dt><code>jest-allure2-reporter/environment-decorator</code></dt>
-      <dd>For advanced use cases where you need to extend an already customized test environment.</dd>
-    </dl>
-  </dd>
-</dl>
+The produced reports look like directories with multiple JSON files, `${uuid}-container.json` and `${uuid}-result.json`, with optional media attachments and a few other files.
+They can be viewed or transformed to HTML using the [`allure` command-line tool][allure-cli], a flexible, feature-rich reporting tool that provides clear and concise test result representation.
 
 ## Why one more Allure reporter for Jest?
 
-Let's start from the fact that **none** of the existing Allure reporters[^1][^2][^3][^4] for Jest is a **reporter** in the Jest sense. Both official and unofficial implementations are built as custom test environment implementations in Jest, whereas _test environments were never meant to be used as reporters_.
+Other reporters are either outdated, have limited features, or are not idiomatic to Jest's new test lifecycle – they are often implemented as a custom test environment, whereas the Jest expects reporters to be _reporters_, pluggable classes that can be swapped in and out.
 
-You may ask, _"So what? As long as that approach works, why should I care?"_. Valid thinking, but... try running a test file with a syntax error and see how the existing reporters handle it. You'll be surprised.
+The common syndrome of existing Allure reporters is that they fall short in reporting early setup failures, tackling duplicate test names and many other edge cases, which hinders the use in large-scale projects, where it is impossible to manually fix all the issues, and it is simpler just to have a tool that works out of the box.
 
-That was just one example of issues that arise when you don't implement a reporter as a _reporter_. Let's move the next point of failure happening early – test environment setup.
+Advanced users also would be pleased to know that `jest-allure2-reporter` can be configured at any level: configuration, DSL, decorators, docblocks and runtime API level.
+It can work even without any special test environment, albeit with some limitations, because it was built originally as a _Jest reporter_.
 
-At Wix, we've been maintaining CI pipelines for hundreds of Detox E2E projects, and one of the reasons why a test environment would fail to initialize could be an Android emulator being unresponsive or disconnected before the test file even started. So, when a test environment itself can break, is that the best place to put your core reporting logic?
+## Takeaways
 
-A few more important questions we've been struggling to answer were:
-
-* You may have executed dozens of test files, but where do you put attachments related to the whole test run?
-* How do you attach links to the test file's source code on GitHub which failed due to a syntax error and even didn't start?
-
-This is the reason why `jest-allure2-reporter` was born, and this is why it's the _idiomatic_ Allure reporter for Jest.
-
-To sum it up, here's a comparison of the existing Allure reporters for Jest:
-
-| Feature | jest-allure2-reporter | allure-jest | jest-allure | jest-circus-allure-environment | jest-allure-circus |
-| --- | --- | --- | --- | --- | --- |
-| Attachments API | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| Early test issues reporting | :heavy_check_mark: | :x: | :x: | :x: | :x: |
-| TODO                        | | | | | |
+* This reporter is a powerful tool tailor-made for the **modern** Jest ecosystem, not "yet another Allure reporter".
+* Easy to understand, straightforward to adopt, and flexible to work with – it's the Jest Allure reporter you've been waiting for.
+* It is progressive by design &mdash; you can start using it like a [standard reporter][jest-reporters], but the more you invest in it, the more you get out of it.
 
 Ready to explore what this reporter can do for you? [Start your journey here.][config]
 

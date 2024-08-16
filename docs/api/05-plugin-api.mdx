@@ -1,0 +1,171 @@
+---
+sidebar_position: 7
+---
+
+# Plugin API
+
+The Plugin API in `jest-allure2-reporter` allows you to extend and customize the functionality of Allure reporting. This powerful feature enables you to add custom behaviors, modify existing ones, or integrate with other tools and services.
+
+## Overview
+
+Plugins are registered using the `allure.$plug()` method, which takes a callback function as its argument. This callback receives a context object that provides access to various aspects of the Allure runtime.
+
+```javascript
+import { allure } from 'jest-allure2-reporter/api';
+
+allure.$plug((context) => {
+  // Plugin implementation
+});
+```
+
+## Plugin Context
+
+The plugin context (`AllureRuntimePluginContext`) provides the following properties and methods:
+
+### `runtime`
+
+Type: `IAllureRuntime`
+
+Gives access to the [Allure runtime](./04-runtime-api.mdx), allowing you to interact with the core Allure functionality.
+
+### `handlebars`
+
+Type: `HandlebarsAPI`
+
+Provides access to the Handlebars templating engine, which can be useful for generating custom content.
+
+### `contentAttachmentHandlers`
+
+Type: `Record<string, ContentAttachmentHandler>`
+
+A collection of handlers for content attachments. You can add custom handlers or modify existing ones.
+
+### `fileAttachmentHandlers`
+
+Type: `Record<string, FileAttachmentHandler>`
+
+A collection of handlers for file attachments. You can add custom handlers or modify existing ones.
+
+### `inferMimeType`
+
+Type: `MIMEInferer`
+
+A function to infer the MIME type of attachments. You can replace this with a custom implementation if needed.
+
+## Examples
+
+### Custom Attachment Handler
+
+Here's an example of how you might use the Plugin API to add a custom attachment handler:
+
+```javascript
+import { allure } from 'jest-allure2-reporter/api';
+
+allure.$plug((context) => {
+  context.contentAttachmentHandlers['json'] = async ({ content, name, outDir }) => {
+    const jsonContent = JSON.stringify(JSON.parse(content), null, 2);
+    const fileName = `${name}.json`;
+    const filePath = path.join(outDir, fileName);
+
+    await fs.writeFile(filePath, jsonContent);
+
+    return fileName;
+  };
+});
+
+// ...
+
+allure.attachment('{"key": "value"}', {
+  name: 'my-attachment',
+  type: 'application/json',
+  handler: 'json',
+});
+```
+
+The example above adds a new content attachment handler for 'json' type.
+It prettifies JSON content before saving it as an attachment.
+
+If you have a handler for one time use, you can pass it as a function to `handler` option:
+
+```javascript
+allure.fileAttachment('my-file.txt', {
+  type: 'application/json',
+  handler: async (context) => {
+    /* your handler code */
+    return fileName;
+  },
+});
+```
+
+### Custom MIME Type Inference
+
+You can also customize how MIME types are inferred for attachments:
+
+```javascript
+import { allure } from 'jest-allure2-reporter/api';
+
+allure.$plug((context) => {
+  context.inferMimeType = ({ sourcePath, content }) => {
+    const mimeType = 'application/vnd.allure.image.diff';
+
+    if (sourcePath && sourcePath.endsWith('.screenshot.json'))
+      return mimeType;
+
+    if (content && content.expected && content.actual && content.diff)
+      return mimeType;
+
+    return undefined; // use default inference
+  };
+});
+```
+
+### Adding a Handlebars Helper
+
+The Plugin API allows you to extend the Handlebars templating engine used by `jest-allure2-reporter`.
+This can be particularly useful for customizing how information is displayed in your reports.
+
+```javascript
+import { allure, Step } from 'jest-allure2-reporter/api';
+
+// Register the plugin
+allure.$plug((context) => {
+  // Add a custom Handlebars helper
+  context.handlebars.registerHelper('uppercase', function(str) {
+    return str.toUpperCase();
+  });
+});
+
+// Use the custom helper in a step
+class TestHelper {
+  @Step('Perform {{uppercase action}}', ['action'])
+  performAction(action) {
+    // Perform the action
+    console.log(`Performing action: ${action}`);
+  }
+}
+
+// In your test
+test('Custom Handlebars helper example', () => {
+  const helper = new TestHelper();
+  helper.performAction('click');
+});
+```
+
+This will result in a step in your Allure report with the name "Perform action: CLICK" instead of "Perform action: click".
+
+Using custom Handlebars helpers like this allows you to format and manipulate the text in your step names, descriptions, and other areas where Handlebars templates are used in Allure reporting. This can lead to more readable and informative reports, especially when dealing with complex test scenarios or when you want to highlight certain information in your steps.
+
+## Best Practices
+
+1. **Avoid Side Effects**: Your plugins should not have unintended side effects on the test execution or reporting process.
+2. **Error Handling**: Implement proper error handling in your plugins to prevent crashes or unexpected behavior.
+3. **Performance**: Be mindful of the performance impact of your plugins, especially for large test suites.
+4. **Documentation**: If you're creating plugins for others to use, provide clear documentation on how to use and configure them.
+
+## Limitations and Considerations
+
+- The Plugin API is powerful but should be used judiciously. Overusing or misusing plugins can lead to complex and hard-to-maintain test setups.
+- Be aware of potential conflicts between multiple plugins. If you're using multiple plugins, ensure they don't interfere with each other.
+- The Plugin API is subject to change in future versions of `jest-allure2-reporter`. Always refer to the latest documentation when upgrading.
+
+Remember to use this feature responsibly and in alignment with your team's testing and reporting strategies.

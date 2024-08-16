@@ -1,0 +1,169 @@
+# Customizers
+
+## Overview
+
+Test customizers are powerful functions used in the configuration of `jest-allure2-reporter` to modify or enhance various aspects of test reporting. They provide a flexible way to customize how test information is processed and presented in the Allure report.
+
+A test customizer is a function with the following general structure:
+
+```typescript
+type Customizer<Context, Value> =
+  (context: Context) => Value;
+```
+
+where:
+- `Context` is an object containing relevant information about the current test or reporting environment;
+- `Value` is the expected return type, which varies depending on the specific customizer being used.
+
+## Usage
+
+Customizers are typically used in the `jest-allure2-reporter` configuration. For example:
+
+```javascript
+module.exports = {
+  // ... other Jest config
+  reporters: [
+    'default',
+    ['jest-allure2-reporter', {
+      testCase: {
+        name: ({ testCase }) => `Custom: ${testCase.fullName}`,
+        // Other customizers...
+      }
+    }]
+  ]
+};
+```
+
+## Helpers
+
+Helpers are utility functions available within the customizer context as `$`. They provide additional functionality to assist in customizing test reports.
+
+### Registering Helpers
+
+Helpers are registered in the `jest-allure2-reporter` configuration using customizers inside `helpers` object:
+
+```javascript
+module.exports = {
+  // ... other Jest config
+  reporters: [
+    'default',
+    ['jest-allure2-reporter', {
+      helpers: {
+        relativize: (globalContext) => {
+          const rootDir = globalContext.globalConfig.rootDir;
+          // Return a helper function
+          return (filePath) => path.relative(rootDir, filePath.join(path.sep));
+        }
+      }
+    }]
+  ]
+};
+```
+
+### Using Helpers
+
+Once registered, helpers can be accessed within customizers via the `$` property of the context:
+
+```javascript
+module.exports = {
+  // ... other Jest config
+  reporters: [
+    'default',
+    ['jest-allure2-reporter', {
+      testCase: {
+        name: ({ $, filePath, value }) => `${value} (${$.relativize(filePath)})`
+      }
+    }]
+  ]
+};
+```
+
+## Context
+
+The context is an object passed to customizers, providing relevant information and access to helpers. It's a crucial part of the customizer functionality, allowing access to test-specific data and utility functions.
+
+### Context Structure
+
+The context object typically includes:
+
+- Test-specific information (e.g., `testCase`, `file`, `result`)
+- Global configuration (`globalConfig`)
+- Helpers (`$`)
+- Other relevant data depending on the customizer type
+
+Example context structure:
+
+```typescript
+interface CustomizerContext {
+  testCase: TestCaseResult;
+  file: TestFile;
+  result: TestResult;
+  globalConfig: Config.GlobalConfig;
+  $: Helpers;
+  // Other properties...
+}
+```
+
+### Accessing Context in Customizers
+
+Customizers can destructure the context to access needed properties:
+
+```javascript
+module.exports = {
+  // ... other Jest config
+  reporters: [
+    'default',
+    ['jest-allure2-reporter', {
+      testCase: {
+        fullName: ({ testCase, filePath, $ }) => {
+          // Use testCase, file, and helpers here
+          return $.customHelper(`${filePath.join('/')}:${testCase.fullName}`);
+        }
+      }
+    }]
+  ]
+};
+```
+
+## Common Customizer Types
+
+1. **Test Case Customizers**
+   - Scope: Individual test cases
+   - Purpose: Modify test case reports with specific details
+   - Use case: Enhancing test case metadata (e.g., name, description, status)
+
+2. **Test Step Customizers**
+   - Scope: Individual test steps, including hooks
+   - Purpose: Adjust information for each step within a test
+   - Use case: Adding granular details to test execution flow
+
+3. **Test File Customizers**
+   - Scope: Entire test files (reported as pseudo-test cases)
+   - Purpose: Apply modifications at the file level
+   - Use case: Grouping or categorizing tests by file
+
+4. **Test Run Customizers**
+   - Scope: Overall test run (reported as a pseudo-test case)
+   - Purpose: Adjust the high-level test run report
+   - Use case: Providing summary information for the entire test suite
+
+5. **Helper Customizers**
+   - Scope: Global
+   - Purpose: Define custom utility functions
+   - Use case: Creating reusable logic for other customizers
+
+6. **Global Customizers**
+   - Scope: Global report elements
+   - Purpose: Modify overarching report components
+   - Use case: Adding environment details, categories, or executor information
+
+Each customizer type has access to a specific context and can modify various properties relevant to its scope. As you become more familiar with the system, you can explore the detailed contexts and properties available for each type.
+
+## Best Practices
+
+1. Keep customizers pure and side-effect free.
+2. Use helpers for complex operations to keep customizers clean.
+3. Leverage TypeScript for better type checking and autocompletion.
+4. Document custom helpers and complex customizers for team understanding.
+
+By understanding and effectively using test customizers, helpers, and context, you can create highly tailored and informative Allure reports that meet your specific project needs.

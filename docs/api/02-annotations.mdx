@@ -1,0 +1,362 @@
+---
+sidebar_position: 3
+---
+
+# Annotations
+
+Annotations are functions that can be called before test suites or tests to add metadata to them. They share the same purpose as [docblocks][1], but they execute at runtime, allowing you to add metadata dynamically. Annotations can also be used to bypass the limitation of docblocks not being applicable to `describe` statements.
+
+To use annotations, you'll need to import them first, e.g.:
+
+```typescript
+import { $Description, $Link, $Owner } from 'jest-allure2-reporter/api';
+```
+
+Alternatively, you can [configure `jest-allure2-reporter/globals`][2] to make them available globally.
+
+## `$Description`
+
+Adds a Markdown description to a test or suite.
+
+```javascript
+$Description('### Suite-level description')
+describe('Test suite', () => {
+  $Description('Demonstrates a **passing** test case')
+  test('First test', () => {
+    expect(1 + 1).toBe(2);
+  });
+
+  $Description('Demonstrates a **failing** test case')
+  test('Second test', () => {
+    expect(2 + 2).toBe(3);
+  });
+});
+```
+
+## `$DescriptionHtml`
+
+Adds an HTML description to a test or suite.
+
+```javascript
+$DescriptionHtml('<h3>Suite-level description</h3>')
+describe('Test suite', () => {
+  $DescriptionHtml('Demonstrates a <b>passing</b> test case')
+  test('First test', () => {
+    expect(1 + 1).toBe(2);
+  });
+
+  $DescriptionHtml('Demonstrates a <b>failing</b> test case')
+  test('Second test', () => {
+    expect(2 + 2).toBe(3);
+  });
+});
+```
+
+## `$DisplayName`
+
+Overrides test names specified in `test('...')` or `it('...')` in the test report. It can also be used to set custom names for hooks.
+
+```javascript
+describe('Test suite', () => {
+  $DisplayName('Custom "beforeEach" hook')
+  beforeEach(() => {
+    // Hooks can be renamed too
+  });
+
+  $DisplayName('1 + 1 = 2')
+  test('First test', () => {
+    expect(1 + 1).toBe(2);
+  });
+
+  $DisplayName('2 + 2 = 3')
+  test('Second test', () => {
+    expect(2 + 2).toBe(3);
+  });
+});
+```
+
+## `$FullName`
+
+Sets the full name of a test, which can be used for more detailed identification or grouping.
+By default, full names are also used for tracking test history across multiple runs or retries.
+
+```javascript
+describe('Test suite', () => {
+  $FullName('Arithmetic > Addition > Valid assertion')
+  test('First test', () => {
+    expect(1 + 1).toBe(2);
+  });
+
+  $FullName('Arithmetic > Addition > Invalid assertion')
+  test('Second test', () => {
+    expect(2 + 2).toBe(3);
+  });
+});
+```
+
+## `$HistoryId`
+
+Assigns a unique identifier to a test, which can be used to track test history across multiple runs or retries.
+
+```javascript
+describe('Test suite', () => {
+  $HistoryId('HISTORY-1')
+  test('First test', () => {
+    expect(2 + 2).toBe(3);
+  });
+
+  $HistoryId('HISTORY-1')
+  test('Considered as repetition of the first test', () => {
+    // Open "Retries" tab in the report to see the history of this test
+    expect(1 + 1).toBe(2);
+  });
+});
+```
+
+## `$Issue`
+
+Links a test to an issue in your issue tracking system.
+
+URLs are built using [the template strings][3] configured in the reporter options.
+
+```javascript
+describe('Regression tests', () => {
+  $Issue('XMLRPC-15')
+  test('Proving the fix', () => {
+    expect(1 + 1).toBe(2);
+  });
+
+  $Issue('XMLRPC-16')
+  test.failing('Demonstrating an existing bug', () => {
+    expect(2 + 2).toBe(3);
+  });
+});
+```
+
+## `$Label`
+
+Adds a custom label to a test or suite.
+
+```javascript
+$Label('testType', 'screenshotDiff');
+describe('Screenshot tests', () => {
+  test('What the client explained', () => {
+    allure.fileAttachment('fixtures/screenshots/expected.png', 'expected');
+    allure.fileAttachment('fixtures/screenshots/actual.png', 'actual');
+    allure.fileAttachment('fixtures/screenshots/diff.png', 'diff');
+
+    // and what the programmer coded ¯\_(ツ)_/¯
+    expect('programmer').toHaveProperty('telepathy');
+  });
+});
+```
+
+## `$Link`
+
+Adds a link to external resources related to the test.
+
+```javascript
+$Link('https://en.wikipedia.org/wiki/Arithmetic', '🔢 Arithmetic')
+describe('Arithmetics', () => {
+  $Link('https://en.wikipedia.org/wiki/Addition', '➕ Addition')
+  test('1 + 1 = 2', () => {
+    expect(1 + 1).toBe(2);
+  });
+
+  $Link('https://en.wikipedia.org/wiki/Division_(mathematics)', '➗ Division')
+  test('3 / 2 = 1.5', () => {
+    expect(3 / 2).toBe(1.5);
+  });
+});
+```
+
+The `$Link` annotation also accepts a `Link` object as an argument:
+
+```javascript
+$Link({ name: '🔢 Arithmetic', type: 'wiki', url: 'https://en.wikipedia.org/wiki/Arithmetic' });
+```
+
+Advanced users may pass empty strings to `url` if they want to [build the URL dynamically][4] via a config function:
+
+```javascript
+$Link({ name: 'Arithmetic', type: 'wiki', url: '' });
+```
+
+## `$Owner`
+
+Specifies the owner of a test or suite.
+
+```javascript
+$Owner('John Doe');
+describe('Suite maintained by John', () => {
+  test('First test', () => {
+    // John maintains this test
+  });
+
+  test('Second test', () => {
+    // John maintains this test too
+  });
+
+  $Owner('Jane Doe')
+  test('Third test', () => {
+    // Unlike the other tests, Jane maintains this one
+  });
+});
+```
+
+## `$Package`, `$TestClass` `$TestMethod`
+
+Specifies the package or module that a test belongs to.
+
+```javascript
+$Package('e2e.annotations')
+$TestClass('e2e.annotations.MyService')
+describe('My service', () => {
+
+  $TestMethod('Alternative title for the test')
+  test('should log a message', () => {
+    // Open "Packages" view to see this test grouped under "e2e.annotations"
+  });
+});
+```
+
+## `$Parameter`
+
+Adds a parameter to a test or suite.
+
+```javascript
+describe('Login screen', () => {
+  $Parameter('auth.NewLoginScreen', 'on')
+  test('should display the new login screen', () => {
+    // Visit the login page
+    // Assert the new login screen is displayed
+  });
+});
+```
+
+The `$Parameter` annotation accepts any values and supports optional attributes:
+
+```javascript
+$Parameter('Some index', 2);
+$Parameter('secret', 'P/55VV0RD', { mode: 'masked' });
+$Parameter({
+  name: 'Debug Info',
+  value: {boring: "debug", info: "here"},
+  excluded: !process.env.DEBUG,
+});
+```
+
+## `$Severity`
+
+Sets the [severity level][5] of a test or suite.
+
+```javascript
+$Severity('critical');
+describe('Test suite', () => {
+  test('Important test 1', () => {
+    expect(1 + 1).toBe(2);
+  });
+
+  test('Important test 2', () => {
+    expect(2 + 2).toBe(4);
+  });
+
+  $Severity('trivial');
+  test('Unimportant test', () => {
+    expect(true).toBe(true);
+  });
+});
+```
+
+## `$Tag`
+
+Adds one or more [tags][6] to a test or suite.
+
+```javascript
+$Tag('dsl', 'arithmetic');
+describe('Test suite', () => {
+  $Tag('addition')
+  test('First test', () => {
+    expect(1 + 1).toBe(2);
+  });
+
+  $Tag('division')
+  test('Second test', () => {
+    expect(3 / 2).toBe(1.5);
+  });
+});
+```
+
+## `$Thread`
+
+Specifies a custom thread for concurrent tests.
+Do not use it unless you want to control tests on the [Timeline][7] manually.
+
+```javascript
+describe('Test suite', () => {
+  $Thread('T1')
+  test.concurrent('First test', () => {
+    expect(1 + 1).toBe(2);
+  });
+
+  $Thread('T2')
+  test.concurrent('Second test', () => {
+    expect(3 / 2).toBe(1.5);
+  });
+});
+```
+
+## `$TmsLink`
+
+Links a test to a Test Management System (TMS) entry.
+
+URLs are built using [the template strings][3] configured in the reporter options.
+
+```javascript
+$TmsLink('TMS-1234')
+test('should be linked to a TMS ticket', () => {
+  expect(1 + 1).toBe(2);
+});
+```
+
+## `$Epic`, `$Feature`, `$Story`
+
+There are also annotations for Behavior-Driven Development (BDD) style testing:
+
+```javascript
+$Epic('Arithmetic operations')
+$Feature('Addition')
+describe('Test suite', () => {
+  $Story('Sane assumptions')
+  test('First test', () => {
+    expect(1 + 1).toBe(2);
+  });
+
+  $Story('Insane assumptions')
+  test('Second test', () => {
+    expect(2 + 2).toBe(3);
+  });
+});
+```
+
+## `$ParentSuite`, `$Suite`, `$SubSuite`
+
+Annotations for organizing test suites in a hierarchical structure:
+
+```javascript
+$ParentSuite('Custom Parent Suite')
+$Suite('Custom Suite')
+$SubSuite('Custom Sub-Suite')
+test('Test outside of any suite', () => {
+  // This test will be placed under:
+  // Custom Parent Suite > Custom Suite > Custom Sub-Suite
+});
+```
+
+[1]: 01-docblocks.mdx
+[2]: index.mdx#global-typings
+[3]: #TODO
+[4]: #TODO
+[5]: #TODO
+[6]: #TODO
+[7]: #TODO

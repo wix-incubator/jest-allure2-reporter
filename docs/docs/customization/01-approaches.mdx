@@ -1,0 +1,120 @@
+# Approaches
+
+jest-allure2-reporter offers several approaches to customize your test reports. Each method has its own advantages and limitations, allowing you to choose the one that best fits your specific needs. Here are the main customization approaches:
+
+## Docblock Annotations
+
+Docblock annotations provide a declarative way to add metadata to your tests directly in the source code.
+This approach is:
+
+* ✨ Agnostic way to add simple metadata
+* ✅ Familiar syntax for developers accustomed to JSDoc
+* ✅ Doesn't require importing additional modules
+* ❗ Only works at the top file level and individual test level
+* ❗ Cannot be applied to test suites or hooks
+
+```javascript
+/**
+ * @description Tests the login functionality
+ * @severity critical
+ * @owner John Doe
+ */
+test('User can log in with valid credentials', () => {
+  // Test code here
+});
+```
+
+## DSL Annotations
+
+DSL (Domain-Specific Language) annotations provide a specialized syntax for adding metadata that's more concise than the runtime API.
+This approach is:
+
+* ✨ A middle ground between a declarative and a programmatic approach
+* ✨ Targets the definition level, not the execution (runtime)
+* ✅ Works on almost every block: suites, hooks and tests themselves
+* ✅ Allows for some programmatic flexibility
+* ❗ Couples your tests to `jest-allure2-reporter`'s API
+
+```javascript
+import { $Description, $Severity, $Owner } from 'jest-allure2-reporter/api';
+
+$Description('Login functionality test suite')
+describe('Login Tests', () => {
+  $Owner('John Doe')
+  $Severity('critical')
+  test('User can log in with valid credentials', () => {
+    // Test code here
+  });
+
+  $Description('Setup test database')
+  beforeAll(() => {
+    // Setup code here
+  });
+});
+```
+
+## Runtime API
+
+The Runtime API allows you to add metadata and customize reports programmatically within your test code.
+This approach is:
+
+* ✨ Purely programmatic, targeted at runtime
+* ✅ Can be used at any point during runtime: file evaluation, suite definition, hook execution, or test execution
+* ✅ Highly flexible and dynamic
+* ❗ Couples your tests to `jest-allure2-reporter`'s API
+* ❗ Doesn't work with skipped tests
+
+```javascript
+import { allure } from 'jest-allure2-reporter/api';
+
+test('User can log in with valid credentials', () => {
+  allure.description('Tests the login functionality');
+  allure.severity('critical');
+  allure.owner('John Doe');
+
+  // Test code here
+});
+```
+
+## Reporter Config
+
+Declarative configuration allows you to set up global customizations and defaults in your Jest configuration file.
+
+Example (in `jest.config.js`):
+```javascript
+module.exports = {
+  // ... other Jest config options
+  reporters: [
+    'default',
+    ['jest-allure2-reporter', {
+      testCase: {
+        labels: {
+          owner: ({ value }) => value ?? 'Team QA',
+          severity: 'critical',
+        },
+      },
+    }],
+  ],
+};
+```
+
+✨ Centralized configuration for the entire project
+✅ Allows setting default (fallback) behaviors and metadata
+✅ Can be shared as a preset or plugin
+❗ Less precise than other methods; applies broadly rather than to specific tests
+❗ Can override more specific customizations if not carefully managed
+
+## Choosing the Right Approach
+
+The best approach (or combination of approaches) depends on your specific needs:
+
+- Use **docblock annotations** for simple, static metadata at the file or individual test level.
+- Use **DSL annotations** when you need to add metadata to sub-suites or hooks, or to individual tests (when your is not static).
+- Use the **runtime API** when you need to add dynamic metadata based on test execution or when you need fine-grained control at any point during the test lifecycle.
+- Use **declarative configuration** for project-wide defaults and behaviors, or for massive changes that apply to all or most tests.
+
+You can combine these approaches as needed. For example, you might use declarative configuration for project-wide defaults, docblock annotations for static file-level metadata, DSL annotations for suite and hook metadata, and the runtime API for dynamic metadata that depends on test execution.
+
+Remember that the config-based approach is a powerful tool that can override other customizations. While this can be useful for implementing broad changes, it should be used judiciously to avoid unintended consequences.
+
+By understanding the strengths and limitations of each approach, you can create detailed, informative Allure reports that provide valuable insights into your test suite's performance and results.

@@ -297,7 +297,7 @@ declare module 'jest-allure2-reporter' {
 
   export type LabelsCustomizer<Context> =
     | PropertyCustomizer<Context, Label[]>
-    | Record<LabelName | string, KeyedLabelCustomizer<Context>>;
+    | Record<LabelName, KeyedLabelCustomizer<Context>>;
 
   export type KeyedLabelCustomizer<Context> =
     | MaybeNullish<MaybeArray<string>>
@@ -312,7 +312,7 @@ declare module 'jest-allure2-reporter' {
 
   export type LinksCustomizer<Context> =
     | PropertyCustomizer<Context, Link[]>
-    | Record<LinkType | string, KeyedLinkCustomizer<Context>>;
+    | Record<LinkType, KeyedLinkCustomizer<Context>>;
 
   export type KeyedLinkCustomizer<Context> =
     | MaybeNullish<string | Link | Link[]>
@@ -717,7 +717,7 @@ declare module 'jest-allure2-reporter' {
   }
 
   export interface Label {
-    name: LabelName | string;
+    name: LabelName;
     value: string;
   }
 
@@ -734,23 +734,25 @@ declare module 'jest-allure2-reporter' {
     | 'tag'
     | 'testClass'
     | 'testMethod'
-    | 'thread';
+    | 'thread'
+    | (string & {});
 
   export interface Link {
     name?: string;
     url: string;
-    type?: LinkType | string;
+    type?: LinkType;
   }
 
-  export type LinkType = 'issue' | 'tms';
+  export type LinkType = 'issue' | 'tms' | (string & {});
 
   export interface Parameter {
     name: string;
     value: Primitive;
     excluded?: boolean;
-    mode?: 'hidden' | 'masked' | 'default';
+    mode?: ParameterMode;
   }
 
+  export type ParameterMode = 'hidden' | 'masked' | 'default';
   export type Severity = 'blocker' | 'critical' | 'normal' | 'minor' | 'trivial';
   export type Stage = 'scheduled' | 'running' | 'finished' | 'pending' | 'interrupted';
   export type Status = 'failed' | 'broken' | 'passed' | 'skipped' | 'unknown';
