@@ -70,7 +70,13 @@ module.exports = async () => {
               label: 'Docs',
             },
             {
-              href: 'https://allure-report-20231215124928.surge.sh/',
+              type: 'docSidebar',
+              sidebarId: 'apiSidebar',
+              position: 'left',
+              label: 'API',
+            },
+            {
+              href: 'https://jest-allure2-reporter-demo.surge.sh',
               label: 'Demo',
               position: 'left',
             },
@@ -97,7 +103,7 @@ module.exports = async () => {
                 },
                 {
                   label: 'API',
-                  to: '/docs/api',
+                  to: '/api',
                 },
               ],
             },

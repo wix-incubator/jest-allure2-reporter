@@ -37,9 +37,9 @@ export interface Parameter {
 
 The options allow you to fine-tune the way your parameters are displayed in the report:
 
-* `excluded: true` - exclude the parameter from the report
-* `mode: "hidden"` - hide the parameter value, e.g. when it is too long yet still useful for debugging
-* `mode: "masked"` - mask the parameter value, e.g. when it contains sensitive information
+* `excluded: true` - exclude the parameter from allure-results (sensitive or unnecessary verbose data)
+* `mode: "masked"` - mask the parameter value with `******` in the generated report
+* `mode: "hidden"` - exclude the parameter from the generated report completely
 
 The `allure.parameter` API can be used also on the top level, e.g.:
 
