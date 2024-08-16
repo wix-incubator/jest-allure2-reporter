@@ -1,0 +1,157 @@
+---
+sidebar_position: 1
+slug: /api
+---
+
+# Exports
+
+The `jest-allure2-reporter` package provides several entry points to enhance your Jest testing experience with Allure reporting capabilities.
+
+## Main Entry Point
+
+### `jest-allure2-reporter`
+
+The core reporter module for collecting test results and generating Allure reports.
+
+```javascript title="jest.config.js"
+/** @type {import('@jest/types').Config.InitialOptions} */
+module.exports = {
+  // ...other Jest configurations
+  reporters: [
+    'default',
+    ['jest-allure2-reporter',
+      /** @type {import('jest-allure2-reporter').ReporterOptions} */
+      {
+        // Reporter options go here
+      }
+    ]
+  ],
+};
+```
+
+For detailed configuration options, see the [Configuration Guide][1].
+
+You can extend this class to customize the reporting behavior:
+
+```javascript
+import { execa } from 'execa';
+import JestAllure2Reporter from 'jest-allure2-reporter';
+
+class CustomizedJestAllure2Reporter extends JestAllure2Reporter {
+  async onRunComplete(contexts, results) {
+    await super.onRunComplete(contexts, results);
+    // Illustrative example: Generate Allure report after test run
+    await execa('allure', ['generate', '--clean']);
+  }
+}
+```
+
+The main entry point also exports the `ReporterOptions` type for TypeScript users, so you
+can define presets and configurations with type safety:
+
+```typescript
+import type { ReporterOptions } from 'jest-allure2-reporter';
+
+export const myPreset1: ReporterOptions = {
+  resultsDir: 'artifacts/allure-results',
+  testCase: {
+    // ...
+  },
+};
+```
+
+## API Entry Point
+
+### `jest-allure2-reporter/api`
+
+This module exports functions and objects for enhancing your tests with Allure metadata and runtime capabilities.
+
+```javascript
+import {
+  $Description,
+  $Link,
+  $Owner,
+  allure,
+  Attachment,
+  Step
+} from 'jest-allure2-reporter/api';
+```
+
+Key exports include:
+- [Annotations][2]: Functions like `$Description`, `$Link`, `$Owner` for adding metadata to your tests.
+- [Decorators][3]: `@Attachment` and `@Step` for enhancing class-based test drivers.
+- [Runtime API][4]: The `allure` object for interacting with Allure during test execution.
+
+If you prefer not to use imports, you can use the global typings provided by `jest-allure2-reporter/globals`.
+
+### Global Typings
+
+For TypeScript projects, you can add Allure types globally by including them in your `tsconfig.json`:
+
+```js
+{
+  "compilerOptions": {
+    "types": ["jest-allure2-reporter/globals"]
+  }
+}
+```
+
+Alternatively, you can import them directly somewhere in your test files:
+
+```typescript
+import 'jest-allure2-reporter/globals';
+```
+
+## Environment Packages
+
+[Jest test environments][5] provide the context in which tests are run: `node`, `jsdom`, or custom environments.
+
+Custom environments are crucial for `jest-allure2-reporter` as they enable the collection of detailed metadata and ensure that annotations, runtime API calls, and decorators can pass information to the reporter — usually this happens through interprocess communication (IPC) since Jest spawns separate worker processes for each test file, and there are no built-in mechanisms for sharing custom data between workers and the main process.
+
+Although `jest-allure2-reporter` technically works with the default Jest environments, the produced reports will be less informative and lacking custom metadata. To get the most out of Allure, you should use one of the provided custom environments.
+
+### `jest-allure2-reporter/environment-node`
+
+⭐ **Recommended choice**.
+
+This test environment is designed to work with Node.js tests and Allure.
+
+```javascript
+// jest.config.js
+module.exports = {
+  testEnvironment: 'jest-allure2-reporter/environment-node',
+  // ...
+};
+```
+
+### `jest-allure2-reporter/environment-jsdom`
+
+A Jest environment for browser-like tests using jsdom, with Allure support.
+
+```javascript
+// jest.config.js
+module.exports = {
+  testEnvironment: 'jest-allure2-reporter/environment-jsdom',
+  // ...
+};
+```
+
+### `jest-allure2-reporter/environment-decorator`
+
+A utility for creating custom Jest environments with Allure support.
+
+```javascript title="custom-allure-environment.js"
+import allureDecorator from 'jest-allure2-reporter/environment-decorator';
+import JestEnvironmentCustom from './JestEnvironmentCustom';
+
+export default allureDecorator(JestEnvironmentCustom);
+```
+
+This is useful for non-standard test environments where you need to bring Allure capabilities in.
+For more information on custom environments, see the [Jest documentation][5].
+
+[1]: config/index.mdx
+[2]: 02-annotations.mdx
+[3]: 03-decorators.mdx
+[4]: 04-runtime-api.mdx
+[5]: https://jestjs.io/docs/configuration#testenvironment-string

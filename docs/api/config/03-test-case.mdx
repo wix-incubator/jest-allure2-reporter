@@ -1,0 +1,370 @@
+# Test Case
+
+In `jest-allure2-reporter`, the `testCase` configuration object allows you to customize how individual test cases are reported in Allure.
+This configuration provides fine-grained control over various aspects of test case reporting, including naming, status, labels, links, and more.
+
+## Configuration Options
+
+The `testCase` configuration object supports the following properties:
+
+```javascript
+/** @type {import('jest-allure2-reporter').ReporterOptions} */
+const jestAllure2ReporterOptions = {
+  testCase: {
+    uuid: /* ... */,
+    ignored: /* ... */,
+    historyId: /* ... */,
+    displayName: /* ... */,
+    fullName: /* ... */,
+    start: /* ... */,
+    stop: /* ... */,
+    description: /* ... */,
+    descriptionHtml: /* ... */,
+    stage: /* ... */,
+    status: /* ... */,
+    statusDetails: /* ... */,
+    labels: {
+      epic: /* ... */,
+      feature: /* ... */,
+      owner: /* ... */,
+      package: /* ... */,
+      parentSuite: /* ... */,
+      severity: /* ... */,
+      story: /* ... */,
+      subSuite: /* ... */,
+      suite: /* ... */,
+      tag: /* ... */,
+      testClass: /* ... */,
+      testMethod: /* ... */,
+      thread: /* ... */,
+      custom: /* ... */,
+    },
+    links: {
+      issue: /* ... */,
+      tms: /* ... */,
+      custom: /* ... */,
+    }
+    attachments: [
+      {
+         name: /* ... */,
+         type: /* ... */,
+         source: /* ... */,
+      },
+    ],
+    parameters: [
+      {
+        name: /* ... */,
+        value: /* ... */,
+        mode: /* ... */,
+      },
+    ],
+  }
+};
+```
+
+### `uuid`
+
+:::caution
+Overriding the UUID may cause issues with the Allure report, as it is used to uniquely identify test cases in the report.
+Make sure you produce unique values across all test cases _including their retry attempts_.
+:::
+
+- Type: `PropertyCustomizer<TestCaseExtractorContext, string>`
+- Default: Automatically generated (UUID v4)
+
+Customizes the unique identifier for each test case run.
+This is needed only in _very rare cases_ where you need predictable JSON paths in `allure-results` directory.
+
+```javascript
+/** @type {import('jest-allure2-reporter').ReporterOptions} */
+const config = {
+  testCase: {
+    uuid: async ({ $, filePath, testCase }) => `${await package.name}:${filePath}:${testCase.fullName}`
+  }
+};
+```
+
+You can return any string from this function because the conversion to UUID v5 is done internally
+by the reporter at the very end.
+
+
+### `ignored`
+
+:::caution
+Ignoring test cases may lead to incomplete test reports, so use this option with caution.
+:::
+
+- Type: `PropertyCustomizer<TestCaseExtractorContext, boolean>`
+- Default: `false`
+
+Determines whether a test case should be omitted from the report.
+
+```typescript
+ignored: ({ testCase }) => testCase.fullName.includes('WIP')
+```
+
+### `historyId`
+
+- Type: `PropertyCustomizer<TestCaseExtractorContext, Primitive>`
+- Default: Based on full test name
+
+Customizes the history ID for a test case, which is used for Allure's history feature.
+
+For example, when you have non-unique test suites and the only difference is the file path, you can use the file path as the history ID:
+
+```typescript
+historyId: ({ filePath, testCase }) => `${filePath}:${testCase.fullName}`
+```
+
+So, if previously you had `file1.test.ts` and `file2.test.ts` with the same test name,
+they no longer would be reported as retries of the same test case — with a customization
+like this, they would be treated as separate test cases.
+
+### `displayName`
+
+- Type: `PropertyCustomizer<TestCaseExtractorContext, string>`
+- Default: `({ testCase }) => testCase.title`
+
+Customizes the display name of the test case in the report.
+
+```typescript
+displayName: ({ testCase, filePath }) => `[${filePath.join('/')}] ${testCase.title}`
+```
+
+This example prefixes the test title with the file path, providing more context in the report.
+
+### `fullName`
+
+- Type: `PropertyCustomizer<TestCaseExtractorContext, string>`
+- Default: `({ testCase }) => testCase.fullName`
+
+Sets the full name of the test case, which can be used for more detailed identification.
+
+```typescript
+fullName: ({ filePath, testCase }) => `${filePath.join('/')}::${testCase.fullName}`
+```
+
+This combines the file path with the full test name, ensuring uniqueness across different files.
+
+### `start`
+
+- Type: `PropertyCustomizer<TestCaseExtractorContext, number>`
+- Default: Automatically set
+
+Customizes the start timestamp of the test case. This is rarely needed, but can be useful for adjusting timestamps in specific scenarios.
+
+```typescript
+start: ({ value }) => value - 1000 // Subtract 1 second from the actual start time
+```
+
+### `stop`
+
+- Type: `PropertyCustomizer<TestCaseExtractorContext, number>`
+- Default: Automatically set
+
+Customizes the stop timestamp of the test case. Like `start`, this is rarely needed but can be useful in specific cases.
+
+```typescript
+stop: ({ value }) => value + 1000 // Add 1 second to the actual stop time
+```
+
+### `description`
+
+- Type: `PropertyCustomizer<TestCaseExtractorContext, string>`
+- Default: Automatically generated based on test code
+
+Sets a custom description for the test case in Markdown format.
+
+```typescript
+description: ({ testCaseMetadata }) => `
+## Test Case: ${testCaseMetadata.displayName}
+
+${testCaseMetadata.description || ''}
+
+\`\`\`js
+${testCaseMetadata.transformedCode}
+\`\`\`
+`
+```
+
+This example combines the display name, any existing description, and the test code into a formatted Markdown description.
+
+### `descriptionHtml`
+
+- Type: `PropertyCustomizer<TestCaseExtractorContext, string>`
+- Default: `undefined`
+
+Sets a custom description for the test case in HTML format.
+
+```typescript
+descriptionHtml: ({ testCaseMetadata }) => `
+<h2>Test Case: ${testCaseMetadata.displayName}</h2>
+${testCaseMetadata.description ? `<p>${testCaseMetadata.description}</p>` : ''}
+<pre><code class="language-javascript">
+${testCaseMetadata.transformedCode}
+</code></pre>
+`
+```
+
+This creates an HTML description with the display name, optional description, and formatted test code.
+
+### `stage`
+
+- Type: `PropertyCustomizer<TestCaseExtractorContext, Stage>`
+- Default: Automatically set based on test execution
+
+Customizes the stage of the test case. Possible values are 'scheduled', 'running', 'finished', 'pending', or 'interrupted'.
+
+```typescript
+stage: ({ value }) => value === 'running' ? 'pending' : value
+```
+
+This example changes 'running' stages to 'pending', which might be useful in specific reporting scenarios.
+
+### `status`
+
+- Type: `PropertyCustomizer<TestCaseExtractorContext, Status>`
+- Default: Automatically set based on test result
+
+Customizes the status of the test case. Possible values are 'failed', 'broken', 'passed', 'skipped', or 'unknown'.
+
+```typescript
+status: ({ value, testCase }) => {
+  if (value === 'failed' && testCase.failureMessages.some(msg => msg.includes('timeout'))) {
+    return 'broken';
+  }
+  return value;
+}
+```
+
+This example changes 'failed' status to 'broken' if the failure message includes 'timeout'.
+
+### `statusDetails`
+
+- Type: `PropertyCustomizer<TestCaseExtractorContext, MaybeNullish<StatusDetails>>`
+- Default: Automatically set based on test result
+
+Provides additional details about the test case status.
+
+```typescript
+statusDetails: ({ value }) => value ? { ...value, trace: 'Custom trace information' } : value
+```
+
+### `labels`
+
+- Type: `LabelsCustomizer<TestCaseExtractorContext>`
+- Default: `undefined`
+
+Customizes the labels associated with the test case.
+
+```typescript
+labels: {
+  severity: 'critical',
+  story: ({ testCase }) => `User Story: ${testCase.ancestorTitles[0]}`,
+  custom: ({ filePath }) => filePath.join('/'),
+}
+```
+
+### `links`
+
+- Type: `LinksCustomizer<TestCaseExtractorContext>`
+- Default: `undefined`
+
+Customizes the links associated with the test case.
+
+```typescript
+links: {
+  issue: ({ value }) => ({
+    name: value.name ?? `Issue ${value.url}`,
+    url: `https://jira.company.com/${value.url}`,
+  }),
+  tms: 'https://tms.company.com/test/{{name}}'
+}
+```
+
+### `attachments`
+
+- Type: `AttachmentsCustomizer<TestCaseExtractorContext>`
+- Default: `undefined`
+
+Customizes the attachments for the test case.
+
+```typescript
+attachments: ({ value }) => [
+  ...value,
+  {
+    name: 'Additional Info',
+    content: 'Extra information about the test case',
+    type: 'text/plain'
+  }
+]
+```
+
+### `parameters`
+
+- Type: `ParametersCustomizer<TestCaseExtractorContext>`
+- Default: `undefined`
+
+Customizes the parameters for the test case.
+
+```typescript
+parameters: {
+  browser: 'Chrome',
+  version: ({ package }) => package.version,
+  custom: ({ testCase }) => ({
+    name: 'Test Depth',
+    value: testCase.ancestorTitles.length,
+  })
+}
+```
+
+## Usage Example
+
+Here's a comprehensive example of how to use the test case configuration:
+
+```typescript
+import type { ReporterOptions } from 'jest-allure2-reporter';
+
+const testCaseConfig: ReporterOptions['testCase'] = {
+  uuid: ({ result ) => result.historyId,
+  historyId: ({ package, filePath, testCase }) => `${package.name}:${filePath}:${testCase.fullName}`,
+  displayName: ({ testCase }) => `[${testCase.ancestorTitles.join(' > ')}] ${testCase.title}`,
+  fullName: ({ filePath, testCase }) => `${filePath.join('/')}::${testCase.fullName}`,
+  description: ({ result }) => `
+    ## Test Case: ${result.displayName}
+    ${testCaseMetadata.description}
+    \`\`\`js
+    ${testCaseMetadata.transformedCode}
+    \`\`\`
+  `,
+  status: ({ value }) => value === 'broken' ? 'failed' : value,
+  labels: {
+    severity: 'critical',
+    story: ({ testCase }) => testCase.ancestorTitles[0],
+    custom: ({ filePath }) => filePath.join('/'),
+  },
+  links: {
+    issue: ({ value }) => ({
+      name: value.name ?? `Issue ${value.url}`,
+      url: `https://jira.company.com/${value.url}`,
+    }),
+    tms: 'https://tms.company.com/test/{{name}}'
+  },
+  parameters: {
+    browser: 'Chrome',
+    'Test Depth': ({ testCase }) => ({
+      value: testCase.ancestorTitles.length,
+    })
+  }
+};
+
+module.exports = {
+  // ... other Jest configurations
+  reporters: [
+    'default',
+    ['jest-allure2-reporter', { testCase: testCaseConfig }]
+  ],
+};
+```
+
+This configuration provides a rich set of customizations for test case reporting, allowing you to tailor the Allure report to your specific needs. The next article will dive into similar configurations for individual test steps, providing even more granular control over your test reporting.

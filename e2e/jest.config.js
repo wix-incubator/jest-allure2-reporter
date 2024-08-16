@@ -6,14 +6,19 @@ const uuid = require('uuid');
 /** @type {import('jest-allure2-reporter').ReporterOptions} */
 const jestAllure2ReporterOptions = {
   extends: [
-    './presets/code-snippets',
-    './presets/remark',
+    require.resolve('./presets/code-snippets'),
+    require.resolve('./presets/remark'),
   ],
   categories: [
     {
       name: 'Snapshot mismatches',
       matchedStatuses: ['failed'],
       messageRegex: /.*\btoMatch(?:[A-Za-z]+)?Snapshot\b.*/,
+    },
+    {
+      name: 'Visual regressions',
+      matchedStatuses: ['failed'],
+      messageRegex: /.*\bscreenshot.*/,
     },
     {
       name: 'Timeouts',

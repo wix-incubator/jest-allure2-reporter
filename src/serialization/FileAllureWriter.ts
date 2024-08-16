@@ -11,7 +11,8 @@ async function writeJson(
   data: unknown,
   stringifier?: (key: string, value: unknown) => unknown,
 ) {
-  await fs.writeFile(path, JSON.stringify(data, stringifier) + '\n');
+  const json = JSON.stringify(data, stringifier);
+  await fs.writeFile(path, json + '\n');
 }
 
 function regexpAwareStringifier(_key: string, value: unknown) {
