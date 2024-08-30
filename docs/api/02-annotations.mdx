@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # Annotations
 
-Annotations are functions that can be called before test suites or tests to add metadata to them. They share the same purpose as [docblocks](./01-docblocks.mdx), but they execute at runtime, allowing you to add metadata dynamically. Annotations can also be used to bypass the limitation of docblocks not being applicable to `describe` statements.
+Annotations are functions that can be called before test suites or tests to add metadata to them. They share the same purpose as [docblocks][1], but they execute at runtime, allowing you to add metadata dynamically. Annotations can also be used to bypass the limitation of docblocks not being applicable to `describe` statements.
 
 To use annotations, you'll need to import them first, e.g.:
 
@@ -12,7 +12,7 @@ To use annotations, you'll need to import them first, e.g.:
 import { $Description, $Link, $Owner } from 'jest-allure2-reporter/api';
 ```
 
-Alternatively, you can [configure `jest-allure2-reporter/globals`](#TODO) to make them available globally.
+Alternatively, you can [configure `jest-allure2-reporter/globals`][2] to make them available globally.
 
 ## `$Description`
 
@@ -117,7 +117,7 @@ describe('Test suite', () => {
 
 Links a test to an issue in your issue tracking system.
 
-URLs are built using [the template strings](#TODO) configured in the reporter options.
+URLs are built using [the template strings][3] configured in the reporter options.
 
 ```javascript
 describe('Regression tests', () => {
@@ -176,7 +176,7 @@ The `$Link` annotation also accepts a `Link` object as an argument:
 $Link({ name: '🔢 Arithmetic', type: 'wiki', url: 'https://en.wikipedia.org/wiki/Arithmetic' });
 ```
 
-Advanced users may pass empty strings to `url` if they want to [build the URL dynamically](#TODO) via a config function:
+Advanced users may pass empty strings to `url` if they want to [build the URL dynamically][4] via a config function:
 
 ```javascript
 $Link({ name: 'Arithmetic', type: 'wiki', url: '' });
@@ -248,7 +248,7 @@ $Parameter({
 
 ## `$Severity`
 
-Sets the [severity level](#TODO) of a test or suite.
+Sets the [severity level][5] of a test or suite.
 
 ```javascript
 $Severity('critical');
@@ -270,7 +270,7 @@ describe('Test suite', () => {
 
 ## `$Tag`
 
-Adds one or more [tags](#TODO) to a test or suite.
+Adds one or more [tags][6] to a test or suite.
 
 ```javascript
 $Tag('dsl', 'arithmetic');
@@ -290,7 +290,7 @@ describe('Test suite', () => {
 ## `$Thread`
 
 Specifies a custom thread for concurrent tests.
-Do not use it unless you want to control tests on the [Timeline](#TODO) manually.
+Do not use it unless you want to control tests on the [Timeline][7] manually.
 
 ```javascript
 describe('Test suite', () => {
@@ -310,7 +310,7 @@ describe('Test suite', () => {
 
 Links a test to a Test Management System (TMS) entry.
 
-URLs are built using [the template strings](#TODO) configured in the reporter options.
+URLs are built using [the template strings][3] configured in the reporter options.
 
 ```javascript
 $TmsLink('TMS-1234')
@@ -352,3 +352,11 @@ test('Test outside of any suite', () => {
   // Custom Parent Suite > Custom Suite > Custom Sub-Suite
 });
 ```
+
+[1]: 01-docblocks.mdx
+[2]: index.mdx#global-typings
+[3]: TODO
+[4]: TODO
+[5]: TODO
+[6]: TODO
+[7]: TODO

@@ -1,0 +1,249 @@
+# Test Step
+
+In `jest-allure2-reporter`, the `testStep` configuration object allows you to customize how individual test steps are reported in Allure. This configuration provides fine-grained control over various aspects of test step reporting, including naming, status, attachments, and parameters.
+
+It's important to note that in Allure reporting, test steps include not only custom steps within your tests but also Jest's lifecycle hooks: `beforeAll`, `beforeEach`, `afterEach`, and `afterAll`. These hooks are treated as steps in the test execution and can be configured using the same options as other steps.
+
+## Configuration Options
+
+The `testStep` configuration object supports the following properties:
+
+```javascript
+/** @type {import('jest-allure2-reporter').ReporterOptions} */
+const jestAllure2ReporterOptions = {
+  testStep: {
+    ignored: /* ... */,
+    displayName: /* ... */,
+    start: /* ... */,
+    stop: /* ... */,
+    stage: /* ... */,
+    status: /* ... */,
+    statusDetails: /* ... */,
+    attachments: /* ... */,
+    parameters: /* ... */,
+  }
+};
+```
+
+These configuration options apply to all types of steps, including custom steps in your tests and Jest's lifecycle hooks (`beforeAll`, `beforeEach`, `afterEach`, and `afterAll`).
+
+### `ignored`
+
+- Type: `PropertyCustomizer<TestStepExtractorContext, boolean>`
+- Default: `false`
+
+Determines whether a test step should be omitted from the report. This can be useful for filtering out certain hooks or custom steps that you don't want to appear in the report.
+
+```typescript
+ignored: ({ testStepMetadata }) =>
+  testStepMetadata.hookType === 'beforeAll' ||
+  testStepMetadata.displayName?.includes('(internal)')
+```
+
+This example ignores `beforeAll` hooks and steps that have "(internal)" in their display name.
+
+### `displayName`
+
+- Type: `PropertyCustomizer<TestStepExtractorContext, string>`
+- Default: `({ testStepMetadata }) => testStepMetadata.displayName || 'Unnamed step'`
+
+Customizes the display name of the test step in the report.
+
+```typescript
+displayName: ({ testStepMetadata }) => {
+  if (testStepMetadata.hookType) {
+    return `${testStepMetadata.hookType} hook: ${testStepMetadata.displayName}`;
+  }
+  return testStepMetadata.displayName || 'Custom step';
+}
+```
+
+This example prefixes hook steps with their type and provides a default name for custom steps.
+
+### `start`
+
+- Type: `PropertyCustomizer<TestStepExtractorContext, number>`
+- Default: Automatically set
+
+Customizes the start timestamp of the test step.
+
+```typescript
+start: ({ value }) => value - 100 // Subtract 100ms from the actual start time
+```
+
+### `stop`
+
+- Type: `PropertyCustomizer<TestStepExtractorContext, number>`
+- Default: Automatically set
+
+Customizes the stop timestamp of the test step.
+
+```typescript
+stop: ({ value }) => value + 100 // Add 100ms to the actual stop time
+```
+
+### `stage`
+
+- Type: `PropertyCustomizer<TestStepExtractorContext, Stage>`
+- Default: Automatically set based on step execution
+
+Customizes the stage of the test step. Possible values are 'scheduled', 'running', 'finished', 'pending', or 'interrupted'.
+
+```typescript
+stage: ({ value, testStepMetadata }) => {
+  if (testStepMetadata.hookType === 'beforeAll' && value === 'running') {
+    return 'scheduled';
+  }
+  return value;
+}
+```
+
+This example changes the stage of running 'beforeAll' hooks to 'scheduled'.
+
+### `status`
+
+- Type: `PropertyCustomizer<TestStepExtractorContext, Status>`
+- Default: Automatically set based on step result
+
+Customizes the status of the test step. Possible values are 'failed', 'broken', 'passed', 'skipped', or 'unknown'.
+
+```typescript
+status: ({ value, testStepMetadata }) => {
+  if (value === 'failed' && testStepMetadata.hookType) {
+    return 'broken';
+  }
+  return value;
+}
+```
+
+This example changes the status of failed hooks to 'broken'.
+
+### `statusDetails`
+
+- Type: `PropertyCustomizer<TestStepExtractorContext, MaybeNullish<StatusDetails>>`
+- Default: Automatically set based on step result
+
+Provides additional details about the test step status.
+
+```typescript
+statusDetails: ({ value, testStepMetadata }) => {
+  if (value && testStepMetadata.hookType) {
+    return {
+      ...value,
+      message: `Hook failure: ${value.message}`,
+    };
+  }
+  return value;
+}
+```
+
+This example prefixes the status message for hooks with "Hook failure:".
+
+### `attachments`
+
+- Type: `AttachmentsCustomizer<TestStepExtractorContext>`
+- Default: `undefined`
+
+Customizes the attachments for the test step.
+
+```typescript
+attachments: ({ value, testStepMetadata }) => {
+  if (testStepMetadata.hookType === 'afterEach') {
+    return [
+      ...value,
+      {
+        name: 'Step Summary',
+        content: JSON.stringify(testStepMetadata, null, 2),
+        type: 'application/json'
+      }
+    ];
+  }
+  return value;
+}
+```
+
+This example adds a JSON attachment with step metadata for 'afterEach' hooks.
+
+### `parameters`
+
+- Type: `ParametersCustomizer<TestStepExtractorContext>`
+- Default: `undefined`
+
+Customizes the parameters for the test step.
+
+```typescript
+parameters: {
+  stepType: ({ testStepMetadata }) => testStepMetadata.hookType || 'custom',
+  duration: ({ testStepMetadata }) => ({
+    name: 'Duration',
+    value: testStepMetadata.stop - testStepMetadata.start,
+    excluded: false,
+  }),
+}
+```
+
+This example adds a 'stepType' parameter and calculates the duration of the step.
+
+## Usage Example
+
+Here's a comprehensive example of how to use the test step configuration:
+
+```typescript
+import type { ReporterOptions } from 'jest-allure2-reporter';
+
+const testStepConfig: ReporterOptions['testStep'] = {
+  ignored: ({ testStepMetadata }) => testStepMetadata.displayName?.includes('(internal)'),
+  displayName: ({ testStepMetadata }) => {
+    if (testStepMetadata.hookType) {
+      return `${testStepMetadata.hookType} hook: ${testStepMetadata.displayName}`;
+    }
+    return testStepMetadata.displayName || 'Custom step';
+  },
+  status: ({ value, testStepMetadata }) => {
+    if (value === 'failed' && testStepMetadata.hookType) {
+      return 'broken';
+    }
+    return value;
+  },
+  statusDetails: ({ value, testStepMetadata }) => {
+    if (value && testStepMetadata.hookType) {
+      return {
+        ...value,
+        message: `Hook failure: ${value.message}`,
+      };
+    }
+    return value;
+  },
+  attachments: ({ value, testStepMetadata }) => {
+    if (testStepMetadata.hookType === 'afterEach') {
+      return [
+        ...value,
+        {
+          name: 'Step Summary',
+          content: JSON.stringify(testStepMetadata, null, 2),
+          type: 'application/json'
+        }
+      ];
+    }
+    return value;
+  },
+  parameters: {
+    stepType: ({ testStepMetadata }) => testStepMetadata.hookType || 'custom',
+    duration: ({ testStepMetadata }) => ({
+      name: 'Duration',
+      value: testStepMetadata.stop - testStepMetadata.start,
+      excluded: false,
+    }),
+  }
+};
+
+module.exports = {
+  // ... other Jest configurations
+  reporters: [
+    'default',
+    ['jest-allure2-reporter', { testStep: testStepConfig }]
+  ],
+};
+```
+
+This configuration provides a rich set of customizations for test step reporting, allowing you to tailor the Allure report to your specific needs. It demonstrates how to handle different types of steps, add custom attachments and parameters, and modify the status and display of steps based on their context.

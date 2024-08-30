@@ -82,8 +82,20 @@ allure.attachment('{"key": "value"}', {
 });
 ```
 
-This plugin adds a new content attachment handler for 'json' type.
+The example above adds a new content attachment handler for 'json' type.
 It prettifies JSON content before saving it as an attachment.
+
+If you have a handler for one time use, you can pass it as a function to `handler` option:
+
+```javascript
+allure.fileAttachment('my-file.txt', {
+  type: 'application/json',
+  handler: async (context) => {
+    /* your handler code */
+    return fileName;
+  },
+});
+```
 
 ### Custom MIME Type Inference
 

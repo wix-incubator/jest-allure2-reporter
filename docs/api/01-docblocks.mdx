@@ -12,11 +12,12 @@ you can put it on the first line of the file.
 
 :::
 
-Docblocks are a powerful way to add metadata to your tests using JSDoc-style comments. These annotations are parsed by `jest-allure2-reporter` to enhance your test reports with additional information.
+Docblocks (JSDoc-style comments )are the least intrusive way to add metadata to your tests.
+These annotations get parsed by `jest-allure2-reporter` and used as a source of information for your test reports.
 
 ## Plain comments
 
-Plain comments act as [`@description`](#description--desc) annotations, when applied to a test case.
+Plain comments act as [`@description`][1] annotations, when applied to a test case.
 
 ```javascript
 /**
@@ -27,7 +28,7 @@ test('should add two numbers', () => {
 });
 ```
 
-For hooks, they act as [`@displayName`](#displayname) annotations.
+For hooks, they act as [`@displayName`][2] annotations.
 
 ```javascript
 /**
@@ -36,7 +37,7 @@ For hooks, they act as [`@displayName`](#displayname) annotations.
 beforeEach(async () => {
   await page.goto('https://example.com');
 });
-````
+```
 
 ## `@description` / `@desc`
 
@@ -79,7 +80,7 @@ test('First test', () => {
 });
 ```
 
-When applied to a hook, it sets a custom display name for the hook, similar to a [plain comment](#plain-comments):
+When applied to a hook, it sets a custom display name for the hook, similar to a [plain comment][3]:
 
 ```javascript
 /**
@@ -214,7 +215,7 @@ describe('Test suite', () => {
 ## `@thread`
 
 Specifies a custom thread for concurrent tests.
-Do not use it unless you want to control tests on the [Timeline](#TODO) manually.
+Do not use it unless you want to control tests on the [Timeline][4] manually.
 
 ```javascript
 /**
@@ -272,3 +273,8 @@ test('Test outside of any suite', () => {
 ```
 
 These docblock annotations provide a powerful way to enrich your tests with metadata, improving the organization and readability of your Allure reports. By using these annotations, you can create more informative and structured test reports that help in better understanding and maintaining your test suite.
+
+[1]: #description--desc
+[2]: #displayname
+[3]: #plain-comments
+[4]: #TODO

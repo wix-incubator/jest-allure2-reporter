@@ -12,9 +12,7 @@ To use decorators, you'll need to import them first, e.g.:
 import { Step, Attachment, FileAttachment } from 'jest-allure2-reporter/api';
 ```
 
-Alternatively, you can [configure `jest-allure2-reporter/globals`](#TODO) to make them available globally.
-
-Understood. I'll focus on providing a more thorough and accurate reference for the `Attachment` and `FileAttachment` decorators based on the type definitions you've provided. Here are the revised sections:
+Alternatively, you can [configure `jest-allure2-reporter/globals`][1] to make them available globally.
 
 ## `Attachment`
 
@@ -32,7 +30,7 @@ The `Attachment` decorator is used to add content attachments to test cases or s
 1. `options`: An object of type `ContentAttachmentOptions`
    - `name`: (Required) A string representing the name of the attachment
    - `mimeType`: (Optional) A string specifying the MIME type of the attachment
-   - `handler`: (Optional) A custom [attachment handler function](TODO) or its string alias
+   - `handler`: (Optional) A custom [attachment handler function][2] or its string alias
 
 2. `name`: A string representing the name of the attachment
 3. `mimeType`: (Optional) A string specifying the MIME type of the attachment
@@ -102,7 +100,7 @@ The `FileAttachment` decorator is used to add file attachments to test cases or 
 1. `options`: An object of type `FileAttachmentOptions`
    - `name`: (Optional) A string representing the name of the attachment
    - `mimeType`: (Optional) A string specifying the MIME type of the attachment
-   - `handler`: (Optional) A custom [attachment handler function](TODO) or its string alias
+   - `handler`: (Optional) A custom [attachment handler function][2] or its string alias
 
 2. `name`: (Optional) A string representing the name of the attachment
 3. `mimeType`: (Optional) A string specifying the MIME type of the attachment
@@ -264,3 +262,6 @@ test('complex operation', () => {
 ```
 
 This will create a hierarchical structure of steps in the Allure report, showing the main operation and its substeps.
+
+[1]: index.mdx#global-typings
+[2]: 05-plugin-api.mdx#custom-attachment-handler

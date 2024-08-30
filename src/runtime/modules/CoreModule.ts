@@ -63,7 +63,7 @@ export class CoreModule {
     this.context.metadata.$bind(null).set('historyId', value);
   }
 
-  label(name: LabelName | string, value: string) {
+  label(name: LabelName, value: string) {
     this.context.metadata.$bind(null).push('labels', [{ name, value }]);
   }
 
