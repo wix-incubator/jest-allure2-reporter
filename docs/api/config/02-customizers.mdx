@@ -115,9 +115,9 @@ module.exports = {
     'default',
     ['jest-allure2-reporter', {
       testCase: {
-        name: ({ testCase, file, $ }) => {
+        fullName: ({ testCase, filePath, $ }) => {
           // Use testCase, file, and helpers here
-          return $.customHelper(`${file.path}:${testCase.fullName}`);
+          return $.customHelper(`${filePath.join('/')}:${testCase.fullName}`);
         }
       }
     }]

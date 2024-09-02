@@ -79,7 +79,7 @@ This is needed only in _very rare cases_ where you need predictable JSON paths i
 /** @type {import('jest-allure2-reporter').ReporterOptions} */
 const config = {
   testCase: {
-    uuid: ({ package, file, test }) => `${package.name}:${file.path}:${test.fullName}`
+    uuid: async ({ $, filePath, testCase }) => `${await package.name}:${filePath}:${testCase.fullName}`
   }
 };
 ```
@@ -100,7 +100,7 @@ Ignoring test cases may lead to incomplete test reports, so use this option with
 Determines whether a test case should be omitted from the report.
 
 ```typescript
-ignored: ({ test }) => test.fullName.includes('WIP')
+ignored: ({ testCase }) => testCase.fullName.includes('WIP')
 ```
 
 ### `historyId`
@@ -260,8 +260,8 @@ Customizes the labels associated with the test case.
 ```typescript
 labels: {
   severity: 'critical',
-  story: ({ test }) => `User Story: ${test.ancestorTitles[0]}`,
-  custom: ({ file }) => `file:${file.path}`
+  story: ({ testCase }) => `User Story: ${testCase.ancestorTitles[0]}`,
+  custom: ({ filePath }) => filePath.join('/'),
 }
 ```
 
@@ -311,10 +311,9 @@ Customizes the parameters for the test case.
 parameters: {
   browser: 'Chrome',
   version: ({ package }) => package.version,
-  custom: ({ test }) => ({
+  custom: ({ testCase }) => ({
     name: 'Test Depth',
-    value: test.ancestorTitles.length,
-    excluded: true
+    value: testCase.ancestorTitles.length,
   })
 }
 ```
@@ -327,12 +326,12 @@ Here's a comprehensive example of how to use the test case configuration:
 import type { ReporterOptions } from 'jest-allure2-reporter';
 
 const testCaseConfig: ReporterOptions['testCase'] = {
-  uuid: ({ package, file, test }) => `${package.name}:${file.path}:${test.fullName}`,
-  historyId: ({ test }) => `${test.identifier}:${test.title}`,
-  displayName: ({ test }) => `[${test.identifier}] ${test.title}`,
-  fullName: ({ file, test }) => `${file.path}::${test.fullName}`,
-  description: ({ testCaseMetadata }) => `
-    ## Test Case: ${testCaseMetadata.displayName}
+  uuid: ({ result ) => result.historyId,
+  historyId: ({ package, filePath, testCase }) => `${package.name}:${filePath}:${testCase.fullName}`,
+  displayName: ({ testCase }) => `[${testCase.ancestorTitles.join(' > ')}] ${testCase.title}`,
+  fullName: ({ filePath, testCase }) => `${filePath.join('/')}::${testCase.fullName}`,
+  description: ({ result }) => `
+    ## Test Case: ${result.displayName}
     ${testCaseMetadata.description}
     \`\`\`js
     ${testCaseMetadata.transformedCode}
@@ -341,8 +340,8 @@ const testCaseConfig: ReporterOptions['testCase'] = {
   status: ({ value }) => value === 'broken' ? 'failed' : value,
   labels: {
     severity: 'critical',
-    story: ({ test }) => `User Story: ${test.ancestorTitles[0]}`,
-    custom: ({ file }) => `file:${file.path}`
+    story: ({ testCase }) => testCase.ancestorTitles[0],
+    custom: ({ filePath }) => filePath.join('/'),
   },
   links: {
     issue: ({ value }) => ({
@@ -353,11 +352,8 @@ const testCaseConfig: ReporterOptions['testCase'] = {
   },
   parameters: {
     browser: 'Chrome',
-    version: ({ package }) => package.version,
-    custom: ({ test }) => ({
-      name: 'Test Depth',
-      value: test.ancestorTitles.length,
-      excluded: true
+    'Test Depth': ({ testCase }) => ({
+      value: testCase.ancestorTitles.length,
     })
   }
 };

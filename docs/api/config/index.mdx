@@ -132,9 +132,9 @@ categories: ({ $ }) => [
 Configures the environment information that will be reported.
 
 ```javascript
-environment: async ({ manifest }) => ({
+environment: async ({ $ }) => ({
   'Node.js Version': process.version,
-  'Package Version': await manifest(m => m.version)
+  'Package Version': await $.manifest(['name'], 'N/A'),
 })
 ```
 
@@ -200,8 +200,8 @@ Customizes how test cases are reported.
 
 ```javascript
 testCase: {
-  name: ({ test }) => test.title,
-  fullName: ({ test }) => test.fullName,
+  name: ({ testCase }) => testCase.title,
+  fullName: ({ testCase }) => testCase.fullName,
   labels: {
     severity: 'normal',
     tag: ['unit', 'integration']
