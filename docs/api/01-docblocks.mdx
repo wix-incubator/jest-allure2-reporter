@@ -12,7 +12,7 @@ you can put it on the first line of the file.
 
 :::
 
-Docblocks (JSDoc-style comments )are the least intrusive way to add metadata to your tests.
+Docblocks (JSDoc-style comments) are the least intrusive way to add metadata to your tests.
 These annotations get parsed by `jest-allure2-reporter` and used as a source of information for your test reports.
 
 ## Plain comments
@@ -122,6 +122,8 @@ test('First test', () => {
 
 Links an issue to a test case.
 
+For an individual test:
+
 ```javascript
 /**
  * @issue XMLRPC-15
@@ -131,66 +133,110 @@ test('Proving the fix', () => {
 });
 ```
 
+For all tests in the file, put the docblock at the very top:
+
+```javascript
+/**
+ * @issue XMLRPC-15
+ */
+
+// Rest of your test file...
+```
+
 ## `@owner`
 
 Specifies the owner of a test or suite.
+
+For an individual test:
 
 ```javascript
 /**
  * @owner John Doe
  */
-describe('Suite maintained by John', () => {
-  test('First test', () => {
-    // Test implementation
-  });
+test('Test maintained by John', () => {
+  // Test implementation
 });
+```
+
+For all tests in the file:
+
+```javascript
+/**
+ * @owner John Doe
+ */
+
+// Rest of your test file...
 ```
 
 ## `@package`
 
 Specifies the package for a test or suite, useful for organizing tests.
 
+For an individual test:
+
 ```javascript
 /**
  * @package e2e.pragmas
  */
-describe('My service', () => {
-  /**
-   * @testMethod Alternative title for the test
-   */
-  test('should log a message', () => {
-    // Test implementation
-  });
+test('should log a message', () => {
+  // Test implementation
 });
+```
+
+For all tests in the file:
+
+```javascript
+/**
+ * @package e2e.my-tests
+ */
+
+// Rest of your test file...
 ```
 
 ## `@severity`
 
 Sets the severity level for a test or suite.
 
+For an individual test:
+
 ```javascript
 /**
  * @severity critical
  */
-describe('Test suite', () => {
-  test('Important test 1', () => {
-    expect(1 + 1).toBe(2);
-  });
+test('Important test', () => {
+  expect(1 + 1).toBe(2);
 });
+```
+
+For all tests in the file:
+
+```javascript
+/**
+ * @severity critical
+ */
+
+// Rest of your test file...
 ```
 
 ## `@epic`, `@feature`, `@story`
 
 Categorizes tests into epics and features for better organization.
 
+Example:
+
 ```javascript
 /**
  * @epic Arithmetic operations
  * @feature Addition
+ */
+
+// Rest of your test file...
+
+/**
  * @story Sane assumptions
  */
-describe('Test suite', () => {
-  // Test cases
+test('1 + 1 should equal 2', () => {
+  expect(1 + 1).toBe(2);
 });
 ```
 
@@ -198,18 +244,25 @@ describe('Test suite', () => {
 
 Adds tags to a test or suite.
 
+For an individual test:
+
 ```javascript
 /**
- * @tag docblock, arithmetic
+ * @tag arithmetic, addition
  */
-describe('Test suite', () => {
-  /**
-   * @tag addition
-   */
-  test('First test', () => {
-    expect(1 + 1).toBe(2);
-  });
+test('First test', () => {
+  expect(1 + 1).toBe(2);
 });
+```
+
+For all tests in the file:
+
+```javascript
+/**
+ * @tag arithmetic
+ */
+
+// Rest of your test file...
 ```
 
 ## `@thread`
@@ -217,18 +270,32 @@ describe('Test suite', () => {
 Specifies a custom thread for concurrent tests.
 Do not use it unless you want to control tests on the [Timeline][4] manually.
 
+For an individual test:
+
 ```javascript
 /**
  * @thread IV
  */
-test('First test', () => {
+test('Concurrent test', () => {
   expect(1 + 1).toBe(2);
 });
+```
+
+For all tests in the file:
+
+```javascript
+/**
+ * @thread IV
+ */
+
+// Rest of your test file...
 ```
 
 ## `@tms`
 
 Links a test management system (TMS) case to a test.
+
+For an individual test:
 
 ```javascript
 /**
@@ -239,35 +306,59 @@ test('should be linked to a TMS ticket', () => {
 });
 ```
 
+For all tests in the file:
+
+```javascript
+/**
+ * @tms TMS-1234
+ */
+
+// Rest of your test file...
+```
+
 ## `@url`
 
 Adds a custom URL link to a test or suite.
+
+For an individual test:
+
+```javascript
+/**
+ * @url https://en.wikipedia.org/wiki/Addition ➕ Addition
+ */
+test('1 + 1 = 2', () => {
+  expect(1 + 1).toBe(2);
+});
+```
+
+For all tests in the file:
 
 ```javascript
 /**
  * @url https://en.wikipedia.org/wiki/Arithmetic 🔢 Arithmetic
  */
-describe('Arithmetics', () => {
-  /**
-   * @url https://en.wikipedia.org/wiki/Addition ➕ Addition
-   */
-  test('1 + 1 = 2', () => {
-    expect(1 + 1).toBe(2);
-  });
-});
+
+// Rest of your test file...
 ```
 
 ## `@parentSuite`, `@suite`, `@subSuite`
 
 Organizes tests into a hierarchical suite structure.
 
+Example:
+
 ```javascript
 /**
  * @parentSuite Custom Parent Suite
+ */
+
+// ...
+
+/**
  * @suite Custom Suite
  * @subSuite Custom Sub-Suite
  */
-test('Test outside of any suite', () => {
+test('Test with custom suite hierarchy', () => {
   // Test implementation
 });
 ```
