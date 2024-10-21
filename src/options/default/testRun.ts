@@ -23,7 +23,8 @@ export const testRun: TestCaseCustomizer<TestRunExtractorContext> = {
   parameters: compose2(
     custom.parameters<TestRunExtractorContext>({
       'a) Suites passed': ({ aggregatedResult }) => aggregatedResult.numPassedTestSuites,
-      'b) Suites failed': ({ aggregatedResult }) => aggregatedResult.numFailedTestSuites,
+      'b) Suites failed': ({ aggregatedResult }) =>
+        aggregatedResult.numFailedTestSuites - aggregatedResult.numRuntimeErrorTestSuites,
       'c) Suites broken': ({ aggregatedResult }) => aggregatedResult.numRuntimeErrorTestSuites,
       'd) Suites pending': ({ aggregatedResult }) => aggregatedResult.numPendingTestSuites,
     }),
