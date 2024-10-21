@@ -30,10 +30,10 @@ function HomepageHeader() {
           </div>
           <div className={clsx('col col--4', styles.heroRight)}>
             <p className={styles.heroText}>
+              <code>jest-allure2-reporter</code>{' '}
               <Translate id="homepage.heroText" description="What the project does">
-                Jest Allure 2 Reporter is an extension for Jest that
-                generates test reports in the Allure Report format,
-                a flexible and feature-rich reporting tool.
+                extends Jest testing framework to provide you with test reports
+                viewable with Allure, a flexible and feature-rich reporting tool.
               </Translate>
             </p>
             <div className={styles.buttons}>

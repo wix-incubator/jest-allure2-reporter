@@ -1,0 +1,152 @@
+# Presets
+
+## Overview
+
+The `jest-allure2-reporter` offers a powerful configuration system that allows you to customize various aspects of your Allure reports. One of the key features of this system is the ability to use presets and extend configurations, which promotes reusability and helps maintain a clean, organized configuration across different projects or test suites.
+
+## Extends
+
+The `extends` option in `jest-allure2-reporter` configuration allows you to inherit and merge configurations from other preset files or objects. This feature is particularly useful for:
+
+1. Sharing common configurations across multiple projects
+2. Creating base configurations that can be extended and customized for specific use cases
+3. Organizing complex configurations into smaller, more manageable pieces
+
+The `extends` option can accept a string (path to a preset file), an object (inline preset), or an array of strings and objects.
+
+## Usage
+
+### Basic Usage
+
+To use the `extends` feature, add it to your `jest-allure2-reporter` configuration:
+
+```javascript
+module.exports = {
+  // ... other Jest config
+  reporters: [
+    'default',
+    ['jest-allure2-reporter', {
+      extends: './my-preset.js',
+      // Additional configurations...
+    }]
+  ]
+};
+```
+
+Accordingly, in `my-preset.js`, you can define your configurations:
+
+```javascript
+module.exports = {
+  testCase: {
+    labels: {
+      owner: 'Team A',
+    },
+  },
+};
+```
+
+### Multiple Presets
+
+You can extend multiple presets by using an array:
+
+```javascript
+module.exports = {
+  // ... other Jest config
+  reporters: [
+    'default',
+    ['jest-allure2-reporter', {
+      extends: [
+        './base-preset.js',
+        './custom-labels-preset.js',
+        './attachment-handling-preset.js'
+      ],
+      // Additional configurations...
+    }]
+  ]
+};
+```
+
+When using `extends` multiple times, or when using `extends` array,
+configurations are merged recursively.
+
+In case of conflicts, later presets in the array override earlier ones.
+The [customizer functions](./02-customizers.mdx), however, may use `({ value })` from the context to access the computed value from the previous preset.
+
+### Inline Presets
+
+You can also use inline objects as presets:
+
+```javascript
+module.exports = {
+  // ... other Jest config
+  reporters: [
+    'default',
+    ['jest-allure2-reporter', {
+      extends: [
+        {
+          testCase: {
+            labels: {
+              severity: 'high',
+            },
+          },
+        }
+      ],
+      // Additional configurations...
+    }]
+  ]
+};
+```
+
+## Preset Structure
+
+A preset is typically a JavaScript file that exports `jest-allure2-reporter` options.
+
+```javascript title="my-preset.js"
+module.exports = {
+  testCase: {
+    links: {
+      issue: 'https://jira.example.com/browse/{{name}}',
+      tms: 'https://tms.example.com/case/{{name}}'
+    },
+  },
+  // Other configuration options...
+};
+```
+
+## Example
+
+Here's an example of a comprehensive setup using presets:
+
+```javascript title="node_modules/@my-org/my-project-allure-preset/index.js"
+module.exports = {
+  testCase: {
+    labels: {
+      owner: 'John Doe',
+    },
+    links: {
+      issue: 'https://github.com/my-org/my-project/issues/{{name}}',
+    },
+  },
+};
+```
+
+```javascript title="jest.config.js"
+const some_other_preset = require('./some-other-preset');
+
+module.exports = {
+  // ... other Jest config
+  reporters: [
+    'default',
+    ['jest-allure2-reporter', {
+      extends: [
+        '@my-org/my-project-allure-preset',
+        some_other_preset,
+      ],
+    }]
+  ]
+};
+```
+
+In this setup, the final configuration will merge the base preset and an inline preset, allowing for a clean and organized configuration.
+
+By effectively using the `extends` feature and presets, you can create a scalable and organized configuration system for `jest-allure2-reporter`, making it easier to manage reporting settings across different projects or test suites.

@@ -1,0 +1,267 @@
+---
+sidebar_position: 4
+---
+
+# Decorators
+
+Decorators in `jest-allure2-reporter` provide a powerful way to add metadata and behavior to your test methods, particularly when working with class-based test structures. They offer a clean, declarative syntax for enhancing your tests with Allure-specific features.
+
+To use decorators, you'll need to import them first, e.g.:
+
+```typescript
+import { Step, Attachment, FileAttachment } from 'jest-allure2-reporter/api';
+```
+
+Alternatively, you can [configure `jest-allure2-reporter/globals`][1] to make them available globally.
+
+## `Attachment`
+
+The `Attachment` decorator is used to add content attachments to test cases or steps in your Allure report.
+
+### Syntax
+
+```typescript
+@Attachment(options: ContentAttachmentOptions)
+@Attachment(name: string, mimeType?: string)
+```
+
+### Parameters
+
+1. `options`: An object of type `ContentAttachmentOptions`
+   - `name`: (Required) A string representing the name of the attachment
+   - `mimeType`: (Optional) A string specifying the MIME type of the attachment
+   - `handler`: (Optional) A custom [attachment handler function][2] or its string alias
+
+2. `name`: A string representing the name of the attachment
+3. `mimeType`: (Optional) A string specifying the MIME type of the attachment
+
+### Usage
+
+You can use the `Attachment` decorator in two ways:
+
+1. With an options object:
+
+```typescript
+class TestClass {
+  @Attachment({
+    name: 'Attachment {{0}}',
+    mimeType: 'text/plain',
+    handler: 'gzip'
+  })
+  createAttachment(id: string): string {
+    return `Content for attachment ${id}`;
+  }
+}
+```
+
+2. With name and optional MIME type:
+
+```typescript
+class TestClass {
+  @Attachment('Attachment {{0}}', 'text/plain')
+  createAttachment(id: string): string {
+    return `Content for attachment ${id}`;
+  }
+}
+```
+
+The decorated method should return the content to be attached. The content can be a string or a Buffer.
+
+### Examples
+
+```typescript
+class HtmlGenerator {
+  @Attachment('Say: {{0}}', 'text/html')
+  static say(message: string) {
+    return `<h1>${message}</h1>`;
+  }
+}
+
+test('should attach HTML via a decorator', () => {
+  expect(HtmlGenerator.say('Hello, world!')).toBe('<h1>Hello, world!</h1>');
+});
+```
+
+This will create an HTML attachment named "Say: Hello, world!" with the content `<h1>Hello, world!</h1>`.
+
+## `FileAttachment`
+
+The `FileAttachment` decorator is used to add file attachments to test cases or steps in your Allure report.
+
+### Syntax
+
+```typescript
+@FileAttachment(options?: FileAttachmentOptions)
+@FileAttachment(name?: string, mimeType?: string)
+```
+
+### Parameters
+
+1. `options`: An object of type `FileAttachmentOptions`
+   - `name`: (Optional) A string representing the name of the attachment
+   - `mimeType`: (Optional) A string specifying the MIME type of the attachment
+   - `handler`: (Optional) A custom [attachment handler function][2] or its string alias
+
+2. `name`: (Optional) A string representing the name of the attachment
+3. `mimeType`: (Optional) A string specifying the MIME type of the attachment
+
+### Usage
+
+You can use the `FileAttachment` decorator in two ways:
+
+1. With an options object:
+
+```typescript
+class TestClass {
+  @FileAttachment({
+    name: 'File {{0}}',
+    mimeType: 'text/plain',
+    handler: 'copy'
+  })
+  attachFile(fileName: string): string {
+    return `/path/to/${fileName}`;
+  }
+}
+```
+
+2. With optional name and MIME type:
+
+```typescript
+class TestClass {
+  @FileAttachment('File {{0}}', 'text/plain')
+  attachFile(fileName: string): string {
+    return `/path/to/${fileName}`;
+  }
+}
+```
+
+The decorated method should return the path to the file that should be attached.
+
+### Examples
+
+```typescript title="source-code-attacher.test.ts"
+import path from 'node:path';
+
+class SourceCodeAttacher {
+  @FileAttachment('{{0}}', 'text/plain')
+  static thisFile() {
+    return __filename;
+  }
+}
+
+test('should attach the file itself via a decorator', () => {
+  expect(SourceCodeAttacher.thisFile()).toBe(__filename);
+});
+```
+
+This will create a file attachment with the name of the file and the content of the file at the specified path.
+
+Both `Attachment` and `FileAttachment` decorators support using handlebars notation (`{{0}}`, `{{1}}`, etc.) in the attachment name to include method parameters.
+
+## `@Step`
+
+The `@Step` decorator marks a method as a test step, which will be reported in the Allure report. It allows you to create a hierarchical structure of steps within your tests, making them more readable and easier to debug.
+
+### Syntax
+
+```typescript
+@Step(name: string, args?: UserParameter[])
+```
+
+### Parameters
+
+- `name: string` - A description template for the step. It can include placeholders for method parameters using handlebars notation (e.g., `{{0}}`, `{{1}}`, etc.).
+- `args?: UserParameter[]` (optional) - An array of parameter definitions to be included in the step report.
+
+`UserParameter` can be one of the following:
+- A string representing the parameter name
+- An object which can include:
+  - `name: string` - The name of the parameter
+  - `excluded?: boolean` - If true, the parameter will be excluded from `allure-results`
+  - `mode?: 'hidden' | 'masked' | 'default'` - Determines how the parameter is displayed in the generated report
+
+### Usage
+
+Apply the `@Step` decorator to methods in your test classes:
+
+```typescript
+class TestClass {
+  @Step('Perform action with {{0}} and {{1}}')
+  performAction(param1: string, param2: number): void {
+    // Method implementation
+  }
+}
+```
+
+### Examples
+
+Basic usage:
+
+```typescript
+class Calculator {
+  @Step('Add {{a}} and {{b}}', ['a', 'b'])
+  add(a: number, b: number): number {
+    return a + b;
+  }
+}
+
+test('addition', () => {
+  const calculator = new Calculator();
+  expect(calculator.add(2, 3)).toBe(5);
+});
+```
+
+Using parameter definitions:
+
+```typescript
+class UserService {
+  @Step('Login as {{username}}', [
+    'username',
+    { name: 'password', mode: 'masked' }
+  ])
+  login(username: string, password: string): boolean {
+    // Login implementation
+    return true;
+  }
+}
+
+test('user login', () => {
+  const userService = new UserService();
+  expect(userService.login('john.doe', 'secret123')).toBe(true);
+});
+```
+
+In this example, the password will be masked in the Allure report.
+
+Nested steps:
+
+```typescript
+class ComplexOperation {
+  @Step('Perform complex operation')
+  performOperation(): number {
+    const result1 = this.step1();
+    const result2 = this.step2();
+    return result1 + result2;
+  }
+
+  @Step('Step 1')
+  private step1(): number {
+    return 5;
+  }
+
+  @Step('Step 2')
+  private step2(): number {
+    return 7;
+  }
+}
+
+test('complex operation', () => {
+  const operation = new ComplexOperation();
+  expect(operation.performOperation()).toBe(12);
+});
+```
+
+This will create a hierarchical structure of steps in the Allure report, showing the main operation and its substeps.
+
+[1]: index.mdx#global-typings
+[2]: 05-plugin-api.mdx#custom-attachment-handler

@@ -21,10 +21,10 @@ const FeatureList = [
     description: (
       <>
         Enhance your tests by adding rich metadata
-        including <Link to="/docs/api/descriptions/">descriptions</Link>,&nbsp;
-        <Link to="/docs/api/steps">test steps</Link>,&nbsp;
-        <Link to="/docs/api/parameters">parameters</Link>,&nbsp;
-        and other <Link to="/docs/api">useful information</Link>.
+        including <Link to="/docs/features/descriptions/">descriptions</Link>,&nbsp;
+        <Link to="/docs/features/steps">test steps</Link>,&nbsp;
+        <Link to="/docs/features/parameters">parameters</Link>,&nbsp;
+        and other <Link to="/docs/features">useful information</Link>.
       </>
     ),
   },

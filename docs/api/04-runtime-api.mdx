@@ -1,0 +1,207 @@
+---
+sidebar_position: 5
+---
+
+# Runtime API
+
+Runtime API provides methods to dynamically add information to your test reports during test execution. This API is accessible through the `allure` object, which is globally available when using the `jest-allure2-reporter`.
+
+:::info Note
+
+Using Runtime API outside of test code is possible, but not recommended for casual users,
+as it has caveats and undocumented behavior.
+
+:::
+
+## Metadata Methods
+
+### `allure.description(string)`
+
+Sets a Markdown description for the current test case.
+
+```javascript
+allure.description('This test verifies the login functionality.');
+```
+
+### `allure.descriptionHtml(string)`
+
+Sets an HTML description for the current test case.
+
+```javascript
+allure.descriptionHtml('<h1>Login Test</h1>' +
+  '<p>This test verifies the login functionality.</p>');
+```
+
+### `allure.epic(string)`
+
+Sets the epic for the current test case.
+
+```javascript
+allure.epic('User Authentication');
+```
+
+### `allure.feature(string)`
+
+Sets the feature for the current test case.
+
+```javascript
+allure.feature('Login');
+```
+
+### `allure.story(string)`
+
+Sets the user story for the current test case.
+
+```javascript
+allure.story('User can log in with valid credentials');
+```
+
+### `allure.suite(string)`
+
+Sets the suite name for the current test case.
+
+```javascript
+allure.suite('Authentication Tests');
+```
+
+### `allure.label(name, string)`
+
+Adds a custom label to the current test case.
+
+```javascript
+allure.label('custom', 'value');
+```
+
+### `allure.parameter(name, value)`
+
+Adds a parameter to the current test case or step.
+
+```javascript
+allure.parameter('username', 'testuser');
+```
+
+## Link Methods
+
+### `allure.link(url[, name])`
+
+Adds a link to the current test case.
+
+```javascript
+allure.link('https://example.com', 'Example Link');
+```
+
+### `allure.issue(name[, url])`
+
+Adds an issue link to the current test case.
+
+```javascript
+allure.issue('JIRA-123');
+```
+
+### `allure.tms(name[, url])`
+
+Adds a Test Management System (TMS) link to the current test case.
+
+```javascript
+allure.tms('TMS-456');
+```
+
+## Status Methods
+
+### `allure.status(status)`
+
+Sets the status for the current test case or step.
+
+```javascript
+allure.status('failed');
+```
+
+### `allure.statusDetails({ message, trace })`
+
+Sets additional status details for the current test case or step.
+
+```javascript
+allure.statusDetails({ message: 'Test failed due to...', trace: 'Error stack trace' });
+```
+
+## Attachments
+
+### `allure.attachment(string, content[, type])`
+
+Adds an attachment to the current test case or step.
+
+```javascript
+allure.attachment('Screenshot', Buffer.from('...'), 'image/png');
+```
+
+### `allure.createAttachment(name: string, content: () => string | Buffer, type?: string)`
+
+Creates a reusable attachment function.
+
+```javascript
+const takeScreenshot = allure.createAttachment('Screenshot', () => Buffer.from('...'), 'image/png');
+takeScreenshot();
+```
+
+## Steps
+
+### `allure.step(name, fn)`
+
+Adds a step to the current test case.
+
+```javascript
+allure.step('Enter username', () => {
+  // Step implementation
+});
+```
+
+### `allure.createStep(name, fn)`
+
+Creates a reusable step function.
+
+```javascript
+const login = allure.createStep('Login', (username, password) => {
+  // Login implementation
+});
+login('testuser', 'password123');
+```
+
+## Advanced Methods
+
+### `allure.$bind(options)`
+
+Binds an instance of the Allure Runtime API to a specific time and context in your test code.
+
+```javascript
+const boundAllure = allure.$bind({ metadata: true, time: false });
+```
+
+Use it when you need to report some metadata post-factum, e.g. add some information about
+the test after leaving its body, e.g.:
+
+```javascript
+let allure$;
+
+test('...', () => {
+  allure$ = allure.$bind();
+  // ...
+});
+
+afterEach(() => {
+  allure$.parameter('Free Memory', os.freemem());
+});
+```
+
+### `allure.$plug(callback)`
+
+Registers a runtime plugin to extend Allure functionality.
+
+```javascript
+allure.$plug((context) => {
+  // Plugin implementation
+});
+```
+
+Read more about [plugins][1].
+
+[1]: 05-plugin-api.mdx

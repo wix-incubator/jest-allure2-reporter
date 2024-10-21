@@ -1,0 +1,77 @@
+# Test File
+
+In `jest-allure2-reporter`, the `testFile` configuration object allows you to customize how test files are reported in Allure. This feature serves two primary purposes:
+
+1. Reporting `testExecError`s: When a test file fails to execute (due to syntax errors or other issues), this configuration allows you to report these errors effectively.
+2. Providing file-level summaries: You can create summary reports for each file, including statistics like the number of passed, failed, broken, or skipped tests.
+
+## Default Configuration
+
+The `testFile` configuration comes with sensible defaults:
+
+```javascript
+/** @type {import('jest-allure2-reporter').ReporterOptions} */
+const defaultTestFileConfig = {
+  ignored: ({ testFile }) => !testFile.testExecError,
+  historyId: ({ filePath }) => filePath.join('/'),
+  displayName: ({ filePath }) => filePath.join(path.sep),
+  fullName: ({ filePath }) => filePath.join(path.sep),
+  stage: ({ testFileMetadata, testFile }) => testFile.testExecError ? 'interrupted' : 'finished',
+  status: ({ testFileMetadata, testFile }) => testFile.testExecError ? 'broken' : testFile.numFailingTests > 0 ? 'failed' : 'passed',
+  labels: {
+    suite: '(test file execution)',
+  },
+};
+```
+
+These defaults ensure that test file execution errors are reported, and provide a basic structure for file-level reporting.
+
+## Configuration Options
+
+The `testFile` configuration object supports many of the same properties as `testCase`, but in the context of an entire test file. Here's an example of how you might customize the `testFile` configuration:
+
+```javascript
+/** @type {import('jest-allure2-reporter').ReporterOptions} */
+const jestAllure2ReporterOptions = {
+  testFile: {
+    ignored: false,
+    displayName: ({ filePath }) => {
+      return filePath.slice(1).join('/');
+    },
+    parameters: {
+      'Total tests': ({ testFile }) =>
+        testFile.numPassingTests +
+        testFile.numFailingTests +
+        testFile.numPendingTests,
+    },
+    description: ({ testFile, value = '' }) => {
+      const {
+        numPassingTests: passed,
+        numFailingTests: failed,
+        numPendingTests: pending,
+      } = testFile;
+      const summary = `**${passed}** passed, **${failed}** failed, **${pending}** pending`;
+      return summary + '\n\n' + value;
+    },
+  }
+};
+```
+
+This configuration:
+
+- Ensures every test file gets reported (i.e., not ignored)
+- Customizes the display name to exclude the first part of the file path
+- Adds a 'Total tests' parameter
+- Provides a summary of test results in the description
+
+## Use Cases
+
+1. **Reporting Execution Errors**: By default, test files are only reported when there's a `testExecError`. This ensures that syntax errors or other issues preventing test execution are captured in the Allure report.
+
+2. **File-Level Summaries**: As shown in the example, you can create summaries for each test file, providing an overview of test results at a glance.
+
+3. **Custom Grouping**: By manipulating the `displayName` and `labels`, you can create custom groupings of tests in your Allure report based on file structure or other criteria.
+
+4. **Additional Context**: You can add file-specific parameters, links, or attachments to provide more context about the test file or its environment.
+
+By leveraging the `testFile` configuration, you can enhance your Allure reports with file-level insights, making it easier to understand test results and identify problematic areas in your test suite.

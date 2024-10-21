@@ -1,0 +1,371 @@
+---
+sidebar_position: 2
+---
+
+# Docblocks
+
+:::info
+
+Docblocks cannot be applied to `describe` statements.
+If you want to apply a docblock to all tests in the file,
+you can put it on the first line of the file.
+
+:::
+
+Docblocks (JSDoc-style comments) are the least intrusive way to add metadata to your tests.
+These annotations get parsed by `jest-allure2-reporter` and used as a source of information for your test reports.
+
+## Plain comments
+
+Plain comments act as [`@description`][1] annotations, when applied to a test case.
+
+```javascript
+/**
+ * This test demonstrates the addition operation.
+ */
+test('should add two numbers', () => {
+  expect(1 + 2).toBe(3);
+});
+```
+
+For hooks, they act as [`@displayName`][2] annotations.
+
+```javascript
+/**
+ * Navigate to the home page
+ */
+beforeEach(async () => {
+  await page.goto('https://example.com');
+});
+```
+
+## `@description` / `@desc`
+
+Adds a Markdown description to a test case.
+
+```javascript
+/**
+ * @description
+ * This test demonstrates the addition operation.
+ */
+test('should add two numbers', () => {
+  expect(1 + 2).toBe(3);
+});
+```
+
+## `@descriptionHtml`
+
+Adds an HTML description to a test case.
+
+```javascript
+/**
+ * @descriptionHtml
+ * This test demonstrates the <code>-</code> operator.
+ */
+test('should subtract two numbers', () => {
+  expect(2 - 1).toBe(1);
+});
+```
+
+## `@displayName`
+
+Overrides test names specified in `test('...')` or `it('...')` in the test report.
+
+```javascript
+/**
+ * @displayName 1 + 1 = 2
+ */
+test('First test', () => {
+  expect(1 + 1).toBe(2);
+});
+```
+
+When applied to a hook, it sets a custom display name for the hook, similar to a [plain comment][3]:
+
+```javascript
+/**
+ * @displayName Custom "beforeEach" hook
+ */
+beforeEach(() => {
+  // Hook implementation
+});
+```
+
+## `@fullName`
+
+Sets a full name for a test case, which can be used for more detailed identification.
+By default, full names are also used for tracking test history across multiple runs or retries.
+
+```javascript
+/**
+ * @fullName Arithmetic > Addition > Valid assertion
+ */
+test('First test', () => {
+  expect(1 + 1).toBe(2);
+});
+```
+
+## `@historyId`
+
+Assigns a custom history ID to a test case, useful for tracking test history across multiple runs or retries.
+
+```javascript
+/**
+ * @historyId HISTORY-2
+ */
+test('First test', () => {
+  expect(2 + 2).toBe(3);
+});
+```
+
+## `@issue`
+
+Links an issue to a test case.
+
+For an individual test:
+
+```javascript
+/**
+ * @issue XMLRPC-15
+ */
+test('Proving the fix', () => {
+  expect(1 + 1).toBe(2);
+});
+```
+
+For all tests in the file, put the docblock at the very top:
+
+```javascript
+/**
+ * @issue XMLRPC-15
+ */
+
+// Rest of your test file...
+```
+
+## `@owner`
+
+Specifies the owner of a test or suite.
+
+For an individual test:
+
+```javascript
+/**
+ * @owner John Doe
+ */
+test('Test maintained by John', () => {
+  // Test implementation
+});
+```
+
+For all tests in the file:
+
+```javascript
+/**
+ * @owner John Doe
+ */
+
+// Rest of your test file...
+```
+
+## `@package`
+
+Specifies the package for a test or suite, useful for organizing tests.
+
+For an individual test:
+
+```javascript
+/**
+ * @package e2e.pragmas
+ */
+test('should log a message', () => {
+  // Test implementation
+});
+```
+
+For all tests in the file:
+
+```javascript
+/**
+ * @package e2e.my-tests
+ */
+
+// Rest of your test file...
+```
+
+## `@severity`
+
+Sets the severity level for a test or suite.
+
+For an individual test:
+
+```javascript
+/**
+ * @severity critical
+ */
+test('Important test', () => {
+  expect(1 + 1).toBe(2);
+});
+```
+
+For all tests in the file:
+
+```javascript
+/**
+ * @severity critical
+ */
+
+// Rest of your test file...
+```
+
+## `@epic`, `@feature`, `@story`
+
+Categorizes tests into epics and features for better organization.
+
+Example:
+
+```javascript
+/**
+ * @epic Arithmetic operations
+ * @feature Addition
+ */
+
+// Rest of your test file...
+
+/**
+ * @story Sane assumptions
+ */
+test('1 + 1 should equal 2', () => {
+  expect(1 + 1).toBe(2);
+});
+```
+
+## `@tag`
+
+Adds tags to a test or suite.
+
+For an individual test:
+
+```javascript
+/**
+ * @tag arithmetic, addition
+ */
+test('First test', () => {
+  expect(1 + 1).toBe(2);
+});
+```
+
+For all tests in the file:
+
+```javascript
+/**
+ * @tag arithmetic
+ */
+
+// Rest of your test file...
+```
+
+## `@thread`
+
+Specifies a custom thread for concurrent tests.
+Do not use it unless you want to control tests on the [Timeline][4] manually.
+
+For an individual test:
+
+```javascript
+/**
+ * @thread IV
+ */
+test('Concurrent test', () => {
+  expect(1 + 1).toBe(2);
+});
+```
+
+For all tests in the file:
+
+```javascript
+/**
+ * @thread IV
+ */
+
+// Rest of your test file...
+```
+
+## `@tms`
+
+Links a test management system (TMS) case to a test.
+
+For an individual test:
+
+```javascript
+/**
+ * @tms TMS-1234
+ */
+test('should be linked to a TMS ticket', () => {
+  expect(1 + 1).toBe(2);
+});
+```
+
+For all tests in the file:
+
+```javascript
+/**
+ * @tms TMS-1234
+ */
+
+// Rest of your test file...
+```
+
+## `@url`
+
+Adds a custom URL link to a test or suite.
+
+For an individual test:
+
+```javascript
+/**
+ * @url https://en.wikipedia.org/wiki/Addition ➕ Addition
+ */
+test('1 + 1 = 2', () => {
+  expect(1 + 1).toBe(2);
+});
+```
+
+For all tests in the file:
+
+```javascript
+/**
+ * @url https://en.wikipedia.org/wiki/Arithmetic 🔢 Arithmetic
+ */
+
+// Rest of your test file...
+```
+
+## `@parentSuite`, `@suite`, `@subSuite`
+
+Organizes tests into a hierarchical suite structure.
+
+Example:
+
+```javascript
+/**
+ * @parentSuite Custom Parent Suite
+ */
+
+// ...
+
+/**
+ * @suite Custom Suite
+ * @subSuite Custom Sub-Suite
+ */
+test('Test with custom suite hierarchy', () => {
+  // Test implementation
+});
+```
+
+These docblock annotations provide a powerful way to enrich your tests with metadata, improving the organization and readability of your Allure reports. By using these annotations, you can create more informative and structured test reports that help in better understanding and maintaining your test suite.
+
+[1]: #description--desc
+[2]: #displayname
+[3]: #plain-comments
+[4]: #TODO

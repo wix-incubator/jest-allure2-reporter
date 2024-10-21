@@ -138,9 +138,9 @@ module.exports = {
             testCase.title
           ].join(' » '),
           labels: {
-            parentSuite: ({ filePath }) => file.pathSegments[0],
-            suite: ({ filePath }) => file.pathSegments[1],
-            subSuite: ({ filePath }) => file.pathSegments.slice(2).join('/'),
+            parentSuite: ({ filePath }) => filePath[0],
+            suite: ({ filePath }) => filePath[1],
+            subSuite: ({ filePath }) => filePath.slice(2).join('/'),
           },
         },
       },
@@ -197,10 +197,10 @@ module.exports = {
     'default',
     ['jest-allure2-reporter', /** @type {import('jest-allure2-reporter').ReporterOptions}*/ {
       labels: {
-        parentSuite: ({ file }) => file.path,
-        suite: ({ test }) => test.ancestorTitles[0],
-        subSuite: ({ test }) => test.ancestorTitles.slice(1).join(' ') || undefined,
-        test: ({ test }) => test.title,
+        parentSuite: ({ filePath }) => filePath.join('/'),
+        suite: ({ testCase }) => testCase.ancestorTitles[0],
+        subSuite: ({ testCase }) => testCase.ancestorTitles.slice(1).join(' ') || undefined,
+        test: ({ testCase }) => testCase.title,
       },
     }],
   ],

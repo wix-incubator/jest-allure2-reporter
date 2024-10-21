@@ -40,7 +40,7 @@ export interface AllureRuntime {
 
   label(name: LabelName, value: string): void;
 
-  link(url: string, name?: string, type?: LinkType | string): void;
+  link(url: string, name?: string, type?: LinkType): void;
 
   parameter(name: string, value: unknown, options?: ParameterOptions): void;
 

@@ -1,0 +1,226 @@
+---
+sidebar_position: 6
+---
+
+# Configuration
+
+The `jest-allure2-reporter` can be configured using the reporter options in your Jest configuration file.
+This reference outlines the available options and their usage.
+
+## Basic Configuration
+
+To use `jest-allure2-reporter`, add it to your Jest configuration:
+
+```javascript
+/** @type {import('@jest/types').Config.InitialOptions} */
+module.exports = {
+  reporters: [
+    'default',
+    ['jest-allure2-reporter', {
+      // Reporter options go here
+    }],
+  ],
+  // Other Jest configurations...
+};
+```
+
+## Reporter Options
+
+### `overwrite`
+
+- Type: `boolean`
+- Default: `true`
+
+Determines whether to overwrite the existing results directory.
+
+```javascript
+overwrite: false
+```
+
+### `resultsDir`
+
+- Type: `string`
+- Default: `'allure-results'`
+
+Specifies the directory where test result files will be output.
+
+```javascript
+resultsDir: 'custom-allure-results'
+```
+
+### `injectGlobals`
+
+- Type: `boolean`
+- Default: `true`
+
+Controls whether Allure's global variables are injected into the test environment.
+
+```javascript
+injectGlobals: false
+```
+
+### `attachments`
+
+- Type: `object`
+
+Configures how external attachments are attached to the report.
+
+```javascript
+attachments: {
+  subDir: 'attachments',
+  fileHandler: 'copy',
+  contentHandler: 'write'
+}
+```
+
+#### `attachments.subDir`
+
+- Type: `string`
+- Default: `'attachments'`
+
+Defines a subdirectory within the `resultsDir` where attachments will be stored.
+
+#### `attachments.fileHandler`
+
+- Type: `'copy' | 'move' | 'ref' | string`
+- Default: `'ref'`
+
+Specifies the default strategy for attaching files to the report by their path.
+
+#### `attachments.contentHandler`
+
+- Type: `'write' | string`
+- Default: `'write'`
+
+Specifies the default strategy for attaching dynamic content to the report.
+
+### `sourceCode`
+
+- Type: `object`
+
+Configures how source code and docblocks are extracted from test files.
+
+```javascript
+sourceCode: {
+  enabled: true,
+  plugins: {
+    // Plugin configurations
+  }
+}
+```
+
+### `categories`
+
+- Type: `function`
+
+Configures the defect categories for the report.
+
+```javascript
+categories: ({ $ }) => [
+  {
+    name: 'Timeouts',
+    matchedStatuses: ['broken'],
+    messageRegex: /.*Exceeded timeout of.*/
+  }
+]
+```
+
+### `environment`
+
+- Type: `function`
+
+Configures the environment information that will be reported.
+
+```javascript
+environment: async ({ $ }) => ({
+  'Node.js Version': process.version,
+  'Package Version': await $.manifest(['name'], 'N/A'),
+})
+```
+
+### `executor`
+
+- Type: `function`
+
+Configures the executor information that will be reported.
+
+```javascript
+executor: ({ value }) => ({
+  name: 'Jenkins',
+  type: 'jenkins',
+  url: process.env.BUILD_URL,
+  buildOrder: process.env.BUILD_NUMBER
+})
+```
+
+### `helpers`
+
+- Type: `function`
+
+Customizes extractor helpers object to use later in the customizers.
+
+```javascript
+helpers: ({ $ }) => ({
+  ...$.helpers,
+  customHelper: () => { /* ... */ }
+})
+```
+
+### `testRun`
+
+- Type: `object`
+
+Customizes how to report test runs (sessions) as pseudo-test cases.
+
+```javascript
+testRun: {
+  uuid: ({ aggregatedResult }) => aggregatedResult.testResults[0].testFilePath,
+  name: 'Custom Test Run Name'
+}
+```
+
+### `testFile`
+
+- Type: `object`
+
+Customizes how to report test files as pseudo-test cases.
+
+```javascript
+testFile: {
+  name: ({ filePath }) => filePath.join('/'),
+  fullName: ({ filePath }) => filePath.join('.')
+}
+```
+
+### `testCase`
+
+- Type: `object`
+
+Customizes how test cases are reported.
+
+```javascript
+testCase: {
+  name: ({ testCase }) => testCase.title,
+  fullName: ({ testCase }) => testCase.fullName,
+  labels: {
+    severity: 'normal',
+    tag: ['unit', 'integration']
+  },
+  links: {
+    issue: 'https://jira.company.com/browse/{{name}}'
+  }
+}
+```
+
+### `testStep`
+
+- Type: `object`
+
+Customizes how individual test steps are reported.
+
+```javascript
+testStep: {
+  name: ({ value }) => `Step: ${value}`,
+  status: ({ value }) => value === 'broken' ? 'failed' : value
+}
+```
