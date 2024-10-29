@@ -14,6 +14,31 @@ describe('getStatusDetails', () => {
     expect(getStatusDetails(input)).toEqual({ message: input });
   });
 
+  it('should handle Error object with a non-string properties', () => {
+    class StringLike {
+      _value: string;
+
+      constructor(value: string) {
+        this._value = value;
+      }
+
+      toString() {
+        return this._value;
+      }
+    }
+
+    const error = Object.assign(new Error('error'), {
+      message: new StringLike('pseudo-message'),
+      name: new StringLike('pseudo-name'),
+      stack: new StringLike('pseudo-stack'),
+    });
+
+    const result = getStatusDetails(error);
+    expect(result).toHaveProperty('message');
+    expect(result?.message).toContain('pseudo-stack');
+    expect(result).not.toHaveProperty('trace');
+  });
+
   it('should handle Error object with stack trace', () => {
     const error = new Error('Test error');
     const result = getStatusDetails(error);
