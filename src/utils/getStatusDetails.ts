@@ -32,11 +32,11 @@ function getTrace(maybeError: unknown): string {
     return restoreStack(error);
   }
 
-  return error.stack || error.message || JSON.stringify(error);
+  return asString(error.stack) || asString(error.message) || JSON.stringify(error);
 }
 
 function restoreStack(error: Error): string {
-  const { message, name, stack } = error;
+  const { message, name, stack } = normalizeError(error);
   if (stack && message && hasEmptyFirstLine(stack) && !HAS_EMPTY_FIRST_LINE.test(message)) {
     return `${name}: ${message}${stack.slice(stack.indexOf('\n'))}`;
   }
@@ -52,4 +52,16 @@ function hasEmptyFirstLine(stack: string): boolean {
   const firstLine = stack.slice(0, stack.indexOf('\n'));
   const [, after] = firstLine.trimEnd().split(':', 2);
   return !after;
+}
+
+function normalizeError(error: Error) {
+  return {
+    message: asString(error.message),
+    name: asString(error.name),
+    stack: asString(error.stack),
+  };
+}
+
+function asString(x: unknown): string {
+  return x ? String(x) : '';
 }
