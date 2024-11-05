@@ -722,6 +722,10 @@ declare module 'jest-allure2-reporter' {
   }
 
   export type LabelName =
+    | KnownLabelName
+    | string;
+
+  export type KnownLabelName =
     | 'epic'
     | 'feature'
     | 'owner'
@@ -734,8 +738,7 @@ declare module 'jest-allure2-reporter' {
     | 'tag'
     | 'testClass'
     | 'testMethod'
-    | 'thread'
-    | (string & {});
+    | 'thread';
 
   export interface Link {
     name?: string;
@@ -743,7 +746,9 @@ declare module 'jest-allure2-reporter' {
     type?: LinkType;
   }
 
-  export type LinkType = 'issue' | 'tms' | (string & {});
+  export type LinkType = KnownLinkType | string;
+
+  export type KnownLinkType = 'issue' | 'tms';
 
   export interface Parameter {
     name: string;
