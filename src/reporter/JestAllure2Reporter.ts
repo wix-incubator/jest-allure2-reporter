@@ -25,7 +25,7 @@ import type {
 
 import { type ReporterConfig, resolveOptions } from '../options';
 import { AllureMetadataProxy, MetadataSquasher } from '../metadata';
-import { compactArray, FileNavigatorCache, stringifyValues } from '../utils';
+import { compactArray, isEmpty, FileNavigatorCache, stringifyValues } from '../utils';
 import { type AllureWriter, FileAllureWriter } from '../serialization';
 import { log, optimizeForTracing } from '../logger';
 
@@ -137,17 +137,17 @@ export class JestAllure2Reporter extends JestMetadataReporter {
     this._globalContext = globalContext;
 
     const environment = await reporterConfig.environment(globalContext);
-    if (environment) {
+    if (!isEmpty(environment)) {
       await allureWriter.writeEnvironmentInfo(stringifyValues(environment));
     }
 
     const executor = await reporterConfig.executor(globalContext);
-    if (executor) {
+    if (!isEmpty(executor)) {
       await allureWriter.writeExecutorInfo(executor);
     }
 
     const categories = await reporterConfig.categories(globalContext);
-    if (categories) {
+    if (!isEmpty(categories)) {
       await allureWriter.writeCategories(categories);
     }
   }
