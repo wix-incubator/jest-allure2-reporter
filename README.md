@@ -24,7 +24,7 @@ Your project should have [`jest`] installed. The minimum supported version is `2
 Run in your project:
 
 ```bash
-npm install --save-dev jest-allure2-reporter@beta
+npm install --save-dev jest-allure2-reporter
 ```
 
 Edit your Jest config, e.g. `jest.config.js`:

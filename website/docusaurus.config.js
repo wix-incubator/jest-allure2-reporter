@@ -40,7 +40,7 @@ module.exports = async () => {
             routeBasePath: '/',
             sidebarPath: require.resolve('./sidebars.js'),
             editUrl:
-              'https://github.com/wix-incubator/jest-allure2-reporter/tree/beta/docs/',
+              'https://github.com/wix-incubator/jest-allure2-reporter/tree/master/docs/',
             showLastUpdateAuthor: true,
             showLastUpdateTime: true,
             remarkPlugins: (await import('./src/remark-plugins/index.mjs')).default,
