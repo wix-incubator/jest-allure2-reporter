@@ -1,6 +1,6 @@
 import type { AllureTestCaseResult } from 'jest-allure2-reporter';
 
-import type { AllureWriter } from '../serialization';
+import type { AllureWriter } from '../store';
 
 import { toTestContainer, toTestResult } from './allure-adapter';
 

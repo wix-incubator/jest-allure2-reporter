@@ -1,6 +1,6 @@
 import type { AllureTestStepResult } from 'jest-allure2-reporter';
 
-import type { AllureStep as Serialized } from '../../serialization';
+import type { AllureStep as Serialized } from '../../store';
 
 import { normalizeAttachments } from './normalizeAttachments';
 import { normalizeParameters } from './normalizeParameters';

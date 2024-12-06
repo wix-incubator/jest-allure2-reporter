@@ -18,6 +18,11 @@ assert(typeof Attachment === 'function', 'jest-allure2-reporter should export At
 assert(typeof $Owner === 'function', 'jest-allure2-reporter should export $Owner function as a named export');
 assert(typeof allure === 'object', 'jest-allure2-reporter should export allure object as a named export');
 
+const { AllureStore, fromConfig, fromDirectory } = require('jest-allure2-reporter/store');
+assert(typeof AllureStore === 'function', 'AllureStore should be a function (class)');
+assert(typeof fromConfig === 'function', 'fromConfig should be a function');
+assert(typeof fromDirectory === 'function', 'fromDirectory should be a function');
+
 function isClass(obj) {
   return typeof obj === 'function' && /^class\s/.test(Function.prototype.toString.call(obj));
 }

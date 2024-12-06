@@ -12,6 +12,7 @@
   "files": [
     "api.test.ts",
     "globals.test.ts",
+    "store.test.ts",
     "test.ts"
   ],
 }
