@@ -26,7 +26,7 @@ import type {
 import { type ReporterConfig, resolveOptions } from '../options';
 import { AllureMetadataProxy, MetadataSquasher } from '../metadata';
 import { compactArray, FileNavigatorCache, stringifyValues } from '../utils';
-import { type AllureWriter, FileAllureWriter } from '../serialization';
+import { type AllureWriter, FileAllureWriter } from '../store';
 import { log, optimizeForTracing } from '../logger';
 
 import * as fallbacks from './fallbacks';

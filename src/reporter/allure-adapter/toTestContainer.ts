@@ -1,7 +1,7 @@
 import type { AllureTestCaseResult } from 'jest-allure2-reporter';
 import { v5 } from 'uuid';
 
-import type { AllureContainer } from '../../serialization';
+import type { AllureContainer } from '../../store';
 
 import { toTestStep } from './toTestStep';
 

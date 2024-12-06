@@ -1,28 +1,4 @@
-import type {
-  Attachment,
-  Category,
-  ExecutorInfo,
-  Label,
-  Link,
-  Stage,
-  Status,
-  StatusDetails,
-} from 'jest-allure2-reporter';
-
-export interface AllureWriter {
-  init?(): Promise<void>;
-  cleanup?(): Promise<void>;
-
-  writeCategories(categories: Category[]): Promise<void>;
-
-  writeEnvironmentInfo(info: Record<string, string>): Promise<void>;
-
-  writeExecutorInfo(info: ExecutorInfo): Promise<void>;
-
-  writeContainer(result: AllureContainer): Promise<void>;
-
-  writeResult(result: AllureResult): Promise<void>;
-}
+import type { Attachment, Label, Link, Stage, Status, StatusDetails } from 'jest-allure2-reporter';
 
 export interface AllureContainer {
   uuid: string;

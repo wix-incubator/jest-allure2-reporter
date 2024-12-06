@@ -53,6 +53,11 @@
       "require": "./environment-node.js",
       "types": "./dist/environment/node.d.ts"
     },
+    "./store": {
+      "import": "./store.mjs",
+      "require": "./store.js",
+      "types": "./dist/store/index.d.ts"
+    },
     "./package.json": "./package.json"
   },
   "files": [

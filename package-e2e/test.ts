@@ -10,7 +10,7 @@ function assertType<T>(_actual: T): void {
 
 const reporter = new Reporter({} as any, {} as any);
 assertType<Promise<void>>(reporter.onRunStart({} as any, {} as any));
-assertType<Reporter>(reporter);
+assertType<Reporter>(repgorter);
 // assertType<object>(Reporter.query);
 assertType<ReporterOptions>({
   overwrite: false,

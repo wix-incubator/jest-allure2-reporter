@@ -4,7 +4,8 @@ import path from 'node:path';
 import { stringify } from 'properties';
 import type { Category, ExecutorInfo } from 'jest-allure2-reporter';
 
-import type { AllureResult, AllureContainer, AllureWriter } from './AllureWriter';
+import type { AllureResult, AllureContainer } from './types';
+import type { AllureWriter } from './AllureWriter';
 
 async function writeJson(
   path: string,
