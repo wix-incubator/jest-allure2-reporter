@@ -111,7 +111,7 @@
     "ci-info": "^3.8.0",
     "handlebars": "^4.7.8",
     "import-from": "^4.0.0",
-    "jest-metadata": "^1.5.3",
+    "jest-metadata": "^1.5.5",
     "lodash": "^4.17.21",
     "node-fetch": "^2.6.7",
     "pkg-up": "^3.1.0",
