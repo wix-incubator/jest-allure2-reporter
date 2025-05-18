@@ -12,6 +12,7 @@ export const isObject = _.isObject;
 export const last = _.last;
 export const mapValues = _.mapValues;
 export const merge = _.merge;
+export const memoize = _.memoize;
 export const once = _.once;
 export const snakeCase = _.snakeCase;
 export const uniq = _.uniq;

@@ -3,35 +3,38 @@ import type {
   GlobalExtractorContext,
   DocblockExtractionContext,
 } from 'jest-allure2-reporter';
-import type { TestFileMetadata } from 'jest-metadata';
+import type { TestInvocationMetadata } from 'jest-metadata';
 
 import { AllureMetadataProxy } from '../metadata';
 import type { ReporterConfig } from '../options';
 import { log } from '../logger';
 import { compactObject, isEmpty } from '../utils';
 
+const isNotProcessed = (() => {
+  const set = new WeakSet();
+  return (metadata: object) => {
+    if (set.has(metadata)) {
+      return false;
+    }
+    set.add(metadata);
+    return true;
+  };
+})();
+
 export async function postProcessMetadata(
   globalContext: GlobalExtractorContext,
-  testFile: TestFileMetadata,
+  testInvocation: TestInvocationMetadata,
 ) {
   const config = globalContext.reporterConfig as ReporterConfig;
   if (!config.sourceCode.enabled) {
     return;
   }
 
-  const allDescribeBlocks = [...testFile.allDescribeBlocks()];
-  const allHookDefinitions = allDescribeBlocks.flatMap((describeBlock) => [
-    ...describeBlock.hookDefinitions(),
-  ]);
-
   const batch = [
-    testFile,
-    ...allDescribeBlocks,
-    ...allHookDefinitions,
-    ...testFile.allTestEntries(),
-    ...testFile.allTestInvocations(),
-    ...testFile.allInvocations(),
-  ];
+    ...testInvocation.allAncestors(),
+    testInvocation,
+    ...testInvocation.allInvocations(),
+  ].filter(isNotProcessed);
 
   await Promise.all(
     batch.map(async (metadata) => {
