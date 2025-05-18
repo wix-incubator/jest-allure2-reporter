@@ -10,19 +10,24 @@ export class FileNavigatorCache {
   #cache = new Map<string, Promise<FileNavigator | undefined>>();
   #scannedSourcemaps = new Set<string>();
 
-  resolve(filePath: string): Promise<FileNavigator | undefined> {
+  resolve = (filePath: string): Promise<FileNavigator | undefined> => {
     const absolutePath = path.isAbsolute(filePath) ? filePath : path.resolve(filePath);
     if (!this.#cache.has(absolutePath)) {
       this.#cache.set(absolutePath, this.#createNavigator(absolutePath));
     }
 
     return this.#cache.get(absolutePath)!;
-  }
+  };
 
-  async scanSourcemap(filePath: string): Promise<void> {
+  hasScannedSourcemap = (filePath: string): boolean => {
     const sourceMapPath = `${filePath}.map`;
+    return this.#scannedSourcemaps.has(sourceMapPath);
+  };
 
-    if (this.#scannedSourcemaps.has(sourceMapPath)) return;
+  scanSourcemap = async (filePath: string): Promise<void> => {
+    if (this.hasScannedSourcemap(filePath)) return;
+
+    const sourceMapPath = `${filePath}.map`;
     this.#scannedSourcemaps.add(sourceMapPath);
 
     const doesNotExist = await fs.access(sourceMapPath).catch(() => true);
@@ -56,7 +61,7 @@ export class FileNavigatorCache {
       const navigator = new FileNavigator(content);
       this.#cache.set(sourcePath, Promise.resolve(navigator));
     }
-  }
+  };
 
   #createNavigator = async (filePath: string) => {
     const sourceCode = await fs.readFile(filePath, 'utf8').catch(() => void 0);
