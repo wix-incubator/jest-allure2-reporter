@@ -7,8 +7,12 @@ import { defaultOptions } from './default';
 import { extendOptions } from './extendOptions';
 import type { ReporterConfig } from './types';
 import { combineTestCaseAndSteps } from './combineTestCaseAndSteps';
+import { resolveWriter } from './resolveWriter';
 
-export async function resolveOptions(rootDirectory: string, custom?: ReporterOptions | undefined) {
+export async function resolveOptions(
+  rootDirectory: string,
+  custom?: ReporterOptions | undefined,
+): Promise<ReporterConfig<void>> {
   const extensions = custom ? await resolveExtendsChain(rootDirectory, custom) : [];
 
   let config: ReporterConfig = defaultOptions();
@@ -28,6 +32,21 @@ export async function resolveOptions(rootDirectory: string, custom?: ReporterOpt
     config.testRun,
     testCaseSteps(config.testStep, 'testRunMetadata'),
   );
+
+  // Resolve the writer if a custom one is specified
+  if (custom?.writer) {
+    const globalContext = {
+      globalConfig: { rootDir: rootDirectory },
+      reporterConfig: config,
+    } as any;
+
+    const writer = await resolveWriter(custom.writer, globalContext, {
+      resultsDir: config.resultsDir,
+      overwrite: config.overwrite,
+    });
+
+    return { ...config, writer } as ReporterConfig<void>;
+  }
 
   return config as ReporterConfig<void>;
 }

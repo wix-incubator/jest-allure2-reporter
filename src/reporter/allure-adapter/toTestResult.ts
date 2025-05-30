@@ -1,6 +1,5 @@
 import type { AllureTestCaseResult } from 'jest-allure2-reporter';
-
-import type { AllureResult as Serialized } from '../../serialization';
+import type { Result as Serialized } from 'allure-store';
 
 import { ensureUUID } from './ensureUUID';
 import { hashHistoryId } from './hashHistoryId';

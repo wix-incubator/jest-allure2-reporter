@@ -30,6 +30,7 @@ export function extendOptions(
     testFile: extractors.compose2(customizers.testCase(custom?.testFile), base.testFile),
     testCase: extractors.compose2(customizers.testCase(custom?.testCase), base.testCase),
     testStep: extractors.compose2(customizers.testStep(custom?.testStep), base.testStep),
+    writer: base.writer,
   };
 }
 

@@ -81,6 +81,16 @@ declare module 'jest-allure2-reporter' {
      * Customize how individual test steps are reported.
      */
     testStep?: TestStepCustomizer;
+    /**
+     * Custom AllureWriter implementation or configuration.
+     *
+     * @example './my-writer.js'
+     * @example MyWriterClass
+     * @example new MyWriter({ url: 'mongodb://...' })
+     * @example ['./database-writer.js', { connectionString: 'mongodb://...' }]
+     * @example [MyWriterClass, { batchSize: 100 }]
+     */
+    writer?: string | Function | object | [string | Function, any];
   }
 
   export interface AttachmentsOptions {

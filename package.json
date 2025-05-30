@@ -106,9 +106,9 @@
     "typescript": "5.x.x"
   },
   "dependencies": {
+    "allure-store": "^1.1.0",
     "bunyamin": "^1.6.1",
     "properties": "^1.2.1",
-    "ci-info": "^3.8.0",
     "handlebars": "^4.7.8",
     "import-from": "^4.0.0",
     "jest-metadata": "^1.5.5",
