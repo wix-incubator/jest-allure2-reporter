@@ -1,5 +1,5 @@
-import 'jest-allure2-reporter';
-import 'jest-allure2-reporter/api';
+import "jest-allure2-reporter";
+import "jest-allure2-reporter/api";
 
 // @ts-expect-error TS2304: Cannot find name '$Description'.
 $Description;

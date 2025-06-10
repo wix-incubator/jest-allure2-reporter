@@ -1,8 +1,9 @@
+import { describe, expect, it, jest } from '@jest/globals';
 import type {
-  PropertyExtractorContext,
-  PromisedProperties,
-  TestCaseExtractorContext,
   AllureTestStepResult,
+  PromisedProperties,
+  PropertyExtractorContext,
+  TestCaseExtractorContext,
 } from 'jest-allure2-reporter';
 
 import { testStep } from './testStep';
@@ -12,7 +13,7 @@ import { createTestCaseContext } from './__utils__/contexts';
 describe('testCaseSteps', () => {
   it('should extract nested steps', async () => {
     let counter = 0;
-    const displayName = jest.fn().mockImplementation(() => `Step ${++counter}`);
+    const displayName = jest.fn<any>().mockImplementation(() => `Step ${++counter}`);
     const testStepExtractor = testStep({ displayName });
     const testCase = testCaseSteps(testStepExtractor, 'testCaseMetadata');
     const context: PropertyExtractorContext<

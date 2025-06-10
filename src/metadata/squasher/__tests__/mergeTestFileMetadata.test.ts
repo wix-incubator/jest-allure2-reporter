@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, test } from '@jest/globals';
 import type { AllureTestFileMetadata, AllureTestStepMetadata } from 'jest-allure2-reporter';
 
 import { MetadataSelector } from '../MetadataSelector';

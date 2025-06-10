@@ -1,3 +1,4 @@
+import { describe, expect, it, jest } from '@jest/globals';
 import type { MaybePromise, PropertyExtractor } from 'jest-allure2-reporter';
 
 import { composeExtractors3 } from './composeExtractors3';

@@ -1,5 +1,6 @@
 import path from 'node:path';
 
+import { describe, expect, it } from '@jest/globals';
 import { state } from 'jest-metadata';
 
 import { AllureMetadataProxy } from '../metadata';

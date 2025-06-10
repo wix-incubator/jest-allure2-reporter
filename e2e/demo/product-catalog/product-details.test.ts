@@ -1,3 +1,5 @@
+import { afterEach, beforeAll, describe, expect, test } from '@jest/globals';
+
 /**
  * @epic Product Discovery
  * @feature View Product Details
@@ -5,7 +7,6 @@
  * @package com.example.shop.catalog
  * @testClass ProductDetailsController
  */
-
 import { FakeBrowser, ProductDetailsDriver } from '../drivers';
 
 describe('Product Catalog', () => {

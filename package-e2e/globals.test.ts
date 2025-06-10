@@ -1,4 +1,4 @@
-import 'jest-allure2-reporter/globals';
+import "jest-allure2-reporter/globals";
 
 // Pseudo-annotations
 assertEqualType($Description, global.$Description);

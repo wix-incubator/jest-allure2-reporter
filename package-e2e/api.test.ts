@@ -1,20 +1,4 @@
-import {
-  Attachment,
-  FileAttachment,
-  Step,
-  $Description,
-  $DescriptionHtml,
-  $Epic,
-  $Feature,
-  $Issue,
-  $Link,
-  $Owner,
-  $Severity,
-  $Story,
-  $Tag,
-  $TmsLink,
-  allure,
-} from 'jest-allure2-reporter/api';
+import { test } from '@jest/globals';
 
 import type {
   AllureRuntime,
@@ -29,8 +13,25 @@ import type {
   FileAttachmentOptions,
   MIMEInferer,
   MIMEInfererContext,
-  UserParameter,
-} from 'jest-allure2-reporter/api';
+  UserParameter
+} from "jest-allure2-reporter/api";
+import {
+  $Description,
+  $DescriptionHtml,
+  $Epic,
+  $Feature,
+  $Issue,
+  $Link,
+  $Owner,
+  $Severity,
+  $Story,
+  $Tag,
+  $TmsLink,
+  allure,
+  Attachment,
+  FileAttachment,
+  Step
+} from "jest-allure2-reporter/api";
 
 enablePlugins();
 

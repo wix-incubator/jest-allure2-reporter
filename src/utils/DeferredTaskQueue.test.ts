@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, jest, test } from '@jest/globals';
+
 import type { DeferredTaskQueueConfig } from './DeferredTaskQueue';
 import { DeferredTaskQueue } from './DeferredTaskQueue';
 
@@ -14,14 +16,14 @@ type TaskPayload = {
 
 describe('DeferredTaskQueue', () => {
   let taskQueue: DeferredTaskQueue<TaskPayload, string | number>;
-  let mockExecute: jest.Mock;
-  let getThreadName: jest.Mock;
-  let getPayloadKey: jest.Mock;
+  let mockExecute: ReturnType<typeof jest.fn>;
+  let getThreadName: ReturnType<typeof jest.fn>;
+  let getPayloadKey: ReturnType<typeof jest.fn>;
   let config: DeferredTaskQueueConfig<TaskPayload, string | number>;
 
-  let taskBegin: jest.Mock;
-  let taskEnd: jest.Mock;
-  let taskFailed: jest.Mock;
+  let taskBegin: ReturnType<typeof jest.fn>;
+  let taskEnd: ReturnType<typeof jest.fn>;
+  let taskFailed: ReturnType<typeof jest.fn>;
   const taskPayloads: { [id: string | number]: TaskPayload } = {};
 
   const createPayload = (
@@ -58,11 +60,11 @@ describe('DeferredTaskQueue', () => {
     for (const key in taskPayloads) delete taskPayloads[key];
 
     getThreadName = jest
-      .fn()
+      .fn<any>()
       .mockImplementation((payload: TaskPayload) => payload.thread || 'default');
-    getPayloadKey = jest.fn().mockImplementation((payload: TaskPayload) => payload.id);
+    getPayloadKey = jest.fn<any>().mockImplementation((payload: TaskPayload) => payload.id);
 
-    mockExecute = jest.fn().mockImplementation(async (payload: TaskPayload) => {
+    mockExecute = jest.fn<any>().mockImplementation(async (payload: TaskPayload) => {
       taskBegin(payload.id);
       // Use a promise that resolves/rejects based on setTimeout with fake timers
       return new Promise<void>((resolve, reject) => {

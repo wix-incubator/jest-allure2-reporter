@@ -1,3 +1,4 @@
+import { describe, expect, it } from '@jest/globals';
 import type { LabelsCustomizer } from 'jest-allure2-reporter';
 
 import { labels } from './labels';

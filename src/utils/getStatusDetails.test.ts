@@ -1,3 +1,5 @@
+import { describe, expect, it } from '@jest/globals';
+
 import { getStatusDetails } from './getStatusDetails';
 
 describe('getStatusDetails', () => {

@@ -1,3 +1,4 @@
+import { describe, expect, it } from '@jest/globals';
 import type { ParametersCustomizer } from 'jest-allure2-reporter';
 
 import { parameters } from './parameters';

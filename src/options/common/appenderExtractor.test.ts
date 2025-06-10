@@ -1,3 +1,5 @@
+import { describe, expect, it, jest } from '@jest/globals';
+
 import { appenderExtractor } from './appenderExtractor';
 
 describe('extractors', () => {
@@ -13,7 +15,7 @@ describe('extractors', () => {
     });
 
     it('should allow the extractor to replace the context value (sync)', async () => {
-      const extractor = jest.fn().mockReturnValue([3, 4]);
+      const extractor = jest.fn<any>().mockReturnValue([3, 4]);
       const context = { value: [1, 2] };
 
       const result = appenderExtractor(extractor)!;
@@ -24,7 +26,7 @@ describe('extractors', () => {
     });
 
     it('should allow the extractor to replace the context value (async)', async () => {
-      const extractor = jest.fn().mockResolvedValue([3, 4]);
+      const extractor = jest.fn<any>().mockResolvedValue([3, 4]);
       const context = { value: Promise.resolve([1, 2]) };
 
       const result = appenderExtractor(extractor)!;
@@ -35,7 +37,7 @@ describe('extractors', () => {
     });
 
     it('should turn undefined results from the extractor into empty arrays', async () => {
-      const extractor = jest.fn().mockReturnValue(void 0);
+      const extractor = jest.fn<any>().mockReturnValue(void 0);
       const context = { value: [1, 2] };
 
       const result = appenderExtractor(extractor)!;

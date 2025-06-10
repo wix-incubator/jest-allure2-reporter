@@ -1,3 +1,4 @@
+import { describe, expect, it } from '@jest/globals';
 import type { PromisedProperties, PropertyExtractorContext } from 'jest-allure2-reporter';
 
 import { thruMaybePromise } from '../../utils';
