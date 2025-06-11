@@ -37,10 +37,8 @@ export class ManifestResolver {
       defaultValue = maybeDefaultValue;
     }
 
-    const what = packageName ? `"${packageName}"` : 'the current project';
     const manifestPath = await this.resolveManifestPath(packageName);
     if (!manifestPath) {
-      log.warn(`Cannot find package.json for ${what}`);
       return defaultValue;
     }
 
@@ -56,9 +54,8 @@ export class ManifestResolver {
       }
 
       return manifest;
-    } catch (error: unknown) {
-      log.error(error, `Failed to extract package.json for ${what}`);
-      return;
+    } catch {
+      return defaultValue;
     }
   };
 
