@@ -23,6 +23,7 @@ import type {
   TestFileExtractorContext,
   TestRunExtractorContext,
 } from 'jest-allure2-reporter';
+import { type AllureWriter } from 'allure-store';
 
 import { type ReporterConfig, resolveOptions } from '../options';
 import { AllureMetadataProxy, MetadataSquasher } from '../metadata';
@@ -33,7 +34,6 @@ import {
   memoize,
   stringifyValues,
 } from '../utils';
-import { type AllureWriter, FileAllureWriter } from '../serialization';
 import { log, optimizeForTracing } from '../logger';
 
 import * as fallbacks from './fallbacks';
@@ -85,10 +85,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
 
   async #init() {
     this._config = await resolveOptions(this._globalConfig.rootDir, this._options);
-    this._writer = new FileAllureWriter({
-      resultsDir: this._config.resultsDir,
-      overwrite: this._config.overwrite,
-    });
+    this._writer = this._config.writer;
 
     await this._writer.init?.();
 

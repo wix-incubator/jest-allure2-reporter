@@ -17,6 +17,7 @@ import {
 } from 'jest-allure2-reporter/api';
 
 import type {
+  AllureRuntime,
   AllureRuntimePluginCallback,
   AllureRuntimePluginContext,
   AttachmentContent,
@@ -26,7 +27,6 @@ import type {
   FileAttachmentContext,
   FileAttachmentHandler,
   FileAttachmentOptions,
-  IAllureRuntime,
   MIMEInferer,
   MIMEInfererContext,
   UserParameter,
@@ -51,9 +51,9 @@ $Severity('critical');
 $Tag('e2e');
 $TmsLink('TEST-456');
 test('typings of jest-allure2-reporter/api', async () => {
-  assertType<IAllureRuntime>(allure);
-  assertType<IAllureRuntime>(allure.$bind());
-  assertType<IAllureRuntime>(allure.$bind({ metadata: false, time: true }));
+  assertType<AllureRuntime>(allure);
+  assertType<AllureRuntime>(allure.$bind());
+  assertType<AllureRuntime>(allure.$bind({ metadata: false, time: true }));
   allure.description('This is a _description_ generated in runtime');
   allure.descriptionHtml('This is a <i>description</i> generated in runtime');
   allure.historyId('00-11-22-33-44-55');
@@ -201,7 +201,7 @@ function enablePlugins() {
   assertType<AttachmentContent>(Buffer.from('content'));
 
   const plugin: AllureRuntimePluginCallback = (context: AllureRuntimePluginContext) => {
-    assertType<IAllureRuntime>(context.runtime);
+    assertType<AllureRuntime>(context.runtime);
     context.contentAttachmentHandlers['custom'] = customContent;
     context.fileAttachmentHandlers['custom'] = customFile;
     context.inferMimeType = inferMimeType;

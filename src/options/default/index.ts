@@ -1,3 +1,5 @@
+import { FileAllureWriter } from 'allure-store';
+
 import * as sourceCode from '../../source-code';
 import type { ReporterConfig } from '../types';
 import * as common from '../common';
@@ -32,5 +34,9 @@ export function defaultOptions(): ReporterConfig {
     categories: common.constant(categories),
     environment: () => ({}),
     executor: () => ({}),
+    writer: new FileAllureWriter({
+      overwrite: true,
+      resultsDirectory: 'allure-results',
+    }),
   };
 }
