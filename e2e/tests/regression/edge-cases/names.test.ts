@@ -9,7 +9,7 @@ import { afterEach, beforeAll, describe, test } from '@jest/globals';
  * @tag fullName
  * @tag description
  */
-import { $Description, $DisplayName, $FullName, $Link, allure } from "jest-allure2-reporter/api";
+import { $Description, $DisplayName, $FullName, $Link, allure } from 'jest-allure2-reporter/api';
 
 describe('Names', () => {
   // Regular beforeAll

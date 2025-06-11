@@ -1,20 +1,3 @@
-import { test } from '@jest/globals';
-
-import type {
-  AllureRuntime,
-  AllureRuntimePluginCallback,
-  AllureRuntimePluginContext,
-  AttachmentContent,
-  ContentAttachmentContext,
-  ContentAttachmentHandler,
-  ContentAttachmentOptions,
-  FileAttachmentContext,
-  FileAttachmentHandler,
-  FileAttachmentOptions,
-  MIMEInferer,
-  MIMEInfererContext,
-  UserParameter
-} from "jest-allure2-reporter/api";
 import {
   $Description,
   $DescriptionHtml,
@@ -31,7 +14,22 @@ import {
   Attachment,
   FileAttachment,
   Step
-} from "jest-allure2-reporter/api";
+} from 'jest-allure2-reporter/api';
+import type {
+  AllureRuntime,
+  AllureRuntimePluginCallback,
+  AllureRuntimePluginContext,
+  AttachmentContent,
+  ContentAttachmentContext,
+  ContentAttachmentHandler,
+  ContentAttachmentOptions,
+  FileAttachmentContext,
+  FileAttachmentHandler,
+  FileAttachmentOptions,
+  MIMEInferer,
+  MIMEInfererContext,
+  UserParameter
+} from 'jest-allure2-reporter/api';
 
 enablePlugins();
 

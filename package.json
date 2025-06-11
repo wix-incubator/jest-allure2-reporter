@@ -135,8 +135,5 @@
   },
   "browserslist": [
     "node 16"
-  ],
-  "overrides": {
-    "unrs-resolver": "1.7.13"
-  }
+  ]
 }

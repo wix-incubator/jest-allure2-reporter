@@ -1,11 +1,11 @@
-import { beforeAll, beforeEach, describe, expect, test } from '@jest/globals';
-
 /**
  * @epic Product Discovery
  * @feature Browse Products
  * @severity blocker
  * @package com.example.shop.catalog
  */
+
+import { beforeAll, beforeEach, describe, expect, test } from '@jest/globals';
 import { FakeBrowser, ProductListingDriver } from '../drivers';
 
 describe('Product Catalog', () => {
