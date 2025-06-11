@@ -1,3 +1,5 @@
+import { beforeAll, beforeEach, describe, expect, it, test } from '@jest/globals';
+
 import { FileNavigator } from './FileNavigator';
 
 describe('FileNavigator', () => {
@@ -118,7 +120,9 @@ describe('FileNavigator', () => {
   });
 
   describe('moveUp/moveDown', () => {
-    beforeEach(() => navigator.jump(1));
+    beforeEach(() => {
+      navigator.jump(1);
+    });
 
     it('should move down and up', () => {
       expect(navigator.moveDown()).toBe(true);

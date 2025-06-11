@@ -1,3 +1,4 @@
+import { describe, expect, jest, test } from '@jest/globals';
 import type {
   AllureTestStepResult,
   PromisedProperties,
@@ -42,16 +43,10 @@ describe('testStepCustomizer', () => {
     ${'parameters'}    | ${[]}          | ${[{ name: 'param1', value: 'value1' }, { name: 'param2', value: 'value2' }]}
   `(
     'should asynchronously customize $property with $customValue yet to be able to access the default value $defaultValue',
-    async ({
-      property,
-      defaultValue,
-      customValue,
-    }: {
-      property: keyof AllureTestStepResult;
-      defaultValue: any;
-      customValue: any;
-    }) => {
-      const asyncExtractor = jest.fn().mockResolvedValue(customValue);
+    async (options) => {
+      const { property: _property, defaultValue, customValue } = options;
+      const property = _property as keyof AllureTestStepResult;
+      const asyncExtractor = jest.fn<any>().mockResolvedValue(customValue);
       const testStep = testStepCustomizer({ [property]: asyncExtractor });
       const context = createContext({ [property]: defaultValue });
       const result = testStep(context) as AllureTestStepResult;
@@ -80,15 +75,9 @@ describe('testStepCustomizer', () => {
     ${'parameters'}    | ${[]}          | ${[{ name: 'param1', value: 'value1' }, { name: 'param2', value: 'value2' }]}
   `(
     'should synchronously customize $property with $customValue yet to be able to access the default value $defaultValue',
-    ({
-      property,
-      defaultValue,
-      customValue,
-    }: {
-      property: keyof AllureTestStepResult;
-      defaultValue: any;
-      customValue: any;
-    }) => {
+    (options) => {
+      const { property: _property, defaultValue, customValue } = options;
+      const property = _property as keyof AllureTestStepResult;
       const syncExtractor = jest.fn().mockReturnValue(customValue);
       const testStep = testStepCustomizer({ [property]: syncExtractor });
       const context = createContext({ [property]: defaultValue });
@@ -109,24 +98,15 @@ describe('testStepCustomizer', () => {
     property      | defaultValue    | customValue
     ${'steps'}    | ${undefined}    | ${[]}
     ${'hookType'} | ${'beforeEach'} | ${'afterEach'}
-  `(
-    'should not be able to customize $property',
-    async ({
-      property,
-      defaultValue,
-      customValue,
-    }: {
-      property: keyof AllureTestStepResult;
-      defaultValue: any;
-      customValue: any;
-    }) => {
-      const extractor = jest.fn().mockResolvedValue(customValue);
-      const testStep = testStepCustomizer({ [property]: extractor });
-      const context = createContext({ [property]: defaultValue });
-      const result = testStep(context) as AllureTestStepResult;
+  `('should not be able to customize $property', async (options) => {
+    const { property: _property, defaultValue, customValue } = options;
+    const property = _property as keyof AllureTestStepResult;
+    const extractor = jest.fn<any>().mockResolvedValue(customValue);
+    const testStep = testStepCustomizer({ [property]: extractor });
+    const context = createContext({ [property]: defaultValue });
+    const result = testStep(context) as AllureTestStepResult;
 
-      expect(result?.[property]).toBe(defaultValue);
-      expect(extractor).not.toHaveBeenCalled();
-    },
-  );
+    expect(result?.[property]).toBe(defaultValue);
+    expect(extractor).not.toHaveBeenCalled();
+  });
 });

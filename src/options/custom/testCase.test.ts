@@ -1,3 +1,4 @@
+import { describe, expect, jest, test } from '@jest/globals';
 import type { AllureTestCaseResult } from 'jest-allure2-reporter';
 
 import { testCase as testCaseCustomizer } from './testCase';
@@ -23,16 +24,10 @@ describe('testCase', () => {
     ${'descriptionHtml'} | ${''}          | ${'<p>Custom description</p>'}
   `(
     'should extract $property with default value $defaultValue and extracted value $extractedValue',
-    async ({
-      property,
-      defaultValue,
-      extractedValue,
-    }: {
-      property: keyof AllureTestCaseResult;
-      defaultValue: any;
-      extractedValue: any;
-    }) => {
-      const extractor = jest.fn().mockResolvedValue(extractedValue);
+    async (options) => {
+      const { property: _property, defaultValue, extractedValue } = options;
+      const property = _property as keyof AllureTestCaseResult;
+      const extractor = jest.fn<any>().mockResolvedValue(extractedValue);
       const testCase = testCaseCustomizer({ [property]: extractor });
       const result = testCase(createTestCaseContext({ [property]: defaultValue }));
 

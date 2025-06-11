@@ -1,10 +1,12 @@
-jest.mock('../logger');
-
 import path from 'node:path';
+
+import { describe, expect, jest, test } from '@jest/globals';
 
 import { log } from '../logger';
 
 import { FileNavigatorCache } from './FileNavigatorCache';
+
+jest.mock('../logger');
 
 const __FIXTURES__ = path.join(__dirname, '__fixtures__');
 

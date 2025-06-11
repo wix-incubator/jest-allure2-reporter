@@ -1,3 +1,4 @@
+import { describe, expect, it, jest } from '@jest/globals';
 import type { MaybePromise, PropertyExtractorContext } from 'jest-allure2-reporter';
 
 import { mergerExtractor } from './mergerExtractor';
@@ -18,7 +19,7 @@ describe('extractors', () => {
     });
 
     it('should replace context value with the extracted value (sync)', async () => {
-      const extractor = jest.fn().mockReturnValue({ c: 3, d: 4 });
+      const extractor = jest.fn<any>().mockReturnValue({ c: 3, d: 4 });
       const context = { value: { a: 1, b: 2 } };
 
       const result = mergerExtractor<TestContext, TestValue>(extractor)!;
@@ -29,7 +30,7 @@ describe('extractors', () => {
     });
 
     it('should replace context value with the extracted value (async)', async () => {
-      const extractor = jest.fn().mockResolvedValue({ c: 3, d: 4 });
+      const extractor = jest.fn<any>().mockResolvedValue({ c: 3, d: 4 });
       const context = { value: Promise.resolve({ a: 1, b: 2 }) };
 
       const result = mergerExtractor<TestContext, TestValue>(extractor)!;

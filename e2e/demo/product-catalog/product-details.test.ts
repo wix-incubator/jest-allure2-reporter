@@ -6,6 +6,7 @@
  * @testClass ProductDetailsController
  */
 
+import { afterEach, beforeAll, describe, expect, test } from '@jest/globals';
 import { FakeBrowser, ProductDetailsDriver } from '../drivers';
 
 describe('Product Catalog', () => {

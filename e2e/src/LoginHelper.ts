@@ -1,4 +1,4 @@
-import { Step, Attachment, FileAttachment } from '../../dist/api';
+import { Step, Attachment, FileAttachment } from 'jest-allure2-reporter/api';
 
 class LoginHelper {
   #email?: string;

@@ -1,3 +1,4 @@
+import { describe, expect, it } from '@jest/globals';
 import type { LinksCustomizer } from 'jest-allure2-reporter';
 
 import { asArray } from '../../../utils';

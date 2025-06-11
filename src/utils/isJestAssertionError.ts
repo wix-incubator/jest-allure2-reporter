@@ -1,3 +1,4 @@
+/* eslint-disable-next-line node/no-unpublished-import */
 import type { JestAssertionError } from 'expect';
 
 import { isObject } from './vendor';

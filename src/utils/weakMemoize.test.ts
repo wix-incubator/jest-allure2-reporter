@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it } from '@jest/globals';
+
 import { weakMemoize } from './weakMemoize';
 
 describe('weakMemoize', () => {

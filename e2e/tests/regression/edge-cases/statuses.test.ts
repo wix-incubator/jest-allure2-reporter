@@ -1,4 +1,6 @@
-import { allure } from '../../../../dist/api';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test } from '@jest/globals';
+
+import { allure } from 'jest-allure2-reporter/api';
 
 const dummyTest = () => expect(true).toBe(true);
 const timeoutTest = (_done: Fn) => {

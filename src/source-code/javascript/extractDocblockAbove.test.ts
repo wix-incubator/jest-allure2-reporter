@@ -1,3 +1,5 @@
+import { describe, expect, it } from '@jest/globals';
+
 import { FileNavigator } from '../../utils';
 
 import { extractDocblockAbove as extractJsDocument_ } from './extractDocblockAbove';

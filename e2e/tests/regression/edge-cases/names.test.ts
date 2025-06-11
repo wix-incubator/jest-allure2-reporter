@@ -1,3 +1,5 @@
+import { afterEach, beforeAll, describe, test } from '@jest/globals';
+
 /**
  * This suite checks how default and custom naming works for test files, test cases and test steps.
  *
@@ -7,7 +9,7 @@
  * @tag fullName
  * @tag description
  */
-import { allure, $Description, $DisplayName, $FullName, $Link } from '../../../../dist/api';
+import { $Description, $DisplayName, $FullName, $Link, allure } from 'jest-allure2-reporter/api';
 
 describe('Names', () => {
   // Regular beforeAll

@@ -3,6 +3,8 @@
  * @feature Read Reviews
  * @package com.example.shop.reviews
  */
+
+import { beforeAll, describe, expect, test } from '@jest/globals';
 import { FakeBrowser, ProductReviewsDriver } from '../drivers';
 
 describe('Product Catalog', () => {

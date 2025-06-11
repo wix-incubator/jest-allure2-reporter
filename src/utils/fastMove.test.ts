@@ -2,6 +2,8 @@ import os from 'node:os';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
+
 import { fastMove } from './fastMove';
 
 describe('fastMove', () => {

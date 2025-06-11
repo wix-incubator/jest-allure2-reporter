@@ -3,6 +3,8 @@
  *
  * This suite tests the navigation elements of the website, focusing on the mobile experience.
  */
+
+import { beforeAll, describe, expect, test } from '@jest/globals';
 import { FakeBrowser, MenuDriver } from '../drivers';
 
 describe('Navigation', () => {

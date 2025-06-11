@@ -1,3 +1,5 @@
+import { describe, expect, it, jest } from '@jest/globals';
+
 import { constantExtractor } from './constantExtractor';
 
 describe('extractors', () => {
@@ -9,7 +11,7 @@ describe('extractors', () => {
     };
 
     it('should return the extractor function when the input is an extractor', () => {
-      const extractor = jest.fn().mockReturnValue(42);
+      const extractor = jest.fn<any>().mockReturnValue(42);
       const result = constantExtractor(extractor);
 
       expect(result).toBe(extractor);

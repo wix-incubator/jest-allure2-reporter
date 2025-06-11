@@ -1,7 +1,4 @@
 import {
-  Attachment,
-  FileAttachment,
-  Step,
   $Description,
   $DescriptionHtml,
   $Epic,
@@ -14,8 +11,10 @@ import {
   $Tag,
   $TmsLink,
   allure,
+  Attachment,
+  FileAttachment,
+  Step
 } from 'jest-allure2-reporter/api';
-
 import type {
   AllureRuntime,
   AllureRuntimePluginCallback,
@@ -29,7 +28,7 @@ import type {
   FileAttachmentOptions,
   MIMEInferer,
   MIMEInfererContext,
-  UserParameter,
+  UserParameter
 } from 'jest-allure2-reporter/api';
 
 enablePlugins();
