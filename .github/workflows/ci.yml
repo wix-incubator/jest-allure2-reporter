@@ -44,10 +44,34 @@ jobs:
           name: allure-results
           path: e2e/allure-results
 
+  package-e2e:
+    name: Package E2E
+    needs: [sanity]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+      - name: Install main project
+        uses: bahmutov/npm-install@v1
+        with:
+          useLockFile: false
+      - name: Build
+        run: npm run build
+      - name: Install Package E2E Project
+        uses: bahmutov/npm-install@v1
+        with:
+          useLockFile: false
+          working-directory: package-e2e
+      - name: Run Package E2E Tests
+        run: npm test
+        working-directory: package-e2e
+
   publish:
     if: github.event_name == 'push'
     name: Publish
-    needs: [sanity]
+    needs: [sanity, package-e2e]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
