@@ -24,7 +24,8 @@ This library connects Jest tests with [Allure Framework](https://allurereport.or
 - Historical test data and trends
 - Comprehensive context for easier debugging
 
-[![Jest Allure2 Reporter Demo](https://img.youtube.com/vi/RkLAB1nfAOY/0.jpg)](https://www.youtube.com/watch?v=RkLAB1nfAOY)
+[![Jest Allure2 Reporter Demo](https://github.com/user-attachments/assets/80b09093-9e5b-40a6-b9dc-ce4b75832e9d)](https://www.youtube.com/watch?v=RkLAB1nfAOY)
+
 <p align="center"><i>Watch how jest-allure2-reporter turns test investigations into detective stories with every clue clearly laid out</i></p>
 
 As shown in the video, you can easily:
@@ -70,7 +71,6 @@ import { allure, Step } from 'jest-allure2-reporter/api';
 export class MyPage {
   @Step('Load user data for ID: {{userId}}')
   async loadUserData(userId: string) {
-    allure.parameter('UserID', userId);
     // Fetch data logic...
     const userData = { name: 'John Doe', id: userId };
 
