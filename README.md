@@ -39,7 +39,7 @@ As shown in the video, you can easily:
 npm install --save-dev jest-allure2-reporter
 ```
 
-Configure Jest (in `jest.config.js` or `jest.config.ts`):
+Configure Jest (e.g., in `jest.config.js`):
 
 ```javascript
 /** @type {import('@jest/types').Config.InitialOptions} */
