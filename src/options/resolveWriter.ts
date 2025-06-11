@@ -40,7 +40,7 @@ export async function resolveWriter(
 
   // If it's a string, import it first
   if (typeof WriterImpl === 'string') {
-    const imported = importFrom(WriterImpl, context.globalConfig.rootDir);
+    const imported = importFrom(context.globalConfig.rootDir, WriterImpl);
     WriterImpl = (imported as any)?.default || imported;
   }
 
