@@ -224,3 +224,51 @@ testStep: {
   status: ({ value }) => value === 'broken' ? 'failed' : value
 }
 ```
+
+### `writer`
+
+- Type: `string | Function | object | [string | Function, any]`
+
+Customizes how test results are written to the filesystem. You can provide:
+- A path to a custom writer implementation
+- A writer class/constructor
+- A writer instance
+- An array with writer implementation and its options
+
+```javascript
+// Using a custom writer class
+writer: MyCustomWriter
+
+// Using a writer instance
+writer: new MyCustomWriter({ url: 'mongodb://...' })
+
+// Using a path to writer implementation
+writer: './my-writer.js'
+
+// Using a writer with options
+writer: [MyCustomWriter, { batchSize: 100 }]
+```
+
+By default, uses `FileAllureWriter` from `allure-store` package with the following configuration:
+```javascript
+writer: new FileAllureWriter({
+  overwrite: true,
+  resultsDirectory: 'allure-results'
+})
+```
+
+You can implement custom writers for various use cases like sending results via HTTP, storing in a database, or integrating with other systems. To do this, create a class implementing the `AllureWriter` interface from `allure-store`:
+
+```typescript
+import { AllureWriter } from 'allure-store';
+
+class MyCustomWriter implements AllureWriter {
+  async writeResult(result: AllureResult): Promise<void> {
+    await fetch('https://api.example.com/results', {
+      method: 'POST',
+      body: JSON.stringify(result)
+    });
+  }
+  // Implement other required methods...
+}
+```
