@@ -1,3 +1,5 @@
+const { describe, expect, test } = require('@jest/globals');
+
 describe('Regression tests', () => {
   /**
    * @issue XMLRPC-15

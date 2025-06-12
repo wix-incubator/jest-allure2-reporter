@@ -2,6 +2,8 @@
  * @url https://en.wikipedia.org/wiki/Arithmetic 🔢 Arithmetic
  */
 
+const { describe, expect, test } = require('@jest/globals');
+
 describe('Arithmetics', () => {
   /**
    * @url https://en.wikipedia.org/wiki/Addition ➕ Addition

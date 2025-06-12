@@ -1,3 +1,4 @@
+const { describe, expect, test } = require('@jest/globals');
 import { Attachment } from 'jest-allure2-reporter/api';
 
 describe('Attachment', () => {

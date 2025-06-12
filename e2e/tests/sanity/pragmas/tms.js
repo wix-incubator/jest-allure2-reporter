@@ -1,3 +1,5 @@
+const { describe, expect, test } = require('@jest/globals');
+
 /**
  * @tms TMS-1234
  */

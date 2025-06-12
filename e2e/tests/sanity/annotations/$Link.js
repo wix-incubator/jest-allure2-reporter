@@ -1,3 +1,5 @@
+const { describe, expect, test } = require('@jest/globals');
+
 $Link('https://en.wikipedia.org/wiki/Arithmetic', '🔢 Arithmetic')
 describe('Arithmetics', () => {
   $Link('https://en.wikipedia.org/wiki/Addition', '➕ Addition')

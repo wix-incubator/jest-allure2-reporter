@@ -1,3 +1,5 @@
+const { describe, expect, test } = require('@jest/globals');
+
 describe('Test suite', () => {
   $HistoryId('HISTORY-1')
   test('First test', () => {

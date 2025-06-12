@@ -1,3 +1,5 @@
+const { describe, expect, test } = require('@jest/globals');
+
 describe('Test suite', () => {
   test.concurrent('First test', () => {
     allure.thread('T1');

@@ -1,3 +1,5 @@
+const { describe, expect, test } = require('@jest/globals');
+
 describe('Test suite', () => {
   $FullName('Arithmetic > Addition > Valid assertion')
   test('First test', () => {

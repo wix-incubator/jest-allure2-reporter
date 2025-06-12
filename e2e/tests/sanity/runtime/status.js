@@ -1,3 +1,5 @@
+const { describe, expect, test } = require('@jest/globals');
+
 test('should be able to set a custom status', () => {
   allure.status('skipped', {
     message: 'Cannot run this test at the moment',

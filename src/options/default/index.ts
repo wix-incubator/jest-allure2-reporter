@@ -1,5 +1,6 @@
 import { FileAllureWriter } from 'allure-store';
 
+import { log } from '../../logger';
 import * as sourceCode from '../../source-code';
 import type { ReporterConfig } from '../types';
 import * as common from '../common';
@@ -34,9 +35,11 @@ export function defaultOptions(): ReporterConfig {
     categories: common.constant(categories),
     environment: () => ({}),
     executor: () => ({}),
-    writer: new FileAllureWriter({
-      overwrite: true,
-      resultsDirectory: 'allure-results',
-    }),
+    writer: (config: ReporterConfig) =>
+      new FileAllureWriter({
+        resultsDirectory: config.resultsDir,
+        overwrite: config.overwrite,
+        onError: (error) => log.error(error, 'Caught an error in FileAllureWriter'),
+      }),
   };
 }

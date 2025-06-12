@@ -1,5 +1,7 @@
 import { Step } from 'jest-allure2-reporter/api';
 
+const { describe, expect, test } = require('@jest/globals');
+
 describe('Step', () => {
   class FactorialCalculator {
     @Step('Get the factorial of {{n}}', ['n'])

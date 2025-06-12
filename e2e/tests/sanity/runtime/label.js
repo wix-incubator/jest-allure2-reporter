@@ -1,3 +1,5 @@
+const { describe, expect, test } = require('@jest/globals');
+
 describe('Screenshot tests', () => {
   allure.label('testType', 'screenshotDiff');
 

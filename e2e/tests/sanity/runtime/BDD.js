@@ -1,3 +1,5 @@
+const { describe, expect, test } = require('@jest/globals');
+
 allure.epic('Arithmetic operations');
 allure.feature('Addition');
 

@@ -1,3 +1,5 @@
+const { describe, expect, test } = require('@jest/globals');
+
 describe('Regression tests', () => {
   $Issue('XMLRPC-15')
   test('Proving the fix', () => {

@@ -1,3 +1,5 @@
+const { describe, expect, test } = require('@jest/globals');
+
 $DescriptionHtml('<h3>Suite-level description</h3>')
 describe('Test suite', () => {
   $DescriptionHtml('Demonstrates a <b>passing</b> test case')

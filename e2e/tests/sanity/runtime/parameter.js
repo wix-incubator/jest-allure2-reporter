@@ -1,3 +1,5 @@
+const { describe, expect, test } = require('@jest/globals');
+
 test.each`
   a    | b    | expected
   ${1} | ${2} | ${3}

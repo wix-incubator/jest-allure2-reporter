@@ -1,5 +1,7 @@
 const os = require('node:os');
 
+const { describe, expect, test } = require('@jest/globals');
+
 test('should wrap a function with automatic attachment of its result', async () => {
   const diagnostics = () => ({ available_memory: os.freemem() });
   const wrapped = allure.createAttachment(diagnostics, 'diagnostics-{{0}}.json');

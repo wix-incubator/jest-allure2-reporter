@@ -1,3 +1,5 @@
+const { describe, expect, test } = require('@jest/globals');
+
 $Epic('Arithmetic operations')
 $Feature('Addition')
 describe('Test suite', () => {

@@ -25,7 +25,7 @@ import type {
 } from 'jest-allure2-reporter';
 import { type AllureWriter } from 'allure-store';
 
-import { type ReporterConfig, resolveOptions } from '../options';
+import { type ReporterConfig, resolveOptions, resolveWriter } from '../options';
 import { AllureMetadataProxy, MetadataSquasher } from '../metadata';
 import {
   compactArray,
@@ -85,7 +85,7 @@ export class JestAllure2Reporter extends JestMetadataReporter {
 
   async #init() {
     this._config = await resolveOptions(this._globalConfig.rootDir, this._options);
-    this._writer = this._config.writer;
+    this._writer = await resolveWriter(this._globalConfig.rootDir, this._config);
 
     await this._writer.init?.();
 

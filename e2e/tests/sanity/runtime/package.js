@@ -1,3 +1,5 @@
+const { describe, expect, test } = require('@jest/globals');
+
 allure.package('e2e.runtime');
 
 describe('My service', () => {

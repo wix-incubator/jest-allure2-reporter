@@ -1,3 +1,5 @@
+const { describe, expect, test } = require('@jest/globals');
+
 describe('Test suite', () => {
   $Thread('T1')
   test.concurrent('First test', () => {

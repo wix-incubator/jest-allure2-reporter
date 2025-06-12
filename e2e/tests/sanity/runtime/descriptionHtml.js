@@ -1,3 +1,5 @@
+const { describe, expect, test } = require('@jest/globals');
+
 allure.descriptionHtml('<h3>File-level description</h3>');
 
 describe('suite', () => {

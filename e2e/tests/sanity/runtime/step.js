@@ -1,3 +1,5 @@
+const { describe, expect, test } = require('@jest/globals');
+
 test('should be able to report nested steps', async () => {
   const result = allure.step('Step 1', async () => {
     const step1 = allure.step('Step 1.1', () => 1);

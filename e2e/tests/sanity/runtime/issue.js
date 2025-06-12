@@ -1,3 +1,5 @@
+const { describe, expect, test } = require('@jest/globals');
+
 describe('Regression tests', () => {
   test('Proving the fix', () => {
     allure.issue('XMLRPC-15');

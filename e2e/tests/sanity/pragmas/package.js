@@ -2,6 +2,8 @@
  * @package e2e.pragmas
  */
 
+const { describe, expect, test } = require('@jest/globals');
+
 describe('My service', () => {
   /**
    * @testMethod Alternative title for the test

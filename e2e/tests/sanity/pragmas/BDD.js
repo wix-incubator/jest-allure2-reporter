@@ -3,6 +3,8 @@
  * @feature Addition
  */
 
+const { describe, expect, test } = require('@jest/globals');
+
 describe('Test suite', () => {
   /**
    * @story Sane assumptions

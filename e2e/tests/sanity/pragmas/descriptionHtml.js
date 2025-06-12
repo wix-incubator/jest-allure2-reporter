@@ -3,6 +3,8 @@
  * <h3>File-level description</h3>
  */
 
+const { describe, expect, test } = require('@jest/globals');
+
 describe('Test suite', () => {
   /**
    * @descriptionHtml
