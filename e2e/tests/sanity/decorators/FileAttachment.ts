@@ -1,5 +1,6 @@
 import path from 'node:path';
 
+const { describe, expect, test } = require('@jest/globals');
 import { FileAttachment } from 'jest-allure2-reporter/api';
 
 describe('FileAttachment', () => {

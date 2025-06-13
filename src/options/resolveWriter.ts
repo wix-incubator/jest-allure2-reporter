@@ -1,67 +1,87 @@
 import importFrom from 'import-from';
 import type { AllureWriter } from 'allure-store';
-import { FileAllureWriter } from 'allure-store';
-import type { GlobalExtractorContext } from 'jest-allure2-reporter';
 
-export interface DefaultWriterOptions {
-  resultsDir: string;
-  overwrite: boolean;
-}
+import type { ReporterConfig } from './types';
 
 export async function resolveWriter(
-  writerReference: any,
-  context: GlobalExtractorContext,
-  defaultOptions: DefaultWriterOptions,
+  rootDirectory: string,
+  config: ReporterConfig,
 ): Promise<AllureWriter> {
-  // If no custom writer specified, create default FileAllureWriter
-  if (!writerReference) {
-    return new FileAllureWriter({
-      resultsDirectory: defaultOptions.resultsDir,
-      overwrite: defaultOptions.overwrite,
-    });
-  }
+  let result: AllureWriter | undefined;
+  const writerOption = config.writer;
 
-  let WriterImpl = writerReference;
-  let customOptions = defaultOptions;
+  let WriterImpl = writerOption;
+  let customOptions = {};
 
   // Handle array pattern [WriterImpl, customOptions]
-  if (Array.isArray(writerReference)) {
-    [WriterImpl, customOptions = defaultOptions] = writerReference;
+  if (Array.isArray(writerOption)) {
+    [WriterImpl, customOptions = {}] = writerOption;
   }
 
-  // If it's already an instance, just return it
-  if (
-    WriterImpl &&
-    typeof WriterImpl === 'object' &&
-    typeof WriterImpl.writeResult === 'function'
-  ) {
-    return WriterImpl as AllureWriter;
-  }
-
-  // If it's a string, import it first
   if (typeof WriterImpl === 'string') {
-    const imported = importFrom(context.globalConfig.rootDir, WriterImpl);
+    const imported = importFrom(rootDirectory, WriterImpl);
     WriterImpl = (imported as any)?.default || imported;
   }
 
   // If it's a function/constructor
-  if (typeof WriterImpl === 'function') {
+  if (isMaybeClass<AllureWriter>(WriterImpl)) {
     try {
-      // Try as constructor
-      return new WriterImpl(context, customOptions);
+      result = await WriterImpl(config, customOptions);
     } catch (constructorError: any) {
       try {
-        // Try as factory function
-        return await WriterImpl(context, customOptions);
+        result = new WriterImpl(config, customOptions);
       } catch (factoryError: any) {
         throw new Error(
-          `Failed to instantiate writer: ${constructorError?.message || constructorError}. ` +
+          `Failed to instantiate AllureWriter: ${constructorError?.message || constructorError}. ` +
             `Also failed as factory: ${factoryError?.message || factoryError}`,
         );
       }
     }
   }
 
-  // Fallback: assume it's already a valid writer instance
-  return WriterImpl as AllureWriter;
+  result ??= WriterImpl as unknown as AllureWriter;
+
+  if (result == null) {
+    throw new TypeError('AllureWriter implementation is undefined or null');
+  }
+
+  if (typeof result !== 'object') {
+    throw new TypeError(
+      'AllureWriter implementation must be a class or function, but got: ' + result,
+    );
+  }
+
+  const missingMethods = findMissingMethods(result);
+  if (missingMethods.length > 0) {
+    throw new TypeError(
+      `AllureWriter implementation is missing required methods: ${missingMethods.join(', ')}`,
+    );
+  }
+
+  return result;
+}
+
+const REQUIRED_METHODS = [
+  'writeCategories',
+  'writeEnvironmentInfo',
+  'writeExecutorInfo',
+  'writeContainer',
+  'writeResult',
+] as Array<keyof AllureWriter>;
+
+function findMissingMethods(object: Partial<AllureWriter> | undefined): (keyof AllureWriter)[] {
+  if (!object || typeof object !== 'object') {
+    return [...REQUIRED_METHODS];
+  }
+
+  return REQUIRED_METHODS.filter((key) => {
+    const hopefullyFunction = object[key];
+    return typeof hopefullyFunction !== 'function';
+  });
+}
+
+function isMaybeClass<T>(
+  value: unknown,
+): value is { new (...arguments_: unknown[]): T; (...arguments_: unknown[]): Promise<T> } {
+  return typeof value === 'function';
 }

@@ -1,3 +1,5 @@
+const { describe, expect, test } = require('@jest/globals');
+
 describe('Test suite', () => {
   test('First test', () => {
     allure.historyId('HISTORY-3');

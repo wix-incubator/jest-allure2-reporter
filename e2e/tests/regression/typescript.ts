@@ -7,6 +7,7 @@
  * @tag smoke
  */
 
+import {describe, it, expect} from '@jest/globals';
 import LoginHelper from '../../src/LoginHelper';
 import {allure} from 'jest-allure2-reporter/api';
 

@@ -1,3 +1,5 @@
+const { describe, expect, test } = require('@jest/globals');
+
 allure.owner('John Doe');
 
 describe('Suite maintained by John', () => {

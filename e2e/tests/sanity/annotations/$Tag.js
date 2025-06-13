@@ -1,3 +1,5 @@
+const { describe, expect, test } = require('@jest/globals');
+
 $Tag('dsl', 'arithmetic');
 describe('Test suite', () => {
   $Tag('addition')

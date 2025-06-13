@@ -1,3 +1,5 @@
+const { describe, expect, test } = require('@jest/globals');
+
 describe('Login screen', () => {
   $Parameter('auth.NewLoginScreen', 'on')
   test('should display the new login screen', () => {

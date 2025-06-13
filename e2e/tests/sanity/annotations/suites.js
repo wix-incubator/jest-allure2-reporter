@@ -1,3 +1,5 @@
+const { describe, expect, test } = require('@jest/globals');
+
 $ParentSuite('Custom Parent Suite')
 $Suite('Custom Suite')
 $SubSuite('Custom Sub-Suite')

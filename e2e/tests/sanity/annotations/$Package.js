@@ -1,3 +1,5 @@
+const { describe, expect, test } = require('@jest/globals');
+
 $Package('e2e.annotations')
 describe('My service', () => {
 

@@ -1,6 +1,9 @@
 /**
  * @tag docblock, arithmetic
  */
+
+const { describe, expect, test } = require('@jest/globals');
+
 describe('Test suite', () => {
   /**
    * @tag addition

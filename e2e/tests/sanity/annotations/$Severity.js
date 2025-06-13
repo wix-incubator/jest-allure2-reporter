@@ -1,3 +1,5 @@
+const { describe, expect, test } = require('@jest/globals');
+
 $Severity('critical');
 describe('Test suite', () => {
   test('Important test 1', () => {

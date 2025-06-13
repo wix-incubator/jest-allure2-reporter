@@ -17,7 +17,6 @@ import type {
   SourceCodePluginCustomizer,
   SourceCodePlugin,
 } from 'jest-allure2-reporter';
-import type { AllureWriter } from 'allure-store';
 
 export type CompositeExtractorLoose<Context, Shape> = {
   readonly [K in keyof Shape]-?: null | PropertyExtractor<Context, MaybePromise<Shape[K]>>;
@@ -41,7 +40,7 @@ export interface ReporterConfig<O = never> {
   testFile: TestCaseExtractor<TestFileExtractorContext, O>;
   testRun: TestCaseExtractor<TestRunExtractorContext, O>;
   testStep: TestStepExtractor<TestStepExtractorContext, O>;
-  writer: AllureWriter;
+  writer: string | Function | object | [string | Function, unknown];
 }
 
 export interface SourceCodeProcessorConfig {

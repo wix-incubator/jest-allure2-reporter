@@ -1,3 +1,5 @@
+const { describe, expect, test } = require('@jest/globals');
+
 $Label('testType', 'screenshotDiff');
 describe('Screenshot tests', () => {
   test('What the client explained', () => {

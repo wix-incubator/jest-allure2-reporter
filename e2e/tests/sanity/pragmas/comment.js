@@ -2,6 +2,8 @@
  * ### File-level description
  */
 
+const { describe, expect, test } = require('@jest/globals');
+
 describe('Test suite', () => {
   /**
    * Custom "beforeEach" hook

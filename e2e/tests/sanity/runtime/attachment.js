@@ -1,4 +1,5 @@
 const fs = require('node:fs/promises');
+const { describe, expect, test } = require('@jest/globals');
 
 test('should attach a file', async () => {
   /** Location of the attached file */

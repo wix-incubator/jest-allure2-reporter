@@ -2,6 +2,8 @@
  * @owner John Doe
  */
 
+const { describe, expect, test } = require('@jest/globals');
+
 describe('Suite maintained by John', () => {
   test('First test', () => {
     // John maintains this test

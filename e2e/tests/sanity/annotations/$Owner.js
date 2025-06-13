@@ -1,3 +1,5 @@
+const { describe, expect, test } = require('@jest/globals');
+
 $Owner('John Doe');
 describe('Suite maintained by John', () => {
   test('First test', () => {

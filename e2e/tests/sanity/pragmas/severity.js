@@ -1,6 +1,9 @@
 /**
  * @severity critical
  */
+
+const { describe, expect, test } = require('@jest/globals');
+
 describe('Test suite', () => {
   test('Important test 1', () => {
     expect(1 + 1).toBe(2);

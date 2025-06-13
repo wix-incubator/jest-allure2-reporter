@@ -1,3 +1,5 @@
+const { describe, expect, test } = require('@jest/globals');
+
 describe('Arithmetics', () => {
   allure.link('https://en.wikipedia.org/wiki/Arithmetic', '🔢 Arithmetic')
 

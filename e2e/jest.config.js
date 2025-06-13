@@ -64,6 +64,7 @@ const jestAllure2ReporterOptions = {
   testStep: {
     ignored: ({ testStepMetadata }) => testStepMetadata.displayName?.includes('(Jest)'),
   },
+  // writer: './console-writer.js',
 };
 
 /** @type {import('@jest/types').Config.InitialOptions} */
