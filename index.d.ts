@@ -700,8 +700,6 @@ declare module 'jest-allure2-reporter' {
 
   export interface Category {
     name?: string;
-    description?: string;
-    descriptionHtml?: string;
     messageRegex?: string | RegExp;
     traceRegex?: string | RegExp;
     matchedStatuses?: Status[];
