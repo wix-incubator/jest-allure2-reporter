@@ -67,7 +67,7 @@ export class ManifestResolver {
     try {
       return require.resolve(packageName + '/package.json');
     } catch (error: unknown) {
-      log.debug(error, `Failed to resolve package.json for "${packageName}"`);
+      log.trace(error, `Failed to resolve package.json for "${packageName}"`);
       return;
     }
   }
