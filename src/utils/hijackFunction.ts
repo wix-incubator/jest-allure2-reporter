@@ -25,7 +25,9 @@ export const hijackFunction: FunctionHijacker = (function_, callback) => {
     function hijackFunctionWrapper(this: unknown, ...arguments_: unknown[]) {
       const result = Reflect.apply(function_, this, arguments_) as MaybePromise<any>;
 
-      return thruMaybePromise(result, (value) => (callback(value, arguments_), value));
+      return thruMaybePromise(result, (value) =>
+        thruMaybePromise(callback(value, arguments_), () => value),
+      );
     },
   );
 };

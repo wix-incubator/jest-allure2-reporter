@@ -45,4 +45,87 @@ describe('hijackFunction', () => {
     expect(wrapper.toString()).toBe(add.toString());
     expect(wrapper.name).toBe('add');
   });
+
+  it('should wait for async callback to complete before returning', async () => {
+    let callbackCompleted = false;
+
+    const callback = async (_value: number) => {
+      // Simulate async work in callback
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      callbackCompleted = true;
+    };
+
+    const function_ = () => 42;
+    const wrapper = hijackFunction(function_, callback);
+
+    const startTime = Date.now();
+    const result = await wrapper();
+    const endTime = Date.now();
+
+    // The function should return the original result
+    expect(result).toBe(42);
+
+    // The callback should have completed before function returns
+    expect(callbackCompleted).toBe(true);
+
+    // Total time should include callback time (~100ms)
+    expect(endTime - startTime).toBeGreaterThanOrEqual(90);
+  });
+
+  it('should wait for async callback when original function returns Promise', async () => {
+    let callbackCompleted = false;
+
+    const callback = async (_value: number) => {
+      // Simulate async work in callback
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      callbackCompleted = true;
+    };
+
+    const asyncFunction = async () => {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      return 100;
+    };
+
+    const wrapper = hijackFunction(asyncFunction, callback);
+
+    const startTime = Date.now();
+    const result = await wrapper();
+    const endTime = Date.now();
+
+    // The function should return the original result
+    expect(result).toBe(100);
+
+    // The callback should have completed before function returns
+    expect(callbackCompleted).toBe(true);
+
+    // Total time should include both function and callback time
+    expect(endTime - startTime).toBeGreaterThanOrEqual(50);
+  });
+
+  // Test: Sync function with async callback - CURRENTLY FAILING
+  it('should wait for async callback when original function is synchronous', async () => {
+    let callbackCompleted = false;
+
+    const callback = async (_value: string) => {
+      // Simulate async work in callback
+      await new Promise((resolve) => setTimeout(resolve, 75));
+      callbackCompleted = true;
+    };
+
+    const syncFunction = () => 'immediate';
+    const wrapper = hijackFunction(syncFunction, callback);
+
+    const startTime = Date.now();
+    const result = await wrapper();
+    const endTime = Date.now();
+
+    // The function should return the original result
+    expect(result).toBe('immediate');
+
+    // The callback should have completed before function returns
+    expect(callbackCompleted).toBe(true);
+
+    // Total time should include callback time (~75ms)
+    expect(endTime - startTime).toBeGreaterThanOrEqual(70);
+  });
 });
