@@ -1,3 +1,4 @@
+import path from 'node:path';
 import util from 'node:util';
 
 import type { Parameter } from 'jest-allure2-reporter';
@@ -160,7 +161,9 @@ export class AllureRuntimeImplementation implements AllureRuntime {
     typeAssertions.assertString(filePath, 'filePath');
 
     const options =
-      typeof nameOrOptions === 'string' ? { name: nameOrOptions } : { ...nameOrOptions };
+      typeof nameOrOptions === 'string'
+        ? { name: nameOrOptions }
+        : { name: path.basename(filePath), ...nameOrOptions };
 
     return this.#fileAttachmentsModule.attachment(filePath, options);
   };
