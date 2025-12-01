@@ -9,5 +9,6 @@ export const writeHandler: ContentAttachmentHandler = async (context) => {
   const destination = placeAttachment(context);
   await fs.mkdir(path.dirname(destination), { recursive: true });
   await fs.writeFile(destination, context.content);
-  return destination;
+  const size = context.size ?? Buffer.byteLength(context.content);
+  return { source: destination, size };
 };

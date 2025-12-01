@@ -9,6 +9,7 @@ import type {
   AttachmentContent,
   AttachmentContext,
   AttachmentHandler,
+  AttachmentHandlerResult,
   AttachmentOptions,
   ContentAttachmentContext,
   ContentAttachmentHandler,
@@ -83,6 +84,7 @@ abstract class AttachmentsModule<
         outDir: this.context.outDir,
         sourcePath: mimeContext.sourcePath,
         content: mimeContext.content,
+        size: userOptions.size,
       });
 
       const pushAttachment = this.#schedulePushAttachment(context);
@@ -101,20 +103,25 @@ abstract class AttachmentsModule<
 
   #schedulePushAttachment(
     context: Context,
-  ): (destinationPath: string | undefined) => typeof destinationPath {
+  ): (result: AttachmentHandlerResult) => string | undefined {
     const metadata = this.context.metadata.$bind();
-    return (destinationPath) => {
-      if (destinationPath) {
+    return (result) => {
+      if (result) {
+        const isObject = typeof result === 'object';
+        const source = isObject ? result.source : result;
+        const size = isObject ? result.size : context.size;
         metadata.push('attachments', [
           {
             name: context.name,
-            source: destinationPath,
             type: context.mimeType,
+            source,
+            ...(size != null && { size }),
           },
         ]);
+        return source;
       }
 
-      return destinationPath;
+      return;
     };
   }
 }
