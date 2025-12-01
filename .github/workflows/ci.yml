@@ -9,6 +9,13 @@ on:
     branches: [master, alpha, beta]
     paths-ignore:
       - '**/*.md'
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Run publish job (semantic-release)'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
 
@@ -69,7 +76,7 @@ jobs:
         working-directory: package-e2e
 
   publish:
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true')
     name: Publish
     needs: [sanity, package-e2e]
     runs-on: ubuntu-latest
