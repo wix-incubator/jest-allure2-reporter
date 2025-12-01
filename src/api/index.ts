@@ -12,6 +12,7 @@ export type {
   AllureRuntimePluginContext,
   AttachmentContent,
   AttachmentHandler,
+  AttachmentHandlerResult,
   AttachmentOptions,
   ContentAttachmentContext,
   ContentAttachmentHandler,

@@ -8,6 +8,7 @@ export * from './fastMove';
 export * from './FileNavigator';
 export * from './FileNavigatorCache';
 export * from './getFullExtension';
+export * from './getFileSize';
 export * from './getStatusDetails';
 export * from './hijackFunction';
 export * from './importFrom';

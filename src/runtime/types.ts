@@ -138,6 +138,7 @@ export interface AllureRuntimePluginContext {
 export type AttachmentOptions<Context extends AttachmentContext> = {
   name?: string;
   mimeType?: string;
+  size?: number;
   handler?: string | AttachmentHandler<Context>;
 };
 
@@ -163,6 +164,7 @@ export interface AttachmentContext {
   outDir: string;
   sourcePath?: string;
   content?: AttachmentContent;
+  size?: number;
 }
 
 export interface FileAttachmentContext extends AttachmentContext {
@@ -175,9 +177,11 @@ export interface ContentAttachmentContext extends AttachmentContext {
 
 export type AttachmentContent = Buffer | string;
 
+export type AttachmentHandlerResult = string | { source: string; size?: number } | undefined;
+
 export type AttachmentHandler<Context extends AttachmentContext> = (
   context: Readonly<Context>,
-) => MaybePromise<string | undefined>;
+) => MaybePromise<AttachmentHandlerResult>;
 
 export type FileAttachmentHandler = AttachmentHandler<FileAttachmentContext>;
 
