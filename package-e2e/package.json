@@ -10,6 +10,6 @@
     "test:ts": "tsc && tsc -p tsconfig.isolated.json"
   },
   "dependencies": {
-    "jest-allure2-reporter": ".."
+    "jest-allure2-reporter": "workspace:*"
   }
 }

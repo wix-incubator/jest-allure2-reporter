@@ -1,4 +1,17 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
+# Strip __archiveUrl from yarn.lock for portability
+if [ -f yarn.lock ]; then
+  if grep -q '__archiveUrl' yarn.lock; then
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+      sed -i '' '/__archiveUrl/d' yarn.lock
+    else
+      sed -i '/__archiveUrl/d' yarn.lock
+    fi
+    git add yarn.lock
+  fi
+fi
 
-npm run lint:staged
+# Validate lockfile
+yarn install --immutable --mode skip-build
+
+# Run lint-staged
+yarn run lint:staged

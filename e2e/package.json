@@ -11,7 +11,7 @@
   "devDependencies": {
     "coffeescript": "^2.7.0",
     "jest": "29.x.x",
-    "jest-allure2-reporter": "..",
+    "jest-allure2-reporter": "workspace:*",
     "jest-jasmine2": "29.x.x",
     "rehype-highlight": "^7.0.0",
     "rehype-stringify": "^10.0.0",
